@@ -1,0 +1,9 @@
+version : "3.8"
+
+services:
+  FrontEnd:
+    build: "Back"
+  BackEnd:
+    build: "Front"
+  DataBase:
+    build: "DB"
