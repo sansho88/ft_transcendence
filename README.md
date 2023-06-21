@@ -1,6 +1,12 @@
 # ft_transcendence
 The last 42 CC project
 
+Lancer la build et demarrage services docker:
+```
+make
+```
+back-end sur localhost:8000 
+adminer sur  localhost:8080 (voir le fichier .en_db dans ./docker/.env)
+front sur    localhost:3000
 
-make pour lancer le services docker, acces back sur localhost:8000 adminer pour la db sur localhost:8080 et le front sur localhost:3000
-(WIP/FIX: les serveur node ne prenne pas en live les modifications fichier...)
+NOTE: Pour profiter des modif nodejs en real time, preferer ubuntu ou git clone dans wsl
