@@ -1,14 +1,12 @@
 COMPOSE=docker-compose
 
+all: up
 
-all:
-	$(COMPOSE) up --build
-
-up:
+up: build
 	$(COMPOSE) up
 
 build:
-	$(COMPOSE) build
+	$(COMPOSE) build --parallel
 
 start:
 	$(COMPOSE) start
