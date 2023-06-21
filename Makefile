@@ -5,6 +5,9 @@ all: up
 up: build
 	$(COMPOSE) up -d
 
+dev: build
+	$(COMPOSE) up
+
 build:
 	$(COMPOSE) build --parallel
 
