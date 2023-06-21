@@ -1,10 +1,24 @@
-all:    up
+COMPOSE=docker-compose
+
+
+all:
+	$(COMPOSE) up --build
 
 up:
-    docker-compose up
+	$(COMPOSE) up
 
 build:
-    docker-compose build
+	$(COMPOSE) build
+
+start:
+	$(COMPOSE) start
+restart:
+	$(COMPOSE) restart
+stop:
+	$(COMPOSE) stop
 
 down:
-    docker-compose down
+	$(COMPOSE) down
+
+ps:
+	$(COMPOSE) ps --all
