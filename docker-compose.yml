@@ -3,6 +3,8 @@ version : "3.8"
 services:
 
   front-end:
+    depends_on:
+      - back-end
     container_name: app
     build:
       context: ./front-end
@@ -16,6 +18,8 @@ services:
       - NODE_ENV=development
 
   back-end:
+    depends_on:
+      - db
     container_name: api
     build:
       context: ./back-end
