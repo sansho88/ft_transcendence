@@ -3,7 +3,7 @@ COMPOSE=docker-compose
 all: up
 
 up: build
-	$(COMPOSE) up
+	$(COMPOSE) up -d
 
 build:
 	$(COMPOSE) build --parallel
