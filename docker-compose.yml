@@ -27,6 +27,8 @@ services:
   db:
     image: postgres
     restart: always
+    volumes:
+      - ./docker/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
       - ./docker/.env/.env_db
 
