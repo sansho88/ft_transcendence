@@ -3,6 +3,7 @@ version : "3.8"
 services:
 
   front-end:
+    container_name: app
     build:
       context: ./front-end
       dockerfile: ../docker/front-end.dockerfile
@@ -15,6 +16,7 @@ services:
       - NODE_ENV=development
 
   back-end:
+    container_name: api
     build:
       context: ./back-end
       dockerfile: ../docker/back-end.dockerfile
@@ -27,6 +29,7 @@ services:
       - NODE_ENV=development
 
   db:
+    container_name: database
     image: postgres
     restart: always
     volumes:
@@ -35,6 +38,7 @@ services:
       - ./docker/.env/.env_db
 
   adminer:
+    container_name: adminer
     image: adminer
     restart: always
     ports:

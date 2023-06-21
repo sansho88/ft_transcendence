@@ -20,3 +20,6 @@ down:
 
 ps:
 	$(COMPOSE) ps --all
+
+fclean:
+	./docker/fclean_docker.sh
