@@ -34,10 +34,12 @@ services:
 
   db:
     container_name: database
-    image: postgres
+    build:
+      context: ./docker
+      dockerfile: ./database.dockerfile
     restart: always
     volumes:
-      - ./docker/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/postgresql/data
     env_file:
       - ./docker/.env/.env_db
 
@@ -47,3 +49,6 @@ services:
     restart: always
     ports:
       - 8080:8080
+
+volumes:
+  db_data:
