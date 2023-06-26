@@ -13,7 +13,7 @@ services:
       - ./front-end:/app
       - /app/node_modules
     ports:
-      - 3000:3000
+      - "3000:3000"
     environment:
       - NODE_ENV=development
 
@@ -28,9 +28,11 @@ services:
       - ./back-end:/usr/src/app
       - /usr/src/app/node_modules
     ports:
-      - 8000:8000
+      - "8000:8000"
     environment:
       - NODE_ENV=development
+    env_file:
+      - ./docker/.env/.env_db
 
   db:
     container_name: database
@@ -48,7 +50,7 @@ services:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - "8080:8080"
 
 volumes:
   db_data:
