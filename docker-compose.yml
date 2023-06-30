@@ -14,6 +14,8 @@ services:
       - /app/node_modules
     ports:
       - "3000:3000"
+    networks:
+      - webapp
     environment:
       - NODE_ENV=development
 
@@ -29,6 +31,9 @@ services:
       - /usr/src/app/node_modules
     ports:
       - "8000:8000"
+    networks:
+      - webapp
+      - database
     environment:
       - NODE_ENV=development
     env_file:
@@ -42,8 +47,12 @@ services:
     restart: always
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - database
     env_file:
       - ./docker/.env/.env_db
+    ports:
+      - "5432:5432"
 
   adminer:
     container_name: adminer
@@ -51,6 +60,13 @@ services:
     restart: always
     ports:
       - "8080:8080"
-
+    networks:
+      - database
 volumes:
   db_data:
+
+networks:
+  webapp:
+    driver: bridge
+  database:
+    driver: bridge
