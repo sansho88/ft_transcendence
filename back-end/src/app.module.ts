@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as process from 'process';
 import { UsersModule } from './users/users.module';
+import { User } from './users/entities/user.entity';
 
 @Module({
 	imports: [
@@ -19,7 +20,7 @@ import { UsersModule } from './users/users.module';
 			username: process.env.POSTGRES_USER,
 			password: process.env.POSTGRES_PASSWORD,
 			database: process.env.POSTGRES_DB,
-			entities: [UsersModule],
+			entities: [User],
 			synchronize: true, // true -> will create the Table on db if class not there
 		}),
 		UsersModule,
