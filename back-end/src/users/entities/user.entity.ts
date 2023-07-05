@@ -13,7 +13,7 @@ export enum UserStatus {
 
 @Entity('test')
 export class User extends BaseEntity {
-	@PrimaryGeneratedColumn('identity')
+	@PrimaryGeneratedColumn()
 	id_users: number;
 
 	@Column({
@@ -22,9 +22,11 @@ export class User extends BaseEntity {
 	})
 	username: string;
 
+	// Todo: comeback later to proper storage
 	@Column({
 		type: 'varchar',
 		length: 256,
+		default: null,
 		nullable: true,
 	})
 	avatar_path: string;
@@ -32,7 +34,8 @@ export class User extends BaseEntity {
 	@Column({
 		type: 'varchar',
 		length: 100,
-		default: false,
+		default: null,
+		nullable: true,
 	})
 	token_2fa: string;
 

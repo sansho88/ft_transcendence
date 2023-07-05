@@ -12,24 +12,31 @@ export class UsersService {
 		private usersRepository: Repository<User>,
 	) {}
 
+	/**
+	 * Todo: update with new thing in table
+	 */
 	async create(createUserDto: CreateUserDto) {
-		const user = new User();
-		user.id_users = createUserDto.id_users;
-		user.username = createUserDto.username;
-		console.log('HELP');
-		return User.save(user);
-		// return `This action adds a new user in ${createUserDto.username}`;
+		const user = User.create({
+			username: createUserDto.username,
+		});
+		await user.save();
+		return `User ${user.username} created with id ${user.id_users} successfully :D`;
 	}
 
 	findAll() {
-		return `This action returns all users`;
+		return this.usersRepository.find();
 	}
 
+	/**
+	 * Todo: return something (Error code?) if invalid id
+	 */
 	findOne(id: number) {
-		// return this.usersRepository.findBy(id);
-		return `This action returns a #${id} user`;
+		return this.usersRepository.findOneBy({ id_users: id });
 	}
 
+	/**
+	 * Todo: do those
+	 */
 	update(id: number, updateUserDto: UpdateUserDto) {
 		return `This action updates a #${id} user`;
 	}
