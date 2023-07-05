@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image'
 import * as React from "react";
+import Button from "./components/CustomButtonComponent"
 
 export default function Home() {
 
@@ -16,6 +17,7 @@ export default function Home() {
       return (
             <button type="button" onClick={handleLogin} className={"button-login"}>
               <span className="text">LOGIN</span></button>
+          /*<Button border={"2px"} color={"#FFFFFF"} image={"linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB)"} height={"30px"} width={"60px"} radius={"4px"} onClick={handleLogin}>LOGIN</Button>*/
       )
     else
       return hello("Sansho");
@@ -39,8 +41,8 @@ export default function Home() {
           <div className="welcome">
             <div className="welcome-msg">WELCOME TO</div>
             {/*<div className="width: 788px; height: 130px; left: 0px; top: 24px; position: absolute; justify-content: center; align-items: center; display: inline-flex">*/}
-              <div className="welcome-title">PONG POD </div>
-            {login()}
+              <div className="welcome-title">PONG POD! {login()}</div>
+
             </div>
 
            {/* <div className="width: 276px; height: 74px; left: 244px; top: 216px; position: absolute">
