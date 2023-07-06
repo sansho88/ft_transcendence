@@ -37,6 +37,10 @@ export default function Home() {
 
   if (!isLogged)
     return (
+        <>
+            <header>
+                <link rel="icon" href="./favicon.ico"/>
+            </header>
         <div className="main-background">
           <div className="welcome">
             <div className="welcome-msg">WELCOME TO</div>
@@ -51,20 +55,20 @@ export default function Home() {
             </div>
             <div className="width: 24px; height: 24px; left: 670px; top: 99px; position: absolute; background: #07C3FF; border-radius: 9999px"></div>*/}
         </div>
+        </>
     )
   else
     return (
         <>
             <header>
-                <link rel="icon" href="/favicon-48x48.cbbd161b.png"/>
-
+                <link rel="icon" href="./favicon.ico"/>
             </header>
       <main className="main-background">
           <div className={"sidebar"}>
               <menu className="menu" autoCapitalize={"words"}  title={"Menu"}>
-                <li tabIndex={1}> <img src={"/friends.svg"}/>Game Mode</li>
-                <li tabIndex={2}><img src={"/friends.svg"}/>Profile</li>
-                <li tabIndex={3}><img src={"/friends.svg"}/>Friends</li>
+                <li tabIndex={1}> <img src={"/joystick.svg"} alt={"joystick-logo"}/>Game Mode</li>
+                <li tabIndex={2}><img src={"/profile.svg"} alt={"profile-logo"}/>Profile</li>
+                <li tabIndex={3}><img src={"/friends.svg"} alt={"friends-logo"}/>Friends</li>
               </menu>
           </div>
 
