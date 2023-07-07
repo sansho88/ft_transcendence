@@ -38,7 +38,12 @@ const Profile: React.FC<ProfileProps> = ({className, avatar,login, nickname, sta
                     width: "40%",
                     height: "50%"
                 }}/>
-                <div className={"infos"}>
+                <div className={"infos"} style={{
+                    fontFamily: "sans-serif",
+                    color: "#880129",
+                    lineHeight: "1.5em"
+                }
+                }>
                     <h2>{login}</h2>
                     <p>{nickname}</p>
                     <p>{status}</p>

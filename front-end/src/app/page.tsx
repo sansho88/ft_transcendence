@@ -3,9 +3,10 @@ import Image from 'next/image'
 import * as React from "react";
 import Button from "./components/CustomButtonComponent"
 import Profile from "./components/ProfileComponent"
+import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
 
 export default function Home() {
-
+preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
     enum AllStatus {
         Offline,
         Online,
@@ -17,7 +18,7 @@ export default function Home() {
         "gold"
     }
     let StatusColor = new Map<number, string>();
-    console.log(AllStatus.length);
+
     for (let i: number = 0; i < 3; i++) {
         StatusColor.set(i, Colors[i]);
     }
@@ -40,7 +41,6 @@ export default function Home() {
   const Header = () => {
       <head>
           <link rel={"icon"} href={"./favicon.ico"}/>
-          <link rel="preload" as="font" href="../../.next/static/media/2aaf0723e720e8b9-s.p.woff2"  type="font/woff2" crossOrigin/>
       </head>
   }
 
