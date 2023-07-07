@@ -6,11 +6,36 @@ import Profile from "./components/ProfileComponent"
 
 export default function Home() {
 
-  const [isLogged, setLog] = React.useState(false);
+    enum AllStatus {
+        Offline,
+        Online,
+        InGame
+    }
+    enum Colors {
+        "grey",
+        "green",
+        "gold"
+    }
+    let StatusColor = new Map<number, string>();
+    console.log(AllStatus.length);
+    for (let i: number = 0; i < 3; i++) {
+        StatusColor.set(i, Colors[i]);
+        console.log(`Colors[${i}]=${Colors[i]}`);
+    }
+
+
+    const [isLogged, setLog] = React.useState(false);
+    const [userStatus, setUserStatus] = React.useState(AllStatus.Online);
 
   function handleLogin(){
    setLog(true);
     console.log("LOGGED BIM!");
+  }
+
+  function handleUserStatus() {
+
+      setUserStatus(userStatus === AllStatus.InGame? AllStatus.Online: AllStatus.InGame );
+      console.log(`User Status: ${userStatus}; statusColor ${StatusColor.get(userStatus)}`);
   }
 
   const Header = () => {
@@ -68,10 +93,9 @@ export default function Home() {
                 <li tabIndex={3}><img src={"/friends.svg"} alt={"friends-logo"}/>Friends</li>
               </menu>
           </div>*/}
-          {/*//todo Status: Border Color modified with useState + enum (0: offline, 1: online, 2: inGame)*/}
           {/*todo: Add History Match Button*/}
           {/*todo: quick stats view*/}
-          <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"LOGIN"} nickname={"NickTaMer"} status={"OnLine"} stats={""}/>
+          <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"LOGIN"} nickname={"NickTaMer"} status={AllStatus[userStatus]} statusColor={StatusColor.get(userStatus)} stats={""}/>
           <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"} height={"42px"}/>
 
         <div className="game">
@@ -83,8 +107,9 @@ export default function Home() {
             width={512}
             height={512}
             priority
+            onClick={handleUserStatus}
           />
-            <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"} alt={"GameMode options"}  radius={"0"} onClick={handleLogin}/>
+            <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"} alt={"GameMode options"}  radius={"0"} onClick={handleUserStatus}/>
         </div>
 
 
