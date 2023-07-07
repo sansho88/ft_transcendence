@@ -2,6 +2,7 @@
 import Image from 'next/image'
 import * as React from "react";
 import Button from "./components/CustomButtonComponent"
+import Profile from "./components/ProfileComponent"
 
 export default function Home() {
 
@@ -10,6 +11,12 @@ export default function Home() {
   function handleLogin(){
    setLog(true);
     console.log("LOGGED BIM!");
+  }
+
+  const Header = () => {
+      <header>
+          <link rel={"icon"} href={"./favicon.ico"}/>
+      </header>
   }
 
   function login(){
@@ -38,9 +45,7 @@ export default function Home() {
   if (!isLogged)
     return (
         <>
-            <header>
-                <link rel="icon" href="./favicon.ico"/>
-            </header>
+            <Header/>
         <div className="main-background">
           <div className="welcome">
             <div className="welcome-msg">WELCOME TO</div>
@@ -48,30 +53,26 @@ export default function Home() {
               <div className="welcome-title">PONG POD! {login()}</div>
 
             </div>
-
-           {/* <div className="width: 276px; height: 74px; left: 244px; top: 216px; position: absolute">
-              <div className="width: 276px; height: 74px; left: 0px; top: 0px; position: absolute; background: #07C3FF; border-radius: 8px"></div>
-
-            </div>
-            <div className="width: 24px; height: 24px; left: 670px; top: 99px; position: absolute; background: #07C3FF; border-radius: 9999px"></div>*/}
         </div>
-        </>
+     </>
     )
   else
     return (
         <>
-            <header>
-                <link rel="icon" href="./favicon.ico"/>
-            </header>
+            <Header/>
       <main className="main-background">
-          <div className={"sidebar"}>
+        {/*  <div className={"sidebar"}>
               <menu className="menu" autoCapitalize={"words"}  title={"Menu"}>
                 <li tabIndex={1}> <img src={"/joystick.svg"} alt={"joystick-logo"}/>Game Mode</li>
                 <li tabIndex={2}><img src={"/profile.svg"} alt={"profile-logo"}/>Profile</li>
                 <li tabIndex={3}><img src={"/friends.svg"} alt={"friends-logo"}/>Friends</li>
               </menu>
-          </div>
-
+          </div>*/}
+          {/*//todo Status: Border Color modified with useState + enum (0: offline, 1: online, 2: inGame)*/}
+          {/*todo: Add History Match Button*/}
+          {/*todo: quick stats view*/}
+          <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"LOGIN"} nickname={"NickTaMer"} status={"OnLine"} stats={""}/>
+          <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"} height={"42px"}/>
 
         <div className="game">
 
@@ -83,6 +84,7 @@ export default function Home() {
             height={512}
             priority
           />
+            <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"} alt={"GameMode options"}  radius={"0"} onClick={handleLogin}/>
         </div>
 
 

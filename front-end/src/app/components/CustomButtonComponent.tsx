@@ -1,35 +1,33 @@
 import React from "react";
 
 interface ButtonProps {
-   border: string;
+   border?: string;
    children?: React.ReactNode;
-   color: string;
+   color?: string;
    image: string;
-   height: string;
-   width: string;
-   radius: string;
+   height?: string;
+   width?: string;
+   radius?: string;
    onClick: () => void;
+   alt: string;
 }
 const Button: React.FC<ButtonProps> = ({
-   border,
-   color,
+    color,
     image,
-   children,
-   height,
-   onClick,
-   radius,
-   width
+    children,
+    height,
+    width,
+    onClick,
+    alt,
+    className
 }) => {
    return (
-       <button onClick={onClick}
+       <button className={className} onClick={onClick}
        style={{
           backgroundColor: color,
-           backgroundImage: image,
-          border,
-          borderRadius: radius,
-          height,
-          width
-       }}>
+          height: height,
+          width: width
+       }}><img src={image} alt={alt}/>
           {children}
        </button>);
 }

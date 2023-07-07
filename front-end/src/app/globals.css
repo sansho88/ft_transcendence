@@ -164,3 +164,40 @@ body {
     margin-inline: auto;
     margin-block: 10vh;
 }
+
+.friends{
+    display: inline-block;
+    position: absolute;
+    right: 2vw;
+    top: 1vh;
+
+}
+
+.main-user-profile{
+    display: inline-block;
+    position: absolute;
+    left: 1vw;
+    top: 1vh;
+    width: 12vw;
+    height: 20vh;
+    background: rgba(0, 0, 0, 0.27);
+    border-radius: 8px;
+}
+
+.main-user-profile .avatar{
+    top: -2vh;
+    margin-left: .4vw;
+    position: relative;
+    display: inline;
+
+}
+
+.main-user-profile .infos{
+    display: inline-block;
+    margin-left: 10px;
+    padding-top: 2vh;
+    position: relative;
+    padding-top: 1vh;
+    width: auto;
+    font-size: 2vh;
+}
