@@ -37,7 +37,7 @@ body {
  box-sizing: border-box;
  color: #FFFFFF;
  display: flex;
- font-family: Phantomsans, sans-serif;
+ font-family: MeromSans-Regular, sans-serif;
  font-size: 4vh;
  justify-content: center;
  line-height: 1em;
@@ -110,7 +110,7 @@ body {
     height: auto;
     background: none;
     font-size: 5vh;
-    font-family: Phantomsans, sans-serif;
+    font-family: MeromSans-Regular, sans-serif;
     word-wrap: break-word;
     /*box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;*/
 }
@@ -120,7 +120,7 @@ body {
     height: auto;
     width: 100%;
     font-size: 10vh;
-    font-family: Phantomsans, sans-serif;
+    font-family: MeromSans-Regular, sans-serif;
     word-wrap: break-word;
 }
 

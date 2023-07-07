@@ -20,7 +20,6 @@ export default function Home() {
     console.log(AllStatus.length);
     for (let i: number = 0; i < 3; i++) {
         StatusColor.set(i, Colors[i]);
-        console.log(`Colors[${i}]=${Colors[i]}`);
     }
 
 
@@ -39,9 +38,10 @@ export default function Home() {
   }
 
   const Header = () => {
-      <header>
+      <head>
           <link rel={"icon"} href={"./favicon.ico"}/>
-      </header>
+          <link rel="preload" as="font" href="../../.next/static/media/2aaf0723e720e8b9-s.p.woff2"  type="font/woff2" crossOrigin/>
+      </head>
   }
 
   function login(){
