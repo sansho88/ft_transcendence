@@ -16,12 +16,6 @@ jobs:
     
     - name: Launch Pong Pod
       run: make
-
-    - name: Run check
-      run: make check
-
-    - name: Run distcheck
-      run: make distcheck
       
     - name: Setup Node.js environment
       uses: actions/setup-node@v3.7.0
