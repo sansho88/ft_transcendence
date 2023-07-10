@@ -178,9 +178,13 @@ body {
     position: absolute;
     left: 1vw;
     top: 1vh;
-    width: 12vw;
-    height: 20vh;
+    padding-right: 1vw;
+    width: auto;
+    height: auto;
     background: rgba(0, 0, 0, 0.27);
+    border: 2px rgba(0, 0, 0, 0.11);
+    border-style: inherit ;
+    box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
     border-radius: 8px;
 }
 
@@ -199,4 +203,16 @@ body {
     position: relative;
     width: auto;
     font-size: 2vh;
+}
+
+.main-user-profile #level{
+    color: darkgrey;
+    position: relative;
+    margin-top: -0.5em;
+    margin-bottom: 4px;
+    padding-left: 0.4vw;
+}
+
+.main-user-profile #login{
+    color: darkgrey;
 }

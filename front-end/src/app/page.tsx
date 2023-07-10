@@ -3,6 +3,7 @@ import Image from 'next/image'
 import * as React from "react";
 import Button from "./components/CustomButtonComponent"
 import Profile from "./components/ProfileComponent"
+import Stats from "./components/StatsComponent"
 import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
 
 export default function Home() {
@@ -93,9 +94,11 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
                 <li tabIndex={3}><img src={"/friends.svg"} alt={"friends-logo"}/>Friends</li>
               </menu>
           </div>*/}
-          {/*todo: Add History Match Button*/}
-          {/*todo: quick stats view*/}
-          <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"LOGIN"} nickname={"NickTaMer"} status={AllStatus[userStatus]} statusColor={StatusColor.get(userStatus)} stats={""}/>
+
+          <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"lelogin"} nickname={"NickTaMer"} status={AllStatus[userStatus]} statusColor={StatusColor.get(userStatus)}>
+              <p><Stats level={42} victories={112} defeats={24} rank={1}/></p>
+              <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
+          </Profile>
           <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"} height={"42px"}/>
 
         <div className="game">
@@ -104,8 +107,8 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
             className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] max-w-fit max-h-fit"
             src="/pong-logo.png"
             alt="Pong Logo"
-            width={512}
-            height={512}
+            width={768}
+            height={768}
             priority
             onClick={handleUserStatus}
           />

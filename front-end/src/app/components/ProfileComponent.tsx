@@ -1,11 +1,5 @@
 import React from "react";
 
-interface StatsProps {
-    victories: bigint;
-    defeats: bigint;
-    rank: bigint;
-    level: number;
-}
 
 interface MatchProps {
     opponent1: string;
@@ -21,12 +15,11 @@ interface ProfileProps {
     nickname: string;
     status: string;
     statusColor?: string;
-    stats: StatsProps;
     matchHistory?: MatchProps[];
 
 }
 
-const Profile: React.FC<ProfileProps> = ({className, avatar,login, nickname, status, statusColor, stats, matchHistory})=>{
+const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nickname, status, statusColor})=>{
     return (
         <>
             <div className={className}>
@@ -34,20 +27,22 @@ const Profile: React.FC<ProfileProps> = ({className, avatar,login, nickname, sta
                     borderWidth: "2px",
                     borderColor: statusColor,
                     boxShadow: `1px 2px 5px ${statusColor}`,
+                    transition: "1000ms",
                     borderRadius: "8px",
-                    width: "40%",
-                    height: "50%"
+                    width: "5vw",
+                    height: "10vh"
                 }}/>
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
-                    color: "#880129",
+                    color: "#07C3FF",
                     lineHeight: "1.5em"
                 }
                 }>
-                    <h2>{login}</h2>
-                    <p>{nickname}</p>
-                    <p>{status}</p>
+                    <h2 id={"login"}>{login}</h2>
+                    <p id={"nickname"}>{nickname}</p>
+                    <p id={"status"} style={{color:statusColor}}>{status}</p>
                 </div>
+                <p id={"children"}>{children}</p>
             </div>
         </>);
 };
