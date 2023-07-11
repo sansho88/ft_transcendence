@@ -1,4 +1,5 @@
-import React from "react";
+import React, {useState} from "react";
+import Button from "./CustomButtonComponent"
 
 
 interface MatchProps {
@@ -15,11 +16,52 @@ interface ProfileProps {
     nickname: string;
     status: string;
     statusColor?: string;
-    matchHistory?: MatchProps[];
-
+    isEditable: boolean;
 }
 
-const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nickname, status, statusColor})=>{
+const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nickname, status, statusColor, isEditable})=>{
+
+
+    const [modifiedNick, setText] = useState<string>(nickname); // Initialisez avec une valeur initiale vide ou une valeur existante si nécessaire
+    const [editMode, setEditMode] = useState(false);
+    const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setText(event.target.value);
+    };
+
+    const turnOnEditMode = () => {
+        setEditMode(true);
+    }
+    const turnOffEditMode = () => {
+        setEditMode(false);
+    }
+
+    const editedNick = () => {
+        if(editMode) {
+            return (<div>
+                <input type="text" value={modifiedNick} onChange={handleTextChange}
+                style={{
+                    width: "8em",
+                    border: "2px ridge darkgrey",
+                    borderRadius: "4px",
+                    background: "none",
+                    padding: "6px"
+                }}/>
+                <span style={{marginLeft: "4px"}}><Button image={"/floppy.svg"} onClick={turnOffEditMode} alt={"Save Button"}/></span>
+            </div>);
+        }
+        else
+            return (
+                <p id={"nickname"}>{modifiedNick}
+                    {isEditable ?
+                        <span id={"editNickNameButton"} style={{marginLeft: "4px"}}>
+                            <Button image={"/edit.svg"} onClick={turnOnEditMode} alt={"edit NickName button"}/>
+                        </span>
+                        : <></>
+                    }
+                </p>
+
+            )
+    }
     return (
         <>
             <div className={className}>
@@ -39,10 +81,11 @@ const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nic
                 }
                 }>
                     <h2 id={"login"}>{login}</h2>
-                    <p id={"nickname"}>{nickname}</p>
+                    {editedNick()}
+
                     <p id={"status"} style={{color:statusColor}}>{status}</p>
                 </div>
-                <p id={"children"}>{children}</p>
+                <p id={"children"} style={{marginLeft: "4px"}}>{children}</p>
             </div>
         </>);
 };

@@ -28,22 +28,25 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
     const [isLogged, setLog] = React.useState(false);
     const [userStatus, setUserStatus] = React.useState(AllStatus.Online);
 
-  function handleLogin(){
-   setLog(true);
-    console.log("LOGGED BIM!");
-  }
+    let userNickName : string = "NickTaMer";
 
-  function handleUserStatus() {
 
-      setUserStatus(userStatus === AllStatus.InGame? AllStatus.Online: AllStatus.InGame );
-      console.log(`User Status: ${userStatus}; statusColor ${StatusColor.get(userStatus)}`);
-  }
+    function handleLogin() {
+        setLog(true);
+        console.log("LOGGED BIM!");
+    }
 
-  const Header = () => {
-      <head>
-          <link rel={"icon"} href={"./favicon.ico"}/>
-      </head>
-  }
+    function handleUserStatus() {
+
+        setUserStatus(userStatus === AllStatus.InGame ? AllStatus.Online : AllStatus.InGame);
+        console.log(`User Status: ${userStatus}; statusColor ${StatusColor.get(userStatus)}`);
+    }
+
+    const Header = () => {
+        <head>
+            <link rel={"icon"} href={"./favicon.ico"}/>
+        </head>
+    }
 
   function login(){
     if (!isLogged)
@@ -95,7 +98,8 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
               </menu>
           </div>*/}
 
-          <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"lelogin"} nickname={"NickTaMer"} status={AllStatus[userStatus]} statusColor={StatusColor.get(userStatus)}>
+          <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"lelogin"} nickname={userNickName}
+                   status={AllStatus[userStatus]} statusColor={StatusColor.get(userStatus)} isEditable={true}>
               <p><Stats level={42} victories={112} defeats={24} rank={1}/></p>
               <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
           </Profile>
