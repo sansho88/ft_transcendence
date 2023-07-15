@@ -1,20 +1,25 @@
 import {
+	PrimaryColumn,
 	BaseEntity,
 	Column,
 	Entity,
-	OneToMany,
-	PrimaryGeneratedColumn,
+	ManyToMany,
+	JoinTable,
 } from 'typeorm';
 
 export enum UserStatus {
+	INGAME = 2,
 	ONLINE = 1,
 	OFFLINE = 0,
 }
 
 @Entity('test')
 export class User extends BaseEntity {
-	@PrimaryGeneratedColumn()
-	id_users: number;
+	@PrimaryColumn({
+		type: 'varchar',
+		length: 12,
+	})
+	login: string;
 
 	@Column({
 		type: 'varchar',
@@ -46,6 +51,14 @@ export class User extends BaseEntity {
 	})
 	status: UserStatus;
 
-	// @OneToMany()
-	// friend_list:
+	// @ManyToMany(() => User, (user) => user.subscribed)
+	// followers: string;
+	//
+	// @ManyToMany(() => User, (user) => user.followers)
+	// @JoinTable()
+	// subscribed: string;
+
+	@ManyToMany(() => User)
+	@JoinTable()
+	friend_list: User[];
 }

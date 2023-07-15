@@ -24,6 +24,7 @@ import { User } from './users/entities/user.entity';
 			synchronize: true, // true -> will create the Table on db if class not there
 		}),
 		UsersModule,
+		// TestUserModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

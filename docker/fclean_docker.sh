@@ -1,13 +1,17 @@
-# shellcheck disable=SC2046 # Intended splitting of OPTIONS
+#!/bin/sh
 
-if [ $(docker ps -a -q) ]; then
+if [ -n "$(docker ps -a -q)" ]; then
+    # shellcheck disable=SC2046
     docker stop $(docker ps -a -q)
+    # shellcheck disable=SC2046
     docker rm $(docker ps -a -q)
 fi
-if [ $(docker images -a -q) ]; then
+if [ -n "$(docker images -a -q)" ]; then
+    # shellcheck disable=SC2046
     docker rmi $(docker images -a -q)
 fi
-if [ $(docker volume ls -q) ]; then
+if [ -n "$(docker volume ls -q)" ]; then
+    # shellcheck disable=SC2046
     docker volume rm $(docker volume ls -q)
 fi
 

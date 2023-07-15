@@ -16,11 +16,14 @@ export class UsersService {
 	 * Todo: update with new thing in table
 	 */
 	async create(createUserDto: CreateUserDto) {
+		if (typeof createUserDto.user_name == undefined)
+			createUserDto.user_name = createUserDto.user_login;
 		const user = User.create({
-			username: createUserDto.username,
+			username: createUserDto.user_name,
+			login: createUserDto.user_login,
 		});
 		await user.save();
-		return `User ${user.username} created with id ${user.id_users} successfully :D`;
+		return `User ${user.username} created with login ${user.login} successfully :D`;
 	}
 
 	findAll() {
@@ -30,8 +33,8 @@ export class UsersService {
 	/**
 	 * Todo: return something (Error code?) if invalid id
 	 */
-	findOne(id: number) {
-		return this.usersRepository.findOneBy({ id_users: id });
+	findOne(login: string) {
+		return this.usersRepository.findOneBy({ login: login });
 	}
 
 	/**
