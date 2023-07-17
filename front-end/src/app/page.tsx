@@ -100,7 +100,7 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
 
           <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"lelogin"} nickname={userNickName}
                    status={AllStatus[userStatus]} statusColor={StatusColor.get(userStatus)} isEditable={true}>
-              <p><Stats level={42} victories={112} defeats={24} rank={1}/></p>
+              <p style={{paddingBottom: "1vh"}}><Stats level={42} victories={112} defeats={24} rank={1}/></p>
               <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
           </Profile>
           <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"} height={"42px"}/>

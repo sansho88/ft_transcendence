@@ -24,21 +24,31 @@ const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nic
 
     const [modifiedNick, setText] = useState<string>(nickname); // Initialisez avec une valeur initiale vide ou une valeur existante si nécessaire
     const [editMode, setEditMode] = useState(false);
+    const [errorMsg, setErrMsg] = useState("");
     const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setText(event.target.value);
+            const value = event.target.value;
+            setText(event.target.value);
+
+        if (value.length < 2 || value.length > 12 || !/^[A-Za-z0-9_]+$/.test(value)) {
+            setErrMsg("Length: 2 => 12 & Alphanumerics only");
+        } else {
+            setErrMsg("");
+        }
     };
 
     const turnOnEditMode = () => {
         setEditMode(true);
     }
     const turnOffEditMode = () => {
-        setEditMode(false);
+        if (!errorMsg.length)
+            setEditMode(false);
     }
 
     const editedNick = () => {
         if(editMode) {
             return (<div>
-                <input type="text" value={modifiedNick} onChange={handleTextChange}
+                <input type="text" minLength={2} maxLength={12} pattern={"[A-Za-z0-9_]+"} value={modifiedNick} onChange={handleTextChange}
+
                 style={{
                     width: "8em",
                     border: "2px ridge darkgrey",
@@ -47,6 +57,7 @@ const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nic
                     padding: "6px"
                 }}/>
                 <span style={{marginLeft: "4px"}}><Button image={"/floppy.svg"} onClick={turnOffEditMode} alt={"Save Button"}/></span>
+                <p style={{fontSize: "12px", color: "red"}}>{errorMsg}</p>
             </div>);
         }
         else
