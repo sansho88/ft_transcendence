@@ -38,14 +38,14 @@ export class UsersController {
 	}
 
 	@Put()
-	follow(@Body() follow_update: { target1: string; target2: string }) {
-		// const followed
+	follow(@Body() updateUser: UpdateUserDto) {
+		return this.usersService.update(updateUser.user_login, updateUser);
 	}
 
-	@Patch(':login')
-	update(@Param('login') login: string, @Body() updateUserDto: UpdateUserDto) {
-		return this.usersService.update(+login, updateUserDto);
-	}
+	// @Patch(':login')
+	// update(@Param('login') login: string, @Body() updateUserDto: UpdateUserDto) {
+	// 	return this.usersService.update(+login, updateUserDto);
+	// }
 
 	@Delete(':login')
 	remove(@Param('login') login: string) {

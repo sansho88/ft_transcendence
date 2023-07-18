@@ -22,6 +22,7 @@ export class UsersService {
 			username: createUserDto.user_name,
 			login: createUserDto.user_login,
 		});
+		user.friend_list = [];
 		await user.save();
 		return `User ${user.username} created with login ${user.login} successfully :D`;
 	}
@@ -37,11 +38,17 @@ export class UsersService {
 		return this.usersRepository.findOneBy({ login: login });
 	}
 
-	/**
-	 * Todo: do those
-	 */
-	update(id: number, updateUserDto: UpdateUserDto) {
-		return `This action updates a #${id} user`;
+	async update(login: string, updateUser: UpdateUserDto) {
+		const user = await this.usersRepository.findOneBy({ login: login });
+		if (updateUser.user_name !== undefined)
+			user.username = updateUser.user_name;
+		if (updateUser.avatar_path !== undefined)
+			user.avatar_path = updateUser.avatar_path;
+		if (updateUser.token_2fa !== undefined)
+			user.token_2fa = updateUser.token_2fa;
+		if (updateUser.status !== undefined) user.status = updateUser.status;
+		await user.save();
+		return 'User updated :D';
 	}
 
 	remove(id: number) {
