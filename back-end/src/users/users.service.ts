@@ -16,7 +16,7 @@ export class UsersService {
 	 * Todo: update with new thing in table
 	 */
 	async create(createUserDto: CreateUserDto) {
-		if (typeof createUserDto.user_name == undefined)
+		if (createUserDto.user_name === undefined)
 			createUserDto.user_name = createUserDto.user_login;
 		const user = User.create({
 			username: createUserDto.user_name,
