@@ -1,54 +1,93 @@
 import {
-	BadRequestException,
 	Controller,
 	Delete,
-	Patch,
+	Put,
 	Param,
 	Body,
 	Post,
 	Get,
-	Put,
+	NotFoundException,
+	UnauthorizedException,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UserService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { User } from './entities/user.entity';
+import { IUser } from './type/user.type';
 
 @Controller('users')
 export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
+	constructor(private readonly userService: UserService) {}
 
 	@Post()
-	create(@Body() createUserDto: CreateUserDto) {
-		return this.usersService.create(createUserDto);
+	create(@Body() createUserDto: IUser): Promise<User | undefined> {
+		return this.userService.create(createUserDto);
+	}
+
+	@Post('login')
+	comparePassword(
+		@Body() loginUserDto: LoginUserDto,
+	): Promise<{ success: boolean; message: string }> {
+		return this.userService.comparePassword(loginUserDto);
 	}
 
 	@Get()
-	findAll() {
-		return this.usersService.findAll();
+	async findAll() {
+		return this.userService.findAll();
 	}
 
-	@Get(':login')
-	findOne(@Param('login') login: string) {
-		return this.usersService.findOne(login).then((result) => {
-			if (!result) {
-				throw new BadRequestException('This Login is not registered');
-			}
-			return result;
-		});
+	@Get('id/:id')
+	async findOneById(@Param('id') id: string): Promise<User | undefined> {
+		const user = await this.userService.findOne(parseInt(id));
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
+		return user;
 	}
 
-	@Put()
-	follow(@Body() updateUser: UpdateUserDto) {
-		return this.usersService.update(updateUser.user_login, updateUser);
+	@Get(':username')
+	async findOneByUsername(
+		@Param('username') username: string,
+	): Promise<User | undefined> {
+		const user = await this.userService.findByUsername(username);
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
+		return user;
 	}
 
-	// @Patch(':login')
-	// update(@Param('login') login: string, @Body() updateUserDto: UpdateUserDto) {
-	// 	return this.usersService.update(+login, updateUserDto);
-	// }
+	@Put(':id')
+	async update(
+		@Param('id') id: string,
+		@Body() updateUserDto: UpdateUserDto,
+	): Promise<User | { message: string }> {
+		const user = await this.userService.findOne(parseInt(id));
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
 
-	@Delete(':login')
-	remove(@Param('login') login: string) {
-		return this.usersService.remove(+login);
+		const updatedUser = await this.userService.update(
+			parseInt(id),
+			updateUserDto,
+		);
+		return updatedUser || { message: 'User updated successfully' };
+	}
+
+	@Delete(':id')
+	async remove(@Param('id') id: string): Promise<{ message: string }> {
+		const user = await this.userService.findOne(parseInt(id));
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
+		const tmp = user.username;
+		await this.userService.remove(parseInt(id));
+		return { message: `User ${tmp} (id: ${id}) removed successfully` };
+	}
+
+	@Delete()
+	async removeAll(): Promise<{ message: string }> {
+		await this.userService.removeAll();
+		return { message: `All users removed successfully` };
 	}
 }

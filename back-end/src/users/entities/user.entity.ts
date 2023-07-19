@@ -1,64 +1,22 @@
-import {
-	PrimaryColumn,
-	BaseEntity,
-	Column,
-	Entity,
-	ManyToMany,
-	JoinTable,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-export enum UserStatus {
-	INGAME = 2,
-	ONLINE = 1,
-	OFFLINE = 0,
-}
+@Entity('USERS')
+export class User {
+	@PrimaryGeneratedColumn()
+	Id_USERS: number;
 
-@Entity('test')
-export class User extends BaseEntity {
-	@PrimaryColumn({
-		type: 'varchar',
-		length: 12,
-	})
-	login: string;
-
-	@Column({
-		type: 'varchar',
-		length: 12,
-	})
+	@Column({ type: 'varchar', length: 12, nullable: false })
 	username: string;
 
-	// Todo: comeback later to proper storage
-	@Column({
-		type: 'varchar',
-		length: 256,
-		default: null,
-		nullable: true,
-	})
+	@Column({ type: 'varchar', length: 256, nullable: true })
 	avatar_path: string;
 
-	@Column({
-		type: 'varchar',
-		length: 100,
-		default: null,
-		nullable: true,
-	})
-	token_2fa: string;
+	@Column({ type: 'smallint', nullable: false })
+	status: number;
 
-	@Column({
-		type: 'enum',
-		enum: UserStatus,
-		default: UserStatus.ONLINE,
-	})
-	status: UserStatus;
+	@Column({ type: 'varchar', length: 100, nullable: true })
+	token_2FA: string;
 
-	// @ManyToMany(() => User, (user) => user.subscribed)
-	// followers: string;
-	//
-	// @ManyToMany(() => User, (user) => user.followers)
-	// @JoinTable()
-	// subscribed: string;
-
-	@ManyToMany(() => User)
-	@JoinTable()
-	friend_list: User[];
+	@Column({ type: 'boolean', nullable: false })
+	has_2FA: boolean;
 }

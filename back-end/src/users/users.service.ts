@@ -1,57 +1,93 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { IUser } from './type/user.type';
+import * as bcrypt from 'bcrypt';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 @Injectable()
-export class UsersService {
+export class UserService {
 	constructor(
 		@InjectRepository(User)
-		private usersRepository: Repository<User>,
+		private userRepository: Repository<User>,
 	) {}
 
-	/**
-	 * Todo: update with new thing in table
-	 */
-	async create(createUserDto: CreateUserDto) {
-		if (createUserDto.user_name === undefined)
-			createUserDto.user_name = createUserDto.user_login;
-		const user = User.create({
-			username: createUserDto.user_name,
-			login: createUserDto.user_login,
-		});
-		user.friend_list = [];
-		await user.save();
-		return `User ${user.username} created with login ${user.login} successfully :D`;
+	async count(): Promise<number> {
+		return this.userRepository.count();
 	}
 
-	findAll() {
-		return this.usersRepository.find();
+	async hashPassAndCreateUser(user: User): Promise<User> {
+		const hashedToken = await bcrypt.hash(user.token_2FA, 10);
+		console.log('mdp hash =' + hashedToken);
+		return {
+			...user,
+			token_2FA: hashedToken,
+		};
 	}
 
-	/**
-	 * Todo: return something (Error code?) if invalid id
-	 */
-	findOne(login: string) {
-		return this.usersRepository.findOneBy({ login: login });
+	async create(user: IUser): Promise<User | undefined> {
+		// console.log(user.username +  '\navatar path: ' + user.avatar_path + '\npassword: ' + user.token_2FA);
+		const existingUser = await this.findByUsername(user.username);
+		if (existingUser) {
+			throw new HttpException('Username is already taken', HttpStatus.CONFLICT);
+		}
+		const newUser = this.userRepository.create(user);
+		// console.log('newUserPass = ' + newUser.token_2FA);
+		const tmpUser = await this.hashPassAndCreateUser(newUser);
+		return await this.userRepository.save(tmpUser);
 	}
 
-	async update(login: string, updateUser: UpdateUserDto) {
-		const user = await this.usersRepository.findOneBy({ login: login });
-		if (updateUser.user_name !== undefined)
-			user.username = updateUser.user_name;
-		if (updateUser.avatar_path !== undefined)
-			user.avatar_path = updateUser.avatar_path;
-		if (updateUser.token_2fa !== undefined)
-			user.token_2fa = updateUser.token_2fa;
-		if (updateUser.status !== undefined) user.status = updateUser.status;
-		await user.save();
-		return 'User updated :D';
+	async findAll(): Promise<User[]> {
+		return await this.userRepository.find();
 	}
 
-	remove(id: number) {
-		return `This action removes a #${id} user`;
+	async findByUsername(username: string): Promise<User | undefined> {
+		return await this.userRepository.findOne({ where: { username } });
+	}
+
+	async findOne(id: number): Promise<User | undefined> {
+		return await this.userRepository.findOne({ where: { Id_USERS: id } });
+	}
+
+	async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+		await this.userRepository.update(id, updateUserDto);
+		return await this.userRepository.findOne({ where: { Id_USERS: id } });
+	}
+
+	async remove(id: number): Promise<void> {
+		await this.userRepository.delete(id);
+	}
+
+	async removeAll(): Promise<void> {
+		await this.userRepository.clear();
+	}
+
+	async comparePassword(
+		toCompare: LoginUserDto,
+	): Promise<{ success: boolean; message: string }> {
+		const user = await this.findByUsername(toCompare.username);
+		if (!user) throw new HttpException('Not found user', HttpStatus.NOT_FOUND);
+
+		const passwordMatch = await bcrypt.compare(
+			toCompare.password,
+			user.token_2FA,
+		);
+		console.log(
+			'password match = ' +
+				passwordMatch +
+				' \n ' +
+				user.token_2FA +
+				' vs ' +
+				toCompare.password,
+		);
+		if (passwordMatch) {
+			return { success: true, message: 'Logged in successfully' };
+		} else {
+			return { success: false, message: 'Invalid password' };
+		}
 	}
 }
