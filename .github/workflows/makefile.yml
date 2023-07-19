@@ -1,4 +1,4 @@
-name: Makefile CI
+name: "Green = GG WP; Red = Tu peux retry!" 
 
 on:
   push:
