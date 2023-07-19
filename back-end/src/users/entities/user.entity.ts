@@ -5,8 +5,11 @@ export class User {
 	@PrimaryGeneratedColumn()
 	Id_USERS: number;
 
-	@Column({ type: 'varchar', length: 12, nullable: false })
-	username: string;
+	@Column({ type: 'varchar', length: 24, nullable: false })
+	login: string;
+
+	@Column({ type: 'varchar', length: 24, nullable: true })
+	nickname: string;
 
 	@Column({ type: 'varchar', length: 256, nullable: true })
 	avatar_path: string;

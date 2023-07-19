@@ -25,6 +25,7 @@ export class UsersController {
 		return this.userService.create(createUserDto);
 	}
 
+	//TODO: juste pour session avec mdp, a supprimer une fois auth by API42
 	@Post('login')
 	comparePassword(
 		@Body() loginUserDto: LoginUserDto,
@@ -37,7 +38,7 @@ export class UsersController {
 		return this.userService.findAll();
 	}
 
-	@Get('id/:id')
+	@Get(':id')
 	async findOneById(@Param('id') id: string): Promise<User | undefined> {
 		const user = await this.userService.findOne(parseInt(id));
 		if (!user) {
@@ -46,16 +47,16 @@ export class UsersController {
 		return user;
 	}
 
-	@Get(':username')
-	async findOneByUsername(
-		@Param('username') username: string,
-	): Promise<User | undefined> {
-		const user = await this.userService.findByUsername(username);
-		if (!user) {
-			throw new NotFoundException('User not found');
-		}
-		return user;
-	}
+	// @Get(':login')
+	// async findOneByUsername(
+	// 	@Param('login') login: string,
+	// ): Promise<User | undefined> {
+	// 	const user = await this.userService.findByUsername(login);
+	// 	if (!user) {
+	// 		throw new NotFoundException('User not found');
+	// 	}
+	// 	return user;
+	// }I
 
 	@Put(':id')
 	async update(
@@ -74,13 +75,15 @@ export class UsersController {
 		return updatedUser || { message: 'User updated successfully' };
 	}
 
+
+
 	@Delete(':id')
 	async remove(@Param('id') id: string): Promise<{ message: string }> {
 		const user = await this.userService.findOne(parseInt(id));
 		if (!user) {
 			throw new NotFoundException('User not found');
 		}
-		const tmp = user.username;
+		const tmp = user.login;
 		await this.userService.remove(parseInt(id));
 		return { message: `User ${tmp} (id: ${id}) removed successfully` };
 	}

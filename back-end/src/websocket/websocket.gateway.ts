@@ -10,7 +10,7 @@ import { Server, Socket } from 'socket.io';
 import { IChatMessage } from '../interfaces/chatTypes';
 
 interface UserSocket {
-	username: string;
+	login: string;
 	socketID: string;
 }
 
@@ -25,10 +25,10 @@ export class WebsocketGateway
 	private clients: UserSocket[] = [];
 
 	handleConnection(@ConnectedSocket() client: Socket) {
-		const username = client.handshake.query.username as string;
+		const login = client.handshake.query.login as string;
 		client.join('homeRoom');
 		console.log('NEW CONNEXION CLIENT, id = ' + client.id);
-		this.clients.push({ username, socketID: client.id });
+		this.clients.push({ login, socketID: client.id });
 		this.server
 			.to(client.id)
 			.emit('welcome', 'Bienvenue sur le chat room principal');

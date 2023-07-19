@@ -30,10 +30,10 @@ export class UserService {
 	}
 
 	async create(user: IUser): Promise<User | undefined> {
-		// console.log(user.username +  '\navatar path: ' + user.avatar_path + '\npassword: ' + user.token_2FA);
-		const existingUser = await this.findByUsername(user.username);
+		// console.log(user.login +  '\navatar path: ' + user.avatar_path + '\npassword: ' + user.token_2FA);
+		const existingUser = await this.findByUsername(user.login);
 		if (existingUser) {
-			throw new HttpException('Username is already taken', HttpStatus.CONFLICT);
+			throw new HttpException('login is already taken', HttpStatus.CONFLICT);
 		}
 		const newUser = this.userRepository.create(user);
 		// console.log('newUserPass = ' + newUser.token_2FA);
@@ -45,8 +45,8 @@ export class UserService {
 		return await this.userRepository.find();
 	}
 
-	async findByUsername(username: string): Promise<User | undefined> {
-		return await this.userRepository.findOne({ where: { username } });
+	async findByUsername(login: string): Promise<User | undefined> {
+		return await this.userRepository.findOne({ where: { login } });
 	}
 
 	async findOne(id: number): Promise<User | undefined> {
@@ -69,7 +69,7 @@ export class UserService {
 	async comparePassword(
 		toCompare: LoginUserDto,
 	): Promise<{ success: boolean; message: string }> {
-		const user = await this.findByUsername(toCompare.username);
+		const user = await this.findByUsername(toCompare.login);
 		if (!user) throw new HttpException('Not found user', HttpStatus.NOT_FOUND);
 
 		const passwordMatch = await bcrypt.compare(
