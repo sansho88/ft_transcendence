@@ -4,5 +4,5 @@ export class CreateUserDto {
 	status: number;
 	token_2FA: string;
 	has_2FA: boolean;
-	Id_MATCHMAKING: number;
+	Id_MATCHMAKING?: number;
 }
