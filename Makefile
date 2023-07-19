@@ -9,7 +9,7 @@ dev: build
 	$(COMPOSE) up
 
 build:
-	$(COMPOSE) build --parallel
+	$(COMPOSE) build --parallel --no-cache
 
 start:
 	$(COMPOSE) start

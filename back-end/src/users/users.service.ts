@@ -87,7 +87,7 @@ export class UserService {
 		if (passwordMatch) {
 			return { success: true, message: 'Logged in successfully' };
 		} else {
-			return { success: false, message: 'Invalid password' };
+			throw new HttpException({ success: false, message: 'Invalid password' }, HttpStatus.UNAUTHORIZED);
 		}
 	}
 }
