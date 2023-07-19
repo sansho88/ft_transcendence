@@ -1,64 +1,34 @@
-import {
-	PrimaryColumn,
-	BaseEntity,
-	Column,
-	Entity,
-	ManyToMany,
-	JoinTable,
-} from 'typeorm';
+import { ApiProperty } from '@nestjs/swagger';
+import { EStatus } from '../../../shared/types';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-export enum UserStatus {
-	INGAME = 2,
-	ONLINE = 1,
-	OFFLINE = 0,
-}
+@Entity('USERS')
+export class User {
+	@ApiProperty({ example: 1, description: 'Id of the user' })
+	@PrimaryGeneratedColumn()
+	Id_USERS: number;
 
-@Entity('test')
-export class User extends BaseEntity {
-	@PrimaryColumn({
-		type: 'varchar',
-		length: 12,
-	})
+	@ApiProperty({ example: 'bducrocq', description: 'login of the user / sera set via success log sur api42' })
+	@Column({ type: 'varchar', length: 24, nullable: false })
 	login: string;
 
-	@Column({
-		type: 'varchar',
-		length: 12,
-	})
-	username: string;
+	@ApiProperty({ example: 'ben', description: 'nickname of the user' })
+	@Column({ type: 'varchar', length: 24, nullable: true })
+	nickname: string;
 
-	// Todo: comeback later to proper storage
-	@Column({
-		type: 'varchar',
-		length: 256,
-		default: null,
-		nullable: true,
-	})
+	@ApiProperty({ example: 'avatar.png', description: 'path to the avatar of the user/par default sera le path vers photo de l\'user' })
+	@Column({ type: 'varchar', length: 256, nullable: true })
 	avatar_path: string;
 
-	@Column({
-		type: 'varchar',
-		length: 100,
-		default: null,
-		nullable: true,
-	})
-	token_2fa: string;
+	@ApiProperty({ example: 1, description: 'status of the user', enum: EStatus })
+	@Column({ type: 'smallint', nullable: false })
+	status: number;
 
-	@Column({
-		type: 'enum',
-		enum: UserStatus,
-		default: UserStatus.ONLINE,
-	})
-	status: UserStatus;
+	@ApiProperty({ example: 'password', description: 'password of the user' })
+	@Column({ type: 'varchar', length: 100, nullable: true })
+	token_2FA: string;
 
-	// @ManyToMany(() => User, (user) => user.subscribed)
-	// followers: string;
-	//
-	// @ManyToMany(() => User, (user) => user.followers)
-	// @JoinTable()
-	// subscribed: string;
-
-	@ManyToMany(() => User)
-	@JoinTable()
-	friend_list: User[];
+	@ApiProperty({ example: true, description: 'has 2FA activated' })
+	@Column({ type: 'boolean', nullable: false })
+	has_2FA: boolean;
 }

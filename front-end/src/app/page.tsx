@@ -1,9 +1,9 @@
 'use client';
 import Image from 'next/image'
 import * as React from "react";
-import Button from "./components/CustomButtonComponent"
-import Profile from "./components/ProfileComponent"
-import Stats from "./components/StatsComponent"
+import Button from "../components/CustomButtonComponent"
+import Profile from "../components/ProfileComponent"
+import Stats from "../components/StatsComponent"
 import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
 
 export default function Home() {
