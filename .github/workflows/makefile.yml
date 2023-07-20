@@ -16,3 +16,12 @@ jobs:
     
     - name: Launch Pong Pod
       run: make
+      
+    - name: Test connexion au front-end
+      run: curl localhost:3000
+      
+    - name: Test connexion au Back-End
+      run: curl localhost:8000
+      
+    - name: Test connexion API
+      run: curl localhost:8080
