@@ -17,6 +17,9 @@ jobs:
     - name: Launch Pong Pod
       run: make
       
+    - name: show hosts
+      run: cat /etc/hosts
+      
     - name: Test connexion au front-end
       run: curl 127.0.0.1:3000
       
