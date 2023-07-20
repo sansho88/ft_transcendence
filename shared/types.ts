@@ -1,5 +1,3 @@
-import { ApiProperty } from "@nestjs/swagger";
-
 export enum EStatus {
 	Offline,
 	Online,
@@ -9,7 +7,7 @@ export enum EStatus {
 export interface IUser {
 	Id_USERS?: number;
 	login: string;
-	nickname: string;
+	nickname?: string;
 	avatar_path: string;
 	status: number;
 	token_2FA: string;
@@ -18,7 +16,14 @@ export interface IUser {
 
 export interface IChatMessage {
 	clientId: number;
-	clientSocketId?: string;
 	clientPsedo: string;
 	message: string;
+}
+
+export interface IOriginNetwork {
+	domain: string;
+	apiPort: number | string;
+	appPort: number | string;
+	apiDOM?: string;
+	appDOM?: string;
 }
