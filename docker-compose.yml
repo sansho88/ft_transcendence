@@ -10,9 +10,9 @@ services:
       context: ./front-end
       dockerfile: ../docker/front-end.dockerfile
     volumes:
-      - ./front-end:/app
-      - /app/node_modules
-      - ./shared:/app/src/shared
+      - ./front-end/src:/usr/src/app/frontend/src
+      - ./front-end/public:/usr/src/app/frontend/public
+      - ./shared:/usr/src/app/shared
     ports:
       - "3000:3000"
     networks:
@@ -28,8 +28,7 @@ services:
       context: ./back-end
       dockerfile: ../docker/back-end.dockerfile
     volumes:
-      - ./back-end:/usr/src/app
-      - /usr/src/app/node_modules
+      - ./back-end/src:/usr/src/app/src
       - ./shared:/usr/src/app/shared
     ports:
       - "8000:8000"
