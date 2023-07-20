@@ -46,7 +46,7 @@ export default function WebsocketClient({className, classNameBlockMessage}: {cla
 		{
 			socketRef.current = io(`${apiOrigin}`, {
 				query: {
-					username: username,
+					login: username,
 				},
 			});
 		}

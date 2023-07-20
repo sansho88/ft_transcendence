@@ -11,7 +11,7 @@ import {
 	LoggedContextType
 } from "@/context/GameContext";
 import { IOriginNetwork } from "../shared/types";
-import { Socket } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import websocketConnect from "@/api/websocket";
 
 const originDefault: IOriginNetwork = {
@@ -28,21 +28,24 @@ const originDefaultFull = (origin: IOriginNetwork): IOriginNetwork => {
 	}
 }
 
+
+
 export function Providers({children}) {
 	const [isLogged, setIsLogged] = useState<boolean>(false);
 	const [userContext, setUserContext] = useState<IUser | undefined>(undefined);
-	const socketRef = useRef<Socket | null>(null);
+	// const socketRef = useRef<Socket | null>(null);
+	// const socketRef = io()
 	
 
 	return (
 		<>
 			<OriginContext.Provider value={originDefaultFull(originDefault)}>
 					<LoggedContext.Provider value={{logged: isLogged, setLogged: setIsLogged}}>
-						<SocketContext.Provider value={socketRef}>
+						{/* <SocketContext.Provider value={socketRef}> */}
 							<UserContext.Provider value={{userContext: userContext, setUserContext: setUserContext}}>
 								{children}
 							</UserContext.Provider>
-						</SocketContext.Provider>
+						{/* </SocketContext.Provider> */}
 					</LoggedContext.Provider>
 			</OriginContext.Provider>
 		</>

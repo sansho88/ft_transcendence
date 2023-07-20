@@ -52,7 +52,7 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
     if (!isLogged)
       return (
             <button type="button" onClick={handleLogin} className={"button-login"}>
-              <span className="text">LOGIN</span></button>
+              <span className="text">LOGIN2</span></button>
           /*<Button border={"2px"} color={"#FFFFFF"} image={"linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB)"} height={"30px"} width={"60px"} radius={"4px"} onClick={handleLogin}>LOGIN</Button>*/
       )
     else
