@@ -50,7 +50,7 @@ export class UsersController {
 	// @ApiExcludeEndpoint()
 	@ApiOperation({
 		summary:
-			"temporaire/ au moment du loggin avec mot de passe, sert a verif le matching des mots de passe pour logger ou non l'user",
+			"ONLY_DEV temp/ check si combo login/password is OK",
 	})
 	@ApiBody({ type: LoginUserDto })
 	@ApiResponse({ status: 401, description: 'Invalid password' })

@@ -1,7 +1,10 @@
-import React from 'react'
+import ChatRoomCommponent from '@/components/chat/ChatRoomComponent'
 
-export default function Chat() {
+export default function ChatRoom() {
 	return (
-		<div>Chat</div>
+		<>
+			<div>ChatRoom</div>
+			<ChatRoomCommponent className='' classNameBlockMessage='m-6 overflow-auto h-[350px]'/>
+		</>
 	)
 }

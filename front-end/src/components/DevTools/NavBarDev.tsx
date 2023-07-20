@@ -6,9 +6,7 @@ import {UserContext, LoggedContext} from "@/context/GameContext";
 
 export function NavBar({className}: {className: string}) {
 
-	const {userContext, setUserContext} = useContext(UserContext);
-
-	const [username, setUsername] = useState('')
+	const {userContext} = useContext(UserContext);
 	const {logged} = useContext(LoggedContext);
 
 
@@ -17,10 +15,10 @@ export function NavBar({className}: {className: string}) {
 		return (
 			<>
 				<Link href="/home">HOME</Link>
-				<Link href="/game">GAME PROTO</Link>
-				<Link href="/chat_room">CHATROOM PROTO</Link>
+				<Link href="/proto/game">GAME PROTO</Link>
+				<Link href="/proto/chat">CHATROOM PROTO</Link>
 				<Link href={`/profile/${userContext?.login}`}>PROFILE</Link>
-				<div className='flex  flex-col'>debug: actif user: {userContext?.login}</div>
+				<div className='flex flex-col'>debug: actif user: {userContext?.login}</div>
 			</>
 		)
 	}

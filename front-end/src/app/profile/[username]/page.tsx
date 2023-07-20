@@ -8,10 +8,8 @@ export default function ProfileUser({params}: {params: { username: string}}) {
 	const [isUserTargetExist, setIsUserTargetExist] = useState<boolean>(false);
 	const {logged} = useContext(LoggedContext);
 
-	console.log("PorfileUser HelloWorld");
 
 	useEffect(() => {
-		console.log("PorfileUser useEffect HelloWorld");
 
 		// requete api pour avoir les infos de l'user sur localhost:8000/api/users/username
 		axios

@@ -2,7 +2,7 @@
 
 import React, {useState, useEffect, useRef, MutableRefObject} from "react";
 import "./game.css";
-import ButtonDBG from "../../components/DevTools/button/btn_dbg";
+import ButtonDBG from "../../../components/DevTools/button/btn_dbg";
 import Ball from "./ball";
 
 // let windowsWidth = window.innerWidth;
@@ -152,7 +152,7 @@ export default function Page() {
 					{/* <ScoreDisplay
 						player={{playerId: 1, positionInGame: "left", score: scoreP1}}
 					/> */}
-				<Ball />
+				{/* <Ball /> */}
 					{/* <ScoreDisplay
 						player={{playerId: 2, positionInGame: "right", score: scoreP2}}
 					/> */}

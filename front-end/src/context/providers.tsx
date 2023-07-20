@@ -1,6 +1,6 @@
 "use client";
 
-import {createContext, useState} from "react";
+import {createContext, useRef, useState} from "react";
 import {IUser} from "../interfaces/userType";
 import {
 	ThemeContext,
@@ -11,6 +11,8 @@ import {
 	LoggedContextType
 } from "@/context/GameContext";
 import { IOriginNetwork } from "../shared/types";
+import { Socket } from "socket.io-client";
+import websocketConnect from "@/api/websocket";
 
 const originDefault: IOriginNetwork = {
 	domain: 'http://localhost',
@@ -29,13 +31,14 @@ const originDefaultFull = (origin: IOriginNetwork): IOriginNetwork => {
 export function Providers({children}) {
 	const [isLogged, setIsLogged] = useState<boolean>(false);
 	const [userContext, setUserContext] = useState<IUser | undefined>(undefined);
+	const socketRef = useRef<Socket | null>(null);
 	
 
 	return (
 		<>
 			<OriginContext.Provider value={originDefaultFull(originDefault)}>
 					<LoggedContext.Provider value={{logged: isLogged, setLogged: setIsLogged}}>
-						<SocketContext.Provider value={null}>
+						<SocketContext.Provider value={socketRef}>
 							<UserContext.Provider value={{userContext: userContext, setUserContext: setUserContext}}>
 								{children}
 							</UserContext.Provider>
