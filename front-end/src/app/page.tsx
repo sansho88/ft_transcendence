@@ -5,6 +5,7 @@ import Button from "../components/CustomButtonComponent"
 import Profile from "../components/ProfileComponent"
 import Stats from "../components/StatsComponent"
 import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
+import axios from "axios";
 
 export default function Home() {
 preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
@@ -33,7 +34,14 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
 
     function handleLogin() {
         setLog(true);
-        console.log("LOGGED BIM!");
+        console.log("LOGGED REALLY!");
+        axios.get("localhost:8000/api/users")
+            .then((response) => {
+                console.log('response:' + response.data);
+            })
+            .catch((e) => {
+                console.error('error:' + e.toString());
+            });
     }
 
     function handleUserStatus() {
