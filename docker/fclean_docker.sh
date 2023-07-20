@@ -16,6 +16,3 @@ if [ -n "$(docker volume ls -q)" ]; then
 fi
 
 docker system prune -f -a --volumes
-
-
-
