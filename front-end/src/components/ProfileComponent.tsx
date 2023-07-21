@@ -96,7 +96,7 @@ const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nic
 
                     <p id={"status"} style={{color:statusColor}}>{status}</p>
                 </div>
-                <p id={"children"} style={{marginLeft: "4px"}}>{children}</p>
+                <div id={"children"} style={{marginLeft: "4px"}}>{children}</div>
             </div>
         </>);
 };

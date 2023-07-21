@@ -50,12 +50,6 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
         console.log(`User Status: ${userStatus}; statusColor ${StatusColor.get(userStatus)}`);
     }
 
-    const Header = () => {
-        <head>
-            <link rel={"icon"} href={"./favicon.ico"}/>
-        </head>
-    }
-
   function login(){
     if (!isLogged)
       return (
@@ -82,7 +76,6 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
   if (!isLogged)
     return (
         <>
-            <Header/>
         <div className="main-background">
           <div className="welcome">
             <div className="welcome-msg">WELCOME TO</div>
@@ -96,7 +89,6 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
   else
     return (
         <>
-            <Header/>
       <main className="main-background">
         {/*  <div className={"sidebar"}>
               <menu className="menu" autoCapitalize={"words"}  title={"Menu"}>
@@ -108,7 +100,8 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
 
           <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"lelogin"} nickname={userNickName}
                    status={AllStatus[userStatus]} statusColor={StatusColor.get(userStatus)} isEditable={true}>
-              <p style={{paddingBottom: "1vh"}}><Stats level={42} victories={112} defeats={24} rank={1}/></p>
+
+              <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
               <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
           </Profile>
           <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"} height={"42px"}/>
