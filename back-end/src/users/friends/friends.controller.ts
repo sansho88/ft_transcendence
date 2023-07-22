@@ -1,8 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { UsersService } from '../users.service';
-import { User } from '../entities/user.entity';
-import { UsersController } from '../users.controller';
-import { from } from 'rxjs';
 import { FriendsService } from './friends.service';
 
 @Controller('users')
@@ -12,12 +9,8 @@ export class FriendsController {
 		private readonly friendsService: FriendsService,
 	) {}
 	@Get('friends/:login')
-	findFriend(@Param('login') login: string) {
-		console.log('get friend test');
-		return this.usersService.findOne(login).then((target) => {
-			console.log(target.friend_list);
-			return target.friend_list;
-		});
+	async getFriend(@Param('login') login: string) {
+		return this.friendsService.getFriend(login);
 	}
 
 	@Post('friends')

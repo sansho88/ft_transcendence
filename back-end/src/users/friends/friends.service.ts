@@ -1,18 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../entities/user.entity';
-import { Repository } from 'typeorm';
 import { UsersService } from '../users.service';
 
 @Injectable()
 export class FriendsService extends UsersService {
 	async addFriend(target_login1: string, target_login2: string) {
-		return 'wip';
+		// return 'wip';
 		const target1 = await this.findOne(target_login1);
 		const target2 = await this.findOne(target_login2);
 		console.log('post friend test');
-		// if (target1 === undefined || target2 === undefined)  // already handel by findOne() (throw an error)
-		// 	return 'User non-existent';
 		if (
 			target1.friend_list !== undefined &&
 			target1.friend_list.find((i) => i.login === target2.login)
@@ -20,7 +15,18 @@ export class FriendsService extends UsersService {
 			return 'Already added';
 		if (target1.friend_list === undefined) target1.friend_list = [];
 		target1.friend_list.push(target2); // todo: crash there i don t know why
-		await target1.save();
+		await this.usersRepository.save(target1);
 		return 'Friend added';
+	}
+
+	async getFriend(target: string) {
+		return await this.usersRepository.find({
+			relations: {
+				friend_list: true,
+			},
+			where: {
+				login: target,
+			},
+		});
 	}
 }
