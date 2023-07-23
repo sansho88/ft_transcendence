@@ -1,9 +1,9 @@
 export interface IUser {
-	Id_USERS?: number;
+	id_user?: number;
 	login: string;
 	nickname: string;
 	avatar_path: string;
 	status: number;
-	token_2FA: string;
-	has_2FA: boolean;
+	token_2fa: string;
+	has_2fa: boolean;
 }

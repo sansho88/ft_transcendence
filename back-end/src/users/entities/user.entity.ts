@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { EStatus } from '../../../shared/types';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { EStatus } from '../../../shared/types';
 
-@Entity('USERS')
+@Entity('users')
 export class User {
 	@ApiProperty({ example: 1, description: 'Id of the user' })
 	@PrimaryGeneratedColumn()
-	Id_USERS: number;
+	id_user: number;
 
 	@ApiProperty({ example: 'bducrocq', description: 'login of the user / sera set via success log sur api42' })
 	@Column({ type: 'varchar', length: 24, nullable: false })
@@ -28,11 +28,11 @@ export class User {
 	@Column({ type: 'varchar', length: 100, nullable: true })
 	password: string;
 
-	@ApiProperty({ example: 'token_2FA', description: 'token_2FA of the user' })
+	@ApiProperty({ example: 'token_2fa', description: 'token_2fa of the user' })
 	@Column({ type: 'varchar', length: 100, nullable: true })
-	token_2FA: string;
+	token_2fa: string;
 
 	@ApiProperty({ example: true, description: 'has 2FA activated' })
 	@Column({ type: 'boolean', nullable: false })
-	has_2FA: boolean;
+	has_2fa: boolean;
 }
