@@ -68,7 +68,8 @@ export class UserService {
 	}
 
 	async removeAll(): Promise<void> {
-		await this.userRepository.clear();
+		// await this.userRepository.clear();
+		await this.userRepository.query('TRUNCATE TABLE "users" CASCADE'); // git push --force
 	}
 
 	async comparePassword(
