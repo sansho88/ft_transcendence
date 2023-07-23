@@ -1,4 +1,4 @@
-import { POD, PODSQL } from "@/types/types";
+import * as POD  from "@/types/types";
 import Axios from "./AxiosConfig";
 import { strRoutes } from "@/types/routesApi";
 
@@ -18,7 +18,7 @@ export namespace getApi {
 
 export namespace postApi {
 
-	export const postUser= (newUser: PODSQL.Users)	=>{return Axios.post(`${strRoutes.postUser}`, newUser);}
+	export const postUser= (newUser: POD.User)	=>{return Axios.post(`${strRoutes.postUser}`, newUser);}
 	export const postTryLogin= (loginTest:{login:string,password :string})=>{
 																										return Axios.post(`${strRoutes.postUserCheckLogin}`, loginTest);}
 
@@ -26,7 +26,7 @@ export namespace postApi {
 
 
 export namespace putApi {
-	export const putUser= (updateUser: Partial<PODSQL.Users>) =>{return Axios.post(`${strRoutes.putUser}`, updateUser)}
+	export const putUser= (updateUser: Partial<POD.User>) =>{return Axios.post(`${strRoutes.putUser}`, updateUser)}
 }
 
 export namespace deleteApi {
