@@ -26,6 +26,10 @@ export class User {
 
 	@ApiProperty({ example: 'password', description: 'password of the user' })
 	@Column({ type: 'varchar', length: 100, nullable: true })
+	password: string;
+
+	@ApiProperty({ example: 'token_2FA', description: 'token_2FA of the user' })
+	@Column({ type: 'varchar', length: 100, nullable: true })
 	token_2FA: string;
 
 	@ApiProperty({ example: true, description: 'has 2FA activated' })

@@ -73,7 +73,7 @@ export default function WebsocketClient({className, classNameBlockMessage}: {cla
 			socketRef.current.on("responseObj", (obj: POD.IChatMessage) => {
 				console.log(
 					"MessageObj confirmé recu:",
-					obj.message + " de " + obj.user.nickname
+					obj.message + " de " + obj.clientPsedo
 				);
 				setChatMsgs((prevChatMsgs) => [...prevChatMsgs, obj]);
 			});
@@ -103,16 +103,8 @@ export default function WebsocketClient({className, classNameBlockMessage}: {cla
 		}
 		if (socketRef.current) {
 			let messObj: POD.IChatMessage = {
-				user: {
-					login: userContext?.login,
-					nickname: userContext?.login,
-					avatar_path: "string",
-					status: 1,
-					token_2FA: "string",
-					has_2FA: false,
-				},
-				// clientId: userContext?.Id_USERS,
-				// clientPsedo: userContext.login,
+				clientId: userContext?.Id_USERS,
+				clientPsedo: userContext.login,
 				message: msg,
 			};
 			console.log("DBG DEBUUUUUG => " + messObj.message);
@@ -137,12 +129,12 @@ export default function WebsocketClient({className, classNameBlockMessage}: {cla
 				<ul className={classNameBlockMessage}>
 
 					{chatMsgs.map((obj, index) => (
-						<div key={"blocMessage-" + uuidv4()} className={obj.user.nickname === username ? 'text-right' : 'text-left '}>
-							<li className={`text-neutral-400 font-semibold text-base ml-4 ${obj.user.nickname === username ? 'text-right ml-auto mr-5' : 'text-left ml-2'}`}>
-								{obj.user.nickname}
+						<div key={"blocMessage-" + uuidv4()} className={obj.clientPsedo === username ? 'text-right' : 'text-left '}>
+							<li className={`text-neutral-400 font-semibold text-base ml-4 ${obj.clientPsedo === username ? 'text-right ml-auto mr-5' : 'text-left ml-2'}`}>
+								{obj.clientPsedo}
 							</li>
 							<li className={`p-2 mb-4 rounded-xl max-w-max min-w-[10rem] 
-															${obj.user.nickname === username ? 'text-right ml-auto mr-4 bg-teal-900' : 'text-left ml-2 bg-gray-800'}`}>
+															${obj.clientPsedo === username ? 'text-right ml-auto mr-4 bg-teal-900' : 'text-left ml-2 bg-gray-800'}`}>
 								{obj.message}
 							</li>
 						</div>

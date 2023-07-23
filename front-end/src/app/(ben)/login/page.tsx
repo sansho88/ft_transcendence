@@ -3,9 +3,9 @@
 import React, {useState, useEffect, useContext} from "react";
 import axios from "axios";
 import {useRouter} from "next/navigation";
-import {OriginContext} from "@/context/GameContext";
-import {IOriginNetwork, IUser} from "../../shared/types";
-import {LoggedContext, UserContext} from "@/context/GameContext";
+import {OriginContext} from "@/context/globalContext";
+import { POD } from "@/types/types";
+import {LoggedContext, UserContext} from "@/context/globalContext";
 
 enum EStepLogin {
 	enterUsername,
@@ -16,7 +16,7 @@ enum EStepLogin {
 }
 
 export default function Page() {
-	const originApi = useContext<IOriginNetwork>(OriginContext).apiDOM;
+	const originApi = useContext<POD.IOriginNetwork>(OriginContext).apiDOM;
 	const {userContext, setUserContext} = useContext(UserContext);
 	
 	const { setLogged} = useContext(LoggedContext);
@@ -63,12 +63,13 @@ export default function Page() {
 	};
 
 	async function tryLoggin(pass: string) {
-		const user: IUser = {
+		const user: POD.IUser = {
 			login: username,
 			nickname: username,
+			password: pass,
 			avatar_path: "base.png",
 			status: 1,
-			token_2FA: pass,
+			token_2FA: pass, //TODO: switch dans reel pass
 			has_2FA: false,
 		};
 

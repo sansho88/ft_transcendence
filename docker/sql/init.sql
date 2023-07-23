@@ -16,6 +16,7 @@ CREATE TABLE USERS(
    Id_USERS SERIAL,
    login VARCHAR(24)  NOT NULL,
    nickname VARCHAR(24)  NOT NULL,
+   password VARCHAR(100) ,
    avatar_path VARCHAR(256) ,
    status SMALLINT NOT NULL,
    token_2FA VARCHAR(100) ,

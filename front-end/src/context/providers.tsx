@@ -9,7 +9,7 @@ import {
 	LoggedContext,
 	OriginContext,
 	LoggedContextType
-} from "@/context/GameContext";
+} from "@/context/globalContext";
 import { IOriginNetwork } from "../shared/types";
 import { io, Socket } from "socket.io-client";
 import websocketConnect from "@/api/websocket";

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useContext } from 'react'
 import axios from 'axios'
-import { LoggedContext } from '@/context/GameContext';
+import { LoggedContext } from '@/context/globalContext';
 
 export default function ProfileUser({params}: {params: { username: string}}) {
 	const [isUserTargetExist, setIsUserTargetExist] = useState<boolean>(false);

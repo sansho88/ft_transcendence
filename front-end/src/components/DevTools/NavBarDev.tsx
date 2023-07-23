@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import React, {useState, createContext, useContext, } from 'react'
-import {UserContext, LoggedContext} from "@/context/GameContext";
+import {UserContext, LoggedContext} from "@/context/globalContext";
 
 
 export function NavBar({className}: {className: string}) {
@@ -9,12 +9,11 @@ export function NavBar({className}: {className: string}) {
 	const {userContext} = useContext(UserContext);
 	const {logged} = useContext(LoggedContext);
 
-
 	function SubNav() {
 
 		return (
 			<>
-				<Link href="/home">HOME</Link>
+				<Link href="/">HOME</Link>
 				<Link href="/proto/game">GAME PROTO</Link>
 				<Link href="/proto/chat">CHATROOM PROTO</Link>
 				<Link href={`/profile/${userContext?.login}`}>PROFILE</Link>
@@ -27,8 +26,9 @@ export function NavBar({className}: {className: string}) {
 		
 		return (
 			<>
-				<Link href="/home">HOME</Link>
-				<Link href="/login">LOGIN</Link>
+				<Link href="/">HOME</Link>
+				<Link href="/auth">AUTH LOGIN</Link>
+				<Link href="/login">OLD LOGIN</Link>
 				<div className=' text-red-500'>user:(not logged)</div>
 			</>
 		)
