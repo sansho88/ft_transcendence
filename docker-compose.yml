@@ -29,11 +29,8 @@ services:
       dockerfile: ./docker/back-end.dockerfile
     volumes:
       - ./back-end/src:/usr/src/app/src
-<<<<<<< HEAD
       - ./front-end/src/shared/:/usr/src/app/shared
-=======
       - ./shared:/usr/src/app/shared
->>>>>>> origin/beta
     ports:
       - "8000:8000"
     networks:
@@ -69,8 +66,9 @@ services:
       - ./docker/.env/.env_db
     networks:
       - database
+
 volumes:
-  db_data:
+   db_data:
 
 networks:
   webapp:
