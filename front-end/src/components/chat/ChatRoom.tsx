@@ -103,7 +103,7 @@ export default function WebsocketClient({className, classNameBlockMessage}: {cla
 		}
 		if (socketRef.current) {
 			let messObj: POD.IChatMessage = {
-				clientId: userContext?.Id_USERS,
+				clientId: userContext?.id_user,
 				clientPsedo: userContext.login,
 				message: msg,
 			};

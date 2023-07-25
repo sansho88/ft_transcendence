@@ -2,95 +2,96 @@
 
 //NOTA BENE: jai prevu toutes routes mais surments des changements a prevoir et des routes inutiles
 
-	const serverApi = 'http://localhost:8000/api' //TODO utiliser le context OriginNetwork
+	const serverApi = "http://localhost:8000/api" //TODO utiliser le context OriginNetwork
 	
 // definition des routes root 🫠
-	const routeUsers = 'users'
-	const routeChannels = 'channels'
-	const routeMessages = 'messages'
-	const routeGame = 'game';
-	const routeMatchmaking = 'matchmaking';
-	const routeBanned = 'banned';
-	const routeChannelInvite = 'channel-invite';
-	const routeMute = 'mute';
-	const routeChallenge = 'challenge';
-	const routeFollow = 'follow';
-	const routeSubscribe = 'subscribe';
-	const routeBlock = 'block';
-	const routeJoined = 'joined';
-	const routeAdministrate = 'administrate';
-	const routePlay = 'play';
+	const routeUsers = 					'users'
+	const routeChannels = 			'channels'
+	const routeMessages = 			'messages'
+	const routeGame = 					'game';
+	const routeMatchmaking = 		'matchmaking';
+	const routeBanned = 				'banned';
+	const routeChannelInvite = 	'channel-invite';
+	const routeMute = 					'mute';
+	const routeChallenge = 			'challenge';
+	const routeFollow = 				'follow';
+	const routeSubscribe = 			'subscribe';
+	const routeBlock = 					'block';
+	const routeJoined = 				'joined';
+	const routeAdministrate = 	'administrate';
+	const routePlay = 					'play';
 	
-//declaration des routes
+//bible des routes
 	export namespace strRoutes {
 
 // +---------------------------------------------------------------------+
 // |                              USERS                                  |
 // +---------------------------------------------------------------------+
 
-	export const getUsersAll=()					=>{return `${serverApi}/${routeUsers}`}
-	export const getUserById = () 			=>{return `${serverApi}/${routeUsers}/`}
-	export const getUserByLogin=()			=>{return `${serverApi}/${routeUsers}/login/`}
+	export const getUsersAll=()							=>{return `${serverApi}/${routeUsers}`}
+	export const getUserById = () 					=>{return `${serverApi}/${routeUsers}/`}
+	export const getUserByLogin=()					=>{return `${serverApi}/${routeUsers}/login/`}
 		
-	export const postUser=()						=>{return `${serverApi}/${routeUsers}`}
-	export const postUserCheckLogin=()	=>{return `${serverApi}/${routeUsers}/login/`}
+	export const postUser=()								=>{return `${serverApi}/${routeUsers}`}
+	export const postUserCheckLogin=()			=>{return `${serverApi}/${routeUsers}/login/`}
 		
-	export const putUser=()							=>{return `${serverApi}/${routeUsers}/`}
+	export const putUser=()									=>{return `${serverApi}/${routeUsers}/`}
 
-	export const deleteUsersAll=()			=>{return `${serverApi}/${routeUsers}`}
-	export const deleteUser=()					=>{return `${serverApi}/${routeUsers}/`}
+	export const deleteUsersAll=()					=>{return `${serverApi}/${routeUsers}`}
+	// export const deleteUsersAll=()					=>{return `http://localhost:8000/api/users`}
+	export const deleteUserById=()					=>{return `${serverApi}/${routeUsers}/`}
 
 // +---------------------------------------------------------------------+
 // |                              GAME                                   |
 // +---------------------------------------------------------------------+
 
-	export const getGamesAllHistory = () => {return `${serverApi}/${routeGame}`};		// return: [game] list des games terminées
-	export const getGamesAllCurrent= () => {return `${serverApi}/${routeGame}`};		// return: [game] list des en cours
-	export const getGameById = () => {return `${serverApi}/${routeGame}/`}; 				// params: :gameId
-	export const getGamesByUserId = () => {return `${serverApi}/${routeGame}/`};		// params: :User_id return array gamesHistory dun user (system de page ?)
+	export const getGamesAllHistory = () 		=> {return `${serverApi}/${routeGame}`};		// return: [game] list des games terminées
+	export const getGamesAllCurrent= () 		=> {return `${serverApi}/${routeGame}`};		// return: [game] list des en cours
+	export const getGameById = () 					=> {return `${serverApi}/${routeGame}/`}; 				// params: :gameId
+	export const getGamesByUserId = () 			=> {return `${serverApi}/${routeGame}/`};		// params: :User_id return array gamesHistory dun user (system de page ?)
 
-	export const postGame = () => {return `${serverApi}/${routeGame}`};							// params: creer une game
+	export const postGame = ()							=> {return `${serverApi}/${routeGame}`};							// params: creer une game
 
-	export const putGameById = () => {return `${serverApi}/${routeGame}/`};					// params: {P1_score P2_score ...etc}
+	export const putGameById = () 					=> {return `${serverApi}/${routeGame}/`};					// params: {P1_score P2_score ...etc}
 	
-	export const deleteGameById = () => {return `${serverApi}/${routeGame}/`};			// si game avortée ?
+	export const deleteGameById = () 				=> {return `${serverApi}/${routeGame}/`};			// si game avortée ?
 
 // +---------------------------------------------------------------------+
 // |                           MATCHMAKING                               |
 // +---------------------------------------------------------------------+
 
-	export const getMatchmaking = () => {return `${serverApi}/${routeMatchmaking}/`}; 				//List des Match en attente
-	export const postMatchmaking = () => {return `${serverApi}/${routeMatchmaking}`};					//creer un list attente de game
-	// export const putMatchmakingById = () => {return `${serverApi}/${routeMatchmaking}/`};			
-	export const deleteMatchmakingById = () => {return `${serverApi}/${routeMatchmaking}/`};	
+	export const getMatchmaking = () 				=> {return `${serverApi}/${routeMatchmaking}/`}; 				//List des Match en attente
+	export const postMatchmaking = () 			=> {return `${serverApi}/${routeMatchmaking}`};					//creer un list attente de game
+	export const putMatchmakingById=() 			=> {return `${serverApi}/${routeMatchmaking}/`};			
+	export const deleteMatchmakingById=() 	=> {return `${serverApi}/${routeMatchmaking}/`};	
 
 // +---------------------------------------------------------------------+
 // |                             CHANNELS                                |
 // +---------------------------------------------------------------------+
 
-	export const getChannelsAll = () => {return `${serverApi}/${routeChannels}`};								//list de tous les channels
-	export const getChannelsAllPublic = () => {return `${serverApi}/${routeChannels}/public`};	//list de tous les channels public
-	export const getChannelById = () => {return `${serverApi}/${routeChannels}/`};							//params: :Channel_Id
+	export const getChannelsAll = () 				=> {return `${serverApi}/${routeChannels}`};								//list de tous les channels
+	export const getChannelsAllPublic = ()	=> {return `${serverApi}/${routeChannels}/public`};	//list de tous les channels public
+	export const getChannelById = () 				=> {return `${serverApi}/${routeChannels}/`};							//params: :Channel_Id
 	
-	export const postChannel = () => {return `${serverApi}/${routeChannels}`};									
+	export const postChannel = () 					=> {return `${serverApi}/${routeChannels}`};									
 	
-	export const putChannelById = () => {return `${serverApi}/${routeChannels}/`};
+	export const putChannelById = () 				=> {return `${serverApi}/${routeChannels}/`};
 	
-	export const deleteChannelById = () => {return `${serverApi}/${routeChannels}/`};
+	export const deleteChannelById = () 		=> {return `${serverApi}/${routeChannels}/`};
 
 // +---------------------------------------------------------------------+
 // |                             MESSAGES                                |
 // +---------------------------------------------------------------------+
 
-	// export const getMessagesAll = () => {return `${serverApi}/${routeMessages}`};
-	// export const getMessageById = () => {return `${serverApi}/${routeMessages}/`};
-	export const getMessagesByChannelId = () => {return `${serverApi}/${routeChannels}/`}; 	//all messages in channel_id
+	// export const getMessagesAll = () 		=> {return `${serverApi}/${routeMessages}`};
+	// export const getMessageById = () 		=> {return `${serverApi}/${routeMessages}/`};
+	export const getMessagesByChannelId=() 	=> {return `${serverApi}/${routeChannels}/`}; 	//all messages in channel_id
 
-	export const postMessage = () => {return `${serverApi}/${routeMessages}`};
+	export const postMessage = () 					=> {return `${serverApi}/${routeMessages}`};
 
-	export const putMessageById = () => {return `${serverApi}/${routeMessages}/`}; 			//feature ? 	params: message_id
+	export const putMessageById = () 				=> {return `${serverApi}/${routeMessages}/`}; 			//feature ? 	params: message_id
 
-	export const deleteMessageById = () => {return `${serverApi}/${routeMessages}/`};		// feature ?	params: message_id
+	export const deleteMessageById = () 		=> {return `${serverApi}/${routeMessages}/`};		// feature ?	params: message_id
 
 // +---------------------------------------------------------------------+
 // |                              BANNED                                 |

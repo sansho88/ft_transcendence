@@ -1,5 +1,8 @@
-import React, {useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Button from "./CustomButtonComponent"
+import * as apiReq from '@/components/api/ApiReq'
+import { UserContext } from "@/context/globalContext";
+import * as POD from '@/shared/types'
 
 
 interface MatchProps {
@@ -12,8 +15,8 @@ interface MatchProps {
 }
 interface ProfileProps {
     avatar: string;
-    login: string;
-    nickname: string;
+    login: string | undefined;
+    nickname: string | undefined;
     status: string;
     statusColor?: string;
     isEditable: boolean;
@@ -22,9 +25,14 @@ interface ProfileProps {
 const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nickname, status, statusColor, isEditable})=>{
 
 
-    const [modifiedNick, setText] = useState<string>(nickname); // Initialisez avec une valeur initiale vide ou une valeur existante si nécessaire
+		//undefined = temporaire/pas top, TODO: modifier la class IUSER et enlever les ?, faire des Partial<IUSER> quand besoin
+    const [modifiedNick, setText] = useState<string | undefined>(nickname); // Initialisez avec une valeur initiale vide ou une valeur existante si nécessaire
+    const [oldNick, setOldNick] = useState<string | undefined>(''); // Initialisez avec une valeur initiale vide ou une valeur existante si nécessaire
     const [editMode, setEditMode] = useState(false);
+		const {userContext, setUserContext} = useContext(UserContext);
     const [errorMsg, setErrMsg] = useState("");
+
+
     const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
             const value = event.target.value;
             setText(event.target.value);
@@ -35,6 +43,39 @@ const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nic
             setErrMsg("");
         }
     };
+
+		useEffect(() => {
+			
+			if(editMode === true)
+				console.log('modifNick = ' + modifiedNick);
+		}, [modifiedNick])
+
+
+		useEffect(() => {
+			async function postNick() {
+				await apiReq.putApi.putUser({nickname: modifiedNick, id_user: userContext?.id_user}) //FIXME
+				.then((res) => {
+					if (res.status === 201)
+						console.log('Nickname à été update en DB')						
+				})
+				.catch((e)=> {console.error(e)});
+			}
+			// let oldNick = modifiedNick;
+			setOldNick(modifiedNick);
+			console.log(`nick compare:|${oldNick}|${modifiedNick}|`)
+			if(editMode === false)
+			{
+				if (oldNick !== modifiedNick)
+				{
+					postNick();
+					setUserContext({
+						...userContext as POD.IUser,
+						nickname: modifiedNick,
+					});
+				}
+			}
+
+		}, [editMode])
 
     const turnOnEditMode = () => {
         setEditMode(true);

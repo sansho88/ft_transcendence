@@ -2,11 +2,12 @@
 
 import React, { useEffect, useState, useContext } from 'react'
 import axios from 'axios'
-import { LoggedContext } from '@/context/globalContext';
+import { LoggedContext, UserContext } from '@/context/globalContext';
 
 export default function ProfileUser({params}: {params: { username: string}}) {
 	const [isUserTargetExist, setIsUserTargetExist] = useState<boolean>(false);
 	const {logged} = useContext(LoggedContext);
+	const {userContext} = useContext(UserContext);
 
 
 	useEffect(() => {
@@ -26,15 +27,17 @@ export default function ProfileUser({params}: {params: { username: string}}) {
 	});
 
 	return (
-		<div className="flex justify-center items-center">
+		<div className="flex  w-screen justify-center items-center">
 			{logged ? (
 				isUserTargetExist ? (
 					<div>{params.username}: 404 NOT FOUND</div>
 				) : (
 					<div>
-						<h1>PROFILE </h1>
-						<div className=" flex justify-center flex-grow space-x-10 p-20">
-							<div>username: {params.username}</div>
+						<div className=" flex flex-col space-x-10">
+						<h1 className=' text-3xl'>PROFILE </h1>
+							<div>login: {userContext?.login}</div>
+							<div>nickanme: {userContext?.nickname}</div>
+							<div>avatar_path: {userContext?.avatar_path}</div>
 						</div>
 					</div>
 				)

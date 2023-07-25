@@ -2,7 +2,7 @@
 
 import React, {useState, useEffect, useRef, MutableRefObject} from "react";
 import "./game.css";
-import ButtonDBG from "../DevTools/button/btn_dbg";
+import ButtonDBG from "@/components/(ben_proto)/DevTools/button/btn_dbg";
 
 interface playerScoreboard {
 	playerId: number;

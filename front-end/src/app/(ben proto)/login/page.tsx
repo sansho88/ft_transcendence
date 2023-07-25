@@ -4,8 +4,10 @@ import React, {useState, useEffect, useContext} from "react";
 import axios from "axios";
 import {useRouter} from "next/navigation";
 import {OriginContext} from "@/context/globalContext";
-import { POD } from "@/types/types";
+import * as POD from "@/shared/types";
 import {LoggedContext, UserContext} from "@/context/globalContext";
+
+
 
 enum EStepLogin {
 	enterUsername,
@@ -19,7 +21,7 @@ export default function Page() {
 	const originApi = useContext<POD.IOriginNetwork>(OriginContext).apiDOM;
 	const {userContext, setUserContext} = useContext(UserContext);
 	
-	const { setLogged} = useContext(LoggedContext);
+	const { setLogged } = useContext(LoggedContext);
 	const [isLogged, setIsLogged] = useState<boolean | null>(null);
 	
 	const [isLoading, setIsLoading] = useState(false);
@@ -39,6 +41,7 @@ export default function Page() {
 
 	useEffect(() => {
 		if (username) {
+			console.log('username =' + username)
 			axios
 				.get(`${originApi}/api/users/login/${username}`)
 				.then((response) => {
@@ -69,8 +72,8 @@ export default function Page() {
 			password: pass,
 			avatar_path: "base.png",
 			status: 1,
-			token_2FA: pass, //TODO: switch dans reel pass
-			has_2FA: false,
+			token_2fa: pass, //TODO: switch dans reel pass
+			has_2fa: false,
 		};
 
 		if (userReponse) {
@@ -86,7 +89,7 @@ export default function Page() {
 			axios
 				.post(`${originApi}/api/users/login`, {
 					username: user.login,
-					password: user.token_2FA,
+					password: user.token_2fa,
 				})
 				.then((reponse) => {
 					if (reponse.status === 201) {setIsLogged(true); setLogged(true); setUserContext(user);}
@@ -118,15 +121,10 @@ export default function Page() {
 		}
 	}, [isLogged]);
 
+function step1() {
 	return (
-		<>
-			<div className="flex justify-center p-5 font-semibold text-xl">
-				PROTOTYPE - LOGIN PAGE
-			</div>
-			<div className="flex flex-col items-center justify-center p-6">
-				{stepLogin === EStepLogin.enterUsername ? (
-					<>
-						<input
+	<>
+		<input
 							type="text"
 							value={usernameInput}
 							onKeyDown={(e) => {
@@ -141,6 +139,34 @@ export default function Page() {
 						<button onClick={() => setUsername(usernameInput.trim().toString())} className="ml-5">
 							USERNAME
 						</button>
+		</>)
+}
+
+
+	return (
+		<>
+			<div className="flex justify-center p-5 font-semibold text-xl">
+				PROTOTYPE - LOGIN PAGE
+			</div>
+			<div className="flex flex-col items-center justify-center p-6">
+				{stepLogin === EStepLogin.enterUsername ? (
+					<>
+					{step1()}
+						{/* <input
+							type="text"
+							value={usernameInput}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									setUsername(usernameInput.trim().toString());
+									setStepLogin(EStepLogin.enterPassword);
+								}
+							}}
+							onChange={(e) => setUsernameInput(e.target.value)}
+							className="bg-neutral-800 text-red-500 flex-grow rounded-lg h-8 p-4"
+						/>
+						<button onClick={() => setUsername(usernameInput.trim().toString())} className="ml-5">
+							USERNAME
+						</button> */}
 					</>
 				) : (
 					<>

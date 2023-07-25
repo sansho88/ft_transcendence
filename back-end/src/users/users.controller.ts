@@ -33,13 +33,9 @@ export class UsersController {
 		summary: 'Create a new user, renvoi en reponse obj User complet si OK',
 	})
 	@ApiBody({ type: CreateUserDto })
-	@ApiResponse({
-		status: 201,
-		description: 'User created successfully',
-		type: User,
-	})
+	@ApiResponse({status: 201,description: 'User created successfully',type: User,})
 	@ApiResponse({ status: 409, description: 'User already exists' })
-	create(@Body() createUserDto: User): Promise<User | undefined> {
+	create(@Body() createUserDto: Partial<User>): Promise<User | undefined> {
 		return this.userService.create(createUserDto);
 	}
 

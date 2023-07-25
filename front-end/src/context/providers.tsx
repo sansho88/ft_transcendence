@@ -1,7 +1,7 @@
 "use client";
 
 import {createContext, useRef, useState} from "react";
-import {IUser} from "../interfaces/userType";
+import {IUser} from "@/shared/types";
 import {
 	ThemeContext,
 	SocketContext,
@@ -12,7 +12,7 @@ import {
 } from "@/context/globalContext";
 import { IOriginNetwork } from "../shared/types";
 import { io, Socket } from "socket.io-client";
-import websocketConnect from "@/api/websocket";
+import websocketConnect from "@/websocket/websocket";
 
 const originDefault: IOriginNetwork = {
 	domain: 'http://localhost',

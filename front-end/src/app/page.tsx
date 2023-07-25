@@ -1,14 +1,20 @@
 'use client';
 import Image from 'next/image'
-import * as React from "react";
+import React,{useContext, useEffect} from "react";
 import Button from "../components/CustomButtonComponent"
 import Profile from "../components/ProfileComponent"
 import Stats from "../components/StatsComponent"
 import { preloadFont } from "next/dist/server/app-render/rsc/preloads";
-import { POD, PODSQL } from '@/types/types'
+import * as POD from '@/shared/types'
+import { UserContext, LoggedContext } from '@/context/globalContext';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
+	preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
+	const { logged, setLogged } = useContext(LoggedContext);
+	const {userContext, setUserContext} = useContext(UserContext);
+	const router = useRouter();
+	
     enum Colors {
         "grey",  
         "green",
@@ -21,14 +27,18 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
     }
 
 
-    const [isLogged, setLog] = React.useState(false);
+		useEffect(() => {
+			if(!logged)
+				router.push('/auth')
+		}, [logged])
+    // const [logged, setLogged] = React.useState(false);
     const [userStatus, setUserStatus] = React.useState(POD.EStatus.Online);
 
     let userNickName : string = "NickTaMer";
 
 
     function handleLogin() {
-        setLog(true);
+        setLogged(true);
         console.log("LOGGED BIM!");
     }
 
@@ -45,7 +55,7 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
     }
 
   function login(){
-    if (!isLogged)
+    if (!logged)
       return (
             <button type="button" onClick={handleLogin} className={"button-login"}>
               <span className="text">LOGIN2</span></button>
@@ -67,20 +77,19 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
     )
   }
 
-  if (!isLogged)
+  if (!logged)
     return (
-        <>
-            <Header/>
-        <div className="main-background">
-          <div className="welcome">
-            <div className="welcome-msg">WELCOME TO</div>
-            {/*<div className="width: 788px; height: 130px; left: 0px; top: 24px; position: absolute; justify-content: center; align-items: center; display: inline-flex">*/}
-              <div className="welcome-title">PONG POD! {login()}</div>
-
-            </div>
-        </div>
-     </>
-    )
+			<>
+				<Header />
+				<div className="main-background">
+					<div className="welcome">
+						<div className="welcome-msg">WELCOME TO</div>
+						{/*<div className="width: 788px; height: 130px; left: 0px; top: 24px; position: absolute; justify-content: center; align-items: center; display: inline-flex">*/}
+						<div className="welcome-title">PONG POD! {login()}</div>
+					</div>
+				</div>
+			</>
+		);
   else
     return (
         <>
@@ -94,7 +103,7 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
               </menu>
           </div>*/}
 
-          <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"lelogin"} nickname={userNickName}
+          <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={userContext?.login} nickname={userContext?.nickname}
                    status={POD.EStatus[userStatus]} statusColor={StatusColor.get(userStatus)} isEditable={true}>
               <p style={{paddingBottom: "1vh"}}><Stats level={42} victories={112} defeats={24} rank={1}/></p>
               <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>

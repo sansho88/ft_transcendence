@@ -3,7 +3,7 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import './game.css'
-import ButtonDBG from '../../components/DevTools/button/btn_dbg';
+import ButtonDBG from '@/components/(ben_proto)/DevTools/button/btn_dbg';
 
 interface playerScoreboard {
 	playerId: number;
@@ -72,7 +72,7 @@ export default function Page() {
 
 
 	return (
-		<main className=" bg-blue-app min-h-screen py-[13vw]">
+		<main className=" bg-blue-app min-h-screen py-[13vw] flex justify-center items-center">
 			<section className="flex justify-center ">
 				<ButtonDBG param={{f: () => addGoal("left"), text: "ADD GOAL P1"}} />
 				<div

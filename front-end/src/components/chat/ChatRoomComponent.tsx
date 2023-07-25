@@ -108,10 +108,10 @@ export default function WebsocketClient({className, classNameBlockMessage}: {cla
 					nickname: userContext?.login,
 					avatar_path: "string",
 					status: 1,
-					token_2FA: "string",
-					has_2FA: false,
+					token_2fa: "string",
+					has_2fa: false,
 				},
-				// clientId: userContext?.Id_USERS,
+				// clientId: userContext?.id_user,
 				// clientPsedo: userContext.login,
 				message: msg,
 			};

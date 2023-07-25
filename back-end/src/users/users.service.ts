@@ -5,7 +5,6 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import { IUser } from './type/user.type';
 import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
@@ -32,13 +31,19 @@ export class UserService {
 		}
 	}
 
-	async create(user: IUser): Promise<User | undefined> {
+	async create(user: Partial<User>): Promise<User | undefined> {
 		// console.log(user.login +  '\navatar path: ' + user.avatar_path + '\npassword: ' + user.token_2fa);
 		const existingUser = await this.findByUsername(user.login);
 		if (existingUser) {
 			throw new HttpException('login is already taken', HttpStatus.CONFLICT);
 		}
 		const newUser = this.userRepository.create(user);
+		if(!user.avatar_path)
+			newUser.avatar_path = '';
+		if (!user.nickname)
+			newUser.nickname = user.login;
+		if(!user.token_2fa)
+			newUser.token_2fa = 'token2fa';
 		newUser.status = 1;
 		newUser.has_2fa = false;
 		// console.log('newUserPass = ' + newUser.token_2fa);
