@@ -12,10 +12,7 @@ services:
     volumes:
       - ./front-end/src:/usr/src/app/front-end/src
       - ./front-end/public:/usr/src/app/front-end/public
-<<<<<<< HEAD
-=======
       - ./shared:/usr/src/app/shared
->>>>>>> origin/beta
     ports:
       - "3000:3000"
     networks:
