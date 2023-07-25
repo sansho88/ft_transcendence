@@ -1,6 +1,13 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Button from "./CustomButtonComponent"
+import axios from "axios";
 
+
+enum Colors {
+    "grey",
+    "green",
+    "gold"
+}
 
 interface MatchProps {
     opponent1: string;
@@ -10,38 +17,95 @@ interface MatchProps {
     date: string;
     id: bigint;
 }
-interface ProfileProps {
-    avatar: string;
-    login: string;
-    nickname: string;
-    status: string;
-    statusColor?: string;
-    isEditable: boolean;
+export enum EStatus {
+    Offline,
+    Online,
+    InGame
 }
 
-const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nickname, status, statusColor, isEditable})=>{
+export interface IUser {
+    Id_USERS?: number;
+    login: string;
+    nickname: string;
+    avatar_path: string;
+    status: number;
+    token_2FA: string;
+    has_2FA: boolean;
+}
 
 
-    const [modifiedNick, setText] = useState<string>(nickname); // Initialisez avec une valeur initiale vide ou une valeur existante si nécessaire
+
+const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, login, status, isEditable})=>{
+
+    const [modifiedNick, setNickText] = useState<string>(nickname);
     const [editMode, setEditMode] = useState(false);
-    const [errorMsg, setErrMsg] = useState("");
-    const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const [nickErrorMsg, setNickErrMsg] = useState("");
+    const [userStatus, setUserStatus] = React.useState(EStatus.Online);
+
+
+    let StatusColor = new Map<number, string>();
+
+    for (let i: number = 0; i < 3; i++) {
+        StatusColor.set(i, Colors[i]);
+    }
+    function handleUserStatus() { //todo: gestion dynamique avec le serveur et front
+
+        setUserStatus(userStatus === EStatus.InGame ? EStatus.Online : EStatus.InGame);
+        console.log(`User Status: ${userStatus}; statusColor ${StatusColor.get(userStatus)}`);
+    }
+
+    function getEnumNameByIndex(enumObj: any, index: number): string | undefined { //useful for userStatus
+        const enumKeys = Object.keys(enumObj).filter((key) => typeof enumObj[key] === 'number');
+        const enumValues = enumKeys.map((key) => enumObj[key]);
+
+        if (enumValues.includes(index)) {
+            return enumKeys[enumValues.indexOf(index)];
+        }
+
+        return undefined;
+    }
+    const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => { //updated for each character
             const value = event.target.value;
-            setText(event.target.value);
+            setNickText(event.target.value);
 
         if (value.length < 2 || value.length > 12 || !/^[A-Za-z0-9_]+$/.test(value)) {
-            setErrMsg("Length: 2 => 12 & Alphanumerics only");
+            setNickErrMsg("Length: 2 => 12 & Alphanumerics only");
         } else {
-            setErrMsg("");
+            setNickErrMsg("");
         }
     };
+
+
+    useEffect(() => {
+        if (modifiedNick != nickname && !editMode)
+            axios.get("http://localhost:8000/api/users/2")
+                .then((response) => {
+                    const tmpNick = response.data.nickname;
+                    setNickText(tmpNick);
+                })
+                .catch((e) => {
+                    console.error('error:' + e.toString());
+                });
+    });
+
+
 
     const turnOnEditMode = () => {
         setEditMode(true);
     }
     const turnOffEditMode = () => {
-        if (!errorMsg.length)
-            setEditMode(false);
+        if (!nickErrorMsg.length)
+        {
+            axios.put(`http://localhost:8000/api/users/2`, {nickname: modifiedNick})
+                .then((response) => {
+                    console.log(response.data);
+                    setEditMode(false);
+                })
+                .catch((error) => {
+                    console.error(error);
+                })
+
+        }
     }
 
     const editedNick = () => {
@@ -57,7 +121,7 @@ const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nic
                     padding: "6px"
                 }}/>
                 <span style={{marginLeft: "4px"}}><Button image={"/floppy.svg"} onClick={turnOffEditMode} alt={"Save Button"}/></span>
-                <p style={{fontSize: "12px", color: "red"}}>{errorMsg}</p>
+                <p style={{fontSize: "12px", color: "red"}}>{nickErrorMsg}</p>
             </div>);
         }
         else
@@ -73,13 +137,15 @@ const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nic
 
             )
     }
+
+   /* status={AllStatus[userStatus]} statusColor={StatusColor.get(userStatus)}*/
     return (
         <>
             <div className={className}>
-                <img className={"avatar"} src={avatar} alt="Avatar" style={{
+                <img className={"avatar"} src={avatar_path} alt="Avatar" style={{
                     borderWidth: "2px",
-                    borderColor: statusColor,
-                    boxShadow: `1px 2px 5px ${statusColor}`,
+                    borderColor: StatusColor.get(userStatus),
+                    boxShadow: `1px 2px 5px ${StatusColor.get(userStatus)}`,
                     transition: "1000ms",
                     borderRadius: "8px",
                     width: "5vw",
@@ -94,7 +160,7 @@ const Profile: React.FC<ProfileProps> = ({children, className, avatar,login, nic
                     <h2 id={"login"}>{login}</h2>
                     {editedNick()}
 
-                    <p id={"status"} style={{color:statusColor}}>{status}</p>
+                    <p id={"status"} style={{color:StatusColor.get(userStatus)}}>{getEnumNameByIndex(EStatus, status) }</p>
                 </div>
                 <div id={"children"} style={{marginLeft: "4px"}}>{children}</div>
             </div>
