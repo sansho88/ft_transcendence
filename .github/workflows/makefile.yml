@@ -2,7 +2,7 @@ name: "Green = GG WP; Red = Tu peux retry!"
 
 on:
   push:
-    branches: [ "main", "beta" ]
+    branches: [ "main", "beta", "testW" ]
   pull_request:
     branches: [ "main", "beta" ]
 
@@ -19,7 +19,11 @@ jobs:
       
     - name: show hosts
       run: cat /etc/hosts
-      
+
+    - name: Sleep for 30 seconds
+      run: sleep 30s
+      shell: bash
+
     - name: Test connexion au front-end
       run: curl 127.0.0.1:3000
       
