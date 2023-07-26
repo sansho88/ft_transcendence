@@ -1,0 +1,9 @@
+.boxgame {
+	border-radius: 24px;
+	background: #01FDFF;
+	box-shadow: 5px 5px 99px 0px rgba(1, 253, 255, 0.80);
+
+	width: 797.54px;
+	height: 564px;
+	flex-shrink: 0;
+}

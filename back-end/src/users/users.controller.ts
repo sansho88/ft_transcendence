@@ -33,23 +33,20 @@ export class UsersController {
 		summary: 'Create a new user, renvoi en reponse obj User complet si OK',
 	})
 	@ApiBody({ type: CreateUserDto })
-	@ApiResponse({
-		status: 201,
-		description: 'User created successfully',
-		type: User,
-	})
+	@ApiResponse({status: 201,description: 'User created successfully',type: User,})
 	@ApiResponse({ status: 409, description: 'User already exists' })
-	create(@Body() createUserDto: User): Promise<User | undefined> {
+	create(@Body() createUserDto: Partial<User>): Promise<User | undefined> {
 		return this.userService.create(createUserDto);
 	}
 
 	//TODO: juste pour session avec mdp, a supprimer une fois auth by API42
-	@ApiExcludeEndpoint()
-	@ApiTags('LOGIN SYSTEM /DEV ONLY')
+	// @ApiExcludeEndpoint()
 	@Post('login')
+	// @ApiTags('LOGIN SYSTEM /DEV ONLY')
+	// @ApiExcludeEndpoint()
 	@ApiOperation({
 		summary:
-			"temporaire/ au moment du loggin avec mot de passe, sert a verif le matching des mots de passe pour logger ou non l'user",
+			"ONLY_DEV temp/ check si combo login/password is OK",
 	})
 	@ApiBody({ type: LoginUserDto })
 	@ApiResponse({ status: 401, description: 'Invalid password' })
@@ -60,15 +57,15 @@ export class UsersController {
 		return this.userService.comparePassword(loginUserDto);
 	}
 
-	@ApiOperation({ summary: 'Get all users' })
 	@Get()
+	@ApiOperation({ summary: 'Get all users' })
 	@ApiResponse({ status: 200, description: 'All users', type: [User] })
 	async findAll() {
 		return this.userService.findAll();
 	}
 
-	@ApiOperation({ summary: 'Get one user by id' })
 	@Get(':id')
+	@ApiOperation({ summary: 'Get one user by id' })
 	@ApiParam({ name: 'id', type: 'string' })
 	async findOneById(@Param('id') id: string): Promise<User | undefined> {
 		const user = await this.userService.findOne(parseInt(id));
@@ -78,19 +75,23 @@ export class UsersController {
 		return user;
 	}
 
-	// @Get(':login')
-	// async findOneByUsername(
-	// 	@Param('login') login: string,
-	// ): Promise<User | undefined> {
-	// 	const user = await this.userService.findByUsername(login);
-	// 	if (!user) {
-	// 		throw new NotFoundException('User not found');
-	// 	}
-	// 	return user;
-	// }
+	@ApiOperation({ summary: 'Get one user by login' })
+	@Get('/login/:login')
+	@ApiParam({ name: 'login', type: 'string' })
+	@ApiResponse({ status: 200, description: 'User found', type: User })
+	@ApiResponse({ status: 404, description: 'User not found' })
+	async findOneByUsername(
+		@Param('login') login: string,
+	): Promise<User | undefined> {
+		const user = await this.userService.findByUsername(login);
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
+		return user;
+	}
 
-	@ApiOperation({ summary: 'Update one user by id' })
 	@Put(':id')
+	@ApiOperation({ summary: 'Update one user by id' })
 	@ApiParam({ name: 'id', type: 'string' })
 	@ApiBody({ type: UpdateUserDto })
 	@ApiResponse({ status: 200, description: 'User updated successfully' })
@@ -111,8 +112,8 @@ export class UsersController {
 		return { message: 'User updated successfully' };
 	}
 
-	@ApiOperation({ summary: 'Delete one user by id' })
 	@Delete(':id')
+	@ApiOperation({ summary: 'Delete one user by id' })
 	@ApiParam({ name: 'id', type: 'string' })
 	@ApiResponse({ status: 200, description: 'User removed successfully' })
 	@ApiResponse({ status: 404, description: 'User not found' })
@@ -126,8 +127,8 @@ export class UsersController {
 		return { message: `User ${tmp} (id: ${id}) removed successfully` };
 	}
 
-	@ApiOperation({ summary: 'Delete all users' })
 	@Delete()
+	@ApiOperation({ summary: 'Delete all users' })
 	@ApiResponse({ status: 200, description: 'All users removed successfully' })
 	async removeAll(): Promise<{ message: string }> {
 		await this.userService.removeAll();

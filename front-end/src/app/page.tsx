@@ -1,18 +1,39 @@
 'use client';
 import Image from 'next/image'
-import * as React from "react";
+import React,{useContext, useEffect} from "react";
 import Button from "../components/CustomButtonComponent"
 import Profile, {EStatus} from "../components/ProfileComponent"
 import Stats from "../components/StatsComponent"
-import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
-import axios from "axios";
-import {useEffect} from "react";
+
+import { preloadFont } from "next/dist/server/app-render/rsc/preloads";
+import * as POD from '@/shared/types'
+import { UserContext, LoggedContext } from '@/context/globalContext';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-    preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
+	preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
+	const { isLogged, setIsLogged } = useContext(LoggedContext);
+	const {userContext, setUserContext} = useContext(UserContext);
+	const router = useRouter();
+	
+    enum Colors {
+        "grey",  
+        "green",
+        "gold"
+    }
+    let StatusColor = new Map<number, string>();
 
-    const [isLogged, setLog] = React.useState(false);
+    for (let i: number = 0; i < 3; i++) {
+        StatusColor.set(i, Colors[i]);
+    }
 
+
+		useEffect(() => {
+			if(!isLogged)
+				router.push('/auth')
+		}, [isLogged])
+ 
+   
     const [userLogin, setUserLogin] = React.useState( "lelogin");
     const [userNickName, setUserNickName] = React.useState( "Nick");
     const [userStatus, setUserStatus] = React.useState(EStatus.Online);
@@ -44,6 +65,7 @@ export default function Home() {
             )
         else
             return hello("Sansho");
+
     }
 
     function hello(name: string) {
@@ -58,6 +80,7 @@ export default function Home() {
             </div>
         )
     }
+
 
     if (!isLogged)
         return (
@@ -102,7 +125,5 @@ export default function Home() {
 
                 </main>
             </>
-
         )
-
 }

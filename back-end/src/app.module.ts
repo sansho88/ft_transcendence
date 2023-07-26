@@ -22,7 +22,7 @@ import { WebsocketGateway } from './websocket/websocket.gateway';
 			password: process.env.POSTGRES_PASSWORD,
 			database: process.env.POSTGRES_DB,
 			entities: [User],
-			synchronize: true, // true -> will create the Table on db if class not there
+			synchronize: false, // true -> will create the Table on db if class not there
 		}),
 		UsersModule,
 	],

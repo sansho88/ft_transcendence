@@ -17,6 +17,7 @@ interface MatchProps {
     date: string;
     id: bigint;
 }
+
 export enum EStatus {
     Offline,
     Online,
@@ -31,7 +32,9 @@ export interface IUser {
     status: number;
     token_2FA: string;
     has_2FA: boolean;
+
 }
+
 
 
 
@@ -65,6 +68,7 @@ const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, l
         return undefined;
     }
     const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => { //updated for each character
+
             const value = event.target.value;
             setNickText(event.target.value);
 
@@ -74,7 +78,6 @@ const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, l
             setNickErrMsg("");
         }
     };
-
 
     useEffect(() => {
         if (modifiedNick != nickname && !editMode)
@@ -87,8 +90,6 @@ const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, l
                     console.error('error:' + e.toString());
                 });
     });
-
-
 
     const turnOnEditMode = () => {
         setEditMode(true);
