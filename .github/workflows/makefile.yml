@@ -2,7 +2,7 @@ name: "Green = GG WP; Red = Tu peux retry!"
 
 on:
   push:
-    branches: [ "main", "beta", "testW" ]
+    branches: [ "main", "beta" ]
   pull_request:
     branches: [ "main", "beta" ]
   workflow_dispatch:
