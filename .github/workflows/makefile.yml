@@ -5,6 +5,11 @@ on:
     branches: [ "main", "beta", "testW" ]
   pull_request:
     branches: [ "main", "beta" ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run workflow on'
+        required: true
 
 jobs:
   build:
