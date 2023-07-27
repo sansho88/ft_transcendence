@@ -12,7 +12,6 @@ services:
     volumes:
       - ./front-end/src:/usr/src/app/front-end/src
       - ./front-end/public:/usr/src/app/front-end/public
-      - ./shared:/usr/src/app/shared
     ports:
       - "3000:3000"
     networks:
@@ -30,7 +29,6 @@ services:
     volumes:
       - ./back-end/src:/usr/src/app/src
       - ./front-end/src/shared/:/usr/src/app/shared
-      - ./shared:/usr/src/app/shared
     ports:
       - "8000:8000"
     networks:
