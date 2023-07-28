@@ -1,9 +1,8 @@
 'use client'
 
-import {ChangeEvent, useContext, useEffect, useState} from 'react'
+import {useContext, useEffect, useState} from 'react'
 import  InputPod  from '@/components/(ben_proto)/login/InputPod'
 import * as POD  from "@/shared/types";
-import {deleteApi, getApi} from '@/components/api/ApiReq'
 import * as apiReq from '@/components/api/ApiReq'
 import * as ClipLoader from 'react-spinners'
 
@@ -11,6 +10,7 @@ import * as ClipLoader from 'react-spinners'
 import './auth.css'
 import { useRouter } from 'next/navigation';
 import { UserContext, LoggedContext } from '@/context/globalContext';
+import axios from "axios";
 // import { Button } from '@/components/CustomButtonComponent'
 
 //FIXME: le re logging ne fonctionne pas bien, ne recupere les infos pour userContext = donner vide
@@ -37,7 +37,6 @@ export default function Auth({className}: {className?: string}) {
 	
 	const {userContext, setUserContext} = useContext(UserContext);
 	const { setLogged } = useContext(LoggedContext);
-	// const [isLogged, setIsLogged] = useState<boolean | null>(null);
 
 
 
@@ -51,8 +50,10 @@ export default function Auth({className}: {className?: string}) {
 	////////////////////////////////////////////////////////
 	////////////////// GESTION DES INPUTS //////////////////
 	////////////////////////////////////////////////////////
-	const [loginInput, setLoginInput] = useState<string>('');
-	const [login, setLogin] = useState<string>('');
+	const lastUserLogin = localStorage.getItem("login");
+	const lastUserPW = localStorage.getItem("password");
+	const [loginInput, setLoginInput] = useState<string>(lastUserLogin == null ? '' : lastUserLogin);
+	const [login, setLogin] = useState<string>(lastUserPW == null ? '' : lastUserPW);
 	
 
 
@@ -174,7 +175,7 @@ export default function Auth({className}: {className?: string}) {
 
 	const LoggedFailed = () => {
 		// const [showMessage, setShowMessage] = useState(true);
-		const router = useRouter();
+		//const router = useRouter();
 		// setLogin(''); setLoginInput('');
 		setPassword(''); setPasswordInput('');
 		setBouttonText(textInviteModeButton)
@@ -258,13 +259,15 @@ useEffect(() => {
 					const req = await apiReq.utilsCheck.isPasswordMatch(login, password);
 					if (req)
 					{
-						apiReq.getApi.getUserByLogin(login)
+						axios.get(`http://localhost:8000/api/users/login/${login}`)
 						.then((res) => {
-							const newUser: POD.IUser = res
+							const newUser: POD.IUser = res.data;
 							setUserContext(newUser);
 							setLogged(true);
 							setCurrentStepLogin(EStepLogin.successLogin);
-							console.log('your are now logged in')
+							localStorage.setItem('login', newUser.login);
+							localStorage.setItem('pass', password);
+							console.log('you are now logged in')
 						})
 						.catch((e)=> {console.log(e); return;})
 						return;
@@ -272,7 +275,7 @@ useEffect(() => {
 					else{
 						setCurrentStepLogin(EStepLogin.failLogin);
 						nextStepCheck()
-						console.log('your not logged, wrong password')
+						console.log('wrong password')
 					}
 				}
 				else {
@@ -284,8 +287,8 @@ useEffect(() => {
 							const newUser: POD.IUser = res.data
 							console.log(`res 201, newUser= ${newUser.login} | pass hashed: ${newUser.password}`);
 							setUserContext(newUser);
-							// localStorage.setItem('login', newUser.login);
-							// localStorage.setItem('pass', newUser.password); //cookie ?
+							localStorage.setItem('login', newUser.login);
+							localStorage.setItem('pass', password); //cookie ?
 
 							setLogged(true);
 							setCurrentStepLogin(EStepLogin.successLogin);
@@ -306,6 +309,7 @@ useEffect(() => {
 				setCurrentStepLogin(EStepLogin.enterLogin);
 				break;
 			case EStepLogin.enterLogin:
+
 				if(loginInput.trim().length === 0){
 					console.log('Login is empty'); 
 					return;

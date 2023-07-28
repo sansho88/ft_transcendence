@@ -1,13 +1,8 @@
 'use client'
 import Link from 'next/link'
-import React, {useState, createContext, useContext, useEffect, } from 'react'
+import React, {useState, useContext, useEffect, } from 'react'
 import {UserContext, LoggedContext} from "@/context/globalContext";
 import { useRouter } from 'next/navigation';
-
-import * as apiReq from '@/components/api/ApiReq'
-import { IUser } from '@/shared/types';
-
-import { Fascinate } from 'next/font/google';
 
 
 
@@ -48,7 +43,7 @@ useEffect(() => {
 				<Link href="/proto/chat">CHATROOM</Link>
 				<Link href={`/profile/${userContext?.login}`}>PROFILE</Link>
 				{infoUser}
-				<button onClick={() => setLogged(false)}> DISCONNECT </button>
+				<button onClick={() => {setLogged(false);localStorage.removeItem("login");}}> DISCONNECT </button>
 			</>
 		)
 	}

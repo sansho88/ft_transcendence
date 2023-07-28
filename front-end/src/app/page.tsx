@@ -6,13 +6,13 @@ import Profile, {EStatus} from "../components/ProfileComponent"
 import Stats from "../components/StatsComponent"
 
 import { preloadFont } from "next/dist/server/app-render/rsc/preloads";
-import * as POD from '@/shared/types'
 import { UserContext, LoggedContext } from '@/context/globalContext';
 import { useRouter } from 'next/navigation';
+import axios from "axios";
 
 export default function Home() {
 	preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
-	const { isLogged, setIsLogged } = useContext(LoggedContext);
+	const { logged, setLogged } = useContext(LoggedContext);
 	const {userContext, setUserContext} = useContext(UserContext);
 	const router = useRouter();
 	
@@ -29,9 +29,15 @@ export default function Home() {
 
 
 		useEffect(() => {
-			if(!isLogged)
+            console.log("Main Page: isLogged? " + logged);
+            console.log("Main Page: localStorageLogin? " + localStorage.getItem("login"));
+			if(!logged && !localStorage.getItem("login"))
 				router.push('/auth')
-		}, [isLogged])
+            else
+            {
+                console.log("ID USER: " + userContext?.id_user);
+            }
+		}, [logged])
  
    
     const [userLogin, setUserLogin] = React.useState( "lelogin");
@@ -39,13 +45,13 @@ export default function Home() {
     const [userStatus, setUserStatus] = React.useState(EStatus.Online);
 
     function handleLogin() {
-        setLog(true);
+       // setLog(true);
         console.log("LOGGED REALLY!");
     }
 
     useEffect(() => {
-        if (isLogged)
-            axios.get("http://localhost:8000/api/users/2")
+        if (logged)
+            axios.get(`http://localhost:8000/api/users/${userContext?.id_user}`)
                 .then((response) => {
                     console.log('response:' + response.data.nickname);
                     setUserLogin(response.data.login);
@@ -54,10 +60,10 @@ export default function Home() {
                 .catch((e) => {
                     console.error('error:' + e.toString());
                 });
-    });
+    }, [logged]);
 
     function login() {
-        if (!isLogged)
+        if (!logged)
             return (
                 <button type="button" onClick={handleLogin} className={"button-login"}>
 
@@ -82,24 +88,13 @@ export default function Home() {
     }
 
 
-    if (!isLogged)
-        return (
-            <>
-                <div className="main-background">
-                    <div className="welcome">
-                        <div className="welcome-msg">WELCOME TO</div>
-                        {/*<div className="width: 788px; height: 130px; left: 0px; top: 24px; position: absolute; justify-content: center; align-items: center; display: inline-flex">*/}
-                        <div className="welcome-title">PONG POD! {login()}</div>
-
-                    </div>
-                </div>
-            </>
-        )
+    if(!logged /*&& !localStorage.getItem("login")*/)
+        router.push('/auth')
     else
         return (
             <>
                 <main className="main-background">
-                    <Profile className={"main-user-profile"} nickname={userNickName} login={userLogin} Id_USERS={2} status={1} avatar_path={"/tests/avatar.jpg"} isEditable={true}>
+                    <Profile className={"main-user-profile"} nickname={userNickName} login={userLogin} status={1} avatar_path={"/tests/avatar.jpg"} isEditable={true}>
 
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
                         <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>

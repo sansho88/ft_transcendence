@@ -1,5 +1,5 @@
 import {createContext} from 'react'
-import { IUser, IOriginNetwork } from '../shared/types' 
+import { IUser, IOriginNetwork } from '@/shared/types'
 import { Socket } from 'socket.io-client';
 
 const originDefault: IOriginNetwork = {
@@ -26,4 +26,4 @@ export const ThemeContext = createContext<string>("light");
 export const OriginContext = createContext<IOriginNetwork>(originDefault);
 export const SocketContext = createContext<Socket | null>(null); //WIP
 export const UserContext = createContext<UserContextType>({ userContext: undefined, setUserContext: ()=> {}});
-export const LoggedContext = createContext<LoggedContextType>({logged: false, setLogged: ()=> {}});
+export const LoggedContext = createContext<LoggedContextType>({logged: localStorage.getItem("login") != null, setLogged: ()=> {}});

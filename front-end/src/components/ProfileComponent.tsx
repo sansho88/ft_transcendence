@@ -81,7 +81,7 @@ const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, l
 
     useEffect(() => {
         if (modifiedNick != nickname && !editMode)
-            axios.get("http://localhost:8000/api/users/2")
+            axios.get(`http://localhost:8000/api/users/login/${login}`)
                 .then((response) => {
                     const tmpNick = response.data.nickname;
                     setNickText(tmpNick);
@@ -95,16 +95,20 @@ const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, l
         setEditMode(true);
     }
     const turnOffEditMode = () => {
+
         if (!nickErrorMsg.length)
         {
-            axios.put(`http://localhost:8000/api/users/2`, {nickname: modifiedNick})
-                .then((response) => {
-                    console.log(response.data);
-                    setEditMode(false);
-                })
-                .catch((error) => {
-                    console.error(error);
-                })
+            axios.get(`http://localhost:8000/api/users/login/${login}`). //temporaire en attendant d'avoir un put par login
+            then((user) => {
+                axios.put(`http://localhost:8000/api/users/${user.data.id_user}`, {nickname: modifiedNick})
+                    .then((response) => {
+                        console.log(response.data);
+                        setEditMode(false);
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    })
+            })
 
         }
     }
