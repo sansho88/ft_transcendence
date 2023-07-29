@@ -1,58 +1,6 @@
-export enum EStatus {
-	Offline,
-	Online,
-	InGame,
-}
-
-// export interface IUser { //utiliser plutot PODSQL.User
-// 	id_user?: number;
-// 	login?: string;
-// 	nickname?: string;
-// 	password: string;
-// 	avatar_path: string;
-// 	status: number;
-// 	token_2fa: string;
-// 	has_2fa: boolean;
-// }
-
-export enum EStepLogin {
-	start,
-	enterLogin,
-	loginIsEnter,
-	enterPassword,
-	passwordIsEnter,
-	tryLogin,
-	successLogin,
-	errorLogin,
-}
-
-export interface IChatMessage {
-	user: IUser;
-	message: string;
-}
-
-export interface IOriginNetwork {
-	domain: string;
-	apiPort: number | string;
-	appPort: number | string;
-	apiDOM?: string;
-	appDOM?: string;
-}
-
-export interface IInput {
-	type: string;
-	value: string;
-	onKeyDown: any;
-	onChange: any;
-}
-
-
-
 // +---------------------------------------------------------------------+
 // |                        SQL TABLE CORRESPONDENCE                     |
 // +---------------------------------------------------------------------+
-
-
 export interface IUser {
   id_user?: number;
   login: string;
@@ -99,11 +47,10 @@ export interface IMute {
 }
 
 export interface IGame {
-  Id_GAME?: number;
+  Id_GAME: number;
   P1_score?: number;
   P2_score?: number;
-  game_type: number;
-  start_date?: Date;
+  start_date: Date;
 }
 
 export interface IMatchmaking {
@@ -147,3 +94,47 @@ export interface IPlay {
   id_user: number;
   Id_GAME: number;
 }
+
+// +---------------------------------------------------------------------+
+// |                           CUSTOM INTERFACE                          |
+// +---------------------------------------------------------------------+
+
+export enum EStatus {
+  Offline,
+  Online,
+  InGame,
+}
+
+export enum EStepLogin {
+  start,
+  enterLogin,
+  loginIsEnter,
+  enterPassword,
+  passwordIsEnter,
+  tryLogin,
+  successLogin,
+  errorLogin,
+}
+
+export interface IChatMessage {
+  user: Partial<IUser>;
+  message: string;
+}
+
+export interface IOriginNetwork {
+  domain: string;
+  apiPort: number | string;
+  appPort: number | string;
+  apiDOM?: string;
+  wsApiDOM?: string;
+  appDOM?: string;
+}
+
+export interface IInput {
+  type: string;
+  value: string;
+  onKeyDown: any;
+  onChange: any;
+}
+
+
