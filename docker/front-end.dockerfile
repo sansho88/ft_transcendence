@@ -8,7 +8,6 @@ WORKDIR /usr/src/app/front-end
 COPY --chown=node:node ./front-end/*.json 							./
 COPY --chown=node:node ./front-end/*.js 								./
 COPY --chown=node:node ./front-end/*.ts 								./
-COPY --chown=node:node ./front-end/*.prettierrc 				./
 
 RUN npm install
 
