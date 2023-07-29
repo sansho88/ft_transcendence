@@ -53,7 +53,6 @@ export class WebsocketGatewayGame
       return console.error('ws/welcomeToGameServer: Bad client or user'); 
     const player: userInfoSocket = {socket: client, user: payload};
     this.serverGame.addPlayerToMatchmaking(player);
-    console.log('helllo');
 		client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
 	}
 

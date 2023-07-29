@@ -148,8 +148,7 @@ export default function Auth({className}: {className?: string}) {
 			<div className="flex flex-col items-center text-center">
       {showMessage && (
         <>
-          <p>Congratulations, you are now logged in!</p>
-          <p>Enjoy playing! </p>
+          <p className=' text-white'>Congratulations, you are now logged in!<br/>Enjoy playing!</p>
           <ClipLoader.PacmanLoader color='#07C3FF' size={30}/>
         </>
       )}

@@ -71,13 +71,13 @@ useEffect(() => {
 			{isHidden ? (
 					<div className='absolute bottom-0 left-[48vw] w-auto rounded-t-xl  px-2 bg-slate-800 opacity-40'>
 						<div className="h-10 flex justify-center items-center space-x-10">
-							<button onClick={() => setIsHidden(false)}> devbar </button>
+							<button onClick={() => setIsHidden(false)} className=' text-white'> devbar </button>
 						</div>
 					</div>
 			) : (
 				<div className={className}>
-					<div className="h-10 flex justify-center items-center space-x-10">
-						<div className=" text-red-500 absolute left-5">Navbar Dev </div>
+					<div className=" text-white h-10 flex justify-center items-center space-x-10">
+						<div className=" text-red-600 absolute left-5">Navbar Dev </div>
 						{logged ? <SubNav /> : <SubNavNotLog />}
 						
 						<button onClick={() => setIsHidden(true)}> ❌ </button>
