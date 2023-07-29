@@ -1,30 +1,39 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { UserEntity } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CredentialEntity } from '../entities/credential.entity';
 
 @Injectable()
 export class UsersService {
 	constructor(
-		@InjectRepository(User)
-		protected usersRepository: Repository<User>,
+		@InjectRepository(UserEntity)
+		private usersRepository: Repository<UserEntity>,
 	) {}
 
 	/**
 	 * Todo: update with new thing in table
 	 */
-	async create(createUserDto: CreateUserDto) {
-		if (createUserDto.username === undefined)
-			createUserDto.username = createUserDto.login;
-		const user = User.create({
-			username: createUserDto.username,
-			login: createUserDto.login,
+	/**
+	 * Create and save the new user
+	 * @param newLogin login of the user
+	 * @param newInvite if true the person is treated not has a member of 42
+	 * @param newCredential his credential
+	 */
+	async create(
+		newLogin: string,
+		newInvite: boolean,
+		newCredential: CredentialEntity,
+	) {
+		const user = UserEntity.create({
+			login: newLogin,
+			nickname: newLogin,
+			Invite: newInvite,
 		});
-		user.friend_list = [];
+		user.credential = newCredential;
 		await user.save();
-		return `User ${user.username} created with login ${user.login} successfully :D`;
+		return;
 	}
 
 	findAll() {
@@ -40,11 +49,9 @@ export class UsersService {
 
 	async update(login: string, updateUser: UpdateUserDto) {
 		const user = await this.usersRepository.findOneBy({ login: login });
-		if (updateUser.username !== undefined) user.username = updateUser.username;
+		if (updateUser.username !== undefined) user.nickname = updateUser.username;
 		if (updateUser.avatar_path !== undefined)
 			user.avatar_path = updateUser.avatar_path;
-		if (updateUser.token_2fa !== undefined)
-			user.token_2fa = updateUser.token_2fa;
 		if (updateUser.status !== undefined) user.status = updateUser.status;
 		await user.save();
 		return 'User updated :D';
@@ -53,4 +60,26 @@ export class UsersService {
 	remove(id: number) {
 		return `This action removes a #${id} user`;
 	}
+	async getCredential(login: string) {
+		const target = await this.usersRepository.findOne({
+			relations: {
+				credential: true,
+			},
+			where: {
+				login: login,
+			},
+		});
+		return target.credential;
+	}
+
+	// async getFriend(target: string) {
+	// 	return await this.usersRepository.find({
+	// 		relations: {
+	// 			friend_list: true,
+	// 		},
+	// 		where: {
+	// 			login: target,
+	// 		},
+	// 	});
+	// }
 }

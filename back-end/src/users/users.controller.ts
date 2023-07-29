@@ -7,18 +7,21 @@ import {
 	Post,
 	Get,
 	Put,
+	UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CurrentUser } from '../auth/indentify.user';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('users')
 export class UsersController {
 	constructor(private readonly usersService: UsersService) {}
 
 	@Post()
-	create(@Body() createUserDto: CreateUserDto) {
-		return this.usersService.create(createUserDto);
+	create() {
+		// return this.usersService.create(createUserDto);
+		return 'USE `/auth/sign` to create a new user';
 	}
 
 	@Get()
@@ -26,7 +29,7 @@ export class UsersController {
 		return this.usersService.findAll();
 	}
 
-	@Get(':login')
+	@Get('/get/:login')
 	findOne(@Param('login') login: string) {
 		return this.usersService.findOne(login).then((result) => {
 			if (!result) {
@@ -49,5 +52,11 @@ export class UsersController {
 	@Delete(':login')
 	remove(@Param('login') login: string) {
 		return this.usersService.remove(+login);
+	}
+
+	@Get('me')
+	@UseGuards(AuthGuard)
+	me(@CurrentUser('login') user) {
+		return this.usersService.findOne(user);
 	}
 }
