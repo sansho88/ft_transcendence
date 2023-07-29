@@ -10,12 +10,15 @@ import { Server, Socket } from 'socket.io';
 import { IChatMessage } from '../interfaces/chatTypes';
 
 interface UserSocket {
-	login: string;
+	username: string;
 	socketID: string;
 }
 
-@WebSocketGateway({ cors: true })
-export class WebsocketGateway
+@WebSocketGateway({
+	cors: true,
+	namespace: '/chat',
+})
+export class WebsocketGatewayChat
 	implements OnGatewayConnection, OnGatewayDisconnect
 {
 	@WebSocketServer()
@@ -25,16 +28,16 @@ export class WebsocketGateway
 	private clients: UserSocket[] = [];
 
 	handleConnection(@ConnectedSocket() client: Socket) {
-		const login = client.handshake.query.login as string;
+		const username = client.handshake.query.username as string;
 		client.join('homeRoom');
 		console.log('NEW CONNEXION CLIENT, id = ' + client.id);
-		this.clients.push({ login, socketID: client.id });
+		this.clients.push({ username, socketID: client.id });
 		this.server
 			.to(client.id)
 			.emit('welcome', 'Bienvenue sur le chat room principal');
 
 		// this.server.to(client.id).emit('getallmsg', this.messages);
-		this.server.to(client.id).emit('getallmsgObj', this.messagesObj);
+		// this.server.to(client.id).emit('getallmsgObj', this.messagesObj);
 	}
 
 	handleDisconnect(client: Socket) {
@@ -42,12 +45,24 @@ export class WebsocketGateway
 		console.log('CLIENT ' + client.id + ' left');
 	}
 
+	@SubscribeMessage('clearMsgs')
+	handleClearMessages(client: Socket, payload: string) {
+    this.messagesObj = [];
+
+	}
 	@SubscribeMessage('message')
 	handleMessage(client: Socket, payload: string) {
 		console.log(client.id + ': ' + payload);
 		this.messages.push(payload);
 		this.server.to(client.id).emit('response', payload);
 		client.emit('hello', 'world');
+	}
+
+	@SubscribeMessage('getAllMsgs')
+	getAllMsgs(client: Socket) {
+		console.log(`${client.id} need all message channel`);
+		console.log(this.messagesObj);
+		this.server.to(client.id).emit('getallmsgObj', this.messagesObj);
 	}
 
 	/**

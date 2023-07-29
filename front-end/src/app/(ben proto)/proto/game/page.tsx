@@ -1,12 +1,29 @@
 "use client";
 
-import React, {useState, useEffect, useRef, MutableRefObject} from "react";
+import React, {useState, useEffect, useRef, MutableRefObject, useContext} from "react";
 import "./game.css";
 import ButtonDBG from "@/components/(ben_proto)/DevTools/button/btn_dbg";
 import Ball from "./ball";
+import * as TGAME from '@/shared/typesGame'
+import * as POD from '@/shared/types'
+import io, {Socket} from "socket.io-client";
+
+import { data } from "autoprefixer";
+import {
+	OriginContext,
+	UserContext,
+	LoggedContext,
+	SocketContextGame,
+} from "@/context/globalContext";
+import { SocketProvider } from "@/context/providers";
+
+
 
 // let windowsWidth = window.innerWidth;
 // let windowsHeight = window.innerHeight;
+const currentDate: Date = new Date;
+
+const gameSession: POD.IGame = {Id_GAME: 1, start_date: currentDate};
 
 interface playerScoreboard {
 	playerId: number;
@@ -43,6 +60,18 @@ function ScoreDisplay({player}: {player: playerScoreboard}) {
 }
 
 export default function Page() {
+  const socketGame = useContext<Socket | null>(SocketContextGame)
+
+  useEffect(() => {
+    if (socketGame && typeof socketGame !== 'string')
+    {
+      socketGame.on('hello', () => {
+        console
+      })
+    }
+
+  }, [])
+
 	const [scoreP1, setScoreP1] = useState(0);
 	const [scoreP2, setScoreP2] = useState(0);
 	const [barPositionP1, setBarPositionP1] = useState(0);
@@ -50,6 +79,9 @@ export default function Page() {
 	const [keysPressed, setKeysPressed] = useState({});
 	const gameDivRef = useRef(null);
 	const barRef = useRef(null);
+
+
+
 
 	function addGoal(position: "left" | "right"): void {
 		if (position === "left") {

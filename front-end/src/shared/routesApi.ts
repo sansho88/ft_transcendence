@@ -21,6 +21,15 @@
 	const routeAdministrate = 	'administrate';
 	const routePlay = 					'play';
 	
+  const routeWsGame =          'game';
+  // const wsRouteChat =         'chat'
+
+  export namespace wsGameRoutes {
+    export const addNewPlayerToServer=() => {return `${routeWsGame}_addPlayerToServer`}
+    export const addPlayerToMatchnaking=() => {return `${routeWsGame}_addPlayerToMatchmaking`}
+  }
+
+
 //bible des routes
 	export namespace strRoutes {
 

@@ -6,7 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import * as process from 'process';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
-import { WebsocketGateway } from './websocket/websocket.gateway';
+import { WebsocketGatewayChat } from './websocket/wsChatProto.gateway';
+import { WebsocketGatewayGame } from './websocket/wsGame.gateway';
+import { ServerGame } from './game/ServerGame';
+// import * as wsGame from './websocket/wsGame.gateway';
 
 @Module({
 	imports: [
@@ -27,7 +30,11 @@ import { WebsocketGateway } from './websocket/websocket.gateway';
 		UsersModule,
 	],
 	controllers: [AppController],
-	providers: [AppService, WebsocketGateway],
-
+	providers: [
+		AppService,
+		WebsocketGatewayChat,
+		WebsocketGatewayGame,
+		ServerGame,
+	],
 })
 export class AppModule {}
