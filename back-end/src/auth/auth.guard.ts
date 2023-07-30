@@ -14,11 +14,9 @@ export class AuthGuard implements CanActivate {
 	constructor(private jwtService: JwtService) {}
 
 	async canActivate(context: ExecutionContext) {
-		console.log(' === IN CANACTIVATE ==== ');
 		const request = context.switchToHttp().getRequest();
 		const token = this.extractTokenFromHeader(request);
 		if (!token) {
-			console.log('NOT TOKEN');
 			throw new UnauthorizedException();
 		}
 		try {
@@ -28,13 +26,11 @@ export class AuthGuard implements CanActivate {
 					secret: process.env.SECRET_KEY,
 				},
 			);
-			console.log(payloadToken);
+			payloadToken.rawPassword = 'NOPE!';
 			request['user'] = payloadToken;
 		} catch {
-			console.log('false catch');
 			throw new UnauthorizedException();
 		}
-		console.log('true');
 		return true;
 	}
 

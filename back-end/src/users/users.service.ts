@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserEntity } from '../entities/user.entity';
+import { UpdateUserDto } from '../dto/user/update-user.dto';
+import { UserEntity, UserStatus } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CredentialEntity } from '../entities/credential.entity';
@@ -36,27 +36,26 @@ export class UsersService {
 		return;
 	}
 
-	findAll() {
+	async findAll() {
 		return this.usersRepository.find();
 	}
 
 	/**
 	 * Todo: return something (Error code?) if invalid id
 	 */
-	findOne(login: string) {
+	async findOne(login: string) {
 		return this.usersRepository.findOneBy({ login: login });
 	}
 
 	async update(login: string, updateUser: UpdateUserDto) {
 		const user = await this.usersRepository.findOneBy({ login: login });
-		if (updateUser.username !== undefined) user.nickname = updateUser.username;
-		if (updateUser.avatar_path !== undefined)
-			user.avatar_path = updateUser.avatar_path;
-		if (updateUser.status !== undefined) user.status = updateUser.status;
+		if (updateUser.nickname !== undefined) user.nickname = updateUser.nickname;
+		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
 		await user.save();
-		return 'User updated :D';
+		return user;
 	}
 
+	// todo: remove user from db
 	remove(id: number) {
 		return `This action removes a #${id} user`;
 	}
@@ -72,6 +71,11 @@ export class UsersService {
 		return target.credential;
 	}
 
+	async userStatus(login: string, newStatus: UserStatus) {
+		const user = await this.usersRepository.findOneBy({ login: login });
+		user.status = newStatus;
+		await user.save();
+	}
 	// async getFriend(target: string) {
 	// 	return await this.usersRepository.find({
 	// 		relations: {

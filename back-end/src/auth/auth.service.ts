@@ -1,5 +1,6 @@
 import {
 	BadRequestException,
+	ConflictException,
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
@@ -7,6 +8,7 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { accessToken } from '../dto/payload';
 import { CredentialService } from './credential.service';
+import { UserStatus } from '../entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -32,6 +34,7 @@ export class AuthService {
 		}
 		console.log('success');
 		const payloadToken: accessToken = { login, rawPassword };
+		this.usersService.userStatus(login, UserStatus.ONLINE).then();
 		return await this.jwtService.signAsync(payloadToken);
 	}
 
@@ -44,7 +47,7 @@ export class AuthService {
 			throw new UnauthorizedException('Login or Password are empty');
 		const payloadToken: accessToken = { login, rawPassword };
 		if (await this.usersService.findOne(login))
-			return new UnauthorizedException('Login already used');
+			throw new ConflictException('login is already taken');
 		const userCredential = await this.credentialsService.create(rawPassword);
 		await this.usersService.create(payloadToken.login, true, userCredential);
 		return await this.jwtService.signAsync(payloadToken);
