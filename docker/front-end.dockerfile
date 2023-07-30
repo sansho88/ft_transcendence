@@ -3,15 +3,12 @@ FROM node:20
 RUN apt-get update && apt-get install apt-file -y && apt-file update
 RUN apt-get install vim -y
 
+WORKDIR /usr/src/app/front-end
 
-WORKDIR /app
-
-COPY package.json ./
-
-COPY package-lock.json ./
+COPY --chown=node:node ./front-end/*.json 							./
+COPY --chown=node:node ./front-end/*.js 								./
+COPY --chown=node:node ./front-end/*.ts 								./
 
 RUN npm install
-
-COPY . ./
 
 CMD ["npm", "run", "dev"]

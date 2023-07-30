@@ -25,3 +25,194 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+
+ /* CSS */
+.button-login {
+ align-items: center;
+ background-image: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
+ border: 0;
+ border-radius: 8px;
+ box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
+ box-sizing: border-box;
+ color: #FFFFFF;
+ display: flex;
+ font-family: MeromSans-Regular, sans-serif;
+ font-size: 4vh;
+ justify-content: center;
+ line-height: 1em;
+ max-width: 100px;
+ min-width: 12vw;
+ padding: 3px;
+ text-decoration: none;
+ user-select: none;
+ -webkit-user-select: none;
+ touch-action: manipulation;
+ white-space: nowrap;
+ cursor: pointer;
+}
+
+
+.button-login:hover {
+  outline: 0;
+}
+
+.button-login span {
+  background-color: rgb(5, 6, 45);
+  padding: 2vh 2.7vw;
+  border-radius: 6px;
+  width: 100%;
+  height: 100%;
+  transition: 300ms;
+}
+
+.button-login:hover span {
+  background: none;
+}
+
+@media (min-width: 768px) {
+  .button-login {
+    font-size: 24px;
+    min-width: 196px;
+  }
+}
+
+.main-background{
+    width: 100%;
+    height: 100vh;
+    display: flex;
+
+    padding: 0;
+    margin: 0;
+    /*
+    background: #2e0505 radial-gradient(#02252f, #050C2E);
+    */
+    background-image: linear-gradient(to right, #050C2E 40%, #73022d);
+}
+
+.welcome{
+
+    justify-content: center;
+    align-items: center;
+    padding-top: 30vh;
+    height: auto;
+    position: relative;
+    text-align: center;
+
+    margin-left: auto;
+    margin-right: auto;
+    color: #07C3FF;
+    font-weight: 900;
+}
+
+.welcome .welcome-msg{
+
+    height: auto;
+    background: none;
+    font-size: 5vh;
+    font-family: MeromSans-Regular, sans-serif;
+    word-wrap: break-word;
+    /*box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;*/
+}
+
+.welcome .welcome-title{
+
+    height: auto;
+    width: 100%;
+    font-size: 10vh;
+    font-family: MeromSans-Regular, sans-serif;
+    word-wrap: break-word;
+}
+
+.welcome-title .button-login{
+    top: 8vh;
+    position: relative;
+    margin-inline: auto;
+}
+
+.sidebar{
+    z-index: 4;
+    width: 18vw;
+    height: 100vh;
+
+    background: rgba(0, 0, 0, 0.59);
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8em;
+    line-height: 2em;
+}
+
+.sidebar .menu{
+    padding-top: 20vh;
+
+}
+
+.menu img{
+    display: inline-block;
+    padding-left: 2vw;
+    margin-right: 2vw;
+}
+
+.menu li {
+    display: block;
+    text-align: left;
+
+}
+
+.game{
+    display: inline;
+    margin-inline: auto;
+    margin-block: 10vh;
+}
+
+.friends{
+    display: inline-block;
+    position: absolute;
+    right: 2vw;
+    top: 1vh;
+
+}
+
+.main-user-profile{
+    display: inline-block;
+    position: absolute;
+    left: 1vw;
+    top: 1vh;
+    padding-right: 1vw;
+    width: auto;
+    height: auto;
+    background: rgba(0, 0, 0, 0.27);
+    border: 2px rgba(0, 0, 0, 0.11);
+    border-style: inherit ;
+    box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
+    border-radius: 8px;
+}
+
+.main-user-profile .avatar{
+    top: -2vh;
+    margin-left: .4vw;
+    position: relative;
+    display: inline;
+
+}
+
+.main-user-profile .infos{
+    display: inline-block;
+    margin-left: 10px;
+    padding-top: 2vh;
+    position: relative;
+    width: auto;
+    font-size: 2vh;
+}
+
+.main-user-profile #level{
+    color: darkgrey;
+    position: relative;
+    margin-top: -0.5em;
+    margin-bottom: 4px;
+    padding-left: 0.4vw;
+}
+
+.main-user-profile #login{
+    color: darkgrey;
+}

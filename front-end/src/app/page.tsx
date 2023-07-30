@@ -1,113 +1,128 @@
+'use client';
 import Image from 'next/image'
+import * as React from "react";
+import Button from "./components/CustomButtonComponent"
+import Profile from "./components/ProfileComponent"
+import Stats from "./components/StatsComponent"
+import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
+    enum AllStatus {
+        Offline,
+        Online,
+        InGame
+    }
+    enum Colors {
+        "grey",
+        "green",
+        "gold"
+    }
+    let StatusColor = new Map<number, string>();
+
+    for (let i: number = 0; i < 3; i++) {
+        StatusColor.set(i, Colors[i]);
+    }
+
+
+    const [isLogged, setLog] = React.useState(false);
+    const [userStatus, setUserStatus] = React.useState(AllStatus.Online);
+
+    let userNickName : string = "NickTaMer";
+
+
+    function handleLogin() {
+        setLog(true);
+        console.log("LOGGED BIM!");
+    }
+
+    function handleUserStatus() {
+
+        setUserStatus(userStatus === AllStatus.InGame ? AllStatus.Online : AllStatus.InGame);
+        console.log(`User Status: ${userStatus}; statusColor ${StatusColor.get(userStatus)}`);
+    }
+
+    const Header = () => {
+        <head>
+            <link rel={"icon"} href={"./favicon.ico"}/>
+        </head>
+    }
+
+  function login(){
+    if (!isLogged)
+      return (
+            <button type="button" onClick={handleLogin} className={"button-login"}>
+              <span className="text">LOGIN</span></button>
+          /*<Button border={"2px"} color={"#FFFFFF"} image={"linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB)"} height={"30px"} width={"60px"} radius={"4px"} onClick={handleLogin}>LOGIN</Button>*/
+      )
+    else
+      return hello("Sansho");
+  }
+  function hello(name: string){
+
+    let msg: string = "";
+
+    if (name.length)
+      msg = "dear " + name + " !\n";
+    return (
+        <div>
+            Hello {msg}
         </div>
-      </div>
+    )
+  }
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+  if (!isLogged)
+    return (
+        <>
+            <Header/>
+        <div className="main-background">
+          <div className="welcome">
+            <div className="welcome-msg">WELCOME TO</div>
+            {/*<div className="width: 788px; height: 130px; left: 0px; top: 24px; position: absolute; justify-content: center; align-items: center; display: inline-flex">*/}
+              <div className="welcome-title">PONG POD! {login()}</div>
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+            </div>
+        </div>
+     </>
+    )
+  else
+    return (
+        <>
+            <Header/>
+      <main className="main-background">
+        {/*  <div className={"sidebar"}>
+              <menu className="menu" autoCapitalize={"words"}  title={"Menu"}>
+                <li tabIndex={1}> <img src={"/joystick.svg"} alt={"joystick-logo"}/>Game Mode</li>
+                <li tabIndex={2}><img src={"/profile.svg"} alt={"profile-logo"}/>Profile</li>
+                <li tabIndex={3}><img src={"/friends.svg"} alt={"friends-logo"}/>Friends</li>
+              </menu>
+          </div>*/}
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+          <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"lelogin"} nickname={userNickName}
+                   status={AllStatus[userStatus]} statusColor={StatusColor.get(userStatus)} isEditable={true}>
+              <p style={{paddingBottom: "1vh"}}><Stats level={42} victories={112} defeats={24} rank={1}/></p>
+              <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
+          </Profile>
+          <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"} height={"42px"}/>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
+        <div className="game">
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+          <Image
+            className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] max-w-fit max-h-fit"
+            src="/pong-logo.png"
+            alt="Pong Logo"
+            width={768}
+            height={768}
+            priority
+            onClick={handleUserStatus}
+          />
+            <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"} alt={"GameMode options"}  radius={"0"} onClick={handleUserStatus}/>
+        </div>
+
+
+      </main>
+        </>
+
+    )
+
 }

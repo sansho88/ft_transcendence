@@ -7,11 +7,11 @@ services:
       - back-end
     container_name: app
     build:
-      context: ./front-end
-      dockerfile: ../docker/front-end.dockerfile
+      context: ./
+      dockerfile: ./docker/front-end.dockerfile
     volumes:
-      - ./front-end:/app
-      - /app/node_modules
+      - ./front-end/src:/usr/src/app/front-end/src
+      - ./front-end/public:/usr/src/app/front-end/public
     ports:
       - "3000:3000"
     networks:
@@ -24,11 +24,11 @@ services:
       - db
     container_name: api
     build:
-      context: ./back-end
-      dockerfile: ../docker/back-end.dockerfile
+      context: ./
+      dockerfile: ./docker/back-end.dockerfile
     volumes:
-      - ./back-end:/usr/src/app
-      - /usr/src/app/node_modules
+      - ./back-end/src:/usr/src/app/src
+      - ./front-end/src/shared/:/usr/src/app/shared
     ports:
       - "8000:8000"
     networks:
@@ -61,10 +61,13 @@ services:
     restart: always
     ports:
       - "8080:8080"
+    env_file:
+      - ./docker/.env/.env_db
     networks:
       - database
+
 volumes:
-  db_data:
+   db_data:
 
 networks:
   webapp:
