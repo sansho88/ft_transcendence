@@ -9,7 +9,7 @@ export namespace getApi {
 	export const getUsersAll=()									: Promise<IUser[]>					=>{return Axios.get(`${strRoutes.getUsersAll()}`);}
 	export const getUserByLogin=(login: string)	: Promise<IUser>						=>{return Axios.get(`${strRoutes.getUserByLogin()}${login}`);}
 	export const getUserById = (id: number) 		: Promise<IUser>						=>{return Axios.get(`${strRoutes.getUserById()}${id}`);}
-
+  
 }
 
 export namespace postApi {

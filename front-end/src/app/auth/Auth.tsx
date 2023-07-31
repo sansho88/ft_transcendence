@@ -66,7 +66,7 @@ export default function Auth({className}: {className?: string}) {
 
 	const enterLogin = () => {
 		return (
-			<div className='flex flex-col justify-center items-center'>
+			<div className='flex flex-col justify-center items-center text-white'>
 				<InputPod 
 					className='inputLogin'
 				props=
@@ -86,7 +86,7 @@ export default function Auth({className}: {className?: string}) {
 	
 	const enterPassword = () => {
 		return (
-			<div className='flex flex-col justify-center items-center'>
+			<div className='flex flex-col justify-center items-center text-white'>
 				<InputPod
 				className='inputLogin'
 				props=
@@ -134,8 +134,8 @@ export default function Auth({className}: {className?: string}) {
 		const timer = setTimeout(() => {
 			setShowMessage(false);
 			setCurrentStepLogin(EStepLogin.bye)
-			router.push('/'); //executer apres le timeout
-		}, 5000); // 3000 ms = 3 secondes
+			router.push('/proto/game'); //executer apres le timeout
+		}, 650); // 3000 ms = 3 secondes
 		return () => clearTimeout(timer);
 	}, [currentStepLogin, router]);
 

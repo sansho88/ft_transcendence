@@ -6,6 +6,7 @@ import {
 	OnGatewayDisconnect,
 	ConnectedSocket,
 } from '@nestjs/websockets';
+
 import { IUser } from 'shared/types';
 import { Server, Socket } from 'socket.io';
 import { ServerGame } from 'src/game/ServerGame';
@@ -26,7 +27,7 @@ export class WebsocketGatewayGame
 	constructor(private serverGame: ServerGame) {}
 
 	@WebSocketServer()
-	private server: Server;
+	public server: Server;
 
 	handleConnection(@ConnectedSocket() client: Socket) {
 		console.log('NEW CONNEXION CLIENT THEGAME, id = ' + client.id);
@@ -39,6 +40,11 @@ export class WebsocketGatewayGame
 		console.log('CLIENT ' + client.id + ' left');
 	}
 
+  emitToGameRoom(room: string, payload: any) {
+    this.server.emit(room, payload)
+  }
+
+
 	@SubscribeMessage(wsGameRoutes.addNewPlayerToServer())
 	welcomeToGameServer(client: Socket, payload: Partial<IUser>) {
     if (payload.login)
@@ -49,10 +55,13 @@ export class WebsocketGatewayGame
 	@SubscribeMessage(wsGameRoutes.addPlayerToMatchnaking())
 	handleGame(client: Socket, payload: Partial<IUser>) {
 		console.log(client.id + ': ' + payload.nickname);
+		console.log('json user: ' + JSON.stringify(payload));
     if (!payload.nickname)
-      return console.error('ws/welcomeToGameServer: Bad client or user'); 
+      return console.error('ws/welcomeToGameServer: Bad client or user');  
+    
     const player: userInfoSocket = {socket: client, user: payload};
-    this.serverGame.addPlayerToMatchmaking(player);
+    this.serverGame.addPlayerToMatchmaking(player, this.server);
+    // console.log('helllo'); 
 		client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
 	}
 

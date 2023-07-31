@@ -9,6 +9,7 @@ import { User } from './users/entities/user.entity';
 import { WebsocketGatewayChat } from './websocket/wsChatProto.gateway';
 import { WebsocketGatewayGame } from './websocket/wsGame.gateway';
 import { ServerGame } from './game/ServerGame';
+import { GameSession } from './game/GameSession';
 // import * as wsGame from './websocket/wsGame.gateway';
 
 @Module({
@@ -34,7 +35,7 @@ import { ServerGame } from './game/ServerGame';
 		AppService,
 		WebsocketGatewayChat,
 		WebsocketGatewayGame,
-		ServerGame,
+		ServerGame
 	],
 })
 export class AppModule {}

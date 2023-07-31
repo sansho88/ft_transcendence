@@ -72,7 +72,7 @@ export class WebsocketGatewayChat
 	 */
 	@SubscribeMessage('messageObj')
 	handleMessageObj(client: Socket, payload: any) {
-		console.log(client.id + ': ' + payload);
+		console.log(client.id + ': ' + JSON.stringify(payload));
 		this.messagesObj.push(payload);
 		this.server.to('homeRoom').emit('responseObj', payload);
 	}

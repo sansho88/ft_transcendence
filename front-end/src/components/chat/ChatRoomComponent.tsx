@@ -36,8 +36,6 @@ export default function WebsocketClient({	className,	classNameBlockMessage,}: {	
 	const socketRef = useContext(SocketContextChat); // ref sur le websocket global
 	const messagesEndRef = useRef<any>(null); //ref sur balise toujours apres dernier message/ pour le scroll auto
   
-	const socketChat = useContext(SocketContextChat);
-
 	const router = useRouter();
   
   console.log('Hello CHat Component')

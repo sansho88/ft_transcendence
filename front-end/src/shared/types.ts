@@ -136,5 +136,3 @@ export interface IInput {
   onKeyDown: any;
   onChange: any;
 }
-
-

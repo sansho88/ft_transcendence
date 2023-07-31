@@ -1,16 +1,17 @@
 import { IUser } from './types';
+import { Socket } from 'socket.io';
 
 // +---------------------------------------------------------------------+
 // |                           GAME INTERFACE                            |
 // +---------------------------------------------------------------------+
 
-export interface IPos2D {
+export interface IVector2D {
 	x: number;
 	y: number;
 }
 
 export interface IBall {
-	pos: IPos2D;
+	pos: IVector2D;
 	size: number;
 	velocity: number;
 	direction: number;
@@ -48,7 +49,7 @@ export interface IGameSession {
 
 export interface userInfoSocket {
 	user: Partial<IUser>;
-	socket: any;
+	socket: Socket;
 }
 
 //vive le cpp
