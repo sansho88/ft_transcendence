@@ -1,6 +1,7 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Button from "./CustomButtonComponent"
 import axios from "axios";
+import {LoggedContext, UserContext} from '@/context/globalContext';
 
 
 enum Colors {
@@ -43,21 +44,12 @@ const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, l
     const [modifiedNick, setNickText] = useState<string>(nickname);
     const [editMode, setEditMode] = useState(false);
     const [nickErrorMsg, setNickErrMsg] = useState("");
-    const [userStatus, setUserStatus] = React.useState(EStatus.Online);
+    const {userContext, setUserContext} = useContext(UserContext);
+    const [statusColor, setStatusColor] = useState("grey");
 
 
-    let StatusColor = new Map<number, string>();
 
-    for (let i: number = 0; i < 3; i++) {
-        StatusColor.set(i, Colors[i]);
-    }
-    function handleUserStatus() { //todo: gestion dynamique avec le serveur et front
-
-        setUserStatus(userStatus === EStatus.InGame ? EStatus.Online : EStatus.InGame);
-        console.log(`User Status: ${userStatus}; statusColor ${StatusColor.get(userStatus)}`);
-    }
-
-    function getEnumNameByIndex(enumObj: any, index: number): string | undefined { //useful for userStatus
+    function getEnumNameByIndex(enumObj: any, index: number): string { //useful for userStatus
         const enumKeys = Object.keys(enumObj).filter((key) => typeof enumObj[key] === 'number');
         const enumValues = enumKeys.map((key) => enumObj[key]);
 
@@ -65,8 +57,14 @@ const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, l
             return enumKeys[enumValues.indexOf(index)];
         }
 
-        return undefined;
+        return "";
     }
+
+    useEffect(() => {
+        setStatusColor(getEnumNameByIndex(Colors, userContext.status ? userContext.status : 0));
+    }, [userContext.status]);
+
+
     const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => { //updated for each character
 
             const value = event.target.value;
@@ -83,8 +81,7 @@ const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, l
         if (modifiedNick != nickname && !editMode)
             axios.get(`http://localhost:8000/api/users/login/${login}`)
                 .then((response) => {
-                    const tmpNick = response.data.nickname;
-                    setNickText(tmpNick);
+                    setNickText(response.data.nickname);
                 })
                 .catch((e) => {
                     console.error('error:' + e.toString());
@@ -143,14 +140,13 @@ const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, l
             )
     }
 
-   /* status={AllStatus[userStatus]} statusColor={StatusColor.get(userStatus)}*/
     return (
         <>
             <div className={className}>
                 <img className={"avatar"} src={avatar_path} alt="Avatar" style={{
                     borderWidth: "2px",
-                    borderColor: StatusColor.get(userStatus),
-                    boxShadow: `1px 2px 5px ${StatusColor.get(userStatus)}`,
+                    borderColor: statusColor,
+                    boxShadow: `1px 2px 5px ${statusColor}`,
                     transition: "1000ms",
                     borderRadius: "8px",
                     width: "5vw",
@@ -165,7 +161,11 @@ const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, l
                     <h2 id={"login"}>{login}</h2>
                     {editedNick()}
 
-                    <p id={"status"} style={{color:StatusColor.get(userStatus)}}>{getEnumNameByIndex(EStatus, status) }</p>
+                    <p id={"status"} style={{
+                        color:statusColor,
+                        transition:"1000ms"}}>
+                        {getEnumNameByIndex(EStatus, userContext.status ? userContext.status : 0) }
+                    </p>
                 </div>
                 <div id={"children"} style={{marginLeft: "4px"}}>{children}</div>
             </div>

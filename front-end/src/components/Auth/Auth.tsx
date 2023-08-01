@@ -267,6 +267,8 @@ useEffect(() => {
 							setCurrentStepLogin(EStepLogin.successLogin);
 							localStorage.setItem('login', newUser.login);
 							localStorage.setItem('pass', password);
+							localStorage.setItem('userContext', JSON.stringify(userContext))
+							console.log(localStorage.getItem(JSON.parse('userContext')));
 							console.log('you are now logged in')
 						})
 						.catch((e)=> {console.log(e); return;})

@@ -1,14 +1,17 @@
 'use client';
 import Image from 'next/image'
-import React,{useContext, useEffect} from "react";
+import React, {useContext, useEffect} from "react";
 import Button from "../components/CustomButtonComponent"
 import Profile, {EStatus} from "../components/ProfileComponent"
 import Stats from "../components/StatsComponent"
 
-import { preloadFont } from "next/dist/server/app-render/rsc/preloads";
-import { UserContext, LoggedContext } from '@/context/globalContext';
-import { useRouter } from 'next/navigation';
+import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
+import {LoggedContext, UserContext} from '@/context/globalContext';
+import {useRouter} from 'next/navigation';
 import axios from "axios";
+import * as POD from "@/shared/types";
+import * as apiReq from '@/components/api/ApiReq'
+import ChatRoomCommponent from '@/components/chat/ChatRoomComponent'
 
 export default function Home() {
 	preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
@@ -27,17 +30,36 @@ export default function Home() {
         StatusColor.set(i, Colors[i]);
     }
 
+    async function updateStatusUser(id_user, status) {
+        const updateUser: Partial<POD.IUser> = {id_user: id_user, status: status}
+        await apiReq.putApi.putUser(updateUser)
+            .then(() => {
+                setUserContext(updateUser);
+            })
+            .catch((e) => {console.error(e)})
+    }
 
-		useEffect(() => {
-            console.log("Main Page: isLogged? " + logged);
-            console.log("Main Page: localStorageLogin? " + localStorage.getItem("login"));
-			if(!logged && !localStorage.getItem("login"))
-				router.push('/auth')
-            else
-            {
-                console.log("ID USER: " + userContext?.id_user);
-            }
-		}, [logged])
+    function switchOnlineIngame(){
+        const tmpStatus = userContext?.status == EStatus.Online ? EStatus.InGame : EStatus.Online;
+        userContext.status = tmpStatus;
+
+        setUserContext(userContext);
+        updateStatusUser(userContext?.id_user, tmpStatus)
+            .catch((e) => console.error(e));
+
+        console.log('[MAIN PAGE]USER STATUS:' + userContext.status);
+    }
+
+    useEffect(() => {
+        console.log("Main Page: isLogged? " + logged);
+        console.log("Main Page: localStorageLogin? " + localStorage.getItem("login"));
+        if(!logged && !localStorage.getItem("login"))
+            router.push('/auth')
+        else
+        {
+            console.log("ID USER: " + userContext?.id_user);
+        }
+    }, [logged])
  
    
     const [userLogin, setUserLogin] = React.useState( "lelogin");
@@ -111,10 +133,11 @@ export default function Home() {
                             width={768}
                             height={768}
                             priority
-                            onClick={handleLogin}
+                            onClick={switchOnlineIngame}
                         />
+                        <ChatRoomCommponent className='' classNameBlockMessage='m-6 overflow-auto h-[350px]'/>
                         <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"}
-                                alt={"GameMode options"} radius={"0"} onClick={handleLogin}/>
+                                alt={"GameMode options"} radius={"0"} onClick={switchOnlineIngame}/>
                     </div>
 
 

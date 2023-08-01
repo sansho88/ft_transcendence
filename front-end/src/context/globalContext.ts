@@ -9,8 +9,8 @@ const originDefault: IOriginNetwork = {
 }
 
 export type UserContextType = {
-	userContext: IUser | undefined;
-	setUserContext: (value: IUser | undefined) => void;
+	userContext: Partial<IUser> ;
+	setUserContext: (value: Partial<IUser>) => void;
 };
 
 export type LoggedContextType = {
@@ -25,5 +25,5 @@ export type SocketContextType = {
 export const ThemeContext = createContext<string>("light");
 export const OriginContext = createContext<IOriginNetwork>(originDefault);
 export const SocketContext = createContext<Socket | null>(null); //WIP
-export const UserContext = createContext<UserContextType>({ userContext: undefined, setUserContext: ()=> {}});
+export const UserContext = createContext<UserContextType>({ userContext: {}, setUserContext: ()=> {}});
 export const LoggedContext = createContext<LoggedContextType>({logged: localStorage.getItem("login") != null, setLogged: ()=> {}});
