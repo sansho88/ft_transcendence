@@ -6,6 +6,7 @@ import * as PODGAME from '@/shared/typesGame'
 import * as wsRoute from '@/shared/routesApi'
 import { cursorTo } from 'readline'
 import * as ClipLoader from 'react-spinners'
+import { removeListener } from 'process'
 
 
 enum EStatusGame {
@@ -35,6 +36,7 @@ export default function Game({className}: {className: string}) {
   const [stepCurrentSession, setStepCurrentSession]   = useState<EStatusGame>(EStatusGame.idle);
   const [buttonText, setButtonText]                   = useState<string>('SEARCH GAME');
   const [remoteEvent, setRemoteEvent]                 = useState<string>('');
+  // const remoteEvent = useRef<string>('');
 
   const [p1Position, setP1Position]                   = useState<number>(0);
   const [p2Position, setP2position]                   = useState<number>(0);
@@ -47,6 +49,7 @@ useEffect(() => {
   console.log(`Vous venez de rejoindre la session de jeu : ${nameGameSession}\nLe match va bientot commencer`);
 }, [nameGameSession])
   
+
 useEffect(() => {
   if (!isLogged){
     // router.push('/auth'); // for dev
@@ -55,36 +58,6 @@ useEffect(() => {
 }, [isLogged])
 
 
-
-const handleMoveP1 = useRef((data) => {
-  setP1Position(data);
-  console.log(`WS moveP1 : ${JSON.stringify(data)}`);
-});
-
-// useEffect(() => {
-//   if (socket?.connected && typeof socket !== 'string') {
-//     const moveP1Listener = (data) => handleMoveP1.current(data);
-
-//     socket.on('moveP1', moveP1Listener);
-
-//     return () => {
-//       socket.off('moveP1', moveP1Listener);
-//     };
-//   }
-// }, [socket]);
-
-useEffect(() => {
-  if (socketRef.current?.connected && typeof socketRef.current !== 'string') {
-    const moveP1Listener = (data) => handleMoveP1.current(data);
-
-    socketRef.current.on('moveP1', moveP1Listener);
-    console.log('coucou') 
-
-    return () => {
-      socketRef.current?.off('moveP1', moveP1Listener);
-    };
-  }
-}, [socketRef.current]);
 
 
 useEffect(() => {
@@ -108,54 +81,61 @@ useEffect(() => {
       console.log(`WS setup recu: ${JSON.stringify(data)}`); //recupere taille des elements paddle et balle
     })
     
-    // socketRef.current.on('moveP1', (data) => {
-    //   setP1position(data);
-    //   console.log(`WS moveP1 : ${JSON.stringify(data)}`); //recupere la position du paddles 1
-    // })
+    socketRef.current.on('moveP1', (data) => {
+      setP1Position(data);
+      console.log(`WS moveP1 : ${JSON.stringify(data)}`); //recupere la position du paddles 1
+    })
     socketRef.current.on('moveP2', (data) => {
-      // setP2position(data);
+      setP2position(data);
       console.log(`WS moveP2 : ${JSON.stringify(data)}`); //recupere la position du paddles 2
     })
-    socketRef.current.on('moveBall', (data) => {
+    socketRef.current.on('moveBall', (data) => {remoteEvent
       console.log(`WS moveBall : ${JSON.stringify(data)}`); //recupere la position de la balle
     })
 
   }
   console.log(`dim table x:${tableRef.current?.offsetWidth} y:${tableRef.current?.offsetHeight}`)
-  return () => {socketRef.current?.close};
+  // return () => {socketRef.current?.close};
 
 }, []);
+
+
+useEffect(() => {
+
+  if (remoteEvent) {
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') {
+        socketRef.current?.emit(remoteEvent, {direction: 'up'})
+      }
+      if (e.key === 'ArrowDown') {
+        socketRef.current?.emit(remoteEvent, {direction: 'down'})
+      }
+    })
+
+    return () => {
+      window.removeEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp') {
+          socketRef.current?.emit(remoteEvent, {direction: 'up'})
+        }
+        if (e.key === 'ArrowDown') {
+          socketRef.current?.emit(remoteEvent, {direction: 'down'})
+        }
+      })
+    }
+  }
+
+},[remoteEvent])
 
 
 useEffect(() => {
   console.log(`position P1: ${p1Position}`);
 }, [p1Position])
 
+useEffect(() => {
+  if (remoteEvent)
+    console.log(`YOU HAVE REMOTE EVENT: ${remoteEvent}`);
+}, [remoteEvent])
 
-const canEmit = useRef<boolean>(false);//TODO: arriver a mettre un timeout de 8ms pour limiter le spam server ?
-function listenKeyboardEvent() {
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === "ArrowUp") { 
-            if(remoteEvent !== ''){
-						  socketRef.current?.emit(remoteEvent, {direction: "up"}); 
-            }
-          }
-				if (event.key === "ArrowDown") {
-          if(remoteEvent !== '')
-              socketRef.current?.emit(remoteEvent, {direction: 'down'});
-				}
-
-		};
-    if (typeof window !== 'undefined') { //for fix console err
-      window.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-}
-
-listenKeyboardEvent();
 
 interface TableProps {
   className?: string;

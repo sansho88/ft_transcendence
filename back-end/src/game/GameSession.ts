@@ -22,7 +22,7 @@ export class GameSession {
 	private game_id:      number;
 	private gameRoom:     string;
 	private startDate:    Date;
-  private speedPaddle:  number = 10;
+  private speedPaddle:  number = 30;
 
 	private table: PodTable = {
 		positionP1    :0,
@@ -78,7 +78,7 @@ export class GameSession {
           this.table.positionP1 -= this.speedPaddle;
       }
       P1.socket.emit('moveP1', this.table.positionP1);
-      // P2.socket.emit('moveP1', this.table.positionP1);
+      P2.socket.emit('moveP1', this.table.positionP1);
 			console.log(`P1pos = ${this.table.positionP1}`);
 		});
 		P2.socket.on(`${this.gameRoom}P2remote`, (data) => {
@@ -93,8 +93,8 @@ export class GameSession {
         if (this.table.positionP2 - this.speedPaddle >= 0)
         this.table.positionP2 -= this.speedPaddle;
       }
+      P1.socket.emit('moveP2', this.table.positionP2);
       P2.socket.emit('moveP2', this.table.positionP2);
-      // P2.socket.emit('moveP2', this.table.positionP2);
       console.log(`P2pos = ${this.table.positionP1}`);
 		});
 
