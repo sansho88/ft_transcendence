@@ -5,6 +5,13 @@ import { Socket } from 'socket.io';
 // |                           GAME INTERFACE                            |
 // +---------------------------------------------------------------------+
 
+export enum EKeyEvent {
+	arrowUpPressed,
+	arrowUpRelease,
+	arrowDownPressed,
+	arrowDownRelease
+}
+
 export interface PodTable {
 	positionP1: number;
 	positionP2: number;
