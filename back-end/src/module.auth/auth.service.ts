@@ -4,7 +4,7 @@ import {
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { UsersService } from '../module.users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { accessToken } from '../dto/payload';
 import { CredentialService } from './credential.service';
@@ -17,6 +17,8 @@ export class AuthService {
 		private jwtService: JwtService,
 		private credentialsService: CredentialService,
 	) {}
+
+	/** * * * * * * * * * * * * * * **/
 
 	async logInVisit(login: string, rawPassword: string) {
 		console.log(`NEW CONNECTION ===== \nlogin: ${login}\npass: ${rawPassword}`);
@@ -33,7 +35,7 @@ export class AuthService {
 			throw new UnauthorizedException();
 		}
 		console.log('success');
-		const payloadToken: accessToken = { login, rawPassword };
+		const payloadToken: accessToken = { id: user.UserID, rawPassword };
 		this.usersService.userStatus(login, UserStatus.ONLINE).then();
 		return await this.jwtService.signAsync(payloadToken);
 	}
@@ -42,14 +44,18 @@ export class AuthService {
 		throw new BadRequestException('WIP');
 	}
 
+	/** * * * * * * * * * * * * * * **/
+
 	async signInVisit(login: string, rawPassword: string) {
 		if (login === undefined || rawPassword === undefined)
 			throw new UnauthorizedException('Login or Password are empty');
-		const payloadToken: accessToken = { login, rawPassword };
+		login = login + '_g';
+		if (login.length > 10) return new BadRequestException();
 		if (await this.usersService.findOne(login))
 			throw new ConflictException('login is already taken');
 		const userCredential = await this.credentialsService.create(rawPassword);
-		await this.usersService.create(payloadToken.login, true, userCredential);
+		const user = await this.usersService.create(login, true, userCredential);
+		const payloadToken: accessToken = { id: user.UserID, rawPassword };
 		return await this.jwtService.signAsync(payloadToken);
 	}
 

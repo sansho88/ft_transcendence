@@ -26,8 +26,9 @@ export class UserEntity extends BaseEntity {
 
 	@PrimaryColumn({
 		type: 'varchar',
-		length: 12,
+		length: 10,
 		unique: true,
+		update: false,
 	})
 	login: string;
 
@@ -37,8 +38,10 @@ export class UserEntity extends BaseEntity {
 	})
 	nickname: string;
 
-	@Column()
-	Invite: boolean; //Todo: rename to visit
+	@Column({
+		type: 'boolean',
+	})
+	visit: boolean;
 
 	// Todo: comeback later to proper storage
 	@Column({
@@ -52,6 +55,7 @@ export class UserEntity extends BaseEntity {
 	@Column({
 		type: 'enum',
 		enum: UserStatus,
+		enumName: `User Status`,
 		default: UserStatus.ONLINE,
 	})
 	status: UserStatus;

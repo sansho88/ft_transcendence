@@ -7,11 +7,12 @@ import {
 	Get,
 	Put,
 	UseGuards,
+	ParseIntPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from '../dto/user/update-user.dto';
-import { CurrentUser } from '../auth/indentify.user';
-import { AuthGuard } from '../auth/auth.guard';
+import { CurrentUser } from '../module.auth/indentify.user';
+import { AuthGuard } from '../module.auth/auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -20,7 +21,7 @@ export class UsersController {
 	@Post()
 	create() {
 		// return this.usersService.create(createUserDto);
-		return 'USE `/auth/sign` to create a new user';
+		return 'USE `/module.auth/sign` to create a new user';
 	}
 
 	// @Get('/get/:login')
@@ -48,20 +49,19 @@ export class UsersController {
 		return this.usersService.remove(+login);
 	}
 
-	/*************************************************/
+	/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ***/
 
 	@Get('me')
 	@UseGuards(AuthGuard)
-	me(@CurrentUser('login') user) {
-		return this.usersService.findOne(user);
+	me(@CurrentUser('id', ParseIntPipe) id: number) {
+		return this.usersService.findOne(id);
 	}
 
-	@Get('/get/:login')
+	@Get('/get/:id')
 	@UseGuards(AuthGuard)
-	findOne(@Param('login') login: string) {
-		return this.usersService.findOne(login);
+	findOneID(@Param('id', ParseIntPipe) id: number) {
+		return this.usersService.findOne(id);
 	}
-
 	@Get('get')
 	@UseGuards(AuthGuard)
 	findAll() {
@@ -73,9 +73,9 @@ export class UsersController {
 	@Put('update')
 	@UseGuards(AuthGuard)
 	updateNickname(
-		@CurrentUser('login') login: string,
+		@CurrentUser('id', ParseIntPipe) id: number,
 		@Body() update: UpdateUserDto,
 	) {
-		return this.usersService.update(login, update);
+		return this.usersService.update(id, update);
 	}
 }

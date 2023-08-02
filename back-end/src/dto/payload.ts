@@ -1,4 +1,4 @@
 export class accessToken {
-	login: string;
+	id: number;
 	rawPassword: string;
 }

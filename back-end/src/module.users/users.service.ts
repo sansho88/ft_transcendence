@@ -26,14 +26,15 @@ export class UsersService {
 		newInvite: boolean,
 		newCredential: CredentialEntity,
 	) {
-		const user = UserEntity.create({
+		const user = this.usersRepository.create({
 			login: newLogin,
 			nickname: newLogin,
-			Invite: newInvite,
+			visit: newInvite,
 		});
 		user.credential = newCredential;
 		await user.save();
-		return;
+		console.log(`New User \`${user.login}\` with ID ${user.UserID}`);
+		return user;
 	}
 
 	async findAll() {
@@ -43,12 +44,14 @@ export class UsersService {
 	/**
 	 * Todo: return something (Error code?) if invalid id
 	 */
-	async findOne(login: string) {
-		return this.usersRepository.findOneBy({ login: login });
+	async findOne(id: number | string) {
+		if (typeof id === 'number')
+			return this.usersRepository.findOneBy({ UserID: id });
+		return this.usersRepository.findOneBy({ login: id });
 	}
 
-	async update(login: string, updateUser: UpdateUserDto) {
-		const user = await this.usersRepository.findOneBy({ login: login });
+	async update(id: number, updateUser: UpdateUserDto) {
+		const user = await this.usersRepository.findOneBy({ UserID: id });
 		if (updateUser.nickname !== undefined) user.nickname = updateUser.nickname;
 		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
 		await user.save();
