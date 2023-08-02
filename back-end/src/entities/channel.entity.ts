@@ -8,7 +8,7 @@ import {
 	ManyToOne,
 	OneToMany,
 	OneToOne,
-	PrimaryColumn,
+	PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { MessageEntity } from './message.entity';
@@ -23,7 +23,7 @@ export enum ChannelType {
 
 @Entity('TestChannels')
 export class ChannelEntity extends BaseEntity {
-	@PrimaryColumn()
+	@PrimaryGeneratedColumn()
 	channelID: number;
 
 	@ManyToOne(() => UserEntity)

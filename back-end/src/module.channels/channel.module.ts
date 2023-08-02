@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChannelEntity } from '../entities/channel.entity';
 import { ChannelCredentialEntity } from '../entities/credential.entity';
 import { UsersModule } from '../module.users/users.module';
+import { ChannelCredentialService } from './credential.service';
 
 @Module({
 	imports: [
@@ -12,6 +13,6 @@ import { UsersModule } from '../module.users/users.module';
 		forwardRef(() => UsersModule),
 	],
 	controllers: [ChannelController],
-	providers: [ChannelService],
+	providers: [ChannelService, ChannelCredentialService],
 })
 export class ChannelModule {}

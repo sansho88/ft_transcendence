@@ -4,9 +4,9 @@ import { AuthService } from './auth.service';
 import { UsersModule } from '../module.users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import * as process from 'process';
-import { CredentialService } from './credential.service';
+import { UserCredentialService } from './credential.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ChannelCredentialEntity, UserCredentialEntity } from '../entities/credential.entity';
+import { UserCredentialEntity } from '../entities/credential.entity';
 
 @Module({
 	imports: [
@@ -16,9 +16,9 @@ import { ChannelCredentialEntity, UserCredentialEntity } from '../entities/crede
 			signOptions: { expiresIn: '99d' },
 		}),
 		forwardRef(() => UsersModule),
-		TypeOrmModule.forFeature([UserCredentialEntity, ChannelCredentialEntity]),
+		TypeOrmModule.forFeature([UserCredentialEntity]),
 	],
 	controllers: [AuthController],
-	providers: [AuthService, CredentialService],
+	providers: [AuthService, UserCredentialService],
 })
 export class AuthModule {}

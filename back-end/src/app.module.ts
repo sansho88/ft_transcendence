@@ -14,6 +14,7 @@ import {
 	UserCredentialEntity,
 } from './entities/credential.entity';
 import { GameEntity } from './entities/game.entity';
+import { ChannelModule } from './module.channels/channel.module';
 
 @Module({
 	imports: [
@@ -40,6 +41,7 @@ import { GameEntity } from './entities/game.entity';
 		}),
 		UsersModule,
 		AuthModule,
+		ChannelModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

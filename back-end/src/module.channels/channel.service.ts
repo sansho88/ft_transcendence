@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ChannelEntity } from '../entities/channel.entity';
+import { ChannelEntity, ChannelType } from '../entities/channel.entity';
 import { UsersService } from '../module.users/users.service';
 import { UserEntity } from '../entities/user.entity';
 import { ChannelCredentialEntity } from '../entities/credential.entity';
@@ -16,18 +16,27 @@ export class ChannelService {
 
 	async create(
 		name: string,
-		owner: UserEntity,
 		credential: ChannelCredentialEntity,
+		protect: boolean,
+		owner: UserEntity,
 	) {
+		// return 'wip';
+		let privacy: ChannelType;
+		if (protect == false) privacy = ChannelType.PUBLIC;
+		else if (credential === undefined) privacy = ChannelType.PRIVATE;
+		else privacy = ChannelType.PROTECTED;
+
 		const chan = this.channelRepository.create({
 			name: name,
 			owner: owner,
 			credential: credential,
+			type: privacy,
 		});
 		await chan.save();
+		// return 'DONE';
 		return chan;
 	}
-	async findAll(){
+	async findAll() {
 		return this.channelRepository.find();
 	}
 }
