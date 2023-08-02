@@ -8,29 +8,34 @@ import { WebsocketGatewayGame } from '../websocket/wsGame.gateway';
 import { IUser } from 'shared/types';
 
 
-export interface PodTable {
-  positionP1: number;
-  positionP2: number;
-  maxPosP1  : number;
-  maxPosP2  : number;
-  sizeP1    : PODGAME.IVector2D;
-  sizeP2    : PODGAME.IVector2D;
-  size      : PODGAME.IVector2D;
+// export interface PodTable {
+//   positionP1: number;
+//   positionP2: number;
+//   maxPosP1  : number;
+//   maxPosP2  : number;
+//   sizeP1    : PODGAME.IVector2D;
+//   sizeP2    : PODGAME.IVector2D;
+//   size      : PODGAME.IVector2D;
+// }
+
+export interface KeyPlayerState{
+	isArrowDownPressed: boolean;
+	isArrowUpPressed: boolean;
 }
 
 export class GameSession {
-	private game_id:      number;
-	private gameRoom:     string;
-	private startDate:    Date;
-  private speedPaddle:  number = 30;
-
-	private table: PodTable = {
+	private game_id:      	number;
+	private gameRoom:     	string;
+	private startDate:    	Date;
+  	private speedPaddle: 	number = 3; // in pixel per move
+	private fpsTargetInMs:	number = (1000/60); // = 16.67ms = 60 fps
+	private table: PODGAME.PodTable = {
 		positionP1    :0,
 		positionP2    :0,
-    maxPosP1      :(600 - 60),
-    maxPosP2      :(600 - 60),
-    sizeP1        :{y: 60, x: 10},
-    sizeP2        :{y: 60, x: 10},
+    	maxPosP1      :(600 - 60),
+    	maxPosP2      :(600 - 60),
+    	sizeP1        :{y: 60, x: 10},
+    	sizeP2        :{y: 60, x: 10},
 		size          :{ x: 800, y: 600 },
 	};
 	private player1: PODGAME.userInfoSocket;
@@ -41,6 +46,10 @@ export class GameSession {
 	private scoreP2: number = 0;
 
 	private isGameRunning: boolean = false;
+	
+	private keyP1: KeyPlayerState = {isArrowDownPressed: false, isArrowUpPressed: false};
+	private keyP2: KeyPlayerState = {isArrowDownPressed: false, isArrowUpPressed: false};
+	private intervalId;
 
 	constructor(
 		server: Server,
@@ -49,10 +58,10 @@ export class GameSession {
 		startDate: Date,
 		game_id: number,
 	) {
-		this.player1 = P1;
-		this.player1 = P2;
-		this.startDate = startDate;
-		this.gameRoom = uuidv4();
+		this.player1 	= 	P1;
+		this.player1 	= 	P2;
+		this.startDate 	= startDate;
+		this.gameRoom 	= uuidv4();
 		//////////SETUP DE LA TABLE //////////////
 
 		//////////SETUP DES PLAYERS //////////////
@@ -66,39 +75,28 @@ export class GameSession {
 
 		//j'ecoute leut propre event pour faire bouger leur paddle respectif
 		P1.socket.on(`${this.gameRoom}P1remote`, (data) => {
-			// console.log(`mooove P1! ${JSON.stringify(data)}`);
-      if (data.direction === 'down')
-      {
-        if (this.table.positionP1 + this.speedPaddle <= this.table.maxPosP1)
-          this.table.positionP1 += this.speedPaddle;
-      }
-      else if (data.direction === 'up')
-      {
-        if (this.table.positionP1 - this.speedPaddle >= 0)
-          this.table.positionP1 -= this.speedPaddle;
-      }
-      P1.socket.emit('moveP1', this.table.positionP1);
-      P2.socket.emit('moveP1', this.table.positionP1);
-			console.log(`P1pos = ${this.table.positionP1}`);
-		});
+     		if (data.direction === 'ArrowDownDown') // == touche enfonce'
+				this.keyP1.isArrowDownPressed = true;
+			else if (data.direction === 'ArrowDownUp') // == touche relache'
+				this.keyP1.isArrowDownPressed = false;
+      		else if (data.direction === 'ArrowUpDown')
+				this.keyP1.isArrowUpPressed = true;
+			else if (data.direction === 'ArrowUpUp')
+				this.keyP1.isArrowUpPressed = false;
+			  
+			});
 		P2.socket.on(`${this.gameRoom}P2remote`, (data) => {
-      // console.log(`mooove P2! ${JSON.stringify(data)}`);
-      if (data.direction === 'down')
-      {
-        if (this.table.positionP2 + this.speedPaddle <= this.table.maxPosP2) 
-        this.table.positionP2 += this.speedPaddle;
-      }
-      else if (data.direction === 'up')
-      {
-        if (this.table.positionP2 - this.speedPaddle >= 0)
-        this.table.positionP2 -= this.speedPaddle;
-      }
-      P1.socket.emit('moveP2', this.table.positionP2);
-      P2.socket.emit('moveP2', this.table.positionP2);
-      console.log(`P2pos = ${this.table.positionP1}`);
+			if (data.direction === 'ArrowDownDown') // == touche enfonce'
+			   this.keyP2.isArrowDownPressed = true;
+		  	else if (data.direction === 'ArrowDownUp') // == touche relache'
+			   this.keyP2.isArrowDownPressed = false;
+			else if (data.direction === 'ArrowUpDown')
+			   this.keyP2.isArrowUpPressed = true;
+		   	else if (data.direction === 'ArrowUpUp')
+				 this.keyP2.isArrowUpPressed = false;
 		});
 
-		//petit message d'acceuil pour le debug et avertir que le game va commencer
+		//petit message d'acceuil pour le debug et avertir que la game va commencer
 		P1.socket.emit(
 			'info',
 			`GameSession: ${this.gameRoom}\nVous jouer face a ${P2.user.login}`,
@@ -115,6 +113,27 @@ export class GameSession {
 			);
 	}
 
+	private positionManagement() {
+		setInterval(() => {
+			if(this.keyP1.isArrowUpPressed)
+			{
+				if(this.table.positionP1 >= 0)
+					this.table.positionP1 -= this.speedPaddle;
+			}
+			if(this.keyP1.isArrowDownPressed)
+			{
+				if(this.table.positionP1 <= this.table.maxPosP1)
+					this.table.positionP1 += this.speedPaddle;
+			}
+		}, this.fpsTargetInMs / 2)
+	}
+	
+	private sendUpdateTable() {
+		setInterval(() => {
+			this.player1.socket.to(this.gameRoom).emit('updateTable', this.table);
+		}, this.fpsTargetInMs)
+	}
+	
 	public getGameId(): number {
 		return this.game_id;
 	}

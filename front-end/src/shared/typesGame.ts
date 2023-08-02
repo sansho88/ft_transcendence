@@ -5,6 +5,16 @@ import { Socket } from 'socket.io';
 // |                           GAME INTERFACE                            |
 // +---------------------------------------------------------------------+
 
+export interface PodTable {
+	positionP1: number;
+	positionP2: number;
+	maxPosP1  : number;
+	maxPosP2  : number;
+	sizeP1    : IVector2D;
+	sizeP2    : IVector2D;
+	size      : IVector2D;
+  }
+
 export interface IVector2D {
 	x: number;
 	y: number;

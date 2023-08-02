@@ -81,17 +81,25 @@ useEffect(() => {
       console.log(`WS setup recu: ${JSON.stringify(data)}`); //recupere taille des elements paddle et balle
     })
     
-    socketRef.current.on('moveP1', (data) => {
-      setP1Position(data);
-      console.log(`WS moveP1 : ${JSON.stringify(data)}`); //recupere la position du paddles 1
+    socketRef.current.on('updateTable', (data: PODGAME.ITable) => {
+      setP1Position(data.posPaddleP1.y);
+      setP2position(data.posPaddleP2.y);
+		//ball position
+      console.log(`WS moveP1 : ${JSON.stringify(data.posPaddleP1.y)}`); //recupere la position du paddles 1
     })
-    socketRef.current.on('moveP2', (data) => {
-      setP2position(data);
-      console.log(`WS moveP2 : ${JSON.stringify(data)}`); //recupere la position du paddles 2
-    })
-    socketRef.current.on('moveBall', (data) => {remoteEvent
-      console.log(`WS moveBall : ${JSON.stringify(data)}`); //recupere la position de la balle
-    })
+   
+	
+	// socketRef.current.on('moveP1', (data) => {
+    //   setP1Position(data);
+    //   console.log(`WS moveP1 : ${JSON.stringify(data)}`); //recupere la position du paddles 1
+    // })
+    // socketRef.current.on('moveP2', (data) => {
+    //   setP2position(data);
+    //   console.log(`WS moveP2 : ${JSON.stringify(data)}`); //recupere la position du paddles 2
+    // })
+    // socketRef.current.on('moveBall', (data) => {remoteEvent
+    //   console.log(`WS moveBall : ${JSON.stringify(data)}`); //recupere la position de la balle
+    // })
 
   }
   console.log(`dim table x:${tableRef.current?.offsetWidth} y:${tableRef.current?.offsetHeight}`)
@@ -104,21 +112,23 @@ useEffect(() => {
 
   if (remoteEvent) {
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp') {
-        socketRef.current?.emit(remoteEvent, {direction: 'up'})
-      }
-      if (e.key === 'ArrowDown') {
-        socketRef.current?.emit(remoteEvent, {direction: 'down'})
+		if (e.key === 'ArrowDown') {
+		  console.log(`${remoteEvent}: UP`)
+		  socketRef.current?.emit(remoteEvent, {direction: 'ArrowUpUp'})
+		}
+		if (e.key === 'ArrowDown') {
+		  console.log(`${remoteEvent}: DOWN`)
+        socketRef.current?.emit(remoteEvent, {direction: 'ArrowUpDown'})
       }
     })
 
     return () => {
       window.removeEventListener('keydown', (e) => {
         if (e.key === 'ArrowUp') {
-          socketRef.current?.emit(remoteEvent, {direction: 'up'})
+          socketRef.current?.emit(remoteEvent, {direction: 'ArrowUpDown'})
         }
         if (e.key === 'ArrowDown') {
-          socketRef.current?.emit(remoteEvent, {direction: 'down'})
+          socketRef.current?.emit(remoteEvent, {direction: 'ArrowUpUp'})
         }
       })
     }
@@ -222,21 +232,6 @@ const Player = ({className, position, refDiv, dim}:
     // handleSearchGame();
   }, [stepCurrentSession]);
   
-  // const handleMatchmakingButton = (() => {
-  //   // handleSearchGame()
-  //   return (
-  //     <div className='flex justify-center'>
-  //       {stepCurrentSession === EStatusGame.idle &&
-  //         <button className='text-white' onClick={() => handleSearchGame()}>PLAY</button> }
-  //       {stepCurrentSession === EStatusGame.matchmakingRequest &&
-  //         <button className='text-white' onClick={() => handleSearchGame()}>CANCEL MATCHMAKING</button> }
-  //       {stepCurrentSession === EStatusGame.gameInProgress &&
-  //         <button className='text-white' onClick={() => handleSearchGame()}>STOP GAME</button> }
-  //       {stepCurrentSession === EStatusGame.endOfGame &&
-  //         <button className='text-white' onClick={() => handleSearchGame()}>END OF GAME</button> }
-  //     </div>
-  //   )
-  // })
 
   return (
     <div className={className}>
@@ -252,7 +247,7 @@ const Player = ({className, position, refDiv, dim}:
             <button className='text-white' onClick={() => handleSearchGame()}>CANCEL MATCHMAKING</button><ClipLoader.ClipLoader color="#36d7b7" />
           </div> }
         {stepCurrentSession === EStatusGame.gameSessionFind &&
-          <button className='text-white' onClick={() => handleSearchGame()}>GAME FIND! READY ?</button> }
+          <button className='text-white' onClick={() => {handleSearchGame()}}>GAME FIND! READY ?</button> }
         {stepCurrentSession === EStatusGame.gameInProgress &&
           <button className='text-white' onClick={() => handleSearchGame()}>STOP GAME</button> }
         {stepCurrentSession === EStatusGame.endOfGame &&
