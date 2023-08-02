@@ -2,14 +2,17 @@ import {
 	BaseEntity,
 	Column,
 	Entity,
+	JoinColumn,
 	JoinTable,
 	ManyToMany,
 	ManyToOne,
 	OneToMany,
+	OneToOne,
 	PrimaryColumn,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { MessageEntity } from './message.entity';
+import { ChannelCredentialEntity } from './credential.entity';
 
 export enum ChannelType {
 	PUBLIC,
@@ -41,6 +44,10 @@ export class ChannelEntity extends BaseEntity {
 		enum: ChannelType,
 	})
 	type: ChannelType;
+
+	@OneToOne(() => ChannelCredentialEntity, { cascade: true })
+	@JoinColumn()
+	credential: ChannelCredentialEntity;
 
 	@ManyToMany(() => UserEntity)
 	@JoinTable()

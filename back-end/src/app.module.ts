@@ -9,7 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { ChannelEntity } from './entities/channel.entity';
 import { MessageEntity } from './entities/message.entity';
-import { CredentialEntity } from './entities/credential.entity';
+import { ChannelCredentialEntity, CredentialEntity } from './entities/credential.entity';
 import { GameEntity } from './entities/game.entity';
 
 @Module({
@@ -30,6 +30,7 @@ import { GameEntity } from './entities/game.entity';
 				ChannelEntity,
 				MessageEntity,
 				CredentialEntity,
+				ChannelCredentialEntity,
 				GameEntity,
 			],
 			synchronize: true, // true -> will create the Table on db if class not there
