@@ -14,6 +14,8 @@ import { UserEntity } from './user.entity';
 import { MessageEntity } from './message.entity';
 import { ChannelCredentialEntity } from './credential.entity';
 import { InviteEntity } from './invite.entity';
+import { MuteEntity } from './mute.entity';
+import { BannedEntity } from './banned.entity';
 
 export enum ChannelType {
 	PUBLIC,
@@ -63,5 +65,13 @@ export class ChannelEntity extends BaseEntity {
 
 	@OneToMany(() => InviteEntity, (InviteEntity) => InviteEntity.channel)
 	@JoinTable()
-	inviteList: UserEntity[];
+	inviteList: InviteEntity[];
+
+	@OneToMany(() => MuteEntity, (MuteEntity) => MuteEntity.channel)
+	@JoinTable()
+	muteList: MuteEntity[];
+
+	@OneToMany(() => BannedEntity, (BannedEntity) => BannedEntity.channel)
+	@JoinTable()
+	bannedList: BannedEntity[];
 }

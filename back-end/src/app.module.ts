@@ -15,6 +15,9 @@ import {
 } from './entities/credential.entity';
 import { GameEntity } from './entities/game.entity';
 import { ChannelModule } from './module.channels/channel.module';
+import { InviteEntity } from './entities/invite.entity';
+import { MuteEntity } from './entities/mute.entity';
+import { BannedEntity } from './entities/banned.entity';
 
 @Module({
 	imports: [
@@ -33,6 +36,9 @@ import { ChannelModule } from './module.channels/channel.module';
 				UserEntity,
 				ChannelEntity,
 				MessageEntity,
+				InviteEntity,
+				MuteEntity,
+				BannedEntity,
 				UserCredentialEntity,
 				ChannelCredentialEntity,
 				GameEntity,

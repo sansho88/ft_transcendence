@@ -12,6 +12,9 @@ import {
 } from 'typeorm';
 import { MessageEntity } from './message.entity';
 import { UserCredentialEntity } from './credential.entity';
+import { InviteEntity } from './invite.entity';
+import { MuteEntity } from './mute.entity';
+import { BannedEntity } from './banned.entity';
 
 export enum UserStatus {
 	INGAME = 2,
@@ -74,6 +77,15 @@ export class UserEntity extends BaseEntity {
 	@ManyToMany(() => UserEntity, (user) => user.followers)
 	@JoinTable()
 	subscribed: UserEntity;
+
+	@OneToMany(() => InviteEntity, (invite) => invite.user)
+	invite: InviteEntity[];
+
+	@OneToMany(() => MuteEntity, (mute) => mute.user)
+	mute: MuteEntity[];
+
+	@OneToMany(() => BannedEntity, (banned) => banned.user)
+	banned: BannedEntity[];
 
 	// @Column()
 	// @ManyToMany(() => UserEntity)
