@@ -1,14 +1,14 @@
 import React, {useContext, useEffect, useState} from "react";
 import Button from "./CustomButtonComponent"
+import Avatar from "@/components/AvatarComponent";
 import axios from "axios";
 import {LoggedContext, UserContext} from '@/context/globalContext';
-
-
-enum Colors {
-    "grey",
-    "green",
-    "gold"
-}
+import {getApi} from "@/components/api/ApiReq";
+import getUserById = getApi.getUserById;
+import {id} from "postcss-selector-parser";
+import "../utils/usefulFuncs"
+import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
+import * as apiReq from '@/components/api/ApiReq'
 
 interface MatchProps {
     opponent1: string;
@@ -39,7 +39,7 @@ export interface IUser {
 
 
 
-const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, login, status, isEditable})=>{
+const Profile: React.FC<IUser> = ({children, className, user_id ,nickname, avatar_path, login, status, isEditable})=>{
 
     const [modifiedNick, setNickText] = useState<string>(nickname);
     const [editMode, setEditMode] = useState(false);
@@ -47,18 +47,32 @@ const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, l
     const {userContext, setUserContext} = useContext(UserContext);
     const [statusColor, setStatusColor] = useState("grey");
 
+    const [ user, setUser] = useState<Partial<IUser>>({nickname: "", login:"", status:0, avatar_path:"", Id_USERS:0});
+
+  /* async function getUserData(id_user){
+            await axios.get(`http://localhost:8000/api/users/${id_user}`)
+               .then((userData) =>{
+               setUser(userData);
+               console.log("[GetUserData]" + userData.login)
+           })
+               .catch((e) => {console.error("[Profile Component]getUserData:" + e)})
+   }
+
+   if (user.login === undefined) {
+       getUserData(user_id)
+           .then(() => {
+               if (user.login) {
+                   login = user.login;
+                   console.log("YAYYYYYIhdifjvprjvf op");
+               }
+           })
+           .catch((e) => console.error(e));
+
+   }
+
+*/
 
 
-    function getEnumNameByIndex(enumObj: any, index: number): string { //useful for userStatus
-        const enumKeys = Object.keys(enumObj).filter((key) => typeof enumObj[key] === 'number');
-        const enumValues = enumKeys.map((key) => enumObj[key]);
-
-        if (enumValues.includes(index)) {
-            return enumKeys[enumValues.indexOf(index)];
-        }
-
-        return "";
-    }
 
     useEffect(() => {
         setStatusColor(getEnumNameByIndex(Colors, userContext.status ? userContext.status : 0));
@@ -143,15 +157,7 @@ const Profile: React.FC<IUser> = ({children, className, nickname, avatar_path, l
     return (
         <>
             <div className={className}>
-                <img className={"avatar"} src={avatar_path} alt="Avatar" style={{
-                    borderWidth: "2px",
-                    borderColor: statusColor,
-                    boxShadow: `1px 2px 5px ${statusColor}`,
-                    transition: "1000ms",
-                    borderRadius: "8px",
-                    width: "5vw",
-                    height: "10vh"
-                }}/>
+                <Avatar avatar_path={""} />
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
                     color: "#07C3FF",
