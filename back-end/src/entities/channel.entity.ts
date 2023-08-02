@@ -13,6 +13,7 @@ import {
 import { UserEntity } from './user.entity';
 import { MessageEntity } from './message.entity';
 import { ChannelCredentialEntity } from './credential.entity';
+import { InviteEntity } from './invite.entity';
 
 export enum ChannelType {
 	PUBLIC,
@@ -59,4 +60,8 @@ export class ChannelEntity extends BaseEntity {
 
 	@OneToMany(() => MessageEntity, (MessageEntity) => MessageEntity.channel)
 	messages: MessageEntity[];
+
+	@OneToMany(() => InviteEntity, (InviteEntity) => InviteEntity.channel)
+	@JoinTable()
+	inviteList: UserEntity[];
 }
