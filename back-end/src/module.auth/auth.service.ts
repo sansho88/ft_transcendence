@@ -30,7 +30,7 @@ export class AuthService {
 			throw new UnauthorizedException();
 		}
 		const credential = await this.usersService.getCredential(login);
-		if (!(await this.credentialsService.compare(rawPassword, credential))) {
+		if (!(await this.credentialsService.compareUser(rawPassword, credential))) {
 			console.log('failed');
 			throw new UnauthorizedException();
 		}
@@ -53,7 +53,7 @@ export class AuthService {
 		if (login.length > 10) return new BadRequestException();
 		if (await this.usersService.findOne(login))
 			throw new ConflictException('login is already taken');
-		const userCredential = await this.credentialsService.create(rawPassword);
+		const userCredential = await this.credentialsService.createUser(rawPassword);
 		const user = await this.usersService.create(login, true, userCredential);
 		const payloadToken: accessToken = { id: user.UserID, rawPassword };
 		return await this.jwtService.signAsync(payloadToken);

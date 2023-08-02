@@ -11,7 +11,7 @@ import {
 	JoinColumn,
 } from 'typeorm';
 import { MessageEntity } from './message.entity';
-import { CredentialEntity } from './credential.entity';
+import { UserCredentialEntity } from './credential.entity';
 
 export enum UserStatus {
 	INGAME = 2,
@@ -60,9 +60,9 @@ export class UserEntity extends BaseEntity {
 	})
 	status: UserStatus;
 
-	@OneToOne(() => CredentialEntity, { cascade: true })
+	@OneToOne(() => UserCredentialEntity, { cascade: true })
 	@JoinColumn()
-	credential: CredentialEntity;
+	credential: UserCredentialEntity;
 
 	@OneToMany(() => MessageEntity, (message) => message.author)
 	message: MessageEntity[];

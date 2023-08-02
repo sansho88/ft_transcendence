@@ -4,6 +4,7 @@ import { ChannelController } from './channel.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChannelEntity } from '../entities/channel.entity';
 import { ChannelCredentialEntity } from '../entities/credential.entity';
+import { UsersModule } from '../module.users/users.module';
 
 @Module({
 	imports: [
@@ -12,6 +13,5 @@ import { ChannelCredentialEntity } from '../entities/credential.entity';
 	],
 	controllers: [ChannelController],
 	providers: [ChannelService],
-	exports: [ChannelService],
 })
-export class UsersModule {}
+export class ChannelModule {}

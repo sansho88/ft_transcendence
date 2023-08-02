@@ -3,7 +3,7 @@ import { UpdateUserDto } from '../dto/user/update-user.dto';
 import { UserEntity, UserStatus } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CredentialEntity } from '../entities/credential.entity';
+import { UserCredentialEntity } from '../entities/credential.entity';
 
 @Injectable()
 export class UsersService {
@@ -24,7 +24,7 @@ export class UsersService {
 	async create(
 		newLogin: string,
 		newInvite: boolean,
-		newCredential: CredentialEntity,
+		newCredential: UserCredentialEntity,
 	) {
 		const user = this.usersRepository.create({
 			login: newLogin,

@@ -9,7 +9,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { ChannelEntity } from './entities/channel.entity';
 import { MessageEntity } from './entities/message.entity';
-import { ChannelCredentialEntity, CredentialEntity } from './entities/credential.entity';
+import {
+	ChannelCredentialEntity,
+	UserCredentialEntity,
+} from './entities/credential.entity';
 import { GameEntity } from './entities/game.entity';
 
 @Module({
@@ -29,7 +32,7 @@ import { GameEntity } from './entities/game.entity';
 				UserEntity,
 				ChannelEntity,
 				MessageEntity,
-				CredentialEntity,
+				UserCredentialEntity,
 				ChannelCredentialEntity,
 				GameEntity,
 			],
