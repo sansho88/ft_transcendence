@@ -1,57 +1,89 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { UpdateUserDto } from '../dto/user/update-user.dto';
+import { UserEntity, UserStatus } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CredentialEntity } from '../entities/credential.entity';
 
 @Injectable()
 export class UsersService {
 	constructor(
-		@InjectRepository(User)
-		private usersRepository: Repository<User>,
+		@InjectRepository(UserEntity)
+		private usersRepository: Repository<UserEntity>,
 	) {}
 
 	/**
 	 * Todo: update with new thing in table
 	 */
-	async create(createUserDto: CreateUserDto) {
-		if (createUserDto.user_name === undefined)
-			createUserDto.user_name = createUserDto.user_login;
-		const user = User.create({
-			username: createUserDto.user_name,
-			login: createUserDto.user_login,
+	/**
+	 * Create and save the new user
+	 * @param newLogin login of the user
+	 * @param newInvite if true the person is treated not has a member of 42
+	 * @param newCredential his credential
+	 */
+	async create(
+		newLogin: string,
+		newInvite: boolean,
+		newCredential: CredentialEntity,
+	) {
+		const user = UserEntity.create({
+			login: newLogin,
+			nickname: newLogin,
+			Invite: newInvite,
 		});
-		user.friend_list = [];
+		user.credential = newCredential;
 		await user.save();
-		return `User ${user.username} created with login ${user.login} successfully :D`;
+		return;
 	}
 
-	findAll() {
+	async findAll() {
 		return this.usersRepository.find();
 	}
 
 	/**
 	 * Todo: return something (Error code?) if invalid id
 	 */
-	findOne(login: string) {
+	async findOne(login: string) {
 		return this.usersRepository.findOneBy({ login: login });
 	}
 
 	async update(login: string, updateUser: UpdateUserDto) {
 		const user = await this.usersRepository.findOneBy({ login: login });
-		if (updateUser.user_name !== undefined)
-			user.username = updateUser.user_name;
-		if (updateUser.avatar_path !== undefined)
-			user.avatar_path = updateUser.avatar_path;
-		if (updateUser.token_2fa !== undefined)
-			user.token_2fa = updateUser.token_2fa;
-		if (updateUser.status !== undefined) user.status = updateUser.status;
+		if (updateUser.nickname !== undefined) user.nickname = updateUser.nickname;
+		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
 		await user.save();
-		return 'User updated :D';
+		return user;
 	}
 
+	// todo: remove user from db
 	remove(id: number) {
 		return `This action removes a #${id} user`;
 	}
+	async getCredential(login: string) {
+		const target = await this.usersRepository.findOne({
+			relations: {
+				credential: true,
+			},
+			where: {
+				login: login,
+			},
+		});
+		return target.credential;
+	}
+
+	async userStatus(login: string, newStatus: UserStatus) {
+		const user = await this.usersRepository.findOneBy({ login: login });
+		user.status = newStatus;
+		await user.save();
+	}
+	// async getFriend(target: string) {
+	// 	return await this.usersRepository.find({
+	// 		relations: {
+	// 			friend_list: true,
+	// 		},
+	// 		where: {
+	// 			login: target,
+	// 		},
+	// 	});
+	// }
 }
