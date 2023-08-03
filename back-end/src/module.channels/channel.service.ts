@@ -31,6 +31,7 @@ export class ChannelService {
 			owner: owner,
 			credential: credential,
 			type: privacy,
+			userList: [owner],
 		});
 		await chan.save();
 		// return 'DONE';
@@ -38,5 +39,42 @@ export class ChannelService {
 	}
 	async findAll() {
 		return this.channelRepository.find();
+	}
+
+	async findOne(id: number) {
+		return this.channelRepository.findOne({
+			where: {
+				channelID: id,
+			},
+		});
+	}
+
+	async joinChannel(user: UserEntity, chan: ChannelEntity) {
+		this.getList(chan).then(async (lst) => {
+			chan.userList = lst;
+			chan.userList.push(user);
+			await chan.save();
+			return chan;
+		});
+	}
+
+	async userInChannel(user: UserEntity, chan: ChannelEntity) {
+		return this.getList(chan).then((userList) => {
+			console.log(userList);
+			return userList.find((usr) => usr.UserID == user.UserID);
+		});
+	}
+
+	async getList(target: ChannelEntity) {
+		return this.channelRepository
+			.findOne({
+				where: {
+					channelID: target.channelID,
+				},
+				relations: {
+					userList: true,
+				},
+			})
+			.then((chan) => chan.userList);
 	}
 }

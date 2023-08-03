@@ -1,9 +1,12 @@
 import {
+	BadRequestException,
 	Body,
 	Controller,
 	Get,
+	Param,
 	ParseIntPipe,
 	Post,
+	Put,
 	UseGuards,
 } from '@nestjs/common';
 import { ChannelService } from './channel.service';
@@ -38,9 +41,29 @@ export class ChannelController {
 			user,
 		);
 	}
-	@Get()
+	@Get('get')
 	@UseGuards(AuthGuard)
 	findAll() {
 		return this.channelService.findAll();
+	}
+
+	@Get('get/:channelID')
+	@UseGuards(AuthGuard)
+	findOne(@Param('channelID', ParseIntPipe) channelID: number) {
+		return this.channelService.findOne(channelID);
+	}
+
+	@Put('join/:channelID')
+	@UseGuards(AuthGuard)
+	async joinChannel(
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@CurrentUser('id', ParseIntPipe) userID: number,
+	) {
+		const chan = await this.channelService.findOne(channelID);
+		const user = await this.userService.findOne(userID);
+		console.log(chan);
+		if (!(await this.channelService.userInChannel(user, chan)))
+			return await this.channelService.joinChannel(user, chan);
+		throw new BadRequestException('User already in channel');
 	}
 }
