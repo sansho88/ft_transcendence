@@ -1,137 +1,81 @@
 import {
-	ApiBody,
-	ApiTags,
-	ApiOperation,
-	ApiResponse,
-	ApiParam,
-	ApiExcludeEndpoint,
-} from '@nestjs/swagger';
-import {
 	Controller,
 	Delete,
-	Put,
 	Param,
 	Body,
 	Post,
 	Get,
-	NotFoundException,
-	UnauthorizedException,
+	Put,
+	UseGuards,
 } from '@nestjs/common';
-import { UserService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
-import { User } from './entities/user.entity';
+import { UsersService } from './users.service';
+import { UpdateUserDto } from '../dto/user/update-user.dto';
+import { CurrentUser } from '../auth/indentify.user';
+import { AuthGuard } from '../auth/auth.guard';
 
-@ApiTags('USERS')
 @Controller('users')
 export class UsersController {
-	constructor(private readonly userService: UserService) {}
+	constructor(private readonly usersService: UsersService) {}
 
 	@Post()
-	@ApiOperation({
-		summary: 'Create a new user, renvoi en reponse obj User complet si OK',
-	})
-	@ApiBody({ type: CreateUserDto })
-	@ApiResponse({status: 201,description: 'User created successfully',type: User,})
-	@ApiResponse({ status: 409, description: 'User already exists' })
-	create(@Body() createUserDto: Partial<User>): Promise<User | undefined> {
-		return this.userService.create(createUserDto);
+	create() {
+		// return this.usersService.create(createUserDto);
+		return 'USE `/auth/sign` to create a new user';
 	}
 
-	//TODO: juste pour session avec mdp, a supprimer une fois auth by API42
-	// @ApiExcludeEndpoint()
-	@Post('login')
-	// @ApiTags('LOGIN SYSTEM /DEV ONLY')
-	// @ApiExcludeEndpoint()
-	@ApiOperation({
-		summary:
-			"ONLY_DEV temp/ check si combo login/password is OK",
-	})
-	@ApiBody({ type: LoginUserDto })
-	@ApiResponse({ status: 401, description: 'Invalid password' })
-	@ApiResponse({ status: 201, description: 'Valid password' })
-	comparePassword(
-		@Body() loginUserDto: LoginUserDto,
-	): Promise<{ success: boolean; message: string }> {
-		return this.userService.comparePassword(loginUserDto);
+	// @Get('/get/:login')
+	// findOne(@Param('login') login: string, @Param('login') id : number) {
+	// 	return this.usersService.findOne(login).then((result) => {
+	// 		if (!result) {
+	// 			throw new BadRequestException('This Login is not registered');
+	// 		}
+	// 		return result;
+	// 	});
+	// }
+
+	// @Put()
+	// follow(@Body() updateUser: UpdateUserDto) {
+	// 	return this.usersService.update(updateUser.login, updateUser);
+	// }
+
+	// @Patch(':login')
+	// update(@Param('login') login: string, @Body() updateUserDto: UpdateUserDto) {
+	// 	return this.usersService.update(+login, updateUserDto);
+	// }
+
+	@Delete(':login')
+	remove(@Param('login') login: string) {
+		return this.usersService.remove(+login);
 	}
 
-	@Get()
-	@ApiOperation({ summary: 'Get all users' })
-	@ApiResponse({ status: 200, description: 'All users', type: [User] })
-	async findAll() {
-		return this.userService.findAll();
+	/*************************************************/
+
+	@Get('me')
+	@UseGuards(AuthGuard)
+	me(@CurrentUser('login') user) {
+		return this.usersService.findOne(user);
 	}
 
-	@Get(':id')
-	@ApiOperation({ summary: 'Get one user by id' })
-	@ApiParam({ name: 'id', type: 'string' })
-	async findOneById(@Param('id') id: string): Promise<User | undefined> {
-		const user = await this.userService.findOne(parseInt(id));
-		if (!user) {
-			throw new NotFoundException('User not found');
-		}
-		return user;
+	@Get('/get/:login')
+	@UseGuards(AuthGuard)
+	findOne(@Param('login') login: string) {
+		return this.usersService.findOne(login);
 	}
 
-	@ApiOperation({ summary: 'Get one user by login' })
-	@Get('/login/:login')
-	@ApiParam({ name: 'login', type: 'string' })
-	@ApiResponse({ status: 200, description: 'User found', type: User })
-	@ApiResponse({ status: 404, description: 'User not found' })
-	async findOneByUsername(
-		@Param('login') login: string,
-	): Promise<User | undefined> {
-		const user = await this.userService.findByUsername(login);
-		if (!user) {
-			throw new NotFoundException('User not found');
-		}
-		return user;
+	@Get('get')
+	@UseGuards(AuthGuard)
+	findAll() {
+		return this.usersService.findAll();
 	}
 
-	@Put(':id')
-	@ApiOperation({ summary: 'Update one user by id' })
-	@ApiParam({ name: 'id', type: 'string' })
-	@ApiBody({ type: UpdateUserDto })
-	@ApiResponse({ status: 200, description: 'User updated successfully' })
-	@ApiResponse({ status: 404, description: 'User not found' })
-	async update(
-		@Param('id') id: string,
-		@Body() updateUserDto: UpdateUserDto,
-	): Promise<User | { message: string }> {
-		const user = await this.userService.findOne(parseInt(id));
-		if (!user) {
-			throw new NotFoundException('User not found');
-		}
+	/*************************************************/
 
-		const updatedUser = await this.userService.update(
-			parseInt(id),
-			updateUserDto,
-		);
-		return { message: 'User updated successfully' };
-	}
-
-	@Delete(':id')
-	@ApiOperation({ summary: 'Delete one user by id' })
-	@ApiParam({ name: 'id', type: 'string' })
-	@ApiResponse({ status: 200, description: 'User removed successfully' })
-	@ApiResponse({ status: 404, description: 'User not found' })
-	async remove(@Param('id') id: string): Promise<{ message: string }> {
-		const user = await this.userService.findOne(parseInt(id));
-		if (!user) {
-			throw new NotFoundException('User not found');
-		}
-		const tmp = user.login;
-		await this.userService.remove(parseInt(id));
-		return { message: `User ${tmp} (id: ${id}) removed successfully` };
-	}
-
-	@Delete()
-	@ApiOperation({ summary: 'Delete all users' })
-	@ApiResponse({ status: 200, description: 'All users removed successfully' })
-	async removeAll(): Promise<{ message: string }> {
-		await this.userService.removeAll();
-		return { message: `All users removed successfully` };
+	@Put('update')
+	@UseGuards(AuthGuard)
+	updateNickname(
+		@CurrentUser('login') login: string,
+		@Body() update: UpdateUserDto,
+	) {
+		return this.usersService.update(login, update);
 	}
 }

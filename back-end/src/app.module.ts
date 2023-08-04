@@ -2,11 +2,15 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import * as process from 'process';
 import { UsersModule } from './users/users.module';
-import { User } from './users/entities/user.entity';
-import { WebsocketGateway } from './websocket/websocket.gateway';
+import { AuthModule } from './auth/auth.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserEntity } from './entities/user.entity';
+import { ChannelEntity } from './entities/channel.entity';
+import { MessageEntity } from './entities/message.entity';
+import { CredentialEntity } from './entities/credential.entity';
+import { GameEntity } from './entities/game.entity';
 
 @Module({
 	imports: [
@@ -21,13 +25,19 @@ import { WebsocketGateway } from './websocket/websocket.gateway';
 			username: process.env.POSTGRES_USER,
 			password: process.env.POSTGRES_PASSWORD,
 			database: process.env.POSTGRES_DB,
-			entities: [User],
-			synchronize: false, // true -> will create the Table on db if class not there
+			entities: [
+				UserEntity,
+				ChannelEntity,
+				MessageEntity,
+				CredentialEntity,
+				GameEntity,
+			],
+			synchronize: true, // true -> will create the Table on db if class not there
 		}),
 		UsersModule,
+		AuthModule,
 	],
 	controllers: [AppController],
-	providers: [AppService, WebsocketGateway],
-
+	providers: [AppService],
 })
 export class AppModule {}
