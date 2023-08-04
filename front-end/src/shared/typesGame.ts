@@ -23,6 +23,7 @@ export enum EKeyEvent {
 
 export interface IPodTable {
   positionBall  :IVector2D;
+  sizeBall      :IVector2D;
 	positionP1    :number;
 	positionP2    :number;
 	maxPosP1      :number;

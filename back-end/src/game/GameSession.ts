@@ -23,6 +23,7 @@ export class GameSession {
 	private fpsTargetInMs: number = 1000 / 60; // = 16.67ms = 60 fps
 	private table: PODGAME.IPodTable = {
 		positionBall: { x: 0, y: 0 },
+    sizeBall:     { x: 18, y: 18 },
 		positionP1: 0,
 		positionP2: 0,
 		maxPosP1: 600 - 60,
@@ -42,9 +43,14 @@ export class GameSession {
 
   private scoreLimit      : number = 3;
 
+  private winner          : PODGAME.userInfoSocket;
+  private looser          : PODGAME.userInfoSocket;
+
 	private isGameRunning   : boolean = true;
   private isP1Ready       : boolean = false;
   private isP2Ready       : boolean = false;
+
+  private ballToRightDBG  : boolean = true;
 
 	private keyP1: KeyPlayerState = {
 		isArrowDownPressed: false,
@@ -193,8 +199,30 @@ export class GameSession {
 		this.sendUpdateTable(); //lancer setInterval table
 	}
 
+  private moveBallLeftRigthDebug = () => {
+    //debug value
+    if (this.isGameRunning){
+
+      if (this.ballToRightDBG && this.table.positionBall.x + (this.table.sizeBall.x/2) >= 0)
+      {  
+        if (this.table.positionBall.x + (this.table.sizeBall.x/2) > this.table.size.x)
+        this.ballToRightDBG = false;
+        else
+        this.table.positionBall.x += 7;
+      }
+      else
+      {
+        if (this.table.positionBall.x - (this.table.sizeBall.x/2) < 0)
+        this.ballToRightDBG = true;
+        else
+        this.table.positionBall.x -= 7;
+      }
+    }
+    // console.log(`BALL posx: ${this.table.positionBall.x}`)
+  }
+
   //calcul position des paddles en temp reel
-	private positionManagement() {
+	private positionManagement() { 
 		if (this.isGameRunning) {
 			this.intervalId = setInterval(() => {
 				if (this.keyP1.isArrowUpPressed) {
@@ -217,6 +245,7 @@ export class GameSession {
 						this.table.positionP2 += this.speedPaddle;
 					console.log('P2 position ' + this.table.positionP2);//FIXME:
 				}
+        this.moveBallLeftRigthDebug();//juste for anime ball before real bounds physics
 			}, this.fpsTargetInMs / 2);
 		}
 	}
@@ -260,25 +289,44 @@ export class GameSession {
     }
   }
 
+  //message de fin de game et reset de la game
+  private messageEndGameAndReset(){
+    this.cleanup()
+    this.serverSocket.to(this.gameRoomEvent).emit('endgame', 
+                `${this.winner.user.nickname} won this game\n${this.table.scoreP1} - ${this.table.scoreP2}`);
+    setTimeout(() => {
+      console.log('reset');
+      this.serverSocket.to(this.gameRoomEvent).emit('reset'); 
+      this.player1.socket.leave(this.gameRoomEvent);
+      this.player2.socket.leave(this.gameRoomEvent);
+    }
+    , 3500);
+  }
+
   //Enclenche la fin du jeu
 	private endOfGame() {
 		if (this.table.scoreP1 > this.table.scoreP2) {
+      this.winner = this.player1;
+      this.looser = this.player2;
 			this.serverSocket
-				.to(this.gameRoomEvent)
-				.emit('info', `${this.player1.user.nickname} won this game`);
+      .to(this.gameRoomEvent)
+      .emit('info', `${this.player1.user.nickname} won this game`);
 			console.log(`${this.player1.user.nickname} won this game`);
 		} else {
-			this.serverSocket
+      this.winner = this.player2;
+      this.looser = this.player1;
+      this.serverSocket
 				.to(this.gameRoomEvent)
 				.emit('info', `${this.player2.user.nickname} won this game`);
 			console.log(`${this.player2.user.nickname} won this game`);
 		}
-    this.serverSocket
-      .to(this.gameRoomEvent)
-      .emit('ENDGAME');
-    this.player1.socket.leave(this.gameRoomEvent);
-    this.player2.socket.leave(this.gameRoomEvent);
-		this.cleanup(); //clear interval
+    // this.serverSocket
+    //   .to(this.gameRoomEvent)
+    //   .emit('ENDGAME');
+    this.messageEndGameAndReset();
+    // this.player1.socket.leave(this.gameRoomEvent);
+    // this.player2.socket.leave(this.gameRoomEvent);
+		// this.cleanup(); //clear interval
 	}
 
   //Gestion fin du game, si score max atteint => endOfGame
@@ -287,6 +335,7 @@ export class GameSession {
 			this.table.scoreP1 >= this.scoreLimit ||
 			this.table.scoreP2 >= this.scoreLimit
 		)
+
 			this.endOfGame();
 	}
 
@@ -303,7 +352,7 @@ export class GameSession {
 	}
 
 	private startGame() {
-      console.log(` le jeu commence`);
+      console.log(`le jeu commence`);
 		  this.isGameRunning = true;
 		  this.positionManagement();
       this.player1.socket.emit('startGame');

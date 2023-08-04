@@ -61,7 +61,7 @@ export default function Game({className}: {className: string}) {
   const [scoreP1, setScoreP1] = useState<number>(0);
   const [scoreP2, setScoreP2] = useState<number>(0);
 
-  const [infoMessage, setInfoMessage]   = useState<string>('');
+  const [infoMessage, setInfoMessage]   = useState<string>('PLAY');
 
 
 	useEffect(() => {
@@ -111,7 +111,7 @@ export default function Game({className}: {className: string}) {
 	      console.log(`WS gameFind recu: ${JSON.stringify(data)}`);
 	    })
 
-	
+
 	    socketRef.current.on('countdown', (data) => {
         if (stepCurrentSession !== EStatusFrontGame.countdown)
           setStepCurrentSession(EStatusFrontGame.countdown);
@@ -125,18 +125,27 @@ export default function Game({className}: {className: string}) {
         // setInfoMessage('');
 	      console.log(`WS GAME IS RUNNING: ${JSON.stringify(data)}`);
 	    })
-	    socketRef.current.on('ENDGAME', (data) => {
+
+	    socketRef.current.on('endgame', (data) => {
+        if (stepCurrentSession !== EStatusFrontGame.endOfGame)
+          setStepCurrentSession(EStatusFrontGame.endOfGame);
+        setNameGameSession('');
+        setRemoteEvent('');
         setBallHidden(true);
         setP1Position(250);
         setP2Position(250);
+        setInfoMessage(data);
+	      console.log(`WS endgame: ${JSON.stringify(data)}`);
+	    })
+
+	    socketRef.current.on('reset', () => {
+	      console.log(`WS RESET`);
+        setInfoMessage('PLAY');
         setScoreP1(0);
         setScoreP2(0);
-        setNameGameSession('');
         setUserP1({});
         setUserP2({});
         setStepCurrentSession(EStatusFrontGame.idle);
-        // setInfoMessage('');
-	      console.log(`WS GAME IS RUNNING: ${JSON.stringify(data)}`);
 	    })
 
 
@@ -269,7 +278,7 @@ export default function Game({className}: {className: string}) {
       <>
         <div  ref={refDiv} className={`${className}`} style={{height: paddleSize.y, width: paddleSize.x, top: `${p1Position}px`}} />
         {nameGameSession &&
-        <div className=' absolute text-gray-500 font-semibold text-xl flex flex-col items-center justify-center' style={{top: '20px', left: '140px'}}>{`${userP1.nickname} `}
+        <div className=' absolute text-gray-500 text-xl flex flex-col items-center justify-center' style={{top: '20px', left: '140px'}}>{`${userP1.nickname} `}
           <div className='text-6xl' style={{top: '20px', right: '120px'}}>{`${scoreP1}`} 
           </div>
         </div>
@@ -279,7 +288,7 @@ export default function Game({className}: {className: string}) {
       <>
         <div ref={refDiv} className={`${className}`} style={{height: paddleSize.y, width: paddleSize.x, top: `${p2Position}px`}} />
         {nameGameSession && 
-        <div className=' absolute text-gray-500 font-semibold text-xl flex flex-col items-center justify-center' style={{top: '20px', right: '140px'}}>{`${userP2.nickname} `}
+        <div className=' absolute text-gray-500 text-xl flex flex-col items-center justify-center' style={{top: '20px', right: '140px'}}>{`${userP2.nickname} `}
           <div className='text-6xl' style={{top: '20px', right: '120px'}}>{`${scoreP2}`}
           </div>
         </div>
@@ -310,12 +319,13 @@ export default function Game({className}: {className: string}) {
   }
 
   function handleSearchGame() {
-    const login   = userLogged.userContext?.login
-    let nickname  = userLogged.userContext?.login;
-    let id_user  = userLogged.userContext?.id_user;
+    const login     = userLogged.userContext?.login
+    let nickname    = userLogged.userContext?.login;
+    let id_user     = userLogged.userContext?.id_user;
     if (nickname === undefined)
       nickname = userLogged.userContext?.nickname
     if (stepCurrentSession === EStatusFrontGame.idle) {
+      setInfoMessage('PLAY');
 			socketRef.current?.emit(`${apiRoutes.wsGameRoutes.addPlayerToMatchnaking()}`, {
         id_user: id_user,
 				login: login,
@@ -343,9 +353,6 @@ export default function Game({className}: {className: string}) {
       console.log("le jeu est terminé !"); 
       return;
 		}
-    else if (stepCurrentSession === EStatusFrontGame.endOfGame)
-      setStepCurrentSession(EStatusFrontGame.idle);
-    return;
   }
 
   useEffect(() => {
@@ -355,16 +362,19 @@ export default function Game({className}: {className: string}) {
 
   return (
     <div className={className}>
-      <Table tableRef={tableRef} className='w-[700px] h-[600px] relative'>
-        <Player className='bg-black ml-2 absolute left-0' dim={{x:2, y:10}} position='left' refDiv={pad1Ref} /> 
-        <Player className='bg-black mr-2 absolute right-0' dim={{x:2, y:10}} position='right' refDiv={pad2Ref} />
+      <Table tableRef={tableRef} className='w-[700px] h-[600px] relative font-vt323'>
+        <Player className='bg-black ml-2 absolute left-0 font-vt323' dim={{x:2, y:10}} position='left' refDiv={pad1Ref} /> 
+        <Player className='bg-black mr-2 absolute right-0 font-vt323' dim={{x:2, y:10}} position='right' refDiv={pad2Ref} />
         {!ballHidden && <Ball/>}
+        {stepCurrentSession === EStatusFrontGame.idle &&
+            <div className=' font-Montserrat absolute -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2  text-gray-700 text-7xl'>{infoMessage}</div> }
         {stepCurrentSession === EStatusFrontGame.countdown &&
-          <div className='absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 font-black text-gray-700 text-9xl'>{infoMessage}</div>  }
-          <button className='text-red-800 absolute bottom-2 left-1/2 -translate-x-1/2 font-extrabold' onClick={() => dbgAddPlayerGoal()}><br/>CHEAT: GOAL +1 </button> 
+          <div className=' font-vt323 absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-gray-700 text-9xl'>{infoMessage}</div>  }
+        {stepCurrentSession === EStatusFrontGame.endOfGame &&
+          <div className=' font-vt323 text-center absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2  text-gray-700 text-xl'>{infoMessage}</div>  }
       </Table>
 
-        <div className='flex justify-center items-center left-1/2 text-xl text-gray-700 h-20'>
+        <div className='flex justify-center items-center left-1/2 text-xl text-gray-700 h-20'> 
           {stepCurrentSession === EStatusFrontGame.idle &&
             <button className='text-white' onClick={() => handleSearchGame()}>PLAY</button> }
           {stepCurrentSession === EStatusFrontGame.matchmakingRequest &&
@@ -378,8 +388,10 @@ export default function Game({className}: {className: string}) {
             </>
           }
           {stepCurrentSession === EStatusFrontGame.gameInProgress &&
-          <div className='flex '>
-            <button className='text-white' onClick={() => stopGameAndLose()}>STOP GAME</button> 
+          <div className='flex flex-grow relative'>
+            <button className='text-white justify-center items-center' onClick={() => stopGameAndLose()}>STOP GAME</button> 
+          <button className='text-red-800 absolute top-2 right-12' onClick={() => dbgAddPlayerGoal()}>GOAL +1 </button> 
+
           </div>
           
         }
