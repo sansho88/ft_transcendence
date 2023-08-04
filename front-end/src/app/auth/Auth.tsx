@@ -5,15 +5,16 @@ import  InputPod  from '@/components/(ben_proto)/login/InputPod'
 import * as POD  from "@/shared/types";
 import * as apiReq from '@/components/api/ApiReq'
 import * as ClipLoader from 'react-spinners'
-
-
 import './auth.css'
+
+
 import { useRouter } from 'next/navigation';
-import { UserContext, LoggedContext } from '@/context/globalContext';
-import axios from "axios";
+
+import Axios from '@/components/api/AxiosConfig';
+import { UserContext, LoggedContext, SocketContextChat, SocketContextGame } from '@/context/globalContext';
 // import { Button } from '@/components/CustomButtonComponent'
 
-//FIXME: le re logging ne fonctionne pas bien, ne recupere les infos pour userContext = donner vide
+//FIXME: le re logging ne fonctionne pas bien, ne recupere les infos pour userContext = data user vide
 
 enum EAuthMod {
 	api42,
@@ -37,16 +38,18 @@ export default function Auth({className}: {className?: string}) {
 	
 	const {userContext, setUserContext} = useContext(UserContext);
 	const { setLogged } = useContext(LoggedContext);
+	// const [isLogged, setIsLogged] = useState<boolean | null>(null);
+  const socketChat = useContext(SocketContextChat);
+  const socketGame = useContext(SocketContextGame);
 
-
-
+  
 	useEffect(() => {
 		console.log('UseEffect : userContext.login = ' + userContext?.login + ' pass: ' + userContext?.password);	
 	}, [userContext]);
 
 	const [currentStepLogin, setCurrentStepLogin] = useState<EStepLogin>(EStepLogin.start)
 
-	
+
 	////////////////////////////////////////////////////////
 	////////////////// GESTION DES INPUTS //////////////////
 	////////////////////////////////////////////////////////
@@ -55,9 +58,6 @@ export default function Auth({className}: {className?: string}) {
 	const [loginInput, setLoginInput] = useState<string>(lastUserLogin == null ? '' : lastUserLogin);
 	const [login, setLogin] = useState<string>(lastUserPW == null ? '' : lastUserPW);
 	
-
-
-
 	const [passwordInput, setPasswordInput] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
 	
@@ -69,7 +69,7 @@ export default function Auth({className}: {className?: string}) {
 
 	const enterLogin = () => {
 		return (
-			<div className='flex flex-col justify-center items-center'>
+			<div className='flex flex-col justify-center items-center text-white'>
 				<InputPod 
 					className='inputLogin'
 				props=
@@ -89,7 +89,7 @@ export default function Auth({className}: {className?: string}) {
 	
 	const enterPassword = () => {
 		return (
-			<div className='flex flex-col justify-center items-center'>
+			<div className='flex flex-col justify-center items-center text-white'>
 				<InputPod
 				className='inputLogin'
 				props=
@@ -137,27 +137,27 @@ export default function Auth({className}: {className?: string}) {
 		const timer = setTimeout(() => {
 			setShowMessage(false);
 			setCurrentStepLogin(EStepLogin.bye)
-			router.push('/'); //executer apres le timeout
-		}, 5000); // 3000 ms = 3 secondes
+			router.push('/proto/game'); //executer apres le timeout
+		}, 650); // 3000 ms = 3 secondes
 		return () => clearTimeout(timer);
 	}, [currentStepLogin, router]);
 
 	const LoggedSuccess = () => {
+
+    socketChat?.connect();
+    socketGame?.connect();
+    
 		return (
 			<div className="flex flex-col items-center text-center">
       {showMessage && (
         <>
-          <p>Congratulations, you are now logged in!</p>
-          <p>Enjoy playing! </p>
+          <p className=' text-white'>Congratulations, you are now logged in!<br/>Enjoy playing!</p>
           <ClipLoader.PacmanLoader color='#07C3FF' size={30}/>
         </>
       )}
     </div>
 		);
 	}
-
-
-
 
 	//TODO: fait une page ou popup qui indique lerreur pendant 3 secondes avant de retourner au debut
 	// useEffect(() => {
@@ -259,7 +259,7 @@ useEffect(() => {
 					const req = await apiReq.utilsCheck.isPasswordMatch(login, password);
 					if (req)
 					{
-						axios.get(`http://localhost:8000/api/users/login/${login}`)
+						Axios.get(`http://localhost:8000/api/users/login/${login}`)
 						.then((res) => {
 							const newUser: POD.IUser = res.data;
 							setUserContext(newUser);
