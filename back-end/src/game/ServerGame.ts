@@ -45,4 +45,5 @@ export class ServerGame {
     return null;
   }
 
+  public getAllGameSession(): GameSession[] { return this.gameSession; }
 }

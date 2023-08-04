@@ -13,7 +13,6 @@ import { ServerGame } from 'src/game/ServerGame';
 import { wsGameRoutes } from 'shared/routesApi';
 import { userInfoSocket } from 'shared/typesGame';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { User } from 'src/users/entities/user.entity';
 
 @WebSocketGateway({
 	transports: ['websocket'],
@@ -44,7 +43,6 @@ export class WebsocketGatewayGame
     this.server.emit(room, payload)
   }
 
-
 	@SubscribeMessage(wsGameRoutes.addNewPlayerToServer())
 	welcomeToGameServer(client: Socket, payload: Partial<IUser>) {
     if (payload.login)
@@ -55,25 +53,24 @@ export class WebsocketGatewayGame
 
 	@SubscribeMessage(wsGameRoutes.addPlayerToMatchnaking())
 	addPlayerToMatchmaking(client: Socket, payload: Partial<IUser>) {
-		console.log(client.id + ': ' + payload.nickname);
-		console.log('json user: ' + JSON.stringify(payload));
+		// console.log(client.id + ': ' + payload.nickname);
+		// console.log('json user: ' + JSON.stringify(payload));
     if (!payload.nickname)
       return console.error('ws/welcomeToGameServer: Bad client or user');  
     
     const player: userInfoSocket = {socket: client, user: payload};
     this.serverGame.addPlayerToMatchmaking(player, this.server);
-    // console.log('helllo'); 
 		client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
 	}
 
 	@SubscribeMessage(wsGameRoutes.removePlayerToMatchnaking())
 	RemoveUserToMatchmaking(client: Socket, payload: Partial<IUser>) {
-    console.log(`TRY removePlayerToMatchnaking:  ${payload.nickname}`); 
+    // console.log(`TRY removePlayerToMatchnaking:  ${payload.nickname}`); 
     if (!payload.nickname)
       return console.error('ws/welcomeToGameServer: Bad client or user');  
     const player: userInfoSocket = {socket: client, user: payload};
     this.serverGame.removePlayerToMatchmaking(player);
-		client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
+		// client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
 	}
 
 }
