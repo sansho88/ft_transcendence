@@ -23,6 +23,7 @@ export class ChatGateway extends IoAdapter {
 	/** This is a test */
 
 	// Todo: Maybe Give Bearer Token to auth when 1st connection then keep userID and client.ID in a map-like structure
+	// Or We could also use a 'Auth' event to identify the user post connection
 	async handleConnection(client: Socket, @MessageBody() data: string) {
 		console.log(`New Connection ${client.id}`);
 	}
