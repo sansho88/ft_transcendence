@@ -30,6 +30,5 @@ export class MessageEntity extends BaseEntity {
 		length: 256,
 		nullable: false,
 	})
-	contente: string;
-
+	content: string;
 }

@@ -15,6 +15,7 @@ import { UserCredentialEntity } from './credential.entity';
 import { InviteEntity } from './invite.entity';
 import { MuteEntity } from './mute.entity';
 import { BannedEntity } from './banned.entity';
+import { ChannelEntity } from './channel.entity';
 
 export enum UserStatus {
 	INGAME = 2,
@@ -69,6 +70,9 @@ export class UserEntity extends BaseEntity {
 
 	@OneToMany(() => MessageEntity, (message) => message.author)
 	message: MessageEntity[];
+
+	@OneToMany(() => ChannelEntity, (chanel) => chanel.userList)
+	channelJoined: ChannelEntity[];
 
 	//	Friends
 	@ManyToMany(() => UserEntity, (user) => user.subscribed)
