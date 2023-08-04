@@ -1,20 +1,27 @@
 'use client';
 import Image from 'next/image'
-import * as React from "react";
-import Button from "./components/CustomButtonComponent"
-import Profile from "./components/ProfileComponent"
-import Stats from "./components/StatsComponent"
+import React, {useContext, useEffect} from "react";
+import Button from "../components/CustomButtonComponent"
+import Profile from "../components/ProfileComponent"
+import Stats from "../components/StatsComponent"
+
 import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
+import {LoggedContext, UserContext} from '@/context/globalContext';
+import {useRouter} from 'next/navigation';
+import axios from "axios";
+import * as POD from "@/shared/types";
+import * as apiReq from '@/components/api/ApiReq'
+import ChatRoomCommponent from '@/components/chat/ChatRoomComponent'
+import {EStatus} from "@/shared/types";
 
 export default function Home() {
-preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
-    enum AllStatus {
-        Offline,
-        Online,
-        InGame
-    }
+	preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
+	const { logged, setLogged } = useContext(LoggedContext);
+	const {userContext, setUserContext} = useContext(UserContext);
+	const router = useRouter();
+	
     enum Colors {
-        "grey",
+        "grey",  
         "green",
         "gold"
     }
@@ -24,105 +31,118 @@ preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2")
         StatusColor.set(i, Colors[i]);
     }
 
+    async function updateStatusUser(id_user, status) {
+        const updateUser: Partial<POD.IUser> = {id_user: id_user, status: status}
+        await apiReq.putApi.putUser(updateUser)
+            .then(() => {
+                setUserContext(updateUser);
+            })
+            .catch((e) => {console.error(e)})
+    }
 
-    const [isLogged, setLog] = React.useState(false);
-    const [userStatus, setUserStatus] = React.useState(AllStatus.Online);
+    function switchOnlineIngame(){
+        const tmpStatus = userContext?.status == EStatus.Online ? EStatus.InGame : EStatus.Online;
+        userContext.status = tmpStatus;
 
-    let userNickName : string = "NickTaMer";
+        setUserContext(userContext);
+        updateStatusUser(userContext?.id_user, tmpStatus)
+            .catch((e) => console.error(e));
 
+        console.log('[MAIN PAGE]USER STATUS:' + userContext.status);
+    }
+
+    useEffect(() => {
+        console.log("Main Page: isLogged? " + logged);
+        console.log("Main Page: localStorageLogin? " + localStorage.getItem("login"));
+        if(!logged && !localStorage.getItem("login"))
+            router.push('/auth')
+        else
+        {
+            console.log("ID USER: " + userContext?.id_user);
+        }
+    }, [logged])
+ 
+   
+    const [userLogin, setUserLogin] = React.useState( "lelogin");
+    const [userNickName, setUserNickName] = React.useState( "Nick");
+    const [userStatus, setUserStatus] = React.useState(EStatus.Online);
 
     function handleLogin() {
-        setLog(true);
-        console.log("LOGGED BIM!");
+       // setLog(true);
+        console.log("LOGGED REALLY!");
     }
 
-    function handleUserStatus() {
+    useEffect(() => {
+        if (logged)
+            axios.get(`http://localhost:8000/api/users/${userContext?.id_user}`)
+                .then((response) => {
+                    console.log('response:' + response.data.nickname);
+                    setUserLogin(response.data.login);
+                    setUserNickName(response.data.nickname);
+                })
+                .catch((e) => {
+                    console.error('error:' + e.toString());
+                });
+    }, [logged]);
 
-        setUserStatus(userStatus === AllStatus.InGame ? AllStatus.Online : AllStatus.InGame);
-        console.log(`User Status: ${userStatus}; statusColor ${StatusColor.get(userStatus)}`);
+    function login() {
+        if (!logged)
+            return (
+                <button type="button" onClick={handleLogin} className={"button-login"}>
+
+                    <span className="text">LOGIN</span></button>
+            )
+        else
+            return hello("Sansho");
+
     }
 
-    const Header = () => {
-        <head>
-            <link rel={"icon"} href={"./favicon.ico"}/>
-        </head>
-    }
+    function hello(name: string) {
 
-  function login(){
-    if (!isLogged)
-      return (
-            <button type="button" onClick={handleLogin} className={"button-login"}>
-              <span className="text">LOGIN</span></button>
-          /*<Button border={"2px"} color={"#FFFFFF"} image={"linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB)"} height={"30px"} width={"60px"} radius={"4px"} onClick={handleLogin}>LOGIN</Button>*/
-      )
-    else
-      return hello("Sansho");
-  }
-  function hello(name: string){
+        let msg: string = "";
 
-    let msg: string = "";
-
-    if (name.length)
-      msg = "dear " + name + " !\n";
-    return (
-        <div>
-            Hello {msg}
-        </div>
-    )
-  }
-
-  if (!isLogged)
-    return (
-        <>
-            <Header/>
-        <div className="main-background">
-          <div className="welcome">
-            <div className="welcome-msg">WELCOME TO</div>
-            {/*<div className="width: 788px; height: 130px; left: 0px; top: 24px; position: absolute; justify-content: center; align-items: center; display: inline-flex">*/}
-              <div className="welcome-title">PONG POD! {login()}</div>
-
+        if (name.length)
+            msg = "dear " + name + " !\n";
+        return (
+            <div>
+                Hello {msg}
             </div>
-        </div>
-     </>
-    )
-  else
-    return (
-        <>
-            <Header/>
-      <main className="main-background">
-        {/*  <div className={"sidebar"}>
-              <menu className="menu" autoCapitalize={"words"}  title={"Menu"}>
-                <li tabIndex={1}> <img src={"/joystick.svg"} alt={"joystick-logo"}/>Game Mode</li>
-                <li tabIndex={2}><img src={"/profile.svg"} alt={"profile-logo"}/>Profile</li>
-                <li tabIndex={3}><img src={"/friends.svg"} alt={"friends-logo"}/>Friends</li>
-              </menu>
-          </div>*/}
-
-          <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"lelogin"} nickname={userNickName}
-                   status={AllStatus[userStatus]} statusColor={StatusColor.get(userStatus)} isEditable={true}>
-              <p style={{paddingBottom: "1vh"}}><Stats level={42} victories={112} defeats={24} rank={1}/></p>
-              <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
-          </Profile>
-          <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"} height={"42px"}/>
-
-        <div className="game">
-
-          <Image
-            className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] max-w-fit max-h-fit"
-            src="/pong-logo.png"
-            alt="Pong Logo"
-            width={768}
-            height={768}
-            priority
-            onClick={handleUserStatus}
-          />
-            <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"} alt={"GameMode options"}  radius={"0"} onClick={handleUserStatus}/>
-        </div>
+        )
+    }
 
 
-      </main>
-        </>
+    if(!logged /*&& !localStorage.getItem("login")*/)
+        router.push('/auth')
+    else
+        return (
+            <>
+                <main className="main-background">
+                    <Profile className={"main-user-profile"} nickname={userNickName} login={userLogin} status={userContext.status} avatar_path={userContext.avatar_path} isEditable={true}>
 
-    )
+                        <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
+                        <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
+                    </Profile>
+                    <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"}
+                            height={"42px"}/>
 
+                    <div className="game">
+
+                        <Image
+                            className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] max-w-fit max-h-fit"
+                            src="/pong-logo.png"
+                            alt="Pong Logo"
+                            width={768}
+                            height={768}
+                            priority
+                            onClick={switchOnlineIngame}
+                        />
+                        <ChatRoomCommponent className='' classNameBlockMessage='m-6 overflow-auto h-[350px]'/>
+                        <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"}
+                                alt={"GameMode options"} radius={"0"} onClick={switchOnlineIngame}/>
+                    </div>
+
+
+                </main>
+            </>
+        )
 }

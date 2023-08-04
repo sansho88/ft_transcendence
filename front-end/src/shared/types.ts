@@ -4,6 +4,17 @@ export enum EStatus {
 	InGame,
 }
 
+// export interface IUser { //utiliser plutot PODSQL.User
+// 	id_user?: number;
+// 	login?: string;
+// 	nickname?: string;
+// 	password: string;
+// 	avatar_path: string;
+// 	status: number;
+// 	token_2fa: string;
+// 	has_2fa: boolean;
+// }
+
 export enum EStepLogin {
 	start,
 	enterLogin,
