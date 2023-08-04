@@ -1,82 +1,40 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, { useEffect, useState} from "react";
 import Button from "./CustomButtonComponent"
 import Avatar from "@/components/AvatarComponent";
 import axios from "axios";
-import {LoggedContext, UserContext} from '@/context/globalContext';
-import {getApi} from "@/components/api/ApiReq";
-import getUserById = getApi.getUserById;
-import {id} from "postcss-selector-parser";
+
+
 import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
-import * as apiReq from '@/components/api/ApiReq'
+import {EStatus} from "@/shared/types";
 
-interface MatchProps {
-    opponent1: string;
-    opponent2: string;
-    scoreOpp1: bigint;
-    scoreOpp2: bigint;
-    date: string;
-    id: bigint;
-}
-
-export enum EStatus {
-    Offline,
-    Online,
-    InGame
-}
 
 export interface IUser {
     Id_USERS?: number;
     login: string;
     nickname: string;
-    avatar_path: string;
-    status: number;
-    token_2FA: string;
-    has_2FA: boolean;
+    avatar_path?: string;
+    status?: number;
+    token_2FA?: string;
+    has_2FA?: boolean;
 
 }
 
 
 
 
-const Profile: React.FC<IUser> = ({children, className, user_id ,nickname, avatar_path, login, status, isEditable})=>{
+const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, login, status, isEditable})=>{
 
     const [modifiedNick, setNickText] = useState<string>(nickname);
     const [editMode, setEditMode] = useState(false);
     const [nickErrorMsg, setNickErrMsg] = useState("");
-    const {userContext, setUserContext} = useContext(UserContext);
     const [statusColor, setStatusColor] = useState("grey");
 
-    const [ user, setUser] = useState<Partial<IUser>>({nickname: "", login:"", status:0, avatar_path:"", Id_USERS:0});
-
-  /* async function getUserData(id_user){
-            await axios.get(`http://localhost:8000/api/users/${id_user}`)
-               .then((userData) =>{
-               setUser(userData);
-               console.log("[GetUserData]" + userData.login)
-           })
-               .catch((e) => {console.error("[Profile Component]getUserData:" + e)})
-   }
-
-   if (user.login === undefined) {
-       getUserData(user_id)
-           .then(() => {
-               if (user.login) {
-                   login = user.login;
-                   console.log("YAYYYYYIhdifjvprjvf op");
-               }
-           })
-           .catch((e) => console.error(e));
-
-   }
-
-*/
-
-
-
+    if (status == undefined)
+        status = 0;
     useEffect(() => {
-        setStatusColor(getEnumNameByIndex(Colors, userContext.status ? userContext.status : 0));
-    }, [userContext.status]);
+        setStatusColor(getEnumNameByIndex(Colors, status ? status : 0));
+    }, [status]);
 
 
     const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => { //updated for each character
@@ -91,7 +49,7 @@ const Profile: React.FC<IUser> = ({children, className, user_id ,nickname, avata
         }
     };
 
-    useEffect(() => {
+    useEffect(() => { //Initialize le nickname a la creation du component
         if (modifiedNick != nickname && !editMode)
             axios.get(`http://localhost:8000/api/users/login/${login}`)
                 .then((response) => {
@@ -154,10 +112,12 @@ const Profile: React.FC<IUser> = ({children, className, user_id ,nickname, avata
             )
     }
 
+
+    const WIDTH= 4, HEIGHT= WIDTH * 3
     return (
         <>
             <div className={className}>
-                <Avatar avatar_path={""} />
+                <Avatar path={avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={status}/>
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
                     color: "#07C3FF",
@@ -170,7 +130,7 @@ const Profile: React.FC<IUser> = ({children, className, user_id ,nickname, avata
                     <p id={"status"} style={{
                         color:statusColor,
                         transition:"1000ms"}}>
-                        {getEnumNameByIndex(EStatus, userContext.status ? userContext.status : 0) }
+                        {getEnumNameByIndex(EStatus, status)}
                     </p>
                 </div>
                 <div id={"children"} style={{marginLeft: "4px"}}>{children}</div>

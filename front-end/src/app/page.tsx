@@ -2,7 +2,7 @@
 import Image from 'next/image'
 import React, {useContext, useEffect} from "react";
 import Button from "../components/CustomButtonComponent"
-import Profile, {EStatus} from "../components/ProfileComponent"
+import Profile from "../components/ProfileComponent"
 import Stats from "../components/StatsComponent"
 
 import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
@@ -12,6 +12,7 @@ import axios from "axios";
 import * as POD from "@/shared/types";
 import * as apiReq from '@/components/api/ApiReq'
 import ChatRoomCommponent from '@/components/chat/ChatRoomComponent'
+import {EStatus} from "@/shared/types";
 
 export default function Home() {
 	preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
@@ -116,7 +117,7 @@ export default function Home() {
         return (
             <>
                 <main className="main-background">
-                    <Profile className={"main-user-profile"} user_id={userContext.id_user} nickname={userNickName} login={userLogin} status={1} avatar_path={"/tests/avatar.jpg"} isEditable={true}>
+                    <Profile className={"main-user-profile"} nickname={userNickName} login={userLogin} status={userContext.status} avatar_path={userContext.avatar_path} isEditable={true}>
 
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
                         <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
