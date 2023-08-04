@@ -24,12 +24,20 @@ export class ServerGame {
     console.log(`${player.user.login}: add in matchmaking list`);
     if(this.matchmaking.getUsersNumber() >= 2)
     {
-      this.gameSession.push(this.matchmaking.createGame(server));
+      //TODO: push en DB ? ou alors push en db uniquement si game terminé
+      this.gameSession.push(this.matchmaking.createGame(server, this.gameSession.length)); //FIXME: recup game_id de la DB
       console.log(`GameSession created`);
     }
   }
 
-  public getGameSession(game_id: number): GameSession {
+  public removePlayerToMatchmaking(player: userInfoSocket) {
+    if (!player)
+        return console.log('removePlayerToMatchmaking: Error player')
+    this.matchmaking.removeUser(player);
+    // console.log(`${player.user.login}: remove in matchmaking list`);
+  }
+
+  public getGameSession(game_id: number): GameSession { 
     this.gameSession.forEach((game) => {
       if(game.getGameId() === game_id)
         return game;

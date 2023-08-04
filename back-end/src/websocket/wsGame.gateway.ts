@@ -49,11 +49,12 @@ export class WebsocketGatewayGame
 	welcomeToGameServer(client: Socket, payload: Partial<IUser>) {
     if (payload.login)
 		  console.log(client.id + '= ' + payload.login + 'is connected to serverGame instance');
-		client.emit('welcome', 'Bienvenue sur le game server');
+    //TODO: save user in list user ? useless ? yes i thinks better with sql request for check online user
+		client.emit('welcome', 'Bienvenue sur le game server'); //message dacceuil connection websocket
 	}
 
 	@SubscribeMessage(wsGameRoutes.addPlayerToMatchnaking())
-	handleGame(client: Socket, payload: Partial<IUser>) {
+	addPlayerToMatchmaking(client: Socket, payload: Partial<IUser>) {
 		console.log(client.id + ': ' + payload.nickname);
 		console.log('json user: ' + JSON.stringify(payload));
     if (!payload.nickname)
@@ -62,6 +63,16 @@ export class WebsocketGatewayGame
     const player: userInfoSocket = {socket: client, user: payload};
     this.serverGame.addPlayerToMatchmaking(player, this.server);
     // console.log('helllo'); 
+		client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
+	}
+
+	@SubscribeMessage(wsGameRoutes.removePlayerToMatchnaking())
+	RemoveUserToMatchmaking(client: Socket, payload: Partial<IUser>) {
+    console.log(`TRY removePlayerToMatchnaking:  ${payload.nickname}`); 
+    if (!payload.nickname)
+      return console.error('ws/welcomeToGameServer: Bad client or user');  
+    const player: userInfoSocket = {socket: client, user: payload};
+    this.serverGame.removePlayerToMatchmaking(player);
 		client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
 	}
 

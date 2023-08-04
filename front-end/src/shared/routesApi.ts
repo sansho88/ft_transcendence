@@ -25,8 +25,9 @@
   // const wsRouteChat =         'chat'
 
   export namespace wsGameRoutes {
-    export const addNewPlayerToServer=() => {return `${routeWsGame}_addPlayerToServer`}
-    export const addPlayerToMatchnaking=() => {return `${routeWsGame}_addPlayerToMatchmaking`}
+    export const addNewPlayerToServer=()      => {return `${routeWsGame}_addPlayerToServer`}
+    export const addPlayerToMatchnaking=()    => {return `${routeWsGame}_addPlayerToMatchmaking`}
+    export const removePlayerToMatchnaking=() => {return `${routeWsGame}_removePlayerToMatchmaking`}
   }
 
 
@@ -47,7 +48,6 @@
 	export const putUser=()									=>{return `${serverApi}/${routeUsers}/`}
 
 	export const deleteUsersAll=()					=>{return `${serverApi}/${routeUsers}`}
-	// export const deleteUsersAll=()					=>{return `http://localhost:8000/api/users`}
 	export const deleteUserById=()					=>{return `${serverApi}/${routeUsers}/`}
 
 // +---------------------------------------------------------------------+

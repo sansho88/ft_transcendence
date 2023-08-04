@@ -77,10 +77,10 @@ export class WebsocketGatewayChat
 		this.server.to('homeRoom').emit('responseObj', payload);
 	}
 
-	@SubscribeMessage('game')
-	handleGame(client: Socket, payload: any) {
-		console.log(client.id + ': ' + payload);
-		this.messagesObj.push(payload);
-		this.server.to('game').emit('gameObj', payload);
-	}
+	// @SubscribeMessage('game')
+	// handleGame(client: Socket, payload: any) {
+	// 	console.log(client.id + ': ' + payload);
+	// 	this.messagesObj.push(payload);
+	// 	this.server.to('game').emit('gameObj', payload);
+	// }
 }
