@@ -19,11 +19,12 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={inter.className}>
-				<div className='bg-gray-950'>
+				<div className='main-background'>
+				{/* <div className='bg-gray-950'> */}
 				{/* <div className='main-background'> */}
 					<Providers>
 						{children}
-						{/*<NavBar className='absolute bottom-0 right-0 w-screen bg-slate-800' />*/}
+						<NavBar className='absolute bottom-0 right-0 w-screen bg-slate-800' />
 					</Providers>
 				</div>
 			</body>
