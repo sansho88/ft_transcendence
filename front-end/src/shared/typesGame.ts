@@ -5,13 +5,22 @@ import { Socket } from 'socket.io';
 // |                           GAME INTERFACE                            |
 // +---------------------------------------------------------------------+
 
+export interface IMsgInitGameElements {
+  ballPos       : IVector2D;
+  ballSize      : IVector2D;
+  paddleP1Pos   : IVector2D;
+  paddleP2Pos   : IVector2D;
+  paddleP1Size  : IVector2D;
+  paddleP2Size  : IVector2D;
+}
+
 export interface IGameSessionInfo {
-  game_id: number;
-  gameName: string;
-  player1: Partial<IUser>;
-  player2: Partial<IUser>;
+  game_id       : number;
+  gameName      : string;
+  player1       : Partial<IUser>;
+  player2       : Partial<IUser>;
   // spectators: Partial<IUser>[];
-  launchTime: Date;
+  launchTime    : Date;
 }
 
 export enum EKeyEvent {
@@ -24,6 +33,8 @@ export enum EKeyEvent {
 export interface IPodTable {
   positionBall  :IVector2D;
   sizeBall      :IVector2D;
+	positionP1v   :IVector2D;
+	positionP2v   :IVector2D;
 	positionP1    :number;
 	positionP2    :number;
 	maxPosP1      :number;
@@ -41,10 +52,10 @@ export interface IVector2D {
 }
 
 export interface IBall {
-	pos: IVector2D;
-	size: number;
-	velocity: number;
-	direction: number;
+	pos           : IVector2D;
+	size          : number;
+	velocity      : number;
+	direction     : number;
 }
 
 // export interface IPosPaddle {
@@ -64,9 +75,9 @@ export enum IDirectionMove {
 
 //mise a jour mouvement paddel transmit par ws
 export interface IGamePlayerMove {
-	game_id: number;
-	user_id: number;
-	direction: IDirectionMove;
+	game_id       : number;
+	user_id       : number;
+	direction     : IDirectionMove;
 }
 
 // export interface IGameSession {
@@ -78,11 +89,10 @@ export interface IGamePlayerMove {
 // }
 
 export interface userInfoSocket {
-	user: Partial<IUser>;
-	socket: Socket;
+	user          : Partial<IUser>;
+	socket        : Socket;
 }
 
-//vive le cpp
 export class Stack<T> {
 	private elements: T[] = [];
 
