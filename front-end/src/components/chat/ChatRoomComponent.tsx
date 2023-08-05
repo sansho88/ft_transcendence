@@ -16,7 +16,7 @@ import Image from "next/image";
 const max_msg_lenght: number = 512;
 
 
-export default function WebsocketClient({	className,	classNameBlockMessage,}: {	className: string;	classNameBlockMessage: string;}) {
+export default function ChatRoomProto({	className,	classNameBlockMessage,}: {	className: string;	classNameBlockMessage?: string;}) {
   const origin = useContext(OriginContext);
 	const apiOrigin = useContext(OriginContext).apiDOM;
 	const {userContext} = useContext(UserContext);
@@ -48,7 +48,7 @@ export default function WebsocketClient({	className,	classNameBlockMessage,}: {	
     }
   }, [])
 
-	if (!logged) router.push("/login");
+	if (!logged) router.push("/auth");
 
 
 	const connectToWebsocket = () => {
@@ -96,15 +96,12 @@ useEffect(() => {
 }, [])
 
 	const handleConnect = () => {
-		if (userContext) setUsername(userContext.login);
+		if (userContext && userContext.login) 
+      setUsername(userContext.login);
 		connectToWebsocket();
 	};
 
 	const sendMessageObj = (msg: string) => {
-		// if (username.trim().length === 0) {
-		// 	alert("Username ne doit pas être vide ou ne contenir que des espaces");
-		// 	return;
-		// }
 		if (msg.trim().length === 0) return;
 		else if (msg.length >= max_msg_lenght) {
 			alert("Votre message doit faire moins de 512 caractères ;)");
@@ -112,17 +109,12 @@ useEffect(() => {
 			return;
 		}
 		if (socketRef && typeof socketRef !== "string") {
-			let messObj: POD.IChatMessage = {
-				user: {
-					login: userContext?.login,
-					nickname: userContext?.login,
-					avatar_path: "string",
-					status: 1,
-					token_2fa: "string",
-					has_2fa: false,
+      let messObj: POD.IChatMessage = {
+        user: {
+          id_user: userContext?.id_user,
+          login: userContext?.login,
+					nickname: userContext?.nickname,
 				},
-				// clientId: userContext?.id_user,
-				// clientPsedo: userContext.login,
 				message: msg, 
 			};
 			console.log("DBG DEBUUUUUG => " + messObj.message);
@@ -130,7 +122,7 @@ useEffect(() => {
 			socketRef?.emit("messageObj", messObj);
 			setMessage("");
 		} else {
-			console.error("Tried to send a message before socket is connected");
+      console.error("Tried to send a message before socket is connected");
 		}
 	};
 
@@ -139,76 +131,54 @@ useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({behavior: "smooth"});
 	}, [chatMsgs]);
 
-	// useEffect(() => {
-	//   if (logged)
-	//     handleConnect();
-	// }, [logged])
-
-	// handleConnect(); 
-
-	return (
-		<div className={className}>
-			<div>
-				<div className="flex justify-center text-sm text-neutral-300 pt-4">
-					{infoMessages}
-				</div>
-				<ul className={classNameBlockMessage}>
-					{chatMsgs.map((obj, index) => (
-						<div
-							key={"blocMessage-" + uuidv4()}
-							className={
-								obj.user.nickname === username ? "text-right" : "text-left "}>
-							<li 
-								className={` text-neutral-400 font-semibold text-base ml-4 ${
-									obj.user.nickname === username
-										? "text-right ml-auto mr-5"
-										: "text-left ml-2"}`}	>
-								{obj.user.nickname}
-							</li>
-							<li
-								className={`text-white p-2 mb-4 rounded-xl max-w-max min-w-[10rem] 
-															${
-																obj.user.nickname === username
-																	? "text-right ml-auto mr-4 bg-teal-900"
-																	: "text-left ml-2 bg-gray-800"}`}>
-								{obj.message}
-							</li>
-						</div>
-					))}
-					<div ref={messagesEndRef} />
-				</ul>
+	// 
+  return (
+		<div className={`flex flex-col ${className}`}>
+			<div className="flex-1 overflow-y-auto text-sm text-neutral-300 pt-4">
+				{infoMessages}
+				{chatMsgs.map((obj, index) => (
+					<div
+						key={'blocMessage-' + uuidv4()}
+						className={
+							obj.user.nickname === username ? 'text-right' : 'text-left'}>
+						<li	className={`text-neutral-400 font-semibold text-base ml-4  list-none 
+              ${obj.user.nickname === username
+				      ? 'text-right ml-auto mr-5'
+				      : 'text-left ml-2'}`}>
+							{obj.user.nickname}
+						</li>
+						<li	className={`text-white p-2 mb-4 rounded-xl max-w-max min-w-[10rem] list-none
+              ${obj.user.nickname === username
+				      ? 'text-right ml-auto mr-4 bg-teal-900'
+				      : 'text-left ml-2 bg-gray-800'}`}>
+              {obj.message}
+						</li>
+					</div>
+				))}
+				<div ref={messagesEndRef} />
 			</div>
-			<>
-				<div className="bg-slate-900 m-10 p-5">
-					{/* <p className="text-neutral-500">username :</p> */}
-					<div className="flex items-center max-w-max">
-					</div>
 
-					<br />
-					<br />
-					{/* bloc button envoi de message */}
-					<p className="text-neutral-500">message :</p>
-					<div className="flex items-center max-w-max">
-						<input
-							type="text"
-							value={message}
-							onChange={(e) => setMessage(e.target.value)}
-							onKeyDown={(e) => {
-								if (e.key === "Enter") sendMessageObj(message);
-							}}
-							className="text-zinc-200 bg-neutral-800 flex-grow rounded-lg h-8 p-4"
-						/>
-						<button onClick={() => sendMessageObj(message)} className=" ml-5">
-							{/* <img
-								src="/chat/send.svg"
-								alt="Send"
-								className="max-w-[2rem] min-w-[1rem]"
-							/> */}
-              <Image src="/chat/send.svg" alt="Send button" className="max-w-[2rem] min-w-[1rem]" width={32} height={32}/>
-						</button>
-					</div>
+				<div className=" flex max-w-max mx-auto">
+					<input
+						type="text"
+						value={message}
+						onChange={(e) => setMessage(e.target.value)}
+						onKeyDown={(e) => {
+              if (e.key === 'Enter') sendMessageObj(message);
+						}}
+						className="text-zinc-200 bg-neutral-800 rounded-lg h-8"
+            />
+					<button onClick={() => sendMessageObj(message)} className="ml-5">
+						<Image
+							src="/chat/send.svg"
+							alt="Send button"
+							className="max-w-[2rem] min-w-[1rem]"
+							width={32}
+							height={32}
+              />
+					</button>
 				</div>
-			</>
 		</div>
 	);
+  
 }

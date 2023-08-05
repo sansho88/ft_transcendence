@@ -136,7 +136,7 @@ export default function Home() {
                             priority
                             onClick={switchOnlineIngame}
                         />
-                        <ChatRoomCommponent className='' classNameBlockMessage='m-6 overflow-auto h-[350px]'/>
+                        <ChatRoomCommponent className='h-[40vh] w-[60vh] flex mx-auto'/>
                         <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"}
                                 alt={"GameMode options"} radius={"0"} onClick={switchOnlineIngame}/>
                     </div>
