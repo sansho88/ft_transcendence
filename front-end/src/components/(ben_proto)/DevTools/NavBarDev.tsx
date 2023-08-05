@@ -2,7 +2,6 @@
 import Link from 'next/link'
 import React, {useState, useContext, useEffect, } from 'react'
 import {UserContext, LoggedContext} from "@/context/globalContext";
-import { useRouter } from 'next/navigation';
 import * as apiReq from '@/components/api/ApiReq'
 
 
@@ -11,16 +10,9 @@ export function NavBar({className}: {className: string}) {
 
 	const {userContext, setUserContext} = useContext(UserContext);
 	const {logged, setLogged} = useContext(LoggedContext);
-	const [isHidden, setIsHidden] = useState(true);
+	const [isHovered, setIsHovered] = useState(false);
   const [turnOffAuth, setTurnOffAuth] = useState<boolean>(false);
-	const router = useRouter();
-
-	useEffect(()=> {
-		if (!logged)
-			router.push('/auth')
-		else
-			setIsHidden(true);
-	}, [logged])
+  // const [isHovered, setIsHovered] = useState(false);
 
 	const [infoUser, setInfoUser] = useState<JSX.Element>(<></>)
 
@@ -35,6 +27,15 @@ export function NavBar({className}: {className: string}) {
   </div>)
   }, [userContext])
 
+
+
+  const handleMouseEnter = () => {
+      setIsHovered(true);
+  }
+
+  const handleMouseLeave = () => {
+      setIsHovered(false);
+  }
 
 
   function Dropdown() {
@@ -103,10 +104,10 @@ function toggleAuthRequired() {
     
     return (
 			<>
-				<Link href="/">HOME</Link>
-				<Link href="/auth">AUTH LOGIN</Link>
+				{/* <Link href="/">HOME</Link> */}
+				{/* <Link href="/auth">AUTH LOGIN</Link> */}
       <Dropdown/>
-        <button onClick={toggleAuthRequired} >{turnOffAuth ? <>ON</> : <>OFF</>}</button>
+        {/* <button onClick={toggleAuthRequired} >{turnOffAuth ? <>ON</> : <>OFF</>}</button> */}
 				{/* <Link href="/login">OLD LOGIN</Link> */}
 				<div className=' text-red-500'>user:(not logged)</div>
 			</>
@@ -116,10 +117,14 @@ function toggleAuthRequired() {
 	
 	return (
 		<>
-			{isHidden ? (
+    <div 
+            onMouseEnter={handleMouseEnter} 
+            onMouseLeave={handleMouseLeave}
+        >
+			{!isHovered ? (
 					<div className='absolute bottom-0 left-[48vw] w-auto rounded-t-xl  px-2 bg-slate-800 opacity-40'>
 						<div className="h-10 flex justify-center items-center space-x-10">
-							<button onClick={() => setIsHidden(false)} className=' text-white'> devbar </button>
+							<button onClick={() => setIsHovered(false)} className=' text-white'> devbar </button>
 						</div>
 					</div>
 			) : (
@@ -128,10 +133,11 @@ function toggleAuthRequired() {
 						<div className=" text-red-600 absolute left-5">Navbar Dev </div>
 						{logged ? <SubNav /> : <SubNavNotLog />}
 						
-						<button onClick={() => setIsHidden(true)}> ❌ </button>
+						<button onClick={() => setIsHovered(false)}> ❌ </button>
 					</div>
 				</div>
 			)}
+      </div>
 		</>
 	);
 }
