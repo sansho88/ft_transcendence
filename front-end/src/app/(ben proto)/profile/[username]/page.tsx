@@ -27,17 +27,17 @@ export default function ProfileUser({params}: {params: { username: string}}) {
 	});
 
 	return (
-		<div className="flex  w-screen justify-center items-center">
+		<div className="text-white flex  w-screen justify-center items-center">
 			{logged ? (
 				isUserTargetExist ? (
 					<div>{params.username}: 404 NOT FOUND</div>
 				) : (
 					<div>
-						<div className=" flex flex-col space-x-10">
+						<div className="  flex flex-col space-x-10">
 						<h1 className=' text-3xl'>PROFILE </h1>
-							<div>login: {userContext?.login}</div>
-							<div>nickanme: {userContext?.nickname}</div>
-							<div>avatar_path: {userContext?.avatar_path}</div>
+							<p>login: {userContext?.login}</p>
+							<p>nickanme: {userContext?.nickname}</p>
+							<p>avatar_path: {userContext?.avatar_path}</p>
 						</div>
 					</div>
 				)

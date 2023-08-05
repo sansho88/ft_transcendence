@@ -1,19 +1,20 @@
 'use client'
 
-import {ChangeEvent, useContext, useEffect, useState} from 'react'
+import {useContext, useEffect, useState} from 'react'
 import  InputPod  from '@/components/(ben_proto)/login/InputPod'
 import * as POD  from "@/shared/types";
-import {deleteApi, getApi} from '@/components/api/ApiReq'
 import * as apiReq from '@/components/api/ApiReq'
 import * as ClipLoader from 'react-spinners'
-
-
 import './auth.css'
+
+
 import { useRouter } from 'next/navigation';
-import { UserContext, LoggedContext } from '@/context/globalContext';
+
+import Axios from '@/components/api/AxiosConfig';
+import { UserContext, LoggedContext, SocketContextChat, SocketContextGame } from '@/context/globalContext';
 // import { Button } from '@/components/CustomButtonComponent'
 
-//FIXME: le re logging ne fonctionne pas bien, ne recupere les infos pour userContext = donner vide
+//FIXME: le re logging ne fonctionne pas bien, ne recupere les infos pour userContext = data user vide
 
 enum EAuthMod {
 	api42,
@@ -38,25 +39,25 @@ export default function Auth({className}: {className?: string}) {
 	const {userContext, setUserContext} = useContext(UserContext);
 	const { setLogged } = useContext(LoggedContext);
 	// const [isLogged, setIsLogged] = useState<boolean | null>(null);
+  const socketChat = useContext(SocketContextChat);
+  const socketGame = useContext(SocketContextGame);
 
-
-
+  
 	useEffect(() => {
 		console.log('UseEffect : userContext.login = ' + userContext?.login + ' pass: ' + userContext?.password);	
 	}, [userContext]);
 
 	const [currentStepLogin, setCurrentStepLogin] = useState<EStepLogin>(EStepLogin.start)
 
-	
+
 	////////////////////////////////////////////////////////
 	////////////////// GESTION DES INPUTS //////////////////
 	////////////////////////////////////////////////////////
-	const [loginInput, setLoginInput] = useState<string>('');
-	const [login, setLogin] = useState<string>('');
+	const lastUserLogin = localStorage.getItem("login");
+	const lastUserPW = localStorage.getItem("password");
+	const [loginInput, setLoginInput] = useState<string>(lastUserLogin == null ? '' : lastUserLogin);
+	const [login, setLogin] = useState<string>(lastUserPW == null ? '' : lastUserPW);
 	
-
-
-
 	const [passwordInput, setPasswordInput] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
 	
@@ -68,7 +69,7 @@ export default function Auth({className}: {className?: string}) {
 
 	const enterLogin = () => {
 		return (
-			<div className='flex flex-col justify-center items-center'>
+			<div className='flex flex-col justify-center items-center text-white'>
 				<InputPod 
 					className='inputLogin'
 				props=
@@ -88,7 +89,7 @@ export default function Auth({className}: {className?: string}) {
 	
 	const enterPassword = () => {
 		return (
-			<div className='flex flex-col justify-center items-center'>
+			<div className='flex flex-col justify-center items-center text-white'>
 				<InputPod
 				className='inputLogin'
 				props=
@@ -137,26 +138,26 @@ export default function Auth({className}: {className?: string}) {
 			setShowMessage(false);
 			setCurrentStepLogin(EStepLogin.bye)
 			router.push('/'); //executer apres le timeout
-		}, 5000); // 3000 ms = 3 secondes
+		}, 650); // 3000 ms = 3 secondes
 		return () => clearTimeout(timer);
 	}, [currentStepLogin, router]);
 
 	const LoggedSuccess = () => {
+
+    socketChat?.connect();
+    socketGame?.connect();
+    
 		return (
 			<div className="flex flex-col items-center text-center">
       {showMessage && (
         <>
-          <p>Congratulations, you are now logged in!</p>
-          <p>Enjoy playing! </p>
+          <p className=' text-white'>Congratulations, you are now logged in!<br/>Enjoy playing!</p>
           <ClipLoader.PacmanLoader color='#07C3FF' size={30}/>
         </>
       )}
     </div>
 		);
 	}
-
-
-
 
 	//TODO: fait une page ou popup qui indique lerreur pendant 3 secondes avant de retourner au debut
 	// useEffect(() => {
@@ -174,7 +175,7 @@ export default function Auth({className}: {className?: string}) {
 
 	const LoggedFailed = () => {
 		// const [showMessage, setShowMessage] = useState(true);
-		const router = useRouter();
+		//const router = useRouter();
 		// setLogin(''); setLoginInput('');
 		setPassword(''); setPasswordInput('');
 		setBouttonText(textInviteModeButton)
@@ -258,13 +259,17 @@ useEffect(() => {
 					const req = await apiReq.utilsCheck.isPasswordMatch(login, password);
 					if (req)
 					{
-						apiReq.getApi.getUserByLogin(login)
+						Axios.get(`http://localhost:8000/api/users/login/${login}`)
 						.then((res) => {
-							const newUser: POD.IUser = res
+							const newUser: POD.IUser = res.data;
 							setUserContext(newUser);
 							setLogged(true);
 							setCurrentStepLogin(EStepLogin.successLogin);
-							console.log('your are now logged in')
+							localStorage.setItem('login', newUser.login);
+							localStorage.setItem('pass', password);
+							localStorage.setItem('userContext', JSON.stringify(userContext))
+							console.log(localStorage.getItem(JSON.parse('userContext')));
+							console.log('you are now logged in')
 						})
 						.catch((e)=> {console.log(e); return;})
 						return;
@@ -272,7 +277,7 @@ useEffect(() => {
 					else{
 						setCurrentStepLogin(EStepLogin.failLogin);
 						nextStepCheck()
-						console.log('your not logged, wrong password')
+						console.log('wrong password')
 					}
 				}
 				else {
@@ -284,8 +289,8 @@ useEffect(() => {
 							const newUser: POD.IUser = res.data
 							console.log(`res 201, newUser= ${newUser.login} | pass hashed: ${newUser.password}`);
 							setUserContext(newUser);
-							// localStorage.setItem('login', newUser.login);
-							// localStorage.setItem('pass', newUser.password); //cookie ?
+							localStorage.setItem('login', newUser.login);
+							localStorage.setItem('pass', password); //cookie ?
 
 							setLogged(true);
 							setCurrentStepLogin(EStepLogin.successLogin);
@@ -306,6 +311,7 @@ useEffect(() => {
 				setCurrentStepLogin(EStepLogin.enterLogin);
 				break;
 			case EStepLogin.enterLogin:
+
 				if(loginInput.trim().length === 0){
 					console.log('Login is empty'); 
 					return;

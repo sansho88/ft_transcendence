@@ -1,92 +1,102 @@
-'use client'
-import { useState, useEffect, useRef, useContext } from "react";
-import { useRouter } from "next/navigation";
-import io, { Socket } from "socket.io-client";
-import { v4 as uuidv4 } from "uuid";
+"use client";
+import {useState, useEffect, useRef, useContext} from "react";
+import {useRouter} from "next/navigation";
+import io, {Socket} from "socket.io-client";
+import {v4 as uuidv4} from "uuid";
 import * as POD from "../../shared/types";
 
-import { OriginContext, UserContext, LoggedContext } from "@/context/globalContext";
-
+import {
+	OriginContext,
+	UserContext,
+	LoggedContext,
+	SocketContextChat,
+} from "@/context/globalContext";
+import Image from "next/image";
 
 const max_msg_lenght: number = 512;
 
 
-export default function WebsocketClient({className, classNameBlockMessage}: {className: string, classNameBlockMessage: string}) {
-	const origin = useContext(OriginContext);
+export default function WebsocketClient({	className,	classNameBlockMessage,}: {	className: string;	classNameBlockMessage: string;}) {
+  const origin = useContext(OriginContext);
 	const apiOrigin = useContext(OriginContext).apiDOM;
 	const {userContext} = useContext(UserContext);
 	const {logged} = useContext(LoggedContext);
-
-
+  
 	const [message, setMessage] = useState<string>("");
 	const [messages, setMessages] = useState<string[]>([]);
 	const [infoMessages, setInfoMessages] = useState<string>("");
 
 	const [username, setUsername] = useState("");
-	const [chatMsg, setChatMsg] = useState<POD.IChatMessage>();
+	// const [chatMsg, setChatMsg] = useState<POD.IChatMessage>();
 	const [chatMsgs, setChatMsgs] = useState<POD.IChatMessage[]>([]);
-	
-	const [channels, setchannels] = useState<string[]>([]);
-	const [currentChannel, setCurrentChannel] = useState<string>('');
 
-	const socketRef = useRef<Socket | null>(null);
-	const messagesEndRef = useRef<any>(null);
-
-
+	// const [channels, setchannels] = useState<string[]>([]);
+	// const [currentChannel, setCurrentChannel] = useState<string>("");
+  
+	const socketRef = useContext(SocketContextChat); // ref sur le websocket global
+	const messagesEndRef = useRef<any>(null); //ref sur balise toujours apres dernier message/ pour le scroll auto
+  
 	const router = useRouter();
+  
+  console.log('Hello CHat Component')
 
-		if(!logged)
-			router.push('/login');
+  useEffect(() => {
+    console.log('CLIENT: All message demandé')
+    if (socketRef && typeof socketRef !== "string") {
+      socketRef?.emit("getAllMsgs");
+      setMessage("");
+    }
+  }, [])
+
+	if (!logged) router.push("/login");
+
 
 	const connectToWebsocket = () => {
-		console.log('DBG ORIGIN CONTEXT:' + apiOrigin);
-		if (socketRef.current)
-			return;
-		else
-		{
-			socketRef.current = io(`${apiOrigin}`, {
-				query: {
-					login: username,
-				},
-			});
-		}
+		console.log("DBG ORIGIN CONTEXT:" + apiOrigin);
+		// Check if socket is defined
+		if (socketRef && typeof socketRef !== "string") {
 
-		if (socketRef.current) {
-			socketRef.current.on("connect", () => {
+      
+			(socketRef as Socket).on("connect", () => {
 				console.log("Connected to WebSocket server");
 			});
-			socketRef.current.on("message", (message: string) => {
+			(socketRef as Socket).on("message", (message: string) => {
 				console.log("Received message:", message);
 			});
-			socketRef.current.on("welcome", (message: string) => {
+			(socketRef as Socket).on("welcome", (message: string) => {
 				setInfoMessages(message);
-				// console.log("Received message:", messages);
 			});
-			socketRef.current.on("getallmsgObj", (messages: POD.IChatMessage[]) => {
-				setChatMsgs(messages);
-				// console.log("Received message:", messages);
-			});
-			socketRef.current.on("response", (message: string) => {
+			(socketRef as Socket).on(
+				"getallmsgObj",
+				(messages: POD.IChatMessage[]) => {
+					setChatMsgs(messages);
+				}
+			);
+			(socketRef as Socket).on("response", (message: string) => {
 				console.log("Message confirmé recu:", message);
 				setMessages((prevMessages) => [...prevMessages, message]);
 			});
-			socketRef.current.on("responseObj", (obj: POD.IChatMessage) => {
+			(socketRef as Socket).on("responseObj", (obj: POD.IChatMessage) => {
 				console.log(
 					"MessageObj confirmé recu:",
 					obj.message + " de " + obj.user.nickname
 				);
 				setChatMsgs((prevChatMsgs) => [...prevChatMsgs, obj]);
 			});
+		} else {
+			console.log("Socket is not defined");
 		}
 	};
 
+
+  //at mounted component
+useEffect(() => {
+  handleConnect();
+
+}, [])
+
 	const handleConnect = () => {
-		// if (username.trim().length === 0) {
-		// 	alert("Username ne doit pas être vide ou ne contenir que des espaces");
-		// 	return;
-		// }
-		if (userContext)
-			setUsername(userContext.login);
+		if (userContext) setUsername(userContext.login);
 		connectToWebsocket();
 	};
 
@@ -101,7 +111,7 @@ export default function WebsocketClient({className, classNameBlockMessage}: {cla
 			setMessage("");
 			return;
 		}
-		if (socketRef.current) {
+		if (socketRef && typeof socketRef !== "string") {
 			let messObj: POD.IChatMessage = {
 				user: {
 					login: userContext?.login,
@@ -113,11 +123,11 @@ export default function WebsocketClient({className, classNameBlockMessage}: {cla
 				},
 				// clientId: userContext?.id_user,
 				// clientPsedo: userContext.login,
-				message: msg,
+				message: msg, 
 			};
 			console.log("DBG DEBUUUUUG => " + messObj.message);
-			socketRef.current.emit("message", messObj.message);
-			socketRef.current.emit("messageObj", messObj);
+			socketRef?.emit("message", messObj.message);
+			socketRef?.emit("messageObj", messObj);
 			setMessage("");
 		} else {
 			console.error("Tried to send a message before socket is connected");
@@ -125,8 +135,16 @@ export default function WebsocketClient({className, classNameBlockMessage}: {cla
 	};
 
 	useEffect(() => {
+    console.log('recu: ' + chatMsgs)
 		messagesEndRef.current?.scrollIntoView({behavior: "smooth"});
 	}, [chatMsgs]);
+
+	// useEffect(() => {
+	//   if (logged)
+	//     handleConnect();
+	// }, [logged])
+
+	// handleConnect(); 
 
 	return (
 		<div className={className}>
@@ -135,14 +153,24 @@ export default function WebsocketClient({className, classNameBlockMessage}: {cla
 					{infoMessages}
 				</div>
 				<ul className={classNameBlockMessage}>
-
 					{chatMsgs.map((obj, index) => (
-						<div key={"blocMessage-" + uuidv4()} className={obj.user.nickname === username ? 'text-right' : 'text-left '}>
-							<li className={`text-neutral-400 font-semibold text-base ml-4 ${obj.user.nickname === username ? 'text-right ml-auto mr-5' : 'text-left ml-2'}`}>
+						<div
+							key={"blocMessage-" + uuidv4()}
+							className={
+								obj.user.nickname === username ? "text-right" : "text-left "}>
+							<li 
+								className={` text-neutral-400 font-semibold text-base ml-4 ${
+									obj.user.nickname === username
+										? "text-right ml-auto mr-5"
+										: "text-left ml-2"}`}	>
 								{obj.user.nickname}
 							</li>
-							<li className={`p-2 mb-4 rounded-xl max-w-max min-w-[10rem] 
-															${obj.user.nickname === username ? 'text-right ml-auto mr-4 bg-teal-900' : 'text-left ml-2 bg-gray-800'}`}>
+							<li
+								className={`text-white p-2 mb-4 rounded-xl max-w-max min-w-[10rem] 
+															${
+																obj.user.nickname === username
+																	? "text-right ml-auto mr-4 bg-teal-900"
+																	: "text-left ml-2 bg-gray-800"}`}>
 								{obj.message}
 							</li>
 						</div>
@@ -154,15 +182,6 @@ export default function WebsocketClient({className, classNameBlockMessage}: {cla
 				<div className="bg-slate-900 m-10 p-5">
 					{/* <p className="text-neutral-500">username :</p> */}
 					<div className="flex items-center max-w-max">
-						{/* <input
-							type="text"
-							value={username}
-							onChange={(b) => setUsername(b.target.value)}
-							className=" bg-neutral-800 text-red-500 flex-grow rounded-lg h-8 p-4"
-						/> */}
-						<button onClick={() => handleConnect()} className="ml-5">
-							Connect
-						</button>
 					</div>
 
 					<br />
@@ -180,11 +199,12 @@ export default function WebsocketClient({className, classNameBlockMessage}: {cla
 							className="text-zinc-200 bg-neutral-800 flex-grow rounded-lg h-8 p-4"
 						/>
 						<button onClick={() => sendMessageObj(message)} className=" ml-5">
-							<img
+							{/* <img
 								src="/chat/send.svg"
 								alt="Send"
 								className="max-w-[2rem] min-w-[1rem]"
-							/>
+							/> */}
+              <Image src="/chat/send.svg" alt="Send button" className="max-w-[2rem] min-w-[1rem]" width={32} height={32}/>
 						</button>
 					</div>
 				</div>
