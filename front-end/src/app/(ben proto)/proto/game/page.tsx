@@ -1,5 +1,5 @@
 'use client'
-import Game from '@/components/game/game'
+import Game from '@/components/game/Game'
 
 export default function GamePage() {
   return (
