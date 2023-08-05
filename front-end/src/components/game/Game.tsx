@@ -28,10 +28,11 @@ enum EStatusFrontGame {
 export default function Game({className}: {className: string}) {
   const socket      = useContext(SocketContextGame);
   const socketRef   = useRef(socket);
-
-  const isLogged    = useContext(LoggedContext);
+  
+  const {logged, setLogged}    = useContext(LoggedContext);
   const userLogged  = useContext(UserContext);
-  // const router      = useRouter();
+  const router      = useRouter();
+
 
   const tableRef    = useRef<HTMLDivElement>(null);
   const pad1Ref     = useRef<HTMLDivElement>(null);
@@ -75,11 +76,11 @@ export default function Game({className}: {className: string}) {
 	}, [nameGameSession]);
 	
 	useEffect(() => {
-	  if (!isLogged) {
-	    // router.push('/auth'); // for dev
+	  if (!logged) {
+	    router.push('/auth'); // for dev
 	    console.error("your are not logged!");
 	  }
-	}, [isLogged]);
+	}, [logged]);
 
 	useEffect(() => {
 	  if (!socketRef.current?.connected)
@@ -161,7 +162,7 @@ export default function Game({className}: {className: string}) {
         setScoreP1(data.scoreP1);
         setScoreP2(data.scoreP2);
 			//ball position
-	      console.log(`WS updateTable : ${JSON.stringify(data)}`); //recupere la position du paddles 1
+	      // console.log(`WS updateTable : ${JSON.stringify(data)}`); //recupere la position du paddles 1
 	    })
      }
  	console.log(`dim table x:${tableRef.current?.offsetWidth} y:${tableRef.current?.offsetHeight}`)
