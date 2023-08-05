@@ -137,7 +137,7 @@ export default function Auth({className}: {className?: string}) {
 		const timer = setTimeout(() => {
 			setShowMessage(false);
 			setCurrentStepLogin(EStepLogin.bye)
-			router.push('/proto/game'); //executer apres le timeout
+			router.push('/'); //executer apres le timeout
 		}, 650); // 3000 ms = 3 secondes
 		return () => clearTimeout(timer);
 	}, [currentStepLogin, router]);
