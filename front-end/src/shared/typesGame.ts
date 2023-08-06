@@ -5,22 +5,23 @@ import { Socket } from 'socket.io';
 // |                           GAME INTERFACE                            |
 // +---------------------------------------------------------------------+
 
-export interface IMsgInitGameElements {
-  ballPos       : IVector2D;
-  ballSize      : IVector2D;
-  paddleP1Pos   : IVector2D;
-  paddleP2Pos   : IVector2D;
-  paddleP1Size  : IVector2D;
-  paddleP2Size  : IVector2D;
+export interface ISizeGameElements {
+  tableServerSize   : IVector2D; //sert a calculer le coef d'agrandissement ou reduction cote front par rapport a la taille d'affichage
+  ballSize          : IVector2D;
+  paddleP1Pos       : IVector2D;
+  paddleP2Pos       : IVector2D;
+  paddleP1Size      : IVector2D;
+  paddleP2Size      : IVector2D;
 }
 
 export interface IGameSessionInfo {
-  game_id       : number;
-  gameName      : string;
-  player1       : Partial<IUser>;
-  player2       : Partial<IUser>;
+  game_id           : number;
+  gameName          : string;
+  player1           : Partial<IUser>;
+  player2           : Partial<IUser>;
+  launchTime        : Date;
+  startInitElement  : ISizeGameElements;
   // spectators: Partial<IUser>[];
-  launchTime    : Date;
 }
 
 export enum EKeyEvent {
@@ -31,42 +32,32 @@ export enum EKeyEvent {
 }
 
 export interface IPodTable {
-  positionBall  :IVector2D;
-  sizeBall      :IVector2D;
-	positionP1v   :IVector2D;
-	positionP2v   :IVector2D;
-	positionP1    :number;
-	positionP2    :number;
-	maxPosP1      :number;
-	maxPosP2      :number;
-	sizeP1        :IVector2D;
-	sizeP2        :IVector2D;
-	size          :IVector2D;
-  scoreP1       :number;
-  scoreP2       :number;
+  positionBall      : IVector2D;
+  sizeBall          : IVector2D;
+	positionP1v       : IVector2D;
+	positionP2v       : IVector2D;
+	positionP1        : number;
+	positionP2        : number;
+	maxPosP1          : number;
+	maxPosP2          : number;
+	sizeP1            : IVector2D;
+	sizeP2            : IVector2D;
+	tableSize         : IVector2D;
+  scoreP1           : number;
+  scoreP2           : number;
   }
 
 export interface IVector2D {
-	x: number;
-	y: number;
+	x                 : number;
+	y                 : number;
 }
 
 export interface IBall {
-	pos           : IVector2D;
-	size          : number;
-	velocity      : number;
-	direction     : number;
+	pos               : IVector2D;
+	size              : number;
+	velocity          : number;
+	direction         : number;
 }
-
-// export interface IPosPaddle {
-// 	y: number;
-// }
-
-// export interface ITable {
-// 	posPaddleP1: IPosPaddle;
-// 	posPaddleP2: IPosPaddle;
-// 	ball: IBall;
-// }
 
 export enum IDirectionMove {
 	up,
@@ -75,22 +66,14 @@ export enum IDirectionMove {
 
 //mise a jour mouvement paddel transmit par ws
 export interface IGamePlayerMove {
-	game_id       : number;
-	user_id       : number;
-	direction     : IDirectionMove;
+	game_id           : number;
+	user_id           : number;
+	direction         : IDirectionMove;
 }
 
-// export interface IGameSession {
-// 	game_id: number;
-// 	player1: IUser;
-// 	player2: IUser;
-// 	spectators: IUser[];
-// 	launchTime: Date;
-// }
-
 export interface userInfoSocket {
-	user          : Partial<IUser>;
-	socket        : Socket;
+	user              : Partial<IUser>;
+	socket            : Socket;
 }
 
 export class Stack<T> {

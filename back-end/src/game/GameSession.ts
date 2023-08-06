@@ -2,7 +2,6 @@ import * as PODGAME from 'shared/typesGame';
 import * as POD from 'shared/types';
 import { Socket } from 'socket.io';
 import { Matchmaking } from './Matchmaking';
-import { v4 as uuidv4 } from "uuid";
 import { Server } from 'socket.io'
 import { Injectable, Inject } from '@nestjs/common';
 import { WebsocketGatewayGame } from '../websocket/wsGame.gateway';
@@ -17,24 +16,16 @@ interface KeyPlayerState{
 export class GameSession {
 	private game_id: number;
 	private gameRoomEvent: string;
+  private initElements: PODGAME.ISizeGameElements;
   private infoGameSession: PODGAME.IGameSessionInfo;
 	private startDate: Date;
 	private speedPaddle: number = 5; // in pixel per move
 	private fpsTargetInMs: number = 1000 / 60; // = 16.67ms = 60 fps
-	private table: PODGAME.IPodTable = {
-		positionBall: { x: 0, y: 0 },
-    sizeBall:     { x: 18, y: 18 },
-		positionP1: 0,
-		positionP2: 0,
-		maxPosP1: 600 - 60,
-		maxPosP2: 600 - 60,
-		sizeP1: { y: 60, x: 10 },
-		sizeP2: { y: 60, x: 10 },
-		size: { x: 700, y: 600 },
-		scoreP1: 0,
-		scoreP2: 0,
-	};
-
+  
+  ///////////////////////  DEFINE FOR SIZE ELEMENTS ///////////////////////
+  private paddlePosMargin : number = 0.01; // 1% of the table
+  private ballSizeCoef    : number = 0.03; // en pourcentage par rapport a la largeur de la table
+    
 	private serverSocket    : Server;
 	private player1         : PODGAME.userInfoSocket;
 	private player2         : PODGAME.userInfoSocket;
@@ -65,44 +56,78 @@ export class GameSession {
 
 	private historyGame: POD.IGame; // pour push dans DB
 
+  
+	private table: Partial<PODGAME.IPodTable> = {
+    positionBall: { x: 0, y: 0 },
+    sizeBall:     { x: 14, y: 14 },
+		// positionP1: 0,
+		// positionP2: 0,
+		maxPosP1: 600 - 60,
+		maxPosP2: 600 - 60,
+		sizeP1: { y: 60, x: 10 },
+		sizeP2: { y: 60, x: 10 },
+		tableSize: { x: 700, y: 600 }, //taille table server
+		scoreP1: 0,
+		scoreP2: 0,
+	};
+
+
 	constructor(
 		server: Server,
 		P1: PODGAME.userInfoSocket,
 		P2: PODGAME.userInfoSocket,
 		startDate: Date,
 		game_id: number,
+    gameSessionRoom : string,
 	) {
 		this.player1 = P1;
 		this.player2 = P2;
 		this.startDate = startDate;
-		this.gameRoomEvent = uuidv4();
+		this.gameRoomEvent = gameSessionRoom;
 		this.serverSocket = server;
 		this.table.positionBall = {
-			x: this.table.size.x / 2,
-			y: this.table.size.y / 2,
+			x: this.table.tableSize.x / 2,
+			y: this.table.tableSize.y / 2,
 		};
-		this.table.positionP1 = this.table.size.y / 2 - this.table.sizeP1.y / 2;
-		this.table.positionP2 = this.table.size.y / 2 - this.table.sizeP2.y / 2;
 
-    this.infoGameSession = {
-      game_id: game_id,
-      gameName: this.gameRoomEvent,
-      player1: P1.user,
-      player2: P2.user,
-      launchTime: startDate,
-    }
+    //position de depart -- centrer en y
+    this.table.positionP1v = {  x: this.paddlePosMargin * this.table.tableSize.x, 
+                                y: this.table.tableSize.y / 2 - this.table.sizeP1.y / 2};
+    this.table.positionP2v = {  x: this.table.tableSize.x - (this.paddlePosMargin * (this.table.tableSize.x * 2)), 
+                                y: this.table.tableSize.y / 2 - this.table.sizeP2.y / 2};
+
+    this.table.maxPosP1 = this.table.tableSize.y - this.table.sizeP1.y;
+    this.table.maxPosP2 = this.table.tableSize.y - this.table.sizeP2.y;
 		//////////SET GAME OBJ FOR DATABASE //////////////
 		// this.historyGame.start_date = startDate;
 		//TODO update GAME TYPE / creer dans la db et recuperer id de session
 		//TODO this.historyGame.Id_GAME = requetes API axios ? websocket ?
-		////
-
-
+		////////////////////////////////////////////////////
+    
+    
+    
 		//////////SETUP DE LA TABLE //////////////
-
+        this.initElements   = {
+          tableServerSize: this.table.tableSize,
+          ballSize: this.table.sizeBall,
+          paddleP1Pos: this.table.positionP1v,
+          paddleP2Pos: this.table.positionP2v,
+          paddleP1Size: this.table.sizeP1,
+          paddleP2Size: this.table.sizeP2,    
+        }
+    
+        this.infoGameSession  = {
+          game_id: game_id,
+          gameName: this.gameRoomEvent,
+          player1: P1.user,
+          player2: P2.user,
+          launchTime: startDate,
+          startInitElement: this.initElements,
+        }
+    
 		//////////SETUP DES PLAYERS //////////////
+    
 		//j'inscrit les player a l'event de cette session
-
 		P1.socket.join(this.gameRoomEvent);
 		P2.socket.join(this.gameRoomEvent);
 
@@ -111,8 +136,10 @@ export class GameSession {
 		P2.socket.emit('gameFind', { remoteEvent: `${this.gameRoomEvent}PLAYER2` });
 
     //les joueurs doivent cliquer sur ready pour commencer le game
-    P1.socket.on(`${this.gameRoomEvent}ready`, () => {this.isP1Ready = true; this.startCountdownIfPlayersReady(); console.log(`player 1 READY`);})
-    P2.socket.on(`${this.gameRoomEvent}ready`, () => {this.isP2Ready = true; this.startCountdownIfPlayersReady(); console.log(`player 2 READY`);})
+    P1.socket.on(`${this.gameRoomEvent}ready`, () => {this.isP1Ready = true; this.startCountdownIfPlayersReady(); 
+                                                        console.log(`${this.gameRoomEvent}: player 1 READY`);})
+    P2.socket.on(`${this.gameRoomEvent}ready`, () => {this.isP2Ready = true; this.startCountdownIfPlayersReady(); 
+                                                        console.log(`${this.gameRoomEvent}: player 2 READY`);})
 
 		//j'ecoute leur propre event pour faire bouger leur paddle respectif
 		P1.socket.on(`${this.gameRoomEvent}PLAYER1`, (data) => {
@@ -195,7 +222,7 @@ export class GameSession {
 				'infoGameSession',
 				this.infoGameSession
 			);
-
+      console.log(`INFO GAME SESSION START INIT : ${JSON.stringify(this.infoGameSession.startInitElement)}`)
 		this.sendUpdateTable(); //lancer setInterval table
 	}
 
@@ -205,17 +232,17 @@ export class GameSession {
 
       if (this.ballToRightDBG && this.table.positionBall.x + (this.table.sizeBall.x/2) >= 0)
       {  
-        if (this.table.positionBall.x + (this.table.sizeBall.x/2) > this.table.size.x)
-        this.ballToRightDBG = false;
+        if (this.table.positionBall.x + (this.table.sizeBall.x/2) > this.table.tableSize.x)
+          this.ballToRightDBG = false;
         else
-        this.table.positionBall.x += 7;
+          this.table.positionBall.x += 7;
       }
       else
       {
         if (this.table.positionBall.x - (this.table.sizeBall.x/2) < 0)
-        this.ballToRightDBG = true;
+          this.ballToRightDBG = true;
         else
-        this.table.positionBall.x -= 7;
+          this.table.positionBall.x -= 7;
       }
     }
     // console.log(`BALL posx: ${this.table.positionBall.x}`)
@@ -226,24 +253,24 @@ export class GameSession {
 		if (this.isGameRunning) {
 			this.intervalId = setInterval(() => {
 				if (this.keyP1.isArrowUpPressed) {
-					if (this.table.positionP1 > 0)
-						this.table.positionP1 -= this.speedPaddle;
-					console.log('P1 position ' + this.table.positionP1); //FIXME:
+					if (this.table.positionP1v.y > 0)
+						this.table.positionP1v.y -= this.speedPaddle;
+					// console.log('P1 position ' + this.table.positionP1v.y); //FIXME:
 				}
 				if (this.keyP1.isArrowDownPressed) {
-					if (this.table.positionP1 < this.table.maxPosP1)
-						this.table.positionP1 += this.speedPaddle;
-					console.log('P1 position ' + this.table.positionP1);//FIXME:
+					if (this.table.positionP1v.y < this.table.maxPosP1)
+						this.table.positionP1v.y += this.speedPaddle;
+					// console.log('P1 position ' + this.table.positionP1v.y);//FIXME:
 				}
 				if (this.keyP2.isArrowUpPressed) {
-					if (this.table.positionP2 > 0)
-						this.table.positionP2 -= this.speedPaddle;
-					console.log('P2 position ' + this.table.positionP2);//FIXME:
+					if (this.table.positionP2v.y > 0)
+						this.table.positionP2v.y -= this.speedPaddle;
+					// console.log('P2 position ' + this.table.positionP2v.y);//FIXME:
 				}
 				if (this.keyP2.isArrowDownPressed) {
-					if (this.table.positionP2 < this.table.maxPosP1)
-						this.table.positionP2 += this.speedPaddle;
-					console.log('P2 position ' + this.table.positionP2);//FIXME:
+					if (this.table.positionP2v.y < this.table.maxPosP1)
+						this.table.positionP2v.y += this.speedPaddle;
+					// console.log('P2 position ' + this.table.positionP2v.y);//FIXME:
 				}
         this.moveBallLeftRigthDebug();//juste for anime ball before real bounds physics
 			}, this.fpsTargetInMs / 2);
@@ -253,6 +280,14 @@ export class GameSession {
   //envoi update au front des elements de la table
 	private sendUpdateTable() {
 		this.intervalIdEmit = setInterval(() => {
+      //TODO: traduire les valeur de table en % pour le front
+      const tableToSend: Partial<PODGAME.IPodTable> = {
+        positionP1v : { y: this.table.positionP1v.y / this.table.tableSize.y, x: this.initElements.paddleP1Pos.x },
+        positionP2v : {y: this.table.positionP2v.y / this.table.tableSize.y, x: this.initElements.paddleP2Pos.x },
+        positionBall: {y: this.table.positionBall.y / this.table.tableSize.y, x: this.table.positionBall.x / this.table.tableSize.x },
+        scoreP1: this.table.scoreP1,
+        scoreP2: this.table.scoreP2,
+      }
 			this.serverSocket.to(this.gameRoomEvent).emit('updateTable', this.table);
 		}, this.fpsTargetInMs);
 	}
@@ -352,7 +387,7 @@ export class GameSession {
 	}
 
 	private startGame() {
-      console.log(`le jeu commence`);
+      console.log(`${this.gameRoomEvent}: le jeu commence`);
 		  this.isGameRunning = true;
 		  this.positionManagement();
       this.player1.socket.emit('startGame');

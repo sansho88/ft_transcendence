@@ -2,12 +2,11 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import { UserContext, SocketContextGame, LoggedContext} from '@/context/globalContext'
 import { useRouter } from 'next/navigation'
+import { IUser } from '@/shared/types'
 import * as PODGAME from '@/shared/typesGame'
 import * as apiRoutes from '@/shared/routesApi'
-import { cursorTo } from 'readline'
 import * as ClipLoader from 'react-spinners'
-import { removeListener } from 'process'
-import { EStepLogin, IUser } from '@/shared/types'
+import { table } from 'console'
 
 enum EStatusFrontGame {
   idle,
@@ -29,7 +28,7 @@ export default function Game({className}: {className: string}) {
   const socket      = useContext(SocketContextGame);
   const socketRef   = useRef(socket);
   
-  const {logged, setLogged}    = useContext(LoggedContext);
+  const {logged}    = useContext(LoggedContext);
   const userLogged  = useContext(UserContext);
   const router      = useRouter();
 
@@ -41,29 +40,33 @@ export default function Game({className}: {className: string}) {
 
 
   const [nameGameSession, setNameGameSession] = useState<string>("");
-  const [paddleSize, setPaddleSize] = useState<PODGAME.IVector2D>({
-    x: 10, //TODO: recup la taille x y  depuis le server
-    y: 60,  // avec coef (== taille server ratio taille div front)
-  });
-  const [stepCurrentSession, setStepCurrentSession] = useState<EStatusFrontGame>(
-    EStatusFrontGame.idle
-  );
+  const [stepCurrentSession, setStepCurrentSession] = useState<EStatusFrontGame>(EStatusFrontGame.idle);
   const [buttonText, setButtonText] = useState<string>("SEARCH GAME");
   const [remoteEvent, setRemoteEvent] = useState<string>("");
   // const remoteEvent = useRef<string>('');
+  
+  // const [paddleSize, setPaddleSize]  = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default
+  const [p1Size, setP1Size]             = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default avant connection
+  const [p2Size, setP2Size]             = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default avant connection
+  const [ballSize, setBallSize]         = useState<PODGAME.IVector2D>({x: 18, y: 18}); //taille par default avant connection
 
-  const [p1Position, setP1Position]     = useState<number>(250);
-  const [p2Position, setP2Position]     = useState<number>(250);
+
+
+  // const [p1Position, setP1Position]     = useState<number>(250);
+  // const [p2Position, setP2Position]     = useState<number>(250);
+  const [p1Position, setP1Position]     = useState<PODGAME.IVector2D>({x: -1, y: -1});
+  const [p2Position, setP2Position]     = useState<PODGAME.IVector2D>({x: -1, y: -1});
   const [ballPosition, setBallPosition] = useState<PODGAME.IVector2D>({x: 0, y: 0});
   const [ballHidden, setBallHidden]     = useState<boolean>(true);
-
-  const [userP1, setUserP1] = useState<Partial<IUser>>({});
-  const [userP2, setUserP2] = useState<Partial<IUser>>({});
-  const [scoreP1, setScoreP1] = useState<number>(0);
-  const [scoreP2, setScoreP2] = useState<number>(0);
-
+  
+  const [userP1, setUserP1]             = useState<Partial<IUser>>({});
+  const [userP2, setUserP2]             = useState<Partial<IUser>>({});
+  const [scoreP1, setScoreP1]           = useState<number>(0);
+  const [scoreP2, setScoreP2]           = useState<number>(0);
+  
   const [infoMessage, setInfoMessage]   = useState<string>('PLAY');
-
+  
+  const coefTableServer                 = useRef<PODGAME.IVector2D>({x: 1, y: 1});
 
 	useEffect(() => {
 	  if (nameGameSession === "") {
@@ -82,6 +85,17 @@ export default function Game({className}: {className: string}) {
 	  }
 	}, [logged]);
 
+
+  function calculCoefTableServer(servSize: PODGAME.IVector2D) {
+    if (tableRef.current) {
+      coefTableServer.current = {x:  tableRef.current?.offsetWidth / servSize.x , y: tableRef.current?.offsetHeight / servSize.y}
+    }
+  }
+    /*-----------------------------------------------------------------------------------------------------------*\
+    |                                                                                                             |
+    |                                     SOCKET ON SUBCRITE EVENT                                                |
+    |                                                                                                             |
+    /*-----------------------------------------------------------------------------------------------------------*/ 
 	useEffect(() => {
 	  if (!socketRef.current?.connected)
 	    socketRef.current?.connect();
@@ -91,15 +105,14 @@ export default function Game({className}: {className: string}) {
 	      console.log(`WS info recu: ${JSON.stringify(data)}`);
 	    })
 	
-	    // socketRef.current.on('nameSession', (data) => {
-      //   setNameGameSession(data);
-	    //   console.log(`WS name session recu: ${JSON.stringify(data)}`);
-	    // })
-	
 	    socketRef.current.on('infoGameSession', (data: PODGAME.IGameSessionInfo) => {
+        // tableServerCoef.current = {x: data.startInitElement.tableServerSize.x / window. //taille en x de la div parent au component}
         setNameGameSession(data.gameName);
         setUserP1(data.player1);
         setUserP2(data.player2);
+        setBallSize(data.startInitElement.ballSize);
+        setP1Position({x: data.startInitElement.paddleP1Pos.x, y: data.startInitElement.paddleP1Pos.y})
+        setP2Position({x: data.startInitElement.paddleP2Pos.x, y: data.startInitElement.paddleP2Pos.y})
 	      console.log(`WS name session recu: ${JSON.stringify(data)}`);
 	    })
 	
@@ -117,14 +130,12 @@ export default function Game({className}: {className: string}) {
         if (stepCurrentSession !== EStatusFrontGame.countdown)
           setStepCurrentSession(EStatusFrontGame.countdown);
         setInfoMessage(data);
-	      console.log(`WS countdown: ${JSON.stringify(data)}`);
+	      // console.log(`WS countdown: ${JSON.stringify(data)}`);
 	    })
 	
-	    socketRef.current.on('startGame', (data) => {
+	    socketRef.current.on('startGame', () => {
         setStepCurrentSession(EStatusFrontGame.gameInProgress);
         setBallHidden(false);
-        // setInfoMessage('');
-	      console.log(`WS GAME IS RUNNING: ${JSON.stringify(data)}`);
 	    })
 
 	    socketRef.current.on('endgame', (data) => {
@@ -133,14 +144,24 @@ export default function Game({className}: {className: string}) {
         setNameGameSession('');
         setRemoteEvent('');
         setBallHidden(true);
-        setP1Position(250);
-        setP2Position(250);
+        if (tableRef && tableRef.current && tableRef.current.offsetHeight){
+          const offsetHeight = tableRef.current.offsetHeight;
+          setP1Position(prevState => ({
+            x: prevState.x,
+            y: (offsetHeight / 2)
+          }));
+          setP2Position(prevState => ({
+            x: prevState.x,
+            y: (offsetHeight / 2)
+          }));;
+        }
         setInfoMessage(data);
 	      console.log(`WS endgame: ${JSON.stringify(data)}`);
 	    })
 
 	    socketRef.current.on('reset', () => {
 	      console.log(`WS RESET`);
+        resetPositionPaddle();
         setInfoMessage('PLAY');
         setScoreP1(0);
         setScoreP2(0);
@@ -155,25 +176,37 @@ export default function Game({className}: {className: string}) {
 	      console.log(`WS setup recu: ${JSON.stringify(data)}`); //recupere taille des elements paddle et balle
 	    })
 	
-	    socketRef.current.on('updateTable', (data: PODGAME.IPodTable) => {
-	      setP1Position(data.positionP1);
-	      setP2Position(data.positionP2);
-        setBallPosition(data.positionBall);
+
+    /*-----------------------------------------------------------------------------------------------------------*\
+    |                                               TABLE UPDATE                                                  |
+    /*-----------------------------------------------------------------------------------------------------------*/  
+      socketRef.current.on('updateTable', (data: PODGAME.IPodTable) => {
+        // console.log(JSON.stringify(data))
+        if(tableRef.current){
+          // coefTableServer.current = {x:  tableRef.current?.offsetWidth / data.tableSize.x , y: tableRef.current?.offsetHeight / data.tableSize.y}
+          calculCoefTableServer(data.tableSize);
+          setP1Position({x: data.positionP1v.x * coefTableServer.current.x, y: data.positionP1v.y * coefTableServer.current.y})
+          setP2Position({x: data.positionP2v.x * coefTableServer.current.x, y: data.positionP2v.y * coefTableServer.current.y})
+          setBallPosition({x: data.positionBall.x * coefTableServer.current.x, y: data.positionBall.y * coefTableServer.current.y});
+          setP1Size({x: data.sizeP1.x * coefTableServer.current.x, y: data.sizeP1.y * coefTableServer.current.y})
+          setP2Size({x: data.sizeP2.x * coefTableServer.current.x, y: data.sizeP2.y * coefTableServer.current.y})
+          setBallSize({x: data.sizeBall.x * coefTableServer.current.x, y: data.sizeBall.y * coefTableServer.current.y})
+
+        }
         setScoreP1(data.scoreP1);
         setScoreP2(data.scoreP2);
+
 			//ball position
 	      // console.log(`WS updateTable : ${JSON.stringify(data)}`); //recupere la position du paddles 1
+        // console.log(`dim table x:${tableRef.current?.offsetWidth} y:${tableRef.current?.offsetHeight}`)
 	    })
      }
- 	console.log(`dim table x:${tableRef.current?.offsetWidth} y:${tableRef.current?.offsetHeight}`)
   // return () => {socketRef.current?.close};
 	}, []);
 
 	const arrowUp = useRef<boolean>(false);
 	const arrowDown = useRef<boolean>(false);
 
-	function eventListen(){
-	}
 
 	useEffect(() => {
     if (remoteEvent) {
@@ -222,11 +255,6 @@ export default function Game({className}: {className: string}) {
 		}
 	}, [remoteEvent]);
 	
-
-	
-	useEffect(() => {
-	  console.log(`position P1: ${p1Position}`);
-	}, [p1Position])
 	
 	useEffect(() => {
 	  if (remoteEvent)
@@ -242,10 +270,12 @@ export default function Game({className}: {className: string}) {
 	
 	const Table: React.FC<TableProps> = ({className, tableRef, children}) => {
 	  return (
-	    <div ref={tableRef} className={`${className} flex rounded-xl bg-blue-game`} 
+      <div ref={tableRef} className={`${className} rounded-xl bg-blue-game`} 
 	    style={{
-	      boxShadow: "0 0 150px  40px rgba(170, 170, 255, 0.4)" 
-	  }}> 
+        boxShadow: "0 0 150px  40px rgba(170, 170, 255, 0.4)" 
+      }}> 
+      {/* <div className="relative pb-[75%]"></div> */}
+      {/* <div className="absolute inset-0 flex items-center justify-center"></div> */}
 	      {children} 
 	    </div>
 	  )
@@ -255,8 +285,8 @@ export default function Game({className}: {className: string}) {
     return (
       <div ref={ballRef} style={{
         position: 'absolute',
-        width: '18px',
-        height: '18px',
+        width: `${ballSize.x}px`,
+        height: `${ballSize.y}px`,
         top: `${ballPosition.y}px`,
         left: `${ballPosition.x}px`,
         transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
@@ -266,41 +296,66 @@ export default function Game({className}: {className: string}) {
     )
   }
 
-	const Player = ({className, position, refDiv, dim}: 
-	  {className?: string, position: 'left' | 'right', refDiv: React.RefObject<HTMLDivElement>, dim: PODGAME.IVector2D}) 
-	    :React.JSX.Element => {
-	
-  
-        //TODO: A REFACTO...
-  return (
-    <>
-      {position === 'left' ? 
-      
-      <>
-        <div  ref={refDiv} className={`${className}`} style={{height: paddleSize.y, width: paddleSize.x, top: `${p1Position}px`}} />
+  const Scoreboard = () => {
+    return (
+      <div className=' game-scoreboard relative'>
         {nameGameSession &&
-        <div className=' absolute text-gray-500 text-xl flex flex-col items-center justify-center' style={{top: '20px', left: '140px'}}>{`${userP1.nickname} `}
-          <div className='text-6xl' style={{top: '20px', right: '120px'}}>{`${scoreP1}`} 
+          <div className='game-scoreboard-left'>{`${userP1.nickname} `}
+            <div className='game-scoreboard-left-score'>{`${scoreP1}`}</div>
           </div>
-        </div>
-        }
-      </>
-      :
+          }
+          {nameGameSession && 
+          <div className='game-scoreboard-right' >{`${userP2.nickname} `}
+            <div className='scogame-scoreboard-right-score'>{`${scoreP2}`}
+            </div>
+          </div>
+          }
+      </div>
+    )
+  
+  }
+
+	const Player = ({className, position, refDiv}: 
+	  {className?: string, position: 'left' | 'right', refDiv: React.RefObject<HTMLDivElement>}) 
+	    :React.JSX.Element => {
+
+        // if(p1Position.x < 0 || p1Position.y < 0)
+        // {
+        //   if(tableRef && tableRef.current) {
+        //     setP1Position({x: tableRef.current?.offsetWidth * 0.014, y: (tableRef.current.offsetHeight / 2) - (p1Size.y / 2)});
+        //     setP2Position({x: (tableRef.current.offsetWidth) - (tableRef.current?.offsetWidth * 0.014) - p2Size.y, y: (tableRef.current.offsetHeight / 2) - (p2Size.y / 2)});
+        //   }
+        // }
+        //TODO: position x ??
+    return (
       <>
-        <div ref={refDiv} className={`${className}`} style={{height: paddleSize.y, width: paddleSize.x, top: `${p2Position}px`}} />
-        {nameGameSession && 
-        <div className=' absolute text-gray-500 text-xl flex flex-col items-center justify-center' style={{top: '20px', right: '140px'}}>{`${userP2.nickname} `}
-          <div className='text-6xl' style={{top: '20px', right: '120px'}}>{`${scoreP2}`}
+        {position === 'left' ? 
+
+        <>
+          <div  ref={refDiv} className={`${className}`} style={{height: p1Size.y, width: p1Size.x, top: `${p1Position.y}px`, left: `${p1Position.x}px`}} />
+          {nameGameSession &&
+          <div className=' game-scoreboard game-scoreboard-left'>{`${userP1.nickname} `}
+            <div className='game-scoreboard-score'>{`${scoreP1}`}</div>
           </div>
-        </div>
-        }
+          }
+        </>
+        :
+        <>
+          <div ref={refDiv} className={`${className}`} style={{height: p2Size.y, width: p2Size.x, top: `${p2Position.y}px`, left: `${p2Position.x}px`}} />
+          {nameGameSession && 
+          <div className=' game-scoreboard game-scoreboard-right'>{`${userP2.nickname} `}
+            <div className='game-scoreboard-score'>{`${scoreP2}`}
+            </div>
+          </div>
+          }
+        </>
+
+        } 
+
       </>
-      
-      } 
-    </>
-    // <>HELLO PADLE</>
-  )
-}
+      // <>HELLO PADLE</>
+    )
+  }
 
   function dbgAddPlayerGoal() {
     console.log('GOALASOOOOO');
@@ -333,7 +388,6 @@ export default function Game({className}: {className: string}) {
 				nickname: nickname,
 			});
       setStepCurrentSession(EStatusFrontGame.matchmakingRequest);
-			setButtonText("CANCEL MATCHMAKING");
 			console.log("Cancel matchmaking not implemented for the moment");
       return;
 		}
@@ -356,23 +410,41 @@ export default function Game({className}: {className: string}) {
 		}
   }
 
+  function resetPositionPaddle() {
+    if(p1Position.x < 0 || p1Position.y < 0)
+    {
+      if(tableRef && tableRef.current) {
+        setP1Position({x: tableRef.current?.offsetWidth * 0.014, 
+                       y: (tableRef.current.offsetHeight / 2) - (p1Size.y / 2)});
+        setP2Position({x: (tableRef.current.offsetWidth) - (tableRef.current?.offsetWidth * 0.014) - (p2Size.x), 
+                       y: (tableRef.current.offsetHeight / 2) - (p2Size.y / 2)});
+      }
+    }
+  }
+
+  useEffect(() => {
+    resetPositionPaddle();
+  }, []);
+
   useEffect(() => {
     console.log(`CurrentStep = ${stepCurrentSession}`);
     // handleSearchGame();
   }, [stepCurrentSession]);
 
   return (
-    <div className={className}>
-      <Table tableRef={tableRef} className='w-[700px] h-[600px] relative font-vt323'>
-        <Player className='bg-black ml-2 absolute left-0 font-vt323' dim={{x:2, y:10}} position='left' refDiv={pad1Ref} /> 
-        <Player className='bg-black mr-2 absolute right-0 font-vt323' dim={{x:2, y:10}} position='right' refDiv={pad2Ref} />
+    <div className={`${className} `}>
+      <Table tableRef={tableRef} className='w-full h-full relative font-vt323'>
+        {/* <Scoreboard/> // bugger*/}
+
+        <Player className='bg-black absolute ' position='left' refDiv={pad1Ref} /> 
+        <Player className='bg-black absolute'  position='right' refDiv={pad2Ref} />
         {!ballHidden && <Ball/>}
         {stepCurrentSession === EStatusFrontGame.idle &&
-            <div className=' font-Montserrat absolute -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2  text-gray-700 text-7xl'>{infoMessage}</div> }
+            <div className='absolute -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2  text-gray-700 text-7xl'>{infoMessage}</div> }
         {stepCurrentSession === EStatusFrontGame.countdown &&
-          <div className=' font-vt323 absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-gray-700 text-9xl'>{infoMessage}</div>  }
+          <div className='absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-gray-700 text-9xl'>{infoMessage}</div>  }
         {stepCurrentSession === EStatusFrontGame.endOfGame &&
-          <div className=' font-vt323 text-center absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2  text-gray-700 text-xl'>{infoMessage}</div>  }
+          <div className='text-center absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2  text-gray-700 text-xl'>{infoMessage}</div>  }
       </Table>
 
         <div className='flex justify-center items-center left-1/2 text-xl text-gray-700 h-20'> 
@@ -385,7 +457,7 @@ export default function Game({className}: {className: string}) {
      
           {stepCurrentSession === EStatusFrontGame.waiting &&
             <>
-              <div className='text-red-700'>Waiting </div><ClipLoader.ClipLoader color="#36d7b7" />
+              <div className='text-red-700 mr-4'>Waiting </div><ClipLoader.ClipLoader color="#36d7b7" />
             </>
           }
           {stepCurrentSession === EStatusFrontGame.gameInProgress &&
