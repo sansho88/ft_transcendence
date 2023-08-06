@@ -1,6 +1,7 @@
 import { userInfoSocket, Stack } from 'shared/typesGame';
 import { Server } from 'socket.io';
 import { GameSession } from './GameSession';
+import { v4 as uuidv4 } from "uuid";
 
 
 export class Matchmaking {
@@ -60,8 +61,9 @@ export class Matchmaking {
       const P1: userInfoSocket = this.userStack.pop();
       const P2: userInfoSocket = this.userStack.pop();
       const startDate : Date = new Date();
-      console.log(`startGame = ${startDate}`);
-      return new GameSession(server, P1, P2, startDate, game_id);
+      const generateSessionName : string = uuidv4();
+      console.log(`NEW GAME SESSION: ${generateSessionName} | ${P1.user.nickname}(${P1.user.login}) vs ${P2.user.nickname}(${P2.user.login})`);
+      return new GameSession(server, P1, P2, startDate, game_id, generateSessionName);
     }
     else
       console.log('Matchmaking: Pas assez de joueurs pour lancer une partie');

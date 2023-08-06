@@ -26,7 +26,6 @@ export class ServerGame {
     {
       //TODO: push en DB ? ou alors push en db uniquement si game terminé
       this.gameSession.push(this.matchmaking.createGame(server, this.gameSession.length)); //FIXME: recup game_id de la DB
-      console.log(`GameSession created`);
     }
   }
 
