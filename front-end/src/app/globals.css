@@ -1,6 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,700;1,700&display=swap');
+
+
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -215,4 +220,36 @@ body {
 
 .main-user-profile #login{
     color: darkgrey;
+}
+
+.game {
+  font-family: 'VT323', monospace;
+  /* font-family: 'Press Start 2P', monospace; */
+
+}
+
+.game-scoreboard {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(63, 105, 190, 0.268);
+  font-size: 1.75vw;/* 20px */;
+  line-height: 1.75rem/* 28px */;
+  top: 20px;
+  flex-direction: column;
+}
+
+.game-scoreboard-left {
+  left: 12vw;
+}
+
+.game-scoreboard-right {
+  right: 12vw;
+}
+
+.game-scoreboard-score {
+  font-size: 5vw/* 60px */;
+  line-height: 1;
 }
