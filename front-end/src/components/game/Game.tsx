@@ -431,6 +431,34 @@ export default function Game({className}: {className: string}) {
     // handleSearchGame();
   }, [stepCurrentSession]);
 
+  const [prevDimensions, setPrevDimensions] = useState({ width: 0, height: 0 });
+  useEffect(() => {
+    if (stepCurrentSession <= EStatusFrontGame.matchmakingRequest){
+      if (tableRef.current)
+      {
+        const observer = new ResizeObserver(entries => {
+          for (let entry of entries)
+          {
+            const { width, height } = entry.contentRect;
+            if (width !== prevDimensions.width || height !== prevDimensions.height)
+            {
+              setP1Position({x: 6, y: height / 2 - (p1Size.y / 2)})
+              setP2Position({x: width - (p2Size.x + 6), y: height / 2 - (p2Size.y / 2)})
+              setPrevDimensions({width, height});
+            }
+          }
+        });
+        observer.observe(tableRef.current);
+        
+        return () => {
+          observer.disconnect();
+        }
+      }
+    }
+  }, [tableRef.current])
+  
+
+
   return (
     <div className={`${className} `}>
       <Table tableRef={tableRef} className='w-full h-full relative font-vt323'>
