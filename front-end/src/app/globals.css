@@ -164,10 +164,18 @@ body {
 
 }
 
-.game{
-    display: inline;
-    margin-inline: auto;
-    margin-block: 10vh;
+.chat{
+    display: inline-block;
+    position: sticky;
+    right: 0;
+    bottom: 0;
+    top: 48vh;
+    height: 42vh;
+    width: 42vh;
+    margin-left: -20vh;
+    margin-inside: auto;
+
+    overflow-y: scroll;
 }
 
 .friends{
@@ -222,9 +230,13 @@ body {
     color: darkgrey;
 }
 
-.game {
-  font-family: 'VT323', monospace;
-  /* font-family: 'Press Start 2P', monospace; */
+.game{
+    display: inline;
+    margin-inline: auto;
+    margin-block: 10vh;
+    font-family: 'VT323', monospace;
+    width: 50vw;
+
 
 }
 
