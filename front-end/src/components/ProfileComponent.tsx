@@ -113,7 +113,7 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
     }
 
 
-    const WIDTH= 4, HEIGHT= WIDTH * 3
+    const WIDTH= 4, HEIGHT= WIDTH * 2.5
     return (
         <>
             <div className={className}>
