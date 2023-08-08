@@ -19,21 +19,36 @@ export class GameSession {
   private initElements: PODGAME.ISizeGameElements;
   private infoGameSession: PODGAME.IGameSessionInfo;
 	private startDate: Date;
-	private speedPaddle: number = 5; // in pixel per move
+
+
+  private ballDirection: PODGAME.IDirectionVec2D = {dx: 1, dy: 0}
 	private fpsTargetInMs: number = 1000 / 60; // = 16.67ms = 60 fps
+  private ballSpeed: number = 3;
+	private speedPaddle: number = 3; // in pixel per move
   
   ///////////////////////  DEFINE FOR SIZE ELEMENTS ///////////////////////
-  private paddlePosMargin : number = 0.01; // 1% of the table
-  private ballSizeCoef    : number = 0.03; // en pourcentage par rapport a la largeur de la table
-    
+  private paddlePosMargin : number = 0.03; // % of the table // decalage barre du bord
+	private table: Partial<PODGAME.IPodTable> = {
+    positionBall: { x: 0, y: 0 },
+    sizeBall:     { x: 12, y: 12 },
+    positionP1v: {x:0, y:0},
+    positionP2v: {x:0, y:0},
+		sizeP1: { y: 60, x: 8 },
+		sizeP2: { y: 60, x: 8 },
+		tableSize: { x: 700, y: 600 }, //taille table server
+		scoreP1: 0,
+		scoreP2: 0,
+	};
+
 	private serverSocket    : Server;
 	private player1         : PODGAME.userInfoSocket;
 	private player2         : PODGAME.userInfoSocket;
 	private spectator       : PODGAME.userInfoSocket[];
 
 
-  private scoreLimit      : number = 3;
+  private scoreLimit      : number = 5;
 
+  private lastPlayerScore : PODGAME.userInfoSocket | undefined = undefined; 
   private winner          : PODGAME.userInfoSocket;
   private looser          : PODGAME.userInfoSocket;
 
@@ -41,7 +56,9 @@ export class GameSession {
   private isP1Ready       : boolean = false;
   private isP2Ready       : boolean = false;
 
-  private ballToRightDBG  : boolean = true;
+  private ballToRightDBG  : boolean = true; // dbg => ball mouvement left / right for visual dbg
+
+
 
 	private keyP1: KeyPlayerState = {
 		isArrowDownPressed: false,
@@ -55,22 +72,6 @@ export class GameSession {
 	private intervalIdEmit: NodeJS.Timeout;
 
 	private historyGame: POD.IGame; // pour push dans DB
-
-  
-	private table: Partial<PODGAME.IPodTable> = {
-    positionBall: { x: 0, y: 0 },
-    sizeBall:     { x: 14, y: 14 },
-		// positionP1: 0,
-		// positionP2: 0,
-		maxPosP1: 600 - 60,
-		maxPosP2: 600 - 60,
-		sizeP1: { y: 60, x: 10 },
-		sizeP2: { y: 60, x: 10 },
-		tableSize: { x: 700, y: 600 }, //taille table server
-		scoreP1: 0,
-		scoreP2: 0,
-	};
-
 
 	constructor(
 		server: Server,
@@ -86,15 +87,16 @@ export class GameSession {
 		this.gameRoomEvent = gameSessionRoom;
 		this.serverSocket = server;
 		this.table.positionBall = {
-			x: this.table.tableSize.x / 2,
-			y: this.table.tableSize.y / 2,
+			x: (this.table.tableSize.x / 2) - (this.table.sizeBall.x / 2),
+			y: (this.table.tableSize.y / 2) - - (this.table.sizeBall.y / 2),
 		};
 
     //position de depart -- centrer en y
     this.table.positionP1v = {  x: this.paddlePosMargin * this.table.tableSize.x, 
                                 y: this.table.tableSize.y / 2 - this.table.sizeP1.y / 2};
-    this.table.positionP2v = {  x: this.table.tableSize.x - (this.paddlePosMargin * (this.table.tableSize.x * 2)), 
+    this.table.positionP2v = {  x: this.table.tableSize.x - (this.paddlePosMargin * this.table.tableSize.x) - this.table.sizeP2.x, 
                                 y: this.table.tableSize.y / 2 - this.table.sizeP2.y / 2};
+
 
     this.table.maxPosP1 = this.table.tableSize.y - this.table.sizeP1.y;
     this.table.maxPosP2 = this.table.tableSize.y - this.table.sizeP2.y;
@@ -103,27 +105,27 @@ export class GameSession {
 		//TODO update GAME TYPE / creer dans la db et recuperer id de session
 		//TODO this.historyGame.Id_GAME = requetes API axios ? websocket ?
 		////////////////////////////////////////////////////
+
+
+
+		//////////INFO TABLE FOR SEND INIT MSG CLIENTS/PLAYER //////////////
+    this.initElements   = {
+      tableServerSize: this.table.tableSize,
+      ballSize: this.table.sizeBall,
+      paddleP1Pos: this.table.positionP1v,
+      paddleP2Pos: this.table.positionP2v,
+      paddleP1Size: this.table.sizeP1,
+      paddleP2Size: this.table.sizeP2,    
+    }
     
-    
-    
-		//////////SETUP DE LA TABLE //////////////
-        this.initElements   = {
-          tableServerSize: this.table.tableSize,
-          ballSize: this.table.sizeBall,
-          paddleP1Pos: this.table.positionP1v,
-          paddleP2Pos: this.table.positionP2v,
-          paddleP1Size: this.table.sizeP1,
-          paddleP2Size: this.table.sizeP2,    
-        }
-    
-        this.infoGameSession  = {
-          game_id: game_id,
-          gameName: this.gameRoomEvent,
-          player1: P1.user,
-          player2: P2.user,
-          launchTime: startDate,
-          startInitElement: this.initElements,
-        }
+    this.infoGameSession  = {
+      game_id: game_id,
+      gameName: this.gameRoomEvent,
+      player1: P1.user,
+      player2: P2.user,
+      launchTime: startDate,
+      startInitElement: this.initElements,
+    }
     
 		//////////SETUP DES PLAYERS //////////////
     
@@ -178,12 +180,12 @@ export class GameSession {
 
 		//DEV EVENT cheat goal system
 		P1.socket.on(`${this.gameRoomEvent}GOAL`, () => {
-			this.addGoalP1();
+      this.addGoalToPlayer(P1);
 			console.log(`P1 GOALLLL`);
 			console.log(`SCORE: ${this.table.scoreP1} | ${this.table.scoreP2}`);
 		});
 		P2.socket.on(`${this.gameRoomEvent}GOAL`, () => {
-			this.addGoalP2();
+      this.addGoalToPlayer(P2);
 			console.log(`P2 GOALLLL`);
 			console.log(`SCORE: ${this.table.scoreP1} | ${this.table.scoreP2}`);
 		});
@@ -192,12 +194,12 @@ export class GameSession {
 		P1.socket.on(`${this.gameRoomEvent}STOP`, () => {
 			console.log(`Player 1 has given up`);
 			this.table.scoreP2 = this.scoreLimit ; 
-      this.checkScore();//faire gagner le joueur adverse
+      this.isEndGameCheckScoring();//faire gagner le joueur adverse
 		});
 		P2.socket.on(`${this.gameRoomEvent}STOP`, () => {
 			console.log(`Player 2 has given up`); 
 			this.table.scoreP1 = this.scoreLimit; 
-      this.checkScore();//faire gagner le joueur adverse
+      this.isEndGameCheckScoring();//faire gagner le joueur adverse
 		}); 
 
 
@@ -224,6 +226,11 @@ export class GameSession {
 			);
       console.log(`INFO GAME SESSION START INIT : ${JSON.stringify(this.infoGameSession.startInitElement)}`)
 		this.sendUpdateTable(); //lancer setInterval table
+	}
+
+  private ballMouvement = () => {
+		this.table.positionBall.x += this.ballSpeed * this.ballDirection.dx;
+		this.table.positionBall.y += this.ballSpeed * this.ballDirection.dy;
 	}
 
   private moveBallLeftRigthDebug = () => {
@@ -272,36 +279,106 @@ export class GameSession {
 						this.table.positionP2v.y += this.speedPaddle;
 					// console.log('P2 position ' + this.table.positionP2v.y);//FIXME:
 				}
-        this.moveBallLeftRigthDebug();//juste for anime ball before real bounds physics
+        this.handleBallCollisions();
+        this.ballMouvement();
+        // this.moveBallLeftRigthDebug();//juste for anime ball before real bounds physics
 			}, this.fpsTargetInMs / 2);
 		}
 	}
 
+  private handleBallCollisions() {
+    // Collision avec le haut ou le bas
+    if (this.table.positionBall.y <= 0 || (this.table.positionBall.y + this.table.sizeBall.y) >= this.table.tableSize.y) {
+      this.ballDirection.dy = -this.ballDirection.dy;
+    }
+    // Collision avec paddle P1
+    if(this.table.positionBall.x <= this.table.positionP1v.x + this.table.sizeP1.x && 
+      this.table.positionBall.y + this.table.sizeBall.y >= this.table.positionP1v.y && 
+      this.table.positionBall.y <= this.table.positionP1v.y + this.table.sizeP1.y){
+        this.ballDirection.dx = -this.ballDirection.dx;  
+      }
+      
+      // Collision avec paddle P2
+    else if(this.table.positionBall.x + this.table.sizeBall.x >= this.table.positionP2v.x && 
+      this.table.positionBall.y + this.table.sizeBall.y >= this.table.positionP2v.y && 
+      this.table.positionBall.y <= this.table.positionP2v.y + this.table.sizeP2.y ) {
+
+        this.ballDirection.dx = -this.ballDirection.dx;  
+    }
+   
+   
+      // Collision avec les rebords gauche droite => GOAL
+    if (this.table.positionBall.x <= 0)
+      this.addGoalToPlayer(this.player1);
+    if (this.table.positionBall.x >= this.table.tableSize.x)
+      this.addGoalToPlayer(this.player2)
+  }
+
+
   //envoi update au front des elements de la table
 	private sendUpdateTable() {
 		this.intervalIdEmit = setInterval(() => {
-      //TODO: traduire les valeur de table en % pour le front
-      const tableToSend: Partial<PODGAME.IPodTable> = {
-        positionP1v : { y: this.table.positionP1v.y / this.table.tableSize.y, x: this.initElements.paddleP1Pos.x },
-        positionP2v : {y: this.table.positionP2v.y / this.table.tableSize.y, x: this.initElements.paddleP2Pos.x },
-        positionBall: {y: this.table.positionBall.y / this.table.tableSize.y, x: this.table.positionBall.x / this.table.tableSize.x },
-        scoreP1: this.table.scoreP1,
-        scoreP2: this.table.scoreP2,
-      }
 			this.serverSocket.to(this.gameRoomEvent).emit('updateTable', this.table);
 		}, this.fpsTargetInMs);
 	}
 
-  //..
-	private addGoalP1() {
-		this.table.scoreP1++;
-		this.checkScore();
+  private resetPositionPlayerAndBall(){
+    this.table.positionP1v.y = (this.table.tableSize.y / 2) - (this.table.sizeP1.y / 2)
+    this.table.positionP2v.y = (this.table.tableSize.y / 2) - (this.table.sizeP1.y / 2)
+    this.table.positionP1v = {  x: this.paddlePosMargin * this.table.tableSize.x, 
+      y: this.table.tableSize.y / 2 - this.table.sizeP1.y / 2};
+    this.table.positionP2v = {  x: this.table.tableSize.x - (this.paddlePosMargin * this.table.tableSize.x) - this.table.sizeP2.x, 
+      y: this.table.tableSize.y / 2 - this.table.sizeP2.y / 2};
+      this.table.positionBall = {
+        x: (this.table.tableSize.x / 2) - (this.table.sizeBall.x / 2),
+        y: (this.table.tableSize.y / 2) - - (this.table.sizeBall.y / 2),
+      };
+  }
+
+  private ballEngagement(){
+		const angleRandom: number = (Math.random() * 2 - 1);
+		let dx: number;
+		console.log(`Random dir = ${angleRandom}`);
+
+		if (this.lastPlayerScore === this.player1) 
+      {dx = -1; console.log(`go to player 2`)}
+		else if (this.lastPlayerScore === this.player2) 
+      {dx = 1; console.log(`go to player 1`)}
+    else 
+    {
+      if (Math.random() < 0.5)
+        dx = 1;
+      else
+        dx = -1;
+    }
+		this.ballDirection = { dx: dx, dy: angleRandom};
 	}
-  //.. non vraiment je vais quand meme pas comment ca?!
-	private addGoalP2() {
-		this.table.scoreP2++;
-		this.checkScore();
-	}
+
+
+
+  private addGoalToPlayer(player: PODGAME.userInfoSocket)
+  {
+    this.resetPositionPlayerAndBall();
+    if (player === this.player1)
+    {  
+      this.table.scoreP1++;
+      this.lastPlayerScore = this.player1;
+    }
+    else 
+    {
+      this.table.scoreP2++;
+      this.lastPlayerScore = this.player2;
+    }
+    if (!this.isEndGameCheckScoring())
+    {
+      this.ballDirection = {dx: 0, dy: 0};
+      setTimeout(() => {
+        this.ballEngagement();
+      }, 2000)
+      //TODO STOP AND RELAUNCH BALL
+    }
+    
+  }
 
   //enclencher un compteur 3,2,1,GO envoyé au front avant de declencher le coup d'envoi
   private startCountdownIfPlayersReady(){
@@ -365,13 +442,14 @@ export class GameSession {
 	}
 
   //Gestion fin du game, si score max atteint => endOfGame
-	private checkScore() {
-		if (
-			this.table.scoreP1 >= this.scoreLimit ||
-			this.table.scoreP2 >= this.scoreLimit
-		)
-
-			this.endOfGame();
+	private isEndGameCheckScoring() {
+		if (this.table.scoreP1 >= this.scoreLimit ||
+		  this.table.scoreP2 >= this.scoreLimit) {
+      this.endOfGame();
+      return true;  
+    }
+    else
+      return false;
 	}
 
   //clean les intervals pour eviter les fuites memoires
@@ -388,12 +466,17 @@ export class GameSession {
 
 	private startGame() {
       console.log(`${this.gameRoomEvent}: le jeu commence`);
+      this.ballEngagement();
 		  this.isGameRunning = true;
 		  this.positionManagement();
       this.player1.socket.emit('startGame');
       this.player2.socket.emit('startGame');
 	}
 
+  //coder la logique de coup d'envoi pour le start et 
+  // private restartAfterGoal(goaler: PODGAME.userInfoSocket) {
+
+  // }
 
   ///////// ACCESSORS ////////////
 	public getGameId(): number {

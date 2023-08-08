@@ -36,8 +36,6 @@ export interface IPodTable {
   sizeBall          : IVector2D;
 	positionP1v       : IVector2D;
 	positionP2v       : IVector2D;
-	positionP1        : number;
-	positionP2        : number;
 	maxPosP1          : number;
 	maxPosP2          : number;
 	sizeP1            : IVector2D;
@@ -45,6 +43,13 @@ export interface IPodTable {
 	tableSize         : IVector2D;
   scoreP1           : number;
   scoreP2           : number;
+  }
+
+
+//vecteur unitaire pour direction de la balle
+export interface IDirectionVec2D {
+    dx                 : number;
+    dy                 : number;
   }
 
 export interface IVector2D {

@@ -6,7 +6,6 @@ import { IUser } from '@/shared/types'
 import * as PODGAME from '@/shared/typesGame'
 import * as apiRoutes from '@/shared/routesApi'
 import * as ClipLoader from 'react-spinners'
-import { table } from 'console'
 
 enum EStatusFrontGame {
   idle,
@@ -17,12 +16,6 @@ enum EStatusFrontGame {
   gameInProgress,
   endOfGame
 }
-
-// interface scoringBoard{
-//   P1: Partial<IUser>;
-//   P2: Partial<IUser>;
-//   scoreP1: 
-// }
 
 export default function Game({className}: {className: string}) {
   const socket      = useContext(SocketContextGame);
@@ -41,19 +34,13 @@ export default function Game({className}: {className: string}) {
 
   const [nameGameSession, setNameGameSession] = useState<string>("");
   const [stepCurrentSession, setStepCurrentSession] = useState<EStatusFrontGame>(EStatusFrontGame.idle);
-  const [buttonText, setButtonText] = useState<string>("SEARCH GAME");
   const [remoteEvent, setRemoteEvent] = useState<string>("");
-  // const remoteEvent = useRef<string>('');
   
-  // const [paddleSize, setPaddleSize]  = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default
   const [p1Size, setP1Size]             = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default avant connection
   const [p2Size, setP2Size]             = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default avant connection
   const [ballSize, setBallSize]         = useState<PODGAME.IVector2D>({x: 18, y: 18}); //taille par default avant connection
 
 
-
-  // const [p1Position, setP1Position]     = useState<number>(250);
-  // const [p2Position, setP2Position]     = useState<number>(250);
   const [p1Position, setP1Position]     = useState<PODGAME.IVector2D>({x: -1, y: -1});
   const [p2Position, setP2Position]     = useState<PODGAME.IVector2D>({x: -1, y: -1});
   const [ballPosition, setBallPosition] = useState<PODGAME.IVector2D>({x: 0, y: 0});
@@ -283,50 +270,41 @@ export default function Game({className}: {className: string}) {
 	
   const Ball = () => {
     return (
+      <>
       <div ref={ballRef} style={{
         position: 'absolute',
         width: `${ballSize.x}px`,
         height: `${ballSize.y}px`,
         top: `${ballPosition.y}px`,
         left: `${ballPosition.x}px`,
-        transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
+        // transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
         borderRadius: '1%',
         backgroundColor: 'black',
-    }} />
-    )
-  }
+    }} >
+      {/* <div className=' bg-red-500' style={{
+        position: 'absolute',
+        width: `800px`,
+        height: `1px`,
+        transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
 
-  const Scoreboard = () => {
-    return (
-      <div className=' game-scoreboard relative'>
-        {nameGameSession &&
-          <div className='game-scoreboard-left'>{`${userP1.nickname} `}
-            <div className='game-scoreboard-left-score'>{`${scoreP1}`}</div>
-          </div>
-          }
-          {nameGameSession && 
-          <div className='game-scoreboard-right' >{`${userP2.nickname} `}
-            <div className='scogame-scoreboard-right-score'>{`${scoreP2}`}
-            </div>
-          </div>
-          }
-      </div>
+    }}/>
+      <div className=' bg-green-500' style={{
+        position: 'absolute',
+        width: `1px`,
+        height: `200px`,
+        transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
+
+    }}/> */}
+
+    </div>
+    </>
     )
-  
   }
 
 	const Player = ({className, position, refDiv}: 
 	  {className?: string, position: 'left' | 'right', refDiv: React.RefObject<HTMLDivElement>}) 
 	    :React.JSX.Element => {
 
-        // if(p1Position.x < 0 || p1Position.y < 0)
-        // {
-        //   if(tableRef && tableRef.current) {
-        //     setP1Position({x: tableRef.current?.offsetWidth * 0.014, y: (tableRef.current.offsetHeight / 2) - (p1Size.y / 2)});
-        //     setP2Position({x: (tableRef.current.offsetWidth) - (tableRef.current?.offsetWidth * 0.014) - p2Size.y, y: (tableRef.current.offsetHeight / 2) - (p2Size.y / 2)});
-        //   }
-        // }
-        //TODO: position x ??
     return (
       <>
         {position === 'left' ? 
@@ -349,11 +327,8 @@ export default function Game({className}: {className: string}) {
           </div>
           }
         </>
-
         } 
-
       </>
-      // <>HELLO PADLE</>
     )
   }
 
@@ -463,7 +438,7 @@ export default function Game({className}: {className: string}) {
     <div className={`${className} `}>
       <Table tableRef={tableRef} className='w-full h-full relative font-vt323'>
         {/* <Scoreboard/> // bugger*/}
-
+        {/* <CenterDBG/> */}
         <Player className='bg-black absolute ' position='left' refDiv={pad1Ref} /> 
         <Player className='bg-black absolute'  position='right' refDiv={pad2Ref} />
         {!ballHidden && <Ball/>}
