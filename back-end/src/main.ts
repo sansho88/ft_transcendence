@@ -29,6 +29,6 @@ async function bootstrap() {
 		credentials: true,
 	});
 	app.useWebSocketAdapter(ioAdapter);
-	await app.listen(8000);
+	await app.listen(8000, '0.0.0.0');
 }
 bootstrap();
