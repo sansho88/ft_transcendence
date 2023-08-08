@@ -1,107 +1,89 @@
 import { Injectable } from '@nestjs/common';
+import { UpdateUserDto } from '../dto/user/update-user.dto';
+import { UserEntity, UserStatus } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
-import * as bcrypt from 'bcrypt';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { CredentialEntity } from '../entities/credential.entity';
 
 @Injectable()
-export class UserService {
+export class UsersService {
 	constructor(
-		@InjectRepository(User)
-		private userRepository: Repository<User>,
+		@InjectRepository(UserEntity)
+		private usersRepository: Repository<UserEntity>,
 	) {}
 
-	async count(): Promise<number> {
-		return this.userRepository.count();
+	/**
+	 * Todo: update with new thing in table
+	 */
+	/**
+	 * Create and save the new user
+	 * @param newLogin login of the user
+	 * @param newInvite if true the person is treated not has a member of 42
+	 * @param newCredential his credential
+	 */
+	async create(
+		newLogin: string,
+		newInvite: boolean,
+		newCredential: CredentialEntity,
+	) {
+		const user = UserEntity.create({
+			login: newLogin,
+			nickname: newLogin,
+			Invite: newInvite,
+		});
+		user.credential = newCredential;
+		await user.save();
+		return;
 	}
 
-	async hashPassAndCreateUser(user: User): Promise<User> {
-		if (user.password) {
-			const hashedPassword = await bcrypt.hash(user.password, 10);
-			return {
-				...user,
-				password: hashedPassword,
-			};
-		} else {
-			return user;
-		}
+	async findAll() {
+		return this.usersRepository.find();
 	}
 
-	async create(user: Partial<User>): Promise<User | undefined> {
-		// console.log(user.login +  '\navatar path: ' + user.avatar_path + '\npassword: ' + user.token_2fa);
-		const existingUser = await this.findByUsername(user.login);
-		if (existingUser) {
-			throw new HttpException('login is already taken', HttpStatus.CONFLICT);
-		}
-		const newUser = this.userRepository.create(user);
-		if(!user.avatar_path)
-			newUser.avatar_path = '';
-		if (!user.nickname)
-			newUser.nickname = user.login;
-		if(!user.token_2fa)
-			newUser.token_2fa = 'token2fa';
-		newUser.status = 1;
-		newUser.has_2fa = false;
-		// console.log('newUserPass = ' + newUser.token_2fa);
-		const tmpUser = await this.hashPassAndCreateUser(newUser);
-		return await this.userRepository.save(tmpUser);
+	/**
+	 * Todo: return something (Error code?) if invalid id
+	 */
+	async findOne(login: string) {
+		return this.usersRepository.findOneBy({ login: login });
 	}
 
-	async findAll(): Promise<User[]> {
-		return await this.userRepository.find();
+	async update(login: string, updateUser: UpdateUserDto) {
+		const user = await this.usersRepository.findOneBy({ login: login });
+		if (updateUser.nickname !== undefined) user.nickname = updateUser.nickname;
+		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
+		await user.save();
+		return user;
 	}
 
-	async findByUsername(login: string): Promise<User | undefined> {
-		return await this.userRepository.findOne({ where: { login } });
+	// todo: remove user from db
+	remove(id: number) {
+		return `This action removes a #${id} user`;
+	}
+	async getCredential(login: string) {
+		const target = await this.usersRepository.findOne({
+			relations: {
+				credential: true,
+			},
+			where: {
+				login: login,
+			},
+		});
+		return target.credential;
 	}
 
-	async findOne(id: number): Promise<User | undefined> {
-		return await this.userRepository.findOne({ where: { id_user: id } });
+	async userStatus(login: string, newStatus: UserStatus) {
+		const user = await this.usersRepository.findOneBy({ login: login });
+		user.status = newStatus;
+		await user.save();
 	}
-
-	async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-		await this.userRepository.update(id, updateUserDto);
-		return await this.userRepository.findOne({ where: { id_user: id } });
-	}
-
-	async remove(id: number): Promise<void> {
-		await this.userRepository.delete(id);
-	}
-
-	async removeAll(): Promise<void> {
-		// await this.userRepository.clear();
-		await this.userRepository.query('TRUNCATE TABLE "users" CASCADE'); // git push --force
-	}
-
-	async comparePassword(
-		toCompare: LoginUserDto,
-	): Promise<{ success: boolean; message: string }> {
-		const user = await this.findByUsername(toCompare.login);
-		if (!user) throw new HttpException('Not found user', HttpStatus.NOT_FOUND);
-
-		const passwordMatch = await bcrypt.compare(
-			toCompare.password,
-			user.password,
-		);
-		console.log(
-			'password match = ' +
-				passwordMatch +
-				' \n ' +
-				user.password +
-				' vs ' +
-				toCompare.password,
-		);
-		if (passwordMatch) {
-			return { success: true, message: 'Logged in successfully' };
-		} else {
-			throw new HttpException(
-				{ success: false, message: 'Invalid password' },
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
-	}
+	// async getFriend(target: string) {
+	// 	return await this.usersRepository.find({
+	// 		relations: {
+	// 			friend_list: true,
+	// 		},
+	// 		where: {
+	// 			login: target,
+	// 		},
+	// 	});
+	// }
 }
