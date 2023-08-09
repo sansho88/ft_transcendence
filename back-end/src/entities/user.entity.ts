@@ -71,26 +71,35 @@ export class UserEntity extends BaseEntity {
 	@OneToMany(() => MessageEntity, (message) => message.author)
 	message: MessageEntity[];
 
-	@OneToMany(() => ChannelEntity, (chanel) => chanel.userList)
-	channelJoined: ChannelEntity[];
-
 	//	Friends
 	@ManyToMany(() => UserEntity, (user) => user.subscribed)
-	followers: UserEntity;
+	@JoinTable()
+	followers: UserEntity[];
 
 	@ManyToMany(() => UserEntity, (user) => user.followers)
 	@JoinTable()
-	subscribed: UserEntity;
+	subscribed: UserEntity[];
 
+	
 	@OneToMany(() => InviteEntity, (invite) => invite.user)
 	invite: InviteEntity[];
-
+	
 	@OneToMany(() => MuteEntity, (mute) => mute.user)
 	mute: MuteEntity[];
-
+	
 	@OneToMany(() => BannedEntity, (banned) => banned.user)
 	banned: BannedEntity[];
+	
+	@OneToMany(() => ChannelEntity, (channel) => channel.userList)
+	@JoinTable()
+	channelJoined: ChannelEntity[];
 
+	@OneToMany(() => ChannelEntity, (channel) => channel.adminList)
+	channelAdmin: ChannelEntity[];
+
+	@OneToMany(() => ChannelEntity, (channel) => channel.owner)
+	channelOwned: ChannelEntity[];
+	
 	// @Column()
 	// @ManyToMany(() => UserEntity)
 	// @JoinTable()
