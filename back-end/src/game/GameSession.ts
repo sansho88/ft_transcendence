@@ -30,10 +30,10 @@ export class GameSession {
   private ballNumberHitBtwAcceleration  : number = 3; //tous les X coup, la ball prend speed * AccelerationFactor
 	private speedPaddle                   : number = 4; // in pixel per move
   private hitCounter                    : number = 0;
-  private scoreLimit                    : number = 5;
+  private scoreLimit                    : number = 50;
   
   ///////////////////////  DEFINE FOR SIZE ELEMENTS ///////////////////////
-  private paddlePosMargin : number = 0.03; // % of the table // decalage barre du bord
+  private paddlePosMargin : number = 0.2; // % of the table // decalage barre du bord
 	private table: Partial<PODGAME.IPodTable> = {
     positionBall: { x: 0, y: 0 },
     sizeBall:     { x: 12, y: 12 },
@@ -319,23 +319,40 @@ export class GameSession {
   }
 
   private handleBallCollisions() {
+
+    //re declaration local pour y voir plus claire dans les if 
+    //plutot qu'une foret de "this.table.xxx.xx" ^^
+    const ballPos   = this.table.positionBall;
+    const ballSize  = this.table.sizeBall;
+    const P1pos     = this.table.positionP1v;
+    const P1Size    = this.table.sizeP1;
+    const P2pos     = this.table.positionP2v;
+    const P2Size    = this.table.sizeP2;
+    const tableSize = this.table.tableSize;
+
     // Collision avec le haut ou le bas
-    if (this.table.positionBall.y <= 0 || (this.table.positionBall.y + this.table.sizeBall.y) >= this.table.tableSize.y) {
+    if (ballPos.y <= 0 || (ballPos.y + ballSize.y) >= tableSize.y) {
       this.ballDirection.dy = -this.ballDirection.dy;
     }
     // Collision avec paddle P1
-    if(this.table.positionBall.x <= this.table.positionP1v.x + this.table.sizeP1.x && 
-      this.table.positionBall.y + this.table.sizeBall.y >= this.table.positionP1v.y && 
-      this.table.positionBall.y <= this.table.positionP1v.y + this.table.sizeP1.y){
+    if(ballPos.x <= P1pos.x + P1Size.x && 
+      ballPos.x + (ballSize.x / 2) >= P1pos.x  &&
+      ballPos.y + ballSize.y >= P1pos.y && 
+      ballPos.y <= P1pos.y + P1Size.y){
+        if (ballPos.x + (ballSize.x / 2) >= P1pos.x )
+          ballPos.x = P1pos.x + P1Size.x;
         this.preciseCollPaddle('P1');
         this.hitCounter++;
         
       }
       
       // Collision avec paddle P2
-      else if(this.table.positionBall.x + this.table.sizeBall.x >= this.table.positionP2v.x && 
-        this.table.positionBall.y + this.table.sizeBall.y >= this.table.positionP2v.y && 
-        this.table.positionBall.y <= this.table.positionP2v.y + this.table.sizeP2.y ) {
+      else if(ballPos.x + ballSize.x >= P2pos.x && 
+              ballPos.x +(ballSize.x / 2) <= P2pos.x + P2Size.x && 
+        ballPos.y + ballSize.y >= P2pos.y && 
+        ballPos.y <= P2pos.y + P2Size.y ) {
+          if (ballPos.x -(ballSize.x / 2) <= P2pos.x + P2Size.x)
+            ballPos.x = P2pos.x - ballSize.x;
           this.preciseCollPaddle('P2');
           this.hitCounter++;
         // this.ballDirection.dx = -this.ballDirection.dx;  
@@ -343,9 +360,9 @@ export class GameSession {
    
    
       // Collision avec les rebords gauche droite => GOAL
-    if (this.table.positionBall.x <= 0)
+    if (ballPos.x <= 0)
       this.addGoalToPlayer(this.player1);
-    if (this.table.positionBall.x >= this.table.tableSize.x)
+    if (ballPos.x >= tableSize.x)
       this.addGoalToPlayer(this.player2)
   }
 
