@@ -14,17 +14,23 @@ interface KeyPlayerState{
 }
 
 export class GameSession {
-	private game_id: number;
-	private gameRoomEvent: string;
-  private initElements: PODGAME.ISizeGameElements;
-  private infoGameSession: PODGAME.IGameSessionInfo;
-	private startDate: Date;
+	private game_id                       : number;
+	private gameRoomEvent                 : string;
+  private initElements                  : PODGAME.ISizeGameElements;
+  private infoGameSession               : PODGAME.IGameSessionInfo;
+	private startDate                     : Date;
 
 
-  private ballDirection: PODGAME.IDirectionVec2D = {dx: 1, dy: 0}
-	private fpsTargetInMs: number = 1000 / 60; // = 16.67ms = 60 fps
-  private ballSpeed: number = 3;
-	private speedPaddle: number = 3; // in pixel per move
+  private ballDirection                 : PODGAME.IDirectionVec2D = {dx: 1, dy: 0}
+	private fpsTargetInMs                 : number = 1000 / 60; // = 16.67ms = 60 fps
+  private ballSpeedInitial              : number = 2.2;
+  private ballSpeedMax                  : number = 4.5;
+  private ballSpeed                     : number = 2.2;
+  private ballAccelerationFactor        : number = 1.15;
+  private ballNumberHitBtwAcceleration  : number = 3; //tous les X coup, la ball prend speed * AccelerationFactor
+	private speedPaddle                   : number = 4; // in pixel per move
+  private hitCounter                    : number = 0;
+  private scoreLimit                    : number = 5;
   
   ///////////////////////  DEFINE FOR SIZE ELEMENTS ///////////////////////
   private paddlePosMargin : number = 0.03; // % of the table // decalage barre du bord
@@ -46,7 +52,6 @@ export class GameSession {
 	private spectator       : PODGAME.userInfoSocket[];
 
 
-  private scoreLimit      : number = 5;
 
   private lastPlayerScore : PODGAME.userInfoSocket | undefined = undefined; 
   private winner          : PODGAME.userInfoSocket;
@@ -286,6 +291,33 @@ export class GameSession {
 		}
 	}
 
+  private preciseCollPaddle(paddle: 'P1' | 'P2') {
+    let collisionPoint: number;
+
+    if (paddle === 'P1') {
+        collisionPoint = this.table.positionBall.y + (this.table.sizeBall.y / 2) - this.table.positionP1v.y;
+    } else {
+        collisionPoint = this.table.positionBall.y + (this.table.sizeBall.y / 2) - this.table.positionP2v.y;
+    }
+
+    // Calculer la position relative de la balle sur le paddle en pourcentage.
+    const relativeIntersectY = (collisionPoint / (paddle === 'P1' ? this.table.sizeP1.y : this.table.sizeP2.y)) - 0.5;
+
+    // Convertir cette position relative de son angle dinversion
+    const bounceAngle = relativeIntersectY * 4.5; 
+
+    this.ballDirection.dy = Math.sin(bounceAngle);
+    this.ballDirection.dx = -this.ballDirection.dx;  // Inversez simplement la direction horizontale comme avant.
+    this.ballSpeedManagement(); //accelere la balle
+}
+
+
+  private ballSpeedManagement(){
+      if (this.hitCounter % this.ballNumberHitBtwAcceleration === 0 && this.ballSpeed <= this.ballSpeedMax)
+        this.ballSpeed *= this.ballAccelerationFactor;
+      console.log(`${this.gameRoomEvent}: la balle accelere ! (DBG: ballSpeed:${this.ballSpeed})`)
+  }
+
   private handleBallCollisions() {
     // Collision avec le haut ou le bas
     if (this.table.positionBall.y <= 0 || (this.table.positionBall.y + this.table.sizeBall.y) >= this.table.tableSize.y) {
@@ -295,15 +327,18 @@ export class GameSession {
     if(this.table.positionBall.x <= this.table.positionP1v.x + this.table.sizeP1.x && 
       this.table.positionBall.y + this.table.sizeBall.y >= this.table.positionP1v.y && 
       this.table.positionBall.y <= this.table.positionP1v.y + this.table.sizeP1.y){
-        this.ballDirection.dx = -this.ballDirection.dx;  
+        this.preciseCollPaddle('P1');
+        this.hitCounter++;
+        
       }
       
       // Collision avec paddle P2
-    else if(this.table.positionBall.x + this.table.sizeBall.x >= this.table.positionP2v.x && 
-      this.table.positionBall.y + this.table.sizeBall.y >= this.table.positionP2v.y && 
-      this.table.positionBall.y <= this.table.positionP2v.y + this.table.sizeP2.y ) {
-
-        this.ballDirection.dx = -this.ballDirection.dx;  
+      else if(this.table.positionBall.x + this.table.sizeBall.x >= this.table.positionP2v.x && 
+        this.table.positionBall.y + this.table.sizeBall.y >= this.table.positionP2v.y && 
+        this.table.positionBall.y <= this.table.positionP2v.y + this.table.sizeP2.y ) {
+          this.preciseCollPaddle('P2');
+          this.hitCounter++;
+        // this.ballDirection.dx = -this.ballDirection.dx;  
     }
    
    
@@ -352,6 +387,8 @@ export class GameSession {
         dx = -1;
     }
 		this.ballDirection = { dx: dx, dy: angleRandom};
+    this.ballSpeed = this.ballSpeedInitial;
+    this.hitCounter = 0;
 	}
 
 
