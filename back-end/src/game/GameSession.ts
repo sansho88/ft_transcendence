@@ -23,24 +23,26 @@ export class GameSession {
 
   private ballDirection                 : PODGAME.IDirectionVec2D = {dx: 1, dy: 0}
 	private fpsTargetInMs                 : number = 1000 / 60; // = 16.67ms = 60 fps
-  private ballSpeedInitial              : number = 2.2;
-  private ballSpeedMax                  : number = 4.5;
-  private ballSpeed                     : number = 2.2;
-  private ballAccelerationFactor        : number = 1.15;
+  private ballSpeedInitial              : number;
+  private ballSpeedMax                  : number = 5.8;
+  private ballSpeed                     : number = 2.6;
+  private ballAccelerationFactor        : number = 1.18;
   private ballNumberHitBtwAcceleration  : number = 3; //tous les X coup, la ball prend speed * AccelerationFactor
+  private paddleAccelerationFactor      : number = 1.1;
+	private speedPaddleInitial            : number;
 	private speedPaddle                   : number = 4; // in pixel per move
   private hitCounter                    : number = 0;
-  private scoreLimit                    : number = 50;
+  private scoreLimit                    : number = 5;
   
   ///////////////////////  DEFINE FOR SIZE ELEMENTS ///////////////////////
-  private paddlePosMargin : number = 0.2; // % of the table // decalage barre du bord
+  private paddlePosMargin : number = 0.014; // % of the table // decalage barre du bord
 	private table: Partial<PODGAME.IPodTable> = {
     positionBall: { x: 0, y: 0 },
-    sizeBall:     { x: 12, y: 12 },
+    sizeBall:     { x:12, y:12 },
     positionP1v: {x:0, y:0},
     positionP2v: {x:0, y:0},
-		sizeP1: { y: 60, x: 8 },
-		sizeP2: { y: 60, x: 8 },
+		sizeP1: { y: 80, x: 10 },
+		sizeP2: { y: 80, x: 10 },
 		tableSize: { x: 700, y: 600 }, //taille table server
 		scoreP1: 0,
 		scoreP2: 0,
@@ -86,6 +88,8 @@ export class GameSession {
 		game_id: number,
     gameSessionRoom : string,
 	) {
+    this.ballSpeedInitial = this.ballSpeed;
+    this.speedPaddleInitial = this.speedPaddle;
 		this.player1 = P1;
 		this.player2 = P2;
 		this.startDate = startDate;
@@ -238,28 +242,6 @@ export class GameSession {
 		this.table.positionBall.y += this.ballSpeed * this.ballDirection.dy;
 	}
 
-  private moveBallLeftRigthDebug = () => {
-    //debug value
-    if (this.isGameRunning){
-
-      if (this.ballToRightDBG && this.table.positionBall.x + (this.table.sizeBall.x/2) >= 0)
-      {  
-        if (this.table.positionBall.x + (this.table.sizeBall.x/2) > this.table.tableSize.x)
-          this.ballToRightDBG = false;
-        else
-          this.table.positionBall.x += 7;
-      }
-      else
-      {
-        if (this.table.positionBall.x - (this.table.sizeBall.x/2) < 0)
-          this.ballToRightDBG = true;
-        else
-          this.table.positionBall.x -= 7;
-      }
-    }
-    // console.log(`BALL posx: ${this.table.positionBall.x}`)
-  }
-
   //calcul position des paddles en temp reel
 	private positionManagement() { 
 		if (this.isGameRunning) {
@@ -280,7 +262,7 @@ export class GameSession {
 					// console.log('P2 position ' + this.table.positionP2v.y);//FIXME:
 				}
 				if (this.keyP2.isArrowDownPressed) {
-					if (this.table.positionP2v.y < this.table.maxPosP1)
+					if (this.table.positionP2v.y < this.table.maxPosP2)
 						this.table.positionP2v.y += this.speedPaddle;
 					// console.log('P2 position ' + this.table.positionP2v.y);//FIXME:
 				}
@@ -291,6 +273,7 @@ export class GameSession {
 		}
 	}
 
+  //renvoyer la ball avec plus d'angle au plus on tape sur les extremitées des paddle
   private preciseCollPaddle(paddle: 'P1' | 'P2') {
     let collisionPoint: number;
 
@@ -300,7 +283,7 @@ export class GameSession {
         collisionPoint = this.table.positionBall.y + (this.table.sizeBall.y / 2) - this.table.positionP2v.y;
     }
 
-    // Calculer la position relative de la balle sur le paddle en pourcentage.
+    // Calculer la position relative de la balle sur le paddle.
     const relativeIntersectY = (collisionPoint / (paddle === 'P1' ? this.table.sizeP1.y : this.table.sizeP2.y)) - 0.5;
 
     // Convertir cette position relative de son angle dinversion
@@ -314,7 +297,10 @@ export class GameSession {
 
   private ballSpeedManagement(){
       if (this.hitCounter % this.ballNumberHitBtwAcceleration === 0 && this.ballSpeed <= this.ballSpeedMax)
+      {
         this.ballSpeed *= this.ballAccelerationFactor;
+        this.speedPaddle *= this.paddleAccelerationFactor;
+      }
       console.log(`${this.gameRoomEvent}: la balle accelere ! (DBG: ballSpeed:${this.ballSpeed})`)
   }
 
@@ -333,7 +319,21 @@ export class GameSession {
     // Collision avec le haut ou le bas
     if (ballPos.y <= 0 || (ballPos.y + ballSize.y) >= tableSize.y) {
       this.ballDirection.dy = -this.ballDirection.dy;
+
+      //empecher la balle de filer droit sur les bords haut/bas
+      if (ballPos.y <= 0 && this.ballDirection.dy < 0.01)
+      {
+        console.log(`JE DEVRAIS PAS ETRE ICI !`)
+        this.table.positionBall.y = 0;
+        this.ballDirection.dy = 0.01
+      }
+      else if ((ballPos.y + ballSize.y) >= this.table.tableSize.y && this.ballDirection.dy > -0.01)
+      {
+        this.table.positionBall.y = this.table.tableSize.y - this.table.sizeBall.y;
+        this.ballDirection.dy = -0.01
+      }
     }
+
     // Collision avec paddle P1
     if(ballPos.x <= P1pos.x + P1Size.x && 
       ballPos.x + (ballSize.x / 2) >= P1pos.x  &&
@@ -371,8 +371,11 @@ export class GameSession {
 	private sendUpdateTable() {
 		this.intervalIdEmit = setInterval(() => {
 			this.serverSocket.to(this.gameRoomEvent).emit('updateTable', this.table);
-		}, this.fpsTargetInMs);
-	}
+      console.log(`ballPos : ${JSON.stringify(this.table.positionBall)}`)
+      console.log(`ballDir : ${JSON.stringify(this.ballDirection)}`)
+    }, this.fpsTargetInMs);
+  }
+
 
   private resetPositionPlayerAndBall(){
     this.table.positionP1v.y = (this.table.tableSize.y / 2) - (this.table.sizeP1.y / 2)
@@ -404,7 +407,13 @@ export class GameSession {
         dx = -1;
     }
 		this.ballDirection = { dx: dx, dy: angleRandom};
+    /////////////////// debug glissage bar haut ou bas //////////
+    // this.ballDirection = { dx: 1, dy: 0};
+    // this.table.positionBall = {x: 40, y: (this.table.tableSize.y + 2) - this.table.sizeBall.y / 2};
+    /////////////////// debug glissage bar haut ou bas //////////
+    
     this.ballSpeed = this.ballSpeedInitial;
+    this.speedPaddle = this.speedPaddleInitial;
     this.hitCounter = 0;
 	}
 
@@ -416,12 +425,12 @@ export class GameSession {
     if (player === this.player1)
     {  
       this.table.scoreP1++;
-      this.lastPlayerScore = this.player1;
+      this.lastPlayerScore = this.player1; //determnine le sens de lengagement 
     }
     else 
     {
       this.table.scoreP2++;
-      this.lastPlayerScore = this.player2;
+      this.lastPlayerScore = this.player2; //determnine le sens de lengagement 
     }
     if (!this.isEndGameCheckScoring())
     {
