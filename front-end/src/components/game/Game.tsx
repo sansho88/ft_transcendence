@@ -6,10 +6,11 @@ import { IUser } from '@/shared/types'
 import * as PODGAME from '@/shared/typesGame'
 import * as apiRoutes from '@/shared/routesApi'
 import * as ClipLoader from 'react-spinners'
-import { table } from 'console'
+import SwitcherTheme from '@/components/game/SwitcherTheme'
 
 enum EStatusFrontGame {
   idle,
+  modChoice,
   matchmakingRequest,
   gameSessionFind,
   waiting,
@@ -17,12 +18,6 @@ enum EStatusFrontGame {
   gameInProgress,
   endOfGame
 }
-
-// interface scoringBoard{
-//   P1: Partial<IUser>;
-//   P2: Partial<IUser>;
-//   scoreP1: 
-// }
 
 export default function Game({className}: {className: string}) {
   const socket      = useContext(SocketContextGame);
@@ -38,22 +33,19 @@ export default function Game({className}: {className: string}) {
   const pad2Ref     = useRef<HTMLDivElement>(null);
   const ballRef     = useRef<HTMLDivElement>(null);
 
+  const [currentGameTheme, setCurrentGameTheme] = useState<string>('')
+
+
 
   const [nameGameSession, setNameGameSession] = useState<string>("");
   const [stepCurrentSession, setStepCurrentSession] = useState<EStatusFrontGame>(EStatusFrontGame.idle);
-  const [buttonText, setButtonText] = useState<string>("SEARCH GAME");
   const [remoteEvent, setRemoteEvent] = useState<string>("");
-  // const remoteEvent = useRef<string>('');
   
-  // const [paddleSize, setPaddleSize]  = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default
   const [p1Size, setP1Size]             = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default avant connection
   const [p2Size, setP2Size]             = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default avant connection
   const [ballSize, setBallSize]         = useState<PODGAME.IVector2D>({x: 18, y: 18}); //taille par default avant connection
 
 
-
-  // const [p1Position, setP1Position]     = useState<number>(250);
-  // const [p2Position, setP2Position]     = useState<number>(250);
   const [p1Position, setP1Position]     = useState<PODGAME.IVector2D>({x: -1, y: -1});
   const [p2Position, setP2Position]     = useState<PODGAME.IVector2D>({x: -1, y: -1});
   const [ballPosition, setBallPosition] = useState<PODGAME.IVector2D>({x: 0, y: 0});
@@ -67,6 +59,14 @@ export default function Game({className}: {className: string}) {
   const [infoMessage, setInfoMessage]   = useState<string>('PLAY');
   
   const coefTableServer                 = useRef<PODGAME.IVector2D>({x: 1, y: 1});
+
+  const gameMod                         = useRef<PODGAME.EGameMod>(PODGAME.EGameMod.classic);
+
+
+  function changeTheme(themeName) {
+    setCurrentGameTheme(themeName);
+}
+
 
 	useEffect(() => {
 	  if (nameGameSession === "") {
@@ -193,8 +193,16 @@ export default function Game({className}: {className: string}) {
           setBallSize({x: data.sizeBall.x * coefTableServer.current.x, y: data.sizeBall.y * coefTableServer.current.y})
 
         }
-        setScoreP1(data.scoreP1);
-        setScoreP2(data.scoreP2);
+        if (gameMod.current !== PODGAME.EGameMod.trainning)
+        {
+          setScoreP1(data.scoreP1);
+          setScoreP2(data.scoreP2);
+        }
+        else
+        {
+          setScoreP1(data.maxTrainningHit);
+          setScoreP2(data.trainningHit);
+        }
 
 			//ball position
 	      // console.log(`WS updateTable : ${JSON.stringify(data)}`); //recupere la position du paddles 1
@@ -270,12 +278,13 @@ export default function Game({className}: {className: string}) {
 	
 	const Table: React.FC<TableProps> = ({className, tableRef, children}) => {
 	  return (
-      <div ref={tableRef} className={`${className} rounded-xl bg-blue-game`} 
+      <div ref={tableRef} className={`${className} relative`} 
 	    style={{
         boxShadow: "0 0 150px  40px rgba(170, 170, 255, 0.4)" 
       }}> 
       {/* <div className="relative pb-[75%]"></div> */}
       {/* <div className="absolute inset-0 flex items-center justify-center"></div> */}
+        <div className='dottedLine absolute  left-1/2 h-full w-1'></div>
 	      {children} 
 	    </div>
 	  )
@@ -283,50 +292,40 @@ export default function Game({className}: {className: string}) {
 	
   const Ball = () => {
     return (
-      <div ref={ballRef} style={{
+      <>
+      <div ref={ballRef} className='ball' style={{
         position: 'absolute',
         width: `${ballSize.x}px`,
         height: `${ballSize.y}px`,
         top: `${ballPosition.y}px`,
         left: `${ballPosition.x}px`,
-        transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
+        // transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
         borderRadius: '1%',
-        backgroundColor: 'black',
-    }} />
-    )
-  }
+    }} >
+      {/* <div className=' bg-red-500' style={{
+        position: 'absolute',
+        width: `800px`,
+        height: `1px`,
+        transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
 
-  const Scoreboard = () => {
-    return (
-      <div className=' game-scoreboard relative'>
-        {nameGameSession &&
-          <div className='game-scoreboard-left'>{`${userP1.nickname} `}
-            <div className='game-scoreboard-left-score'>{`${scoreP1}`}</div>
-          </div>
-          }
-          {nameGameSession && 
-          <div className='game-scoreboard-right' >{`${userP2.nickname} `}
-            <div className='scogame-scoreboard-right-score'>{`${scoreP2}`}
-            </div>
-          </div>
-          }
-      </div>
+    }}/>
+      <div className=' bg-green-500' style={{
+        position: 'absolute',
+        width: `1px`,
+        height: `200px`,
+        transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
+
+    }}/> */}
+
+    </div>
+    </>
     )
-  
   }
 
 	const Player = ({className, position, refDiv}: 
 	  {className?: string, position: 'left' | 'right', refDiv: React.RefObject<HTMLDivElement>}) 
 	    :React.JSX.Element => {
-
-        // if(p1Position.x < 0 || p1Position.y < 0)
-        // {
-        //   if(tableRef && tableRef.current) {
-        //     setP1Position({x: tableRef.current?.offsetWidth * 0.014, y: (tableRef.current.offsetHeight / 2) - (p1Size.y / 2)});
-        //     setP2Position({x: (tableRef.current.offsetWidth) - (tableRef.current?.offsetWidth * 0.014) - p2Size.y, y: (tableRef.current.offsetHeight / 2) - (p2Size.y / 2)});
-        //   }
-        // }
-        //TODO: position x ??
+        const textP1: string = gameMod.current === PODGAME.EGameMod.trainning ? `your record` : `${userP1.nickname}`;
     return (
       <>
         {position === 'left' ? 
@@ -334,7 +333,7 @@ export default function Game({className}: {className: string}) {
         <>
           <div  ref={refDiv} className={`${className}`} style={{height: p1Size.y, width: p1Size.x, top: `${p1Position.y}px`, left: `${p1Position.x}px`}} />
           {nameGameSession &&
-          <div className=' game-scoreboard game-scoreboard-left'>{`${userP1.nickname} `}
+          <div className=' game-scoreboard game-scoreboard-left'>{`${textP1}`}
             <div className='game-scoreboard-score'>{`${scoreP1}`}</div>
           </div>
           }
@@ -349,11 +348,8 @@ export default function Game({className}: {className: string}) {
           </div>
           }
         </>
-
         } 
-
       </>
-      // <>HELLO PADLE</>
     )
   }
 
@@ -380,16 +376,31 @@ export default function Game({className}: {className: string}) {
     let id_user     = userLogged.userContext?.id_user;
     if (nickname === undefined)
       nickname = userLogged.userContext?.nickname
-    if (stepCurrentSession === EStatusFrontGame.idle) {
+    if (stepCurrentSession === EStatusFrontGame.modChoice) {
       setInfoMessage('PLAY');
-			socketRef.current?.emit(`${apiRoutes.wsGameRoutes.addPlayerToMatchnaking()}`, {
-        id_user: id_user,
-				login: login,
-				nickname: nickname,
-			});
-      setStepCurrentSession(EStatusFrontGame.matchmakingRequest);
-			console.log("Cancel matchmaking not implemented for the moment");
-      return;
+      if (gameMod.current === PODGAME.EGameMod.classic) {
+        socketRef.current?.emit(
+          `${apiRoutes.wsGameRoutes.addPlayerToMatchnaking()}`,
+					{
+            id_user: id_user,
+						login: login,
+						nickname: nickname,
+					},
+				);
+				setStepCurrentSession(EStatusFrontGame.matchmakingRequest);
+				console.log('Cancel matchmaking not implemented for the moment');
+				return;
+			}
+      else if (gameMod.current === PODGAME.EGameMod.trainning) {
+        socketRef.current?.emit(
+          `${apiRoutes.wsGameRoutes.createTrainningGame()}`,
+					{
+            id_user: id_user,
+						login: login,
+						nickname: nickname,
+					},)
+      }
+      
 		}
     else if (stepCurrentSession === EStatusFrontGame.matchmakingRequest) {
       setStepCurrentSession(EStatusFrontGame.gameSessionFind);
@@ -424,6 +435,7 @@ export default function Game({className}: {className: string}) {
 
   useEffect(() => {
     resetPositionPaddle();
+    setCurrentGameTheme(new PODGAME.GameTheme().neon);
   }, []);
 
   useEffect(() => {
@@ -460,24 +472,32 @@ export default function Game({className}: {className: string}) {
 
 
   return (
-    <div className={`${className} `}>
-      <Table tableRef={tableRef} className='w-full h-full relative font-vt323'>
+    <div className={`${className} ${currentGameTheme} rounded-xl`}> 
+      <Table tableRef={tableRef} className='table w-full h-full relative font-vt323'> 
         {/* <Scoreboard/> // bugger*/}
-
-        <Player className='bg-black absolute ' position='left' refDiv={pad1Ref} /> 
-        <Player className='bg-black absolute'  position='right' refDiv={pad2Ref} />
+        {/* <CenterDBG/> */}
+        <Player className='paddle absolute ' position='left' refDiv={pad1Ref} /> 
+        <Player className='paddle absolute'  position='right' refDiv={pad2Ref} />
         {!ballHidden && <Ball/>}
         {stepCurrentSession === EStatusFrontGame.idle &&
-            <div className='absolute -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2  text-gray-700 text-7xl'>{infoMessage}</div> }
+          <>
+            <SwitcherTheme className=' absolute right-1 top-1' setThemeFunction={setCurrentGameTheme} ></SwitcherTheme>
+            <div className='absolute -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2  game-info-message text-7xl'>{infoMessage}</div> 
+          </>}
         {stepCurrentSession === EStatusFrontGame.countdown &&
-          <div className='absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-gray-700 text-9xl'>{infoMessage}</div>  }
+          <div className='absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 game-info-message text-9xl'>{infoMessage}</div>  }
         {stepCurrentSession === EStatusFrontGame.endOfGame &&
-          <div className='text-center absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2  text-gray-700 text-xl'>{infoMessage}</div>  }
+          <div className='text-center absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2  game-info-message text-xl'>{infoMessage}</div>  }
       </Table>
 
         <div className='flex justify-center items-center left-1/2 text-xl text-gray-700 h-20'> 
           {stepCurrentSession === EStatusFrontGame.idle &&
-            <button className='text-white' onClick={() => handleSearchGame()}>PLAY</button> }
+            <button className='text-white' onClick={() => setStepCurrentSession(EStatusFrontGame.modChoice)}>PLAY</button> }
+          {stepCurrentSession === EStatusFrontGame.modChoice &&
+            <div className=' space-x-32'>
+              <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.classic;handleSearchGame()}}>CLASSIC</button> 
+              <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.trainning;handleSearchGame()}}>SOLO TRAINING</button> 
+            </div> }
           {stepCurrentSession === EStatusFrontGame.matchmakingRequest &&
             <div className='flex space-x-5 items-center'>
               <button className='text-white' onClick={() => cancelMatchmaking()}>CANCEL MATCHMAKING</button><ClipLoader.ClipLoader color="#36d7b7" />
@@ -491,7 +511,9 @@ export default function Game({className}: {className: string}) {
           {stepCurrentSession === EStatusFrontGame.gameInProgress &&
           <div className='flex flex-grow relative'>
             <button className='text-white justify-center items-center' onClick={() => stopGameAndLose()}>STOP GAME</button> 
-          <button className='text-red-800 absolute top-2 right-12' onClick={() => dbgAddPlayerGoal()}>GOAL +1 </button> 
+            {gameMod.current !== PODGAME.EGameMod.trainning &&
+              <button className='text-red-800 absolute top-2 right-12' onClick={() => dbgAddPlayerGoal()}>GOAL +1 </button> 
+            }
 
           </div>
           

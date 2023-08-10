@@ -15,8 +15,15 @@ import { IOriginNetwork } from "../shared/types";
 import { io, Socket } from "socket.io-client";
 // import websocketConnect from "@/websocket/websocket";
 
+const IP_HOST = () => {
+  if (window)
+    return window.location.hostname;
+  else
+    return `localhost`
+}
+
 const originDefault: IOriginNetwork = {
-	domain: 'localhost',
+	domain: IP_HOST(),
 	apiPort: 8000,
 	appPort: 3000,
 }
