@@ -157,19 +157,15 @@ export class GameSession {
 			if (data === PODGAME.EKeyEvent.arrowDownPressed) {
 				// == touche BAS enfoncé
 				this.keyP1.isArrowDownPressed = true;
-				console.log('P1 isArrowDownPressed');
 			} else if (data === PODGAME.EKeyEvent.arrowDownRelease) {
 				// == touche BAS relaché
 				this.keyP1.isArrowDownPressed = false;
-				console.log('P1 isArrowDownRelease');
 			} else if (data === PODGAME.EKeyEvent.arrowUpPressed) {
 				// == touche HAUT enfoncé
 				this.keyP1.isArrowUpPressed = true;
-				console.log('P1 isArrowUpPressed');
 			} else if (data === PODGAME.EKeyEvent.arrowUpRelease) {
 				// == touche HAUT relaché
 				this.keyP1.isArrowUpPressed = false;
-				console.log('P1 isArrowUpRelease');
 			}
 		});
 		P2.socket.on(`${this.gameRoomEvent}PLAYER2`, (data) => {
@@ -249,26 +245,21 @@ export class GameSession {
 				if (this.keyP1.isArrowUpPressed) {
 					if (this.table.positionP1v.y > 0)
 						this.table.positionP1v.y -= this.speedPaddle;
-					// console.log('P1 position ' + this.table.positionP1v.y); //FIXME:
 				}
 				if (this.keyP1.isArrowDownPressed) {
 					if (this.table.positionP1v.y < this.table.maxPosP1)
 						this.table.positionP1v.y += this.speedPaddle;
-					// console.log('P1 position ' + this.table.positionP1v.y);//FIXME:
 				}
 				if (this.keyP2.isArrowUpPressed) {
 					if (this.table.positionP2v.y > 0)
 						this.table.positionP2v.y -= this.speedPaddle;
-					// console.log('P2 position ' + this.table.positionP2v.y);//FIXME:
 				}
 				if (this.keyP2.isArrowDownPressed) {
 					if (this.table.positionP2v.y < this.table.maxPosP2)
 						this.table.positionP2v.y += this.speedPaddle;
-					// console.log('P2 position ' + this.table.positionP2v.y);//FIXME:
 				}
         this.handleBallCollisions();
         this.ballMouvement();
-        // this.moveBallLeftRigthDebug();//juste for anime ball before real bounds physics
 			}, this.fpsTargetInMs / 2);
 		}
 	}
@@ -300,8 +291,8 @@ export class GameSession {
       {
         this.ballSpeed *= this.ballAccelerationFactor;
         this.speedPaddle *= this.paddleAccelerationFactor;
+        console.log(`${this.gameRoomEvent}: la balle accelere ! (ballSpeed:${this.ballSpeed})`)
       }
-      console.log(`${this.gameRoomEvent}: la balle accelere ! (DBG: ballSpeed:${this.ballSpeed})`)
   }
 
   private handleBallCollisions() {
@@ -323,7 +314,6 @@ export class GameSession {
       //empecher la balle de filer droit sur les bords haut/bas
       if (ballPos.y <= 0 && this.ballDirection.dy < 0.01)
       {
-        console.log(`JE DEVRAIS PAS ETRE ICI !`)
         this.table.positionBall.y = 0;
         this.ballDirection.dy = 0.01
       }
@@ -371,8 +361,6 @@ export class GameSession {
 	private sendUpdateTable() {
 		this.intervalIdEmit = setInterval(() => {
 			this.serverSocket.to(this.gameRoomEvent).emit('updateTable', this.table);
-      console.log(`ballPos : ${JSON.stringify(this.table.positionBall)}`)
-      console.log(`ballDir : ${JSON.stringify(this.ballDirection)}`)
     }, this.fpsTargetInMs);
   }
 
@@ -393,12 +381,12 @@ export class GameSession {
   private ballEngagement(){
 		const angleRandom: number = (Math.random() * 2 - 1);
 		let dx: number;
-		console.log(`Random dir = ${angleRandom}`);
+		// console.log(`Random direction for ball engagement = ${angleRandom}`);
 
 		if (this.lastPlayerScore === this.player1) 
-      {dx = -1; console.log(`go to player 2`)}
+      dx = -1;
 		else if (this.lastPlayerScore === this.player2) 
-      {dx = 1; console.log(`go to player 1`)}
+      dx = 1;
     else 
     {
       if (Math.random() < 0.5)
@@ -406,12 +394,7 @@ export class GameSession {
       else
         dx = -1;
     }
-		this.ballDirection = { dx: dx, dy: angleRandom};
-    /////////////////// debug glissage bar haut ou bas //////////
-    // this.ballDirection = { dx: 1, dy: 0};
-    // this.table.positionBall = {x: 40, y: (this.table.tableSize.y + 2) - this.table.sizeBall.y / 2};
-    /////////////////// debug glissage bar haut ou bas //////////
-    
+		this.ballDirection = { dx: dx, dy: angleRandom};    
     this.ballSpeed = this.ballSpeedInitial;
     this.speedPaddle = this.speedPaddleInitial;
     this.hitCounter = 0;
@@ -495,13 +478,7 @@ export class GameSession {
 				.emit('info', `${this.player2.user.nickname} won this game`);
 			console.log(`${this.player2.user.nickname} won this game`);
 		}
-    // this.serverSocket
-    //   .to(this.gameRoomEvent)
-    //   .emit('ENDGAME');
     this.messageEndGameAndReset();
-    // this.player1.socket.leave(this.gameRoomEvent);
-    // this.player2.socket.leave(this.gameRoomEvent);
-		// this.cleanup(); //clear interval
 	}
 
   //Gestion fin du game, si score max atteint => endOfGame
