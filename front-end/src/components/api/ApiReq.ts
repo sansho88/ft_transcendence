@@ -57,7 +57,7 @@ export namespace utilsCheck {
 		console.log('\n\ncall isPasswordMatch: login: ||' + login + '||\npassword: ||' + password + '||\n\n');
 		try {
 			const res = await postApi.postTryLogin({login, password});
-			return res.status === 201 ? true : false;
+			return res.status === 201;
 		} 
 		catch (error) {
 			console.error(error);
@@ -67,7 +67,7 @@ export namespace utilsCheck {
 
 	export async function isOnline(id: number): Promise<boolean> {
 		try {
-			return (await getApi.getUserById(id)).status !== 0 ? true : false;
+			return (await getApi.getUserById(id)).status !== 0;
 		} 
 		catch (error) {
 			console.error(error);

@@ -10,6 +10,7 @@ export interface IUser {
   status: number;
   token_2fa?: string;
   has_2fa: boolean;
+  visit?: boolean;
 }
 
 export interface IChannel {

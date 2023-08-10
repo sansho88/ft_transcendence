@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 
 import Axios from '@/components/api/AxiosConfig';
 import { UserContext, LoggedContext, SocketContextChat, SocketContextGame } from '@/context/globalContext';
+import Button from "@/components/CustomButtonComponent";
 // import { Button } from '@/components/CustomButtonComponent'
 
 //FIXME: le re logging ne fonctionne pas bien, ne recupere les infos pour userContext = data user vide
@@ -24,9 +25,14 @@ enum EAuthMod {
 enum EStepLogin {
 	init,
 	start,
+	tryLoginAsInvite,
+	signOrLogIn,
+	signIn,
+	logIn,
 	enterLogin,
 	enterPassword,
-	tryLogin,
+	tryToCreateAccount,
+	tryToConnect,
 	loading,
 	successLogin,
 	failLogin,
@@ -67,10 +73,21 @@ export default function Auth({className}: {className?: string}) {
 	//////////////// INPUT SWITCH DISPLAY //////////////////
 	////////////////////////////////////////////////////////
 
+	const askForLogOrSignIn = () => {
+	  return (
+		  <div>
+			  <button type="button" onClick={() => {setCurrentStepLogin(EStepLogin.signIn)}} className={"button-login"}>
+              <span className="text">SIGN IN</span></button>
+              <button type="button" onClick={() => {setCurrentStepLogin(EStepLogin.logIn)}} className={"button-login"}>
+              <span className="text">LOG IN</span></button>
+		  </div>
+	  )
+	}
+
 	const enterLogin = () => {
 		return (
 			<div className='flex flex-col justify-center items-center text-white'>
-				<InputPod 
+				<InputPod
 					className='inputLogin'
 				props=
 				{
@@ -80,14 +97,18 @@ export default function Auth({className}: {className?: string}) {
 						onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
 						if (e.key === "Enter") {
 							() => nextStepCheck()}}
+
 					}
 				}/>
 				<div className=' font-thin'>Enter login</div>
+				{}
+				{enterPassword()}
 			</div>
 		)
 	}
-	
+
 	const enterPassword = () => {
+
 		return (
 			<div className='flex flex-col justify-center items-center text-white'>
 				<InputPod
@@ -103,10 +124,12 @@ export default function Auth({className}: {className?: string}) {
 					}
 				}
 				/>
-				{isLoginAlreadyExist ? 
-					<div className=' font-thin'>{login} : Enter your password</div> :
+				{currentStepLogin === EStepLogin.logIn ?
+					<div className=' font-thin'>Enter your password</div> :
 					<div className=' font-thin'>Create password</div> 
 				}
+				<button onClick={() => setCurrentStepLogin(currentStepLogin === EStepLogin.logIn ?
+					EStepLogin.tryToConnect : EStepLogin.enterPassword)} className='button-login h-14'>CONNECT</button>
 			</div>
 		)
 	}
@@ -178,7 +201,7 @@ export default function Auth({className}: {className?: string}) {
 		//const router = useRouter();
 		// setLogin(''); setLoginInput('');
 		setPassword(''); setPasswordInput('');
-		setBouttonText(textInviteModeButton)
+		setInviteButtonText(textInviteModeButton)
 		alert('The login and password do not match.');
 
 		setCurrentStepLogin(EStepLogin.start);
@@ -216,7 +239,11 @@ export default function Auth({className}: {className?: string}) {
 }, [password, login]);
 
 const textInviteModeButton:string = 'INVITE MODE'
-const [buttonText, setBouttonText] = useState<string>(textInviteModeButton);
+const textSignInButton:string = 'SIGN IN'
+const textLogInButton:string = 'LOG IN'
+const [inviteButtonText, setInviteButtonText] = useState<string>(textInviteModeButton);
+const [signInButtonText, setSignInButtonText] = useState<string>(textSignInButton);
+const [logInButtonText, setLogInButtonText] = useState<string>(textLogInButton);
 const [isLoginAlreadyExist, setLoginAlreadyExist] = useState<boolean>(false);
 
 
@@ -229,24 +256,29 @@ useEffect(() => {
 			// setCurrentStepLogin(EStepLogin.enterLogin)
 			// console.log('Change step enterLogin => trylogin')
 			break;
-			
+
+			case EStepLogin.signOrLogIn:
+				console.log("Asked for sign in or Log in");
+				break;
+
+
 			case EStepLogin.enterLogin:
 				console.log('enterLogin'); 
-				setBouttonText('NEXT')
+				setInviteButtonText('NEXT')
 				return;
 				
 			case EStepLogin.enterPassword:
-				setBouttonText('VALIDATE')
+				setInviteButtonText('VALIDATE')
 				if(loginInput.trim().length === 0){
 					console.log('Login is empty'); 
 					return;
 				}
 				const loginTrimmed = loginInput.trim().toString();
 				setLogin(loginTrimmed);
-				const req: boolean = await apiReq.utilsCheck.isLoginAlreadyTaken(loginTrimmed);
+				/*const req: boolean = await apiReq.utilsCheck.isLoginAlreadyTaken(loginTrimmed);
 				if (req){
 					setLoginAlreadyExist(true);
-				}
+				}*/
 
 				if(passwordInput === ''){
 					console.log('No pass, return'); 
@@ -254,12 +286,12 @@ useEffect(() => {
 				}
 				setPassword(passwordInput);
 				break;
-			case EStepLogin.tryLogin:
-				if(isLoginAlreadyExist) {
+			case EStepLogin.logIn: //todo: "LOG IN" et "SIGN IN"
+				//if(isLoginAlreadyExist) {
 					const req = await apiReq.utilsCheck.isPasswordMatch(login, password);
 					if (req)
 					{
-						Axios.get(`http://localhost:8000/api/users/login/${login}`)
+						Axios.get(`http://localhost:8000/api/users/get/${login}`)
 						.then((res) => {
 							const newUser: POD.IUser = res.data;
 							setUserContext(newUser);
@@ -279,9 +311,11 @@ useEffect(() => {
 						nextStepCheck()
 						console.log('wrong password')
 					}
-				}
-				else {
-					const createUser: Partial<POD.IUser> = {login: login, password: password}
+				//}
+				break;
+			case EStepLogin.tryToCreateAccount:
+					const createUser: Partial<POD.IUser> = {login: login, password: password, visit: true}
+				console.log(`at case: TryToCreateAccount: login: ${login}, password: ${password}`) //fixme: les infos sont pas envoyées
 					await apiReq.postApi.postUser(createUser)
 					.then((res) => {
 						if (res.status === 201)
@@ -294,9 +328,9 @@ useEffect(() => {
 
 							setLogged(true);
 							setCurrentStepLogin(EStepLogin.successLogin);
+							console.log("Token: ", res.data.token)
 						}
 					})
-				}
 			return;
 		}
 	}
@@ -308,7 +342,7 @@ useEffect(() => {
 	function nextStepCheck(){
 		switch(currentStepLogin){
 			case EStepLogin.start:
-				setCurrentStepLogin(EStepLogin.enterLogin);
+				setCurrentStepLogin(EStepLogin.signOrLogIn);
 				break;
 			case EStepLogin.enterLogin:
 
@@ -321,14 +355,19 @@ useEffect(() => {
 				}
 				break;
 			case EStepLogin.enterPassword:
+				console.log( "Enter Login: ", loginInput);
 					if(passwordInput.length === 0){
 						return;
 					}
 					else{
 						setPassword(passwordInput);
-						setCurrentStepLogin(EStepLogin.tryLogin)
+						setCurrentStepLogin( EStepLogin.tryToCreateAccount)
 					}
-			case EStepLogin.tryLogin:
+					break;
+
+			case EStepLogin.signIn:
+				setCurrentStepLogin(EStepLogin.enterLogin);
+			case EStepLogin.tryLoginAsInvite:
 
 
 		}
@@ -349,14 +388,18 @@ useEffect(() => {
 				{welcomeTitle()}
 				{currentStepLogin === EStepLogin.start 					&& 
 					<button onClick={() => console.log('Not implemented')} className='button-login h-14 opacity-30'>LOGIN 42</button>}
-				{currentStepLogin === EStepLogin.enterLogin 		&& enterLogin()}
-				{currentStepLogin === EStepLogin.enterPassword 	&& enterPassword()}
-				{currentStepLogin === EStepLogin.tryLogin 			&& <ClipLoader.BeatLoader className='pt-[12vh]' color="#36d7b7"	size={13}/> 
+				{currentStepLogin < EStepLogin.tryLoginAsInvite 				&&
+					<button onClick={() => nextStepCheck()} className='button-login h-14'>{inviteButtonText}</button>}
+				{currentStepLogin === EStepLogin.signOrLogIn && askForLogOrSignIn()}
+				{currentStepLogin === EStepLogin.enterLogin  && enterLogin()}{/*
+				{currentStepLogin === EStepLogin.enterPassword 	&& enterPassword()}*/}
+				{(currentStepLogin === EStepLogin.signIn || currentStepLogin === EStepLogin.logIn) && enterLogin()}
+
+				{currentStepLogin === EStepLogin.signOrLogIn 			&& <ClipLoader.BeatLoader className='pt-[12vh]' color="#36d7b7" size={13}/>
 																													}
 				{currentStepLogin === EStepLogin.successLogin 	&& LoggedSuccess()}
 				{currentStepLogin === EStepLogin.failLogin 			&& LoggedFailed()}
-				{currentStepLogin < EStepLogin.tryLogin 				&&
-					<button onClick={() => nextStepCheck()} className='button-login h-14'>{buttonText}</button>}
+
 			</div>
 
 	)
