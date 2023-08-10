@@ -58,7 +58,7 @@ export class ServerGame {
 
       const startDate : Date = new Date();
       const generateSessionName : string = uuidv4();
-      console.log(`NEW TRAINNING SESSION: ${generateSessionName} | ${player.user.nickname})`);
+      console.log(`NEW TRAINING SESSION: ${generateSessionName} | ${player.user.nickname})`);
       return new GameSession(server, player, player, startDate, game_id, EGameMod.trainning, generateSessionName);
   }
 

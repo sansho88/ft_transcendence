@@ -131,7 +131,7 @@ export class GameSession {
       if (this.gameMod === PODGAME.EGameMod.trainning)
       {
         this.table.positionP1v = {x: 0, y: 0};
-        this.table.sizeP1 = {x: this.table.tableSize.x * 0.05, y: this.table.tableSize.y};
+        this.table.sizeP1 = {x: this.table.tableSize.x * 0.02, y: this.table.tableSize.y};
         // this.player1.user.nickname = 'THE BIG WALL';
         this.scoreLimit = 5;
         // this.ballSpeedMax *= 1.2;

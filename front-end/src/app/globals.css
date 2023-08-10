@@ -11,6 +11,11 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  --game-primary-color: #01FDFF;
+  --game-secondary-color: #000000;
+  --game-text-color: rgba(63, 105, 190, 0.268);
+  --game-line-color: var(--game-text-color);
+  --game-line-opacity: 50%;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,6 +23,11 @@
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
+    --game-primary-color: #01FDFF;
+    --game-secondary-color: #000000;
+    --game-text-color: rgba(63, 105, 190, 0.268);
+    --game-line-color: var(--game-text-color);
+    --game-line-opacity: 50%;
   }
 }
 
@@ -234,7 +244,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(63, 105, 190, 0.268);
+  color: var(--game-text-color);
   font-size: 1.75vw;/* 20px */;
   line-height: 1.75rem/* 28px */;
   top: 20px;
@@ -252,4 +262,65 @@ body {
 .game-scoreboard-score {
   font-size: 5vw/* 60px */;
   line-height: 1;
+}
+
+.table {
+  border-radius: 0.75rem/* 12px */;
+  background-color: var(--game-primary-color);
+  transition: background-color 500ms;
+  
+}
+
+.paddle {
+  background-color: var(--game-secondary-color);
+  transition: background-color 500ms;
+}
+
+.ball {
+  background-color: var(--game-secondary-color);
+  transition: background-color 500ms;
+}
+
+.dottedLine {
+  /* border: 10px dotted; */
+  outline-style: dotted;
+  background-color: var(--game-line-color);
+  opacity: 80%;
+}
+
+.game-info-message {
+  color: var(--game-text-color);
+  background-color: var(--game-primary-color);
+  padding: 1rem;
+}
+
+.game-theme-neon {
+  --game-primary-color: #01FDFF;
+  --game-secondary-color: #000000;
+  --game-text-color: rgba(63, 105, 190, 0.268);
+  --game-line-color: var(--game-text-color);
+  --game-line-opacity: 50%;
+  outline-color: var(--game-text-color);
+
+  background-color: var(--game-primary-color);
+  color: var(--game-secondary-color);
+  transition: background-color 500ms, color 500ms;
+}
+
+.game-theme-sunset {
+  --game-primary-color: #cb6821;
+  --game-secondary-color: #ffffff;
+  --game-text-color: rgb(63, 105, 190);
+  background-color: var(--game-primary-color);
+  color: var(--game-secondary-color);
+  transition: background-color 500ms, color 500ms;
+}
+
+.game-theme-classic-pong {
+  --game-primary-color: #0f0f0f;
+  --game-secondary-color: #ffffff;
+  --game-text-color: rgb(117, 117, 117);
+  background-color: var(--game-primary-color);
+  color: var(--game-secondary-color);
+  transition: background-color 500ms, color 500ms;
 }

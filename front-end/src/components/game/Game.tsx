@@ -6,6 +6,7 @@ import { IUser } from '@/shared/types'
 import * as PODGAME from '@/shared/typesGame'
 import * as apiRoutes from '@/shared/routesApi'
 import * as ClipLoader from 'react-spinners'
+import SwitcherTheme from '@/components/game/SwitcherTheme'
 
 enum EStatusFrontGame {
   idle,
@@ -32,6 +33,9 @@ export default function Game({className}: {className: string}) {
   const pad2Ref     = useRef<HTMLDivElement>(null);
   const ballRef     = useRef<HTMLDivElement>(null);
 
+  const [currentGameTheme, setCurrentGameTheme] = useState<string>('')
+
+
 
   const [nameGameSession, setNameGameSession] = useState<string>("");
   const [stepCurrentSession, setStepCurrentSession] = useState<EStatusFrontGame>(EStatusFrontGame.idle);
@@ -57,6 +61,11 @@ export default function Game({className}: {className: string}) {
   const coefTableServer                 = useRef<PODGAME.IVector2D>({x: 1, y: 1});
 
   const gameMod                         = useRef<PODGAME.EGameMod>(PODGAME.EGameMod.classic);
+
+
+  function changeTheme(themeName) {
+    setCurrentGameTheme(themeName);
+}
 
 
 	useEffect(() => {
@@ -269,12 +278,13 @@ export default function Game({className}: {className: string}) {
 	
 	const Table: React.FC<TableProps> = ({className, tableRef, children}) => {
 	  return (
-      <div ref={tableRef} className={`${className} rounded-xl bg-blue-game`} 
+      <div ref={tableRef} className={`${className} relative`} 
 	    style={{
         boxShadow: "0 0 150px  40px rgba(170, 170, 255, 0.4)" 
       }}> 
       {/* <div className="relative pb-[75%]"></div> */}
       {/* <div className="absolute inset-0 flex items-center justify-center"></div> */}
+        <div className='dottedLine absolute  left-1/2 h-full w-1'></div>
 	      {children} 
 	    </div>
 	  )
@@ -283,7 +293,7 @@ export default function Game({className}: {className: string}) {
   const Ball = () => {
     return (
       <>
-      <div ref={ballRef} style={{
+      <div ref={ballRef} className='ball' style={{
         position: 'absolute',
         width: `${ballSize.x}px`,
         height: `${ballSize.y}px`,
@@ -291,7 +301,6 @@ export default function Game({className}: {className: string}) {
         left: `${ballPosition.x}px`,
         // transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
         borderRadius: '1%',
-        backgroundColor: 'black',
     }} >
       {/* <div className=' bg-red-500' style={{
         position: 'absolute',
@@ -426,6 +435,7 @@ export default function Game({className}: {className: string}) {
 
   useEffect(() => {
     resetPositionPaddle();
+    setCurrentGameTheme(new PODGAME.GameTheme().neon);
   }, []);
 
   useEffect(() => {
@@ -462,19 +472,22 @@ export default function Game({className}: {className: string}) {
 
 
   return (
-    <div className={`${className} `}>
-      <Table tableRef={tableRef} className='w-full h-full relative font-vt323'>
+    <div className={`${className} ${currentGameTheme} rounded-xl`}> 
+      <Table tableRef={tableRef} className='table w-full h-full relative font-vt323'> 
         {/* <Scoreboard/> // bugger*/}
         {/* <CenterDBG/> */}
-        <Player className='bg-black absolute ' position='left' refDiv={pad1Ref} /> 
-        <Player className='bg-black absolute'  position='right' refDiv={pad2Ref} />
+        <Player className='paddle absolute ' position='left' refDiv={pad1Ref} /> 
+        <Player className='paddle absolute'  position='right' refDiv={pad2Ref} />
         {!ballHidden && <Ball/>}
         {stepCurrentSession === EStatusFrontGame.idle &&
-            <div className='absolute -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2  text-gray-700 text-7xl'>{infoMessage}</div> }
+          <>
+            <SwitcherTheme className=' absolute right-1 top-1' setThemeFunction={setCurrentGameTheme} ></SwitcherTheme>
+            <div className='absolute -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2  game-info-message text-7xl'>{infoMessage}</div> 
+          </>}
         {stepCurrentSession === EStatusFrontGame.countdown &&
-          <div className='absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-gray-700 text-9xl'>{infoMessage}</div>  }
+          <div className='absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 game-info-message text-9xl'>{infoMessage}</div>  }
         {stepCurrentSession === EStatusFrontGame.endOfGame &&
-          <div className='text-center absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2  text-gray-700 text-xl'>{infoMessage}</div>  }
+          <div className='text-center absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2  game-info-message text-xl'>{infoMessage}</div>  }
       </Table>
 
         <div className='flex justify-center items-center left-1/2 text-xl text-gray-700 h-20'> 
@@ -483,7 +496,7 @@ export default function Game({className}: {className: string}) {
           {stepCurrentSession === EStatusFrontGame.modChoice &&
             <div className=' space-x-32'>
               <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.classic;handleSearchGame()}}>CLASSIC</button> 
-              <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.trainning;handleSearchGame()}}>SOLO TRAINNING(proto beta)</button> 
+              <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.trainning;handleSearchGame()}}>SOLO TRAINING</button> 
             </div> }
           {stepCurrentSession === EStatusFrontGame.matchmakingRequest &&
             <div className='flex space-x-5 items-center'>

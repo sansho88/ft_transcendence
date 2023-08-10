@@ -5,6 +5,12 @@ import { Socket } from 'socket.io';
 // |                           GAME INTERFACE                            |
 // +---------------------------------------------------------------------+
 
+export class GameTheme {
+  public neon           = 'game-theme-neon';
+  public classicPong    = 'game-theme-classic-pong';
+  public sunset         = 'game-theme-sunset'
+}
+
 export enum EGameMod {
   classic,
   ghost,
