@@ -14,6 +14,7 @@ interface KeyPlayerState{
 }
 
 export class GameSession {
+  private gameMod                       : PODGAME.EGameMod;
 	private game_id                       : number;
 	private gameRoomEvent                 : string;
   private initElements                  : PODGAME.ISizeGameElements;
@@ -24,7 +25,7 @@ export class GameSession {
   private ballDirection                 : PODGAME.IDirectionVec2D = {dx: 1, dy: 0}
 	private fpsTargetInMs                 : number = 1000 / 60; // = 16.67ms = 60 fps
   private ballSpeedInitial              : number;
-  private ballSpeedMax                  : number = 5.8;
+  private ballSpeedMax                  : number = 6.2;
   private ballSpeed                     : number = 2.6;
   private ballAccelerationFactor        : number = 1.18;
   private ballNumberHitBtwAcceleration  : number = 3; //tous les X coup, la ball prend speed * AccelerationFactor
@@ -32,20 +33,27 @@ export class GameSession {
 	private speedPaddleInitial            : number;
 	private speedPaddle                   : number = 4; // in pixel per move
   private hitCounter                    : number = 0;
-  private scoreLimit                    : number = 5;
+  private scoreLimit                    : number = 3;
+
+  // private trainningHit                  : number = 0;
+  // private maxTrainningHit               : number = 0;
+
   
   ///////////////////////  DEFINE FOR SIZE ELEMENTS ///////////////////////
+  private classicPaddleSize: PODGAME.IVector2D = {y: 80, x: 10};
   private paddlePosMargin : number = 0.014; // % of the table // decalage barre du bord
 	private table: Partial<PODGAME.IPodTable> = {
     positionBall: { x: 0, y: 0 },
     sizeBall:     { x:12, y:12 },
     positionP1v: {x:0, y:0},
     positionP2v: {x:0, y:0},
-		sizeP1: { y: 80, x: 10 },
-		sizeP2: { y: 80, x: 10 },
+		sizeP1: this.classicPaddleSize,
+		sizeP2: this.classicPaddleSize,
 		tableSize: { x: 700, y: 600 }, //taille table server
 		scoreP1: 0,
 		scoreP2: 0,
+    trainningHit: 0,
+    maxTrainningHit: 0,
 	};
 
 	private serverSocket    : Server;
@@ -81,13 +89,15 @@ export class GameSession {
 	private historyGame: POD.IGame; // pour push dans DB
 
 	constructor(
-		server: Server,
+    server: Server,
 		P1: PODGAME.userInfoSocket,
 		P2: PODGAME.userInfoSocket,
 		startDate: Date,
 		game_id: number,
+    gameMod: PODGAME.EGameMod,
     gameSessionRoom : string,
 	) {
+    this.gameMod = gameMod;
     this.ballSpeedInitial = this.ballSpeed;
     this.speedPaddleInitial = this.speedPaddle;
 		this.player1 = P1;
@@ -115,7 +125,31 @@ export class GameSession {
 		//TODO this.historyGame.Id_GAME = requetes API axios ? websocket ?
 		////////////////////////////////////////////////////
 
+    /*************************************************************************/
+		/////////////////////SETUP TRAINNING GAME ////////////////////////////////
+    /*************************************************************************/
+      if (this.gameMod === PODGAME.EGameMod.trainning)
+      {
+        this.table.positionP1v = {x: 0, y: 0};
+        this.table.sizeP1 = {x: this.table.tableSize.x * 0.05, y: this.table.tableSize.y};
+        // this.player1.user.nickname = 'THE BIG WALL';
+        this.scoreLimit = 5;
+        // this.ballSpeedMax *= 1.2;
+        // this.ballAccelerationFactor *= 0.9;
+        // this.paddleAccelerationFactor *=1.0;
+        // this.ballSpeedInitial = this.ballSpeedMax;
+        // this.ballAccelerationFactor *= 0.8;
+      }
+      else
+      {
+        this.table.positionP1v = {  x: this.paddlePosMargin * this.table.tableSize.x, 
+          y: this.table.tableSize.y / 2 - this.table.sizeP1.y / 2};
 
+      }
+
+    /*************************************************************************/
+    /*************************************************************************/
+    
 
 		//////////INFO TABLE FOR SEND INIT MSG CLIENTS/PLAYER //////////////
     this.initElements   = {
@@ -136,38 +170,46 @@ export class GameSession {
       startInitElement: this.initElements,
     }
     
+
+
 		//////////SETUP DES PLAYERS //////////////
     
 		//j'inscrit les player a l'event de cette session
-		P1.socket.join(this.gameRoomEvent);
-		P2.socket.join(this.gameRoomEvent);
+    if (gameMod !== PODGAME.EGameMod.trainning)
+		{
+      P1.socket.join(this.gameRoomEvent);
+      P1.socket.emit('gameFind', { remoteEvent: `${this.gameRoomEvent}PLAYER1` });
+      P1.socket.on(`${this.gameRoomEvent}ready`, () => {this.isP1Ready = true; this.startCountdownIfPlayersReady(); 
+        console.log(`${this.gameRoomEvent}: player 1 READY`);})
+    }
+		
+    P2.socket.join(this.gameRoomEvent);
 
 		//j'envoi un nom d'event custom a chaque player sur lequel il vont emettre pour informer qu'il bouge
-		P1.socket.emit('gameFind', { remoteEvent: `${this.gameRoomEvent}PLAYER1` });
 		P2.socket.emit('gameFind', { remoteEvent: `${this.gameRoomEvent}PLAYER2` });
-
+    
     //les joueurs doivent cliquer sur ready pour commencer le game
-    P1.socket.on(`${this.gameRoomEvent}ready`, () => {this.isP1Ready = true; this.startCountdownIfPlayersReady(); 
-                                                        console.log(`${this.gameRoomEvent}: player 1 READY`);})
     P2.socket.on(`${this.gameRoomEvent}ready`, () => {this.isP2Ready = true; this.startCountdownIfPlayersReady(); 
-                                                        console.log(`${this.gameRoomEvent}: player 2 READY`);})
-
-		//j'ecoute leur propre event pour faire bouger leur paddle respectif
-		P1.socket.on(`${this.gameRoomEvent}PLAYER1`, (data) => {
-			if (data === PODGAME.EKeyEvent.arrowDownPressed) {
-				// == touche BAS enfoncé
-				this.keyP1.isArrowDownPressed = true;
-			} else if (data === PODGAME.EKeyEvent.arrowDownRelease) {
-				// == touche BAS relaché
-				this.keyP1.isArrowDownPressed = false;
-			} else if (data === PODGAME.EKeyEvent.arrowUpPressed) {
-				// == touche HAUT enfoncé
-				this.keyP1.isArrowUpPressed = true;
-			} else if (data === PODGAME.EKeyEvent.arrowUpRelease) {
-				// == touche HAUT relaché
-				this.keyP1.isArrowUpPressed = false;
-			}
-		});
+      console.log(`${this.gameRoomEvent}: player 2 READY`);})
+      
+    if (this.gameMod !== PODGAME.EGameMod.trainning) {
+      //j'ecoute leur propre event pour faire bouger leur paddle respectif
+      P1.socket.on(`${this.gameRoomEvent}PLAYER1`, (data) => {
+      if (data === PODGAME.EKeyEvent.arrowDownPressed) {
+          // == touche BAS enfoncé
+        this.keyP1.isArrowDownPressed = true;
+        } else if (data === PODGAME.EKeyEvent.arrowDownRelease) {
+          // == touche BAS relaché
+        this.keyP1.isArrowDownPressed = false;
+        } else if (data === PODGAME.EKeyEvent.arrowUpPressed) {
+          // == touche HAUT enfoncé
+        this.keyP1.isArrowUpPressed = true;
+        } else if (data === PODGAME.EKeyEvent.arrowUpRelease) {
+          // == touche HAUT relaché
+        this.keyP1.isArrowUpPressed = false;
+        }
+      });
+    }
 		P2.socket.on(`${this.gameRoomEvent}PLAYER2`, (data) => {
 			if (data === PODGAME.EKeyEvent.arrowDownPressed)
 				// == touche BAS enfoncé
@@ -183,11 +225,12 @@ export class GameSession {
 				this.keyP2.isArrowUpPressed = false;
 		});
 
-		//DEV EVENT cheat goal system
-		P1.socket.on(`${this.gameRoomEvent}GOAL`, () => {
-      this.addGoalToPlayer(P1);
-			console.log(`P1 GOALLLL`);
-			console.log(`SCORE: ${this.table.scoreP1} | ${this.table.scoreP2}`);
+
+      //DEV EVENT cheat goal system
+    P1.socket.on(`${this.gameRoomEvent}GOAL`, () => {
+        this.addGoalToPlayer(P1);
+        console.log(`P1 GOALLLL`);
+        console.log(`SCORE: ${this.table.scoreP1} | ${this.table.scoreP2}`);
 		});
 		P2.socket.on(`${this.gameRoomEvent}GOAL`, () => {
       this.addGoalToPlayer(P2);
@@ -195,6 +238,7 @@ export class GameSession {
 			console.log(`SCORE: ${this.table.scoreP1} | ${this.table.scoreP2}`);
 		});
 
+    
 
 		P1.socket.on(`${this.gameRoomEvent}STOP`, () => {
 			console.log(`Player 1 has given up`);
@@ -345,6 +389,9 @@ export class GameSession {
             ballPos.x = P2pos.x - ballSize.x;
           this.preciseCollPaddle('P2');
           this.hitCounter++;
+          this.table.trainningHit++;
+          if (this.table.trainningHit > this.table.maxTrainningHit)
+            this.table.maxTrainningHit = this.table.trainningHit;
         // this.ballDirection.dx = -this.ballDirection.dx;  
     }
    
@@ -360,16 +407,21 @@ export class GameSession {
   //envoi update au front des elements de la table
 	private sendUpdateTable() {
 		this.intervalIdEmit = setInterval(() => {
+      // if (this.gameMod === PODGAME.EGameMod.trainning)
+      // {
+      //   this.table.trainningHit = this.table.trainningHit;
+      //   this.table.maxTrainningHit = this.table.maxTrainningHit;
+      // }
 			this.serverSocket.to(this.gameRoomEvent).emit('updateTable', this.table);
     }, this.fpsTargetInMs);
   }
 
 
   private resetPositionPlayerAndBall(){
-    this.table.positionP1v.y = (this.table.tableSize.y / 2) - (this.table.sizeP1.y / 2)
-    this.table.positionP2v.y = (this.table.tableSize.y / 2) - (this.table.sizeP1.y / 2)
-    this.table.positionP1v = {  x: this.paddlePosMargin * this.table.tableSize.x, 
+    if (this.gameMod !== PODGAME.EGameMod.trainning){
+      this.table.positionP1v = {  x: this.paddlePosMargin * this.table.tableSize.x, 
       y: this.table.tableSize.y / 2 - this.table.sizeP1.y / 2};
+    }
     this.table.positionP2v = {  x: this.table.tableSize.x - (this.paddlePosMargin * this.table.tableSize.x) - this.table.sizeP2.x, 
       y: this.table.tableSize.y / 2 - this.table.sizeP2.y / 2};
       this.table.positionBall = {
@@ -398,6 +450,8 @@ export class GameSession {
     this.ballSpeed = this.ballSpeedInitial;
     this.speedPaddle = this.speedPaddleInitial;
     this.hitCounter = 0;
+    if (this.gameMod === PODGAME.EGameMod.trainning)
+      this.table.trainningHit = 0;
 	}
 
 
@@ -428,7 +482,7 @@ export class GameSession {
 
   //enclencher un compteur 3,2,1,GO envoyé au front avant de declencher le coup d'envoi
   private startCountdownIfPlayersReady(){
-    if (this.isP1Ready && this.isP2Ready)
+    if ((this.isP1Ready && this.isP2Ready) || this.gameMod === PODGAME.EGameMod.trainning)
     {
       let countdown : number = 3;
       let intervalStart: NodeJS.Timeout = setInterval(() => {
@@ -450,8 +504,32 @@ export class GameSession {
   //message de fin de game et reset de la game
   private messageEndGameAndReset(){
     this.cleanup()
-    this.serverSocket.to(this.gameRoomEvent).emit('endgame', 
-                `${this.winner.user.nickname} won this game\n${this.table.scoreP1} - ${this.table.scoreP2}`);
+    if (this.gameMod !== PODGAME.EGameMod.classic)
+    {
+      this.table.sizeP1 = this.classicPaddleSize;
+      this.table.sizeP2 = this.classicPaddleSize;
+      this.serverSocket.to(this.gameRoomEvent).emit('updateTable', this.table);
+    }
+    const endMessage = () => {
+      if (this.gameMod === PODGAME.EGameMod.trainning){
+        if (this.table.maxTrainningHit <= 0)
+          return `${this.table.maxTrainningHit}: Did you really play?`;
+        else if (this.table.maxTrainningHit >= 4 && this.table.maxTrainningHit <= 8)
+          return `${this.table.maxTrainningHit}: It's a good start, courage!`;
+        else if (this.table.maxTrainningHit > 8 && this.table.maxTrainningHit <= 13)
+          return `${this.table.maxTrainningHit}: One more effort!`;
+        else if (this.table.maxTrainningHit > 13 && this.table.maxTrainningHit <= 20)
+          return `${this.table.maxTrainningHit}: Wow, well done that's great!`;
+        else if (this.table.maxTrainningHit > 20 && this.table.maxTrainningHit < 42)
+          return `${this.table.maxTrainningHit}: You have become a god, but.. return worked!`;
+        else
+          return `${this.table.maxTrainningHit}: 500 Internal Server Error: It's impossible ! Otherwise: Incredible!`
+      }
+      else
+        return `${this.winner.user.nickname} won this game\n${this.table.scoreP1} - ${this.table.scoreP2}`
+    }
+    // console.error(`endMessage`)
+    this.serverSocket.to(this.gameRoomEvent).emit('endgame', endMessage());
     setTimeout(() => {
       console.log('reset');
       this.serverSocket.to(this.gameRoomEvent).emit('reset'); 
@@ -463,6 +541,7 @@ export class GameSession {
 
   //Enclenche la fin du jeu
 	private endOfGame() {
+
 		if (this.table.scoreP1 > this.table.scoreP2) {
       this.winner = this.player1;
       this.looser = this.player2;

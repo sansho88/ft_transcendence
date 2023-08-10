@@ -9,6 +9,7 @@ import * as ClipLoader from 'react-spinners'
 
 enum EStatusFrontGame {
   idle,
+  modChoice,
   matchmakingRequest,
   gameSessionFind,
   waiting,
@@ -54,6 +55,9 @@ export default function Game({className}: {className: string}) {
   const [infoMessage, setInfoMessage]   = useState<string>('PLAY');
   
   const coefTableServer                 = useRef<PODGAME.IVector2D>({x: 1, y: 1});
+
+  const gameMod                         = useRef<PODGAME.EGameMod>(PODGAME.EGameMod.classic);
+
 
 	useEffect(() => {
 	  if (nameGameSession === "") {
@@ -180,8 +184,16 @@ export default function Game({className}: {className: string}) {
           setBallSize({x: data.sizeBall.x * coefTableServer.current.x, y: data.sizeBall.y * coefTableServer.current.y})
 
         }
-        setScoreP1(data.scoreP1);
-        setScoreP2(data.scoreP2);
+        if (gameMod.current !== PODGAME.EGameMod.trainning)
+        {
+          setScoreP1(data.scoreP1);
+          setScoreP2(data.scoreP2);
+        }
+        else
+        {
+          setScoreP1(data.maxTrainningHit);
+          setScoreP2(data.trainningHit);
+        }
 
 			//ball position
 	      // console.log(`WS updateTable : ${JSON.stringify(data)}`); //recupere la position du paddles 1
@@ -304,7 +316,7 @@ export default function Game({className}: {className: string}) {
 	const Player = ({className, position, refDiv}: 
 	  {className?: string, position: 'left' | 'right', refDiv: React.RefObject<HTMLDivElement>}) 
 	    :React.JSX.Element => {
-
+        const textP1: string = gameMod.current === PODGAME.EGameMod.trainning ? `your record` : `${userP1.nickname}`;
     return (
       <>
         {position === 'left' ? 
@@ -312,7 +324,7 @@ export default function Game({className}: {className: string}) {
         <>
           <div  ref={refDiv} className={`${className}`} style={{height: p1Size.y, width: p1Size.x, top: `${p1Position.y}px`, left: `${p1Position.x}px`}} />
           {nameGameSession &&
-          <div className=' game-scoreboard game-scoreboard-left'>{`${userP1.nickname} `}
+          <div className=' game-scoreboard game-scoreboard-left'>{`${textP1}`}
             <div className='game-scoreboard-score'>{`${scoreP1}`}</div>
           </div>
           }
@@ -355,16 +367,31 @@ export default function Game({className}: {className: string}) {
     let id_user     = userLogged.userContext?.id_user;
     if (nickname === undefined)
       nickname = userLogged.userContext?.nickname
-    if (stepCurrentSession === EStatusFrontGame.idle) {
+    if (stepCurrentSession === EStatusFrontGame.modChoice) {
       setInfoMessage('PLAY');
-			socketRef.current?.emit(`${apiRoutes.wsGameRoutes.addPlayerToMatchnaking()}`, {
-        id_user: id_user,
-				login: login,
-				nickname: nickname,
-			});
-      setStepCurrentSession(EStatusFrontGame.matchmakingRequest);
-			console.log("Cancel matchmaking not implemented for the moment");
-      return;
+      if (gameMod.current === PODGAME.EGameMod.classic) {
+        socketRef.current?.emit(
+          `${apiRoutes.wsGameRoutes.addPlayerToMatchnaking()}`,
+					{
+            id_user: id_user,
+						login: login,
+						nickname: nickname,
+					},
+				);
+				setStepCurrentSession(EStatusFrontGame.matchmakingRequest);
+				console.log('Cancel matchmaking not implemented for the moment');
+				return;
+			}
+      else if (gameMod.current === PODGAME.EGameMod.trainning) {
+        socketRef.current?.emit(
+          `${apiRoutes.wsGameRoutes.createTrainningGame()}`,
+					{
+            id_user: id_user,
+						login: login,
+						nickname: nickname,
+					},)
+      }
+      
 		}
     else if (stepCurrentSession === EStatusFrontGame.matchmakingRequest) {
       setStepCurrentSession(EStatusFrontGame.gameSessionFind);
@@ -452,7 +479,12 @@ export default function Game({className}: {className: string}) {
 
         <div className='flex justify-center items-center left-1/2 text-xl text-gray-700 h-20'> 
           {stepCurrentSession === EStatusFrontGame.idle &&
-            <button className='text-white' onClick={() => handleSearchGame()}>PLAY</button> }
+            <button className='text-white' onClick={() => setStepCurrentSession(EStatusFrontGame.modChoice)}>PLAY</button> }
+          {stepCurrentSession === EStatusFrontGame.modChoice &&
+            <div className=' space-x-32'>
+              <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.classic;handleSearchGame()}}>CLASSIC</button> 
+              <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.trainning;handleSearchGame()}}>SOLO TRAINNING(proto beta)</button> 
+            </div> }
           {stepCurrentSession === EStatusFrontGame.matchmakingRequest &&
             <div className='flex space-x-5 items-center'>
               <button className='text-white' onClick={() => cancelMatchmaking()}>CANCEL MATCHMAKING</button><ClipLoader.ClipLoader color="#36d7b7" />
@@ -466,7 +498,9 @@ export default function Game({className}: {className: string}) {
           {stepCurrentSession === EStatusFrontGame.gameInProgress &&
           <div className='flex flex-grow relative'>
             <button className='text-white justify-center items-center' onClick={() => stopGameAndLose()}>STOP GAME</button> 
-          <button className='text-red-800 absolute top-2 right-12' onClick={() => dbgAddPlayerGoal()}>GOAL +1 </button> 
+            {gameMod.current !== PODGAME.EGameMod.trainning &&
+              <button className='text-red-800 absolute top-2 right-12' onClick={() => dbgAddPlayerGoal()}>GOAL +1 </button> 
+            }
 
           </div>
           

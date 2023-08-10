@@ -36,6 +36,7 @@
     export const addNewPlayerToServer=()      => {return `${routeWsGame}_addPlayerToServer`}
     export const addPlayerToMatchnaking=()    => {return `${routeWsGame}_addPlayerToMatchmaking`}
     export const removePlayerToMatchnaking=() => {return `${routeWsGame}_removePlayerToMatchmaking`}
+    export const createTrainningGame=()       => {return `${routeWsGame}_createTrainningGame`}
   }
 
 

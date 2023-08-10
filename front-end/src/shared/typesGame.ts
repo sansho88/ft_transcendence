@@ -5,6 +5,13 @@ import { Socket } from 'socket.io';
 // |                           GAME INTERFACE                            |
 // +---------------------------------------------------------------------+
 
+export enum EGameMod {
+  classic,
+  ghost,
+  trainning,
+  rumble
+}
+
 export interface ISizeGameElements {
   tableServerSize   : IVector2D; //sert a calculer le coef d'agrandissement ou reduction cote front par rapport a la taille d'affichage
   ballSize          : IVector2D;
@@ -43,6 +50,8 @@ export interface IPodTable {
 	tableSize         : IVector2D;
   scoreP1           : number;
   scoreP2           : number;
+  trainningHit      : number;
+  maxTrainningHit   : number;
   }
 
 
