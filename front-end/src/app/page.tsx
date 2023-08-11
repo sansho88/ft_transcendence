@@ -75,15 +75,18 @@ export default function Home() {
 
     useEffect(() => {
         if (logged)
-            axios.get(`http://localhost:8000/api/users/${userContext?.id_user}`)
+        {
+            console.log("[mainPage: useEffect]User logged. Trying to get infos from database... ")
+            apiReq.getApi.getUserByLogin(localStorage.getItem("login"))//fixme: login == undefined there
                 .then((response) => {
-                    console.log('response:' + response.data.nickname);
-                    setUserLogin(response.data.login);
-                    setUserNickName(response.data.nickname);
+                    console.log('response:' + response.login);
+                    setUserLogin(response.login);
+                    setUserNickName(response.nickname ? response.nickname : "");
                 })
                 .catch((e) => {
                     console.error('error:' + e.toString());
                 });
+        }
     }, [logged]);
 
     function login() {

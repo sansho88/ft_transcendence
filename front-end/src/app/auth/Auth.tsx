@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import Axios from '@/components/api/AxiosConfig';
 import { UserContext, LoggedContext, SocketContextChat, SocketContextGame } from '@/context/globalContext';
 import Button from "@/components/CustomButtonComponent";
+import {setBearerToken} from "@/components/api/ApiReq";
 // import { Button } from '@/components/CustomButtonComponent'
 
 //FIXME: le re logging ne fonctionne pas bien, ne recupere les infos pour userContext = data user vide
@@ -55,17 +56,8 @@ export default function Auth({className}: {className?: string}) {
 		console.log('UseEffect : userContext.login = ' + userContext?.login + ' pass: ' + userContext?.password);	
 	}, [userContext]);
 
-	const [currentStepLogin, setCurrentStepLogin] = useState<EStepLogin>(EStepLogin.start)
+	const [currentStepLogin, setCurrentStepLogin] = useState<EStepLogin>(EStepLogin.start);
 
-	const axios = require('axios');
-
-// Créer une instance Axios avec des en-têtes d'authentification par défaut
-	const axiosInstance = axios.create({
-		baseURL: 'http://localhost:8000/api/',
-		headers: {
-			'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dpbiI6ImRvdWJpd2EiLCJyYXdQYXNzd29yZCI6IjQyNDIiLCJpYXQiOjE2OTE2ODAwNTksImV4cCI6MTcwMDIzMzY1OX0.M2gV3bBe6S5pObLNucLGrEbICLAhwUCwRtnOsmg8jaQ'
-		}
-	});
 
 	////////////////////////////////////////////////////////
 	////////////////// GESTION DES INPUTS //////////////////
@@ -356,15 +348,21 @@ useEffect(() => {
 					.then((res) => {
 						if (res.status === 200)
 						{
-							const newUser: POD.IUser = res.data
-							console.log(`res 200, newUser= ${newUser.login} | pass hashed: ${newUser.password}`);
-							setUserContext(newUser);
-							localStorage.setItem('login', newUser.login);
-							localStorage.setItem('pass', password); //cookie ?
+							const userToken = res.data
+							console.log(`Token: ${res.data}`);
+							localStorage.setItem('token', userToken);
+							localStorage.setItem("login", login);
+							setUserContext(createUser);
+							apiReq.getApi.getUserByLogin(login)
+								.then((reqUser) => 	{
+									console.log("USER in Database POST creation: ", reqUser.login);
+									if (reqUser.login != undefined)
+										setUserContext(reqUser);
+								})
+
 
 							setLogged(true);
 							setCurrentStepLogin(EStepLogin.successLogin);
-							console.log("Token: ", res.data.token)
 						}
 					})
 						.catch((e) => console.error("Post User: " + e, `createUser= ${createUser.login}, ${createUser.visit}`));

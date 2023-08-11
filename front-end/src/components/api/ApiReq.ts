@@ -1,27 +1,44 @@
+import {useState} from "react";
+
 'user client'
 
 import Axios from "./AxiosConfig";
 import { strRoutes } from "@/shared/routesApi";
 import { IUser } from "@/shared/types";
+import axios from "axios";
+
+	//const Axios = require('axios');
+
+// Créer une instance Axios avec des en-têtes d'authentification par défaut
+	export const axiosInstance = axios.create({
+		baseURL: 'http://localhost:8000/api/',
+		headers: {
+			'Authorization': `Bearer ${localStorage.getItem("token")}`
+		}
+	});
+
+
 
 export namespace getApi {
 
-	export const getUsersAll=()									: Promise<IUser[]>					=>{return Axios.get(`${strRoutes.getUsersAll()}`);}
-	export const getUserByLogin=(login: string)	: Promise<IUser>						=>{return Axios.get(`${strRoutes.getUserByLogin()}${login}`);}
-	export const getUserById = (id: number) 		: Promise<IUser>						=>{return Axios.get(`${strRoutes.getUserById()}${id}`);}
+
+
+	export const getUsersAll=()									: Promise<IUser[]>					=>{return axiosInstance.get(`${strRoutes.getUsersAll()}`);}
+	export const getUserByLogin= (login: string | undefined): Promise<IUser>						=>{return axiosInstance.get(`${strRoutes.getUserByLogin()}${login}`);}
+	export const getUserById = (id: number) 		: Promise<IUser>						=>{return axiosInstance.get(`${strRoutes.getUserById()}${id}`);}
   
 }
 
 export namespace postApi {
 
-	export const postUser= (newUser: Partial<IUser>)												=>{return Axios.post(`${strRoutes.postUser()}`, newUser);}
-	export const postTryLogin= (loginTest:{login:string,password :string})	=>{return Axios.post(`${strRoutes.postUserCheckLogin()}`, loginTest);}
+	export const postUser= (newUser: Partial<IUser>)												=>{return axiosInstance.post(`${strRoutes.postUser()}`, newUser);}
+	export const postTryLogin= (loginTest:{login:string,password :string})	=>{return axiosInstance.post(`${strRoutes.postUserCheckLogin()}`, loginTest);}
 
 }
 
 
 export namespace putApi {
-	export const putUser= (updateUser: Partial<IUser>)		=>{return Axios.put(`${strRoutes.putUser()}${updateUser.id_user}`, updateUser)}
+	export const putUser= (updateUser: Partial<IUser>)		=>{return axiosInstance.put(`${strRoutes.putUser()}${updateUser.id_user}`, updateUser)}
 }
 
 export namespace deleteApi {

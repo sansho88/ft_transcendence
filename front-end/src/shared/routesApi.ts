@@ -38,7 +38,7 @@
 // |                              USERS                                  |
 // +---------------------------------------------------------------------+
 
-	export const getUsersAll=()							=>{return `${serverApi}/${routeUsers}`}
+	export const getUsersAll=()							=>{return `${serverApi}/${routeUsers}/get/`}
 	export const getUserById = () 					=>{return `${serverApi}/${routeUsers}/`}
 	export const getUserByLogin=()					=>{return `${serverApi}/${routeUsers}/get/`}
 		
