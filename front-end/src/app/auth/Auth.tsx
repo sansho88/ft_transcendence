@@ -8,6 +8,7 @@ import * as ClipLoader from 'react-spinners'
 import './auth.css'
 
 
+
 import { useRouter } from 'next/navigation';
 
 import Axios from '@/components/api/AxiosConfig';
@@ -47,6 +48,7 @@ export default function Auth({className}: {className?: string}) {
 	// const [isLogged, setIsLogged] = useState<boolean | null>(null);
   const socketChat = useContext(SocketContextChat);
   const socketGame = useContext(SocketContextGame);
+  const [areCredentialsValids, setAreCredsValids] = useState(false);
 
   
 	useEffect(() => {
@@ -55,6 +57,15 @@ export default function Auth({className}: {className?: string}) {
 
 	const [currentStepLogin, setCurrentStepLogin] = useState<EStepLogin>(EStepLogin.start)
 
+	const axios = require('axios');
+
+// Créer une instance Axios avec des en-têtes d'authentification par défaut
+	const axiosInstance = axios.create({
+		baseURL: 'http://localhost:8000/api/',
+		headers: {
+			'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dpbiI6ImRvdWJpd2EiLCJyYXdQYXNzd29yZCI6IjQyNDIiLCJpYXQiOjE2OTE2ODAwNTksImV4cCI6MTcwMDIzMzY1OX0.M2gV3bBe6S5pObLNucLGrEbICLAhwUCwRtnOsmg8jaQ'
+		}
+	});
 
 	////////////////////////////////////////////////////////
 	////////////////// GESTION DES INPUTS //////////////////
@@ -128,10 +139,35 @@ export default function Auth({className}: {className?: string}) {
 					<div className=' font-thin'>Enter your password</div> :
 					<div className=' font-thin'>Create password</div> 
 				}
-				<button onClick={() => setCurrentStepLogin(currentStepLogin === EStepLogin.logIn ?
-					EStepLogin.tryToConnect : EStepLogin.enterPassword)} className='button-login h-14'>CONNECT</button>
+				<button onClick={() => {
+					setCredentials();
+					setCurrentStepLogin(currentStepLogin === EStepLogin.logIn ?
+					EStepLogin.tryToConnect : EStepLogin.tryToCreateAccount)}} className='button-login h-14'>CONNECT</button>
 			</div>
 		)
+	}
+
+	function setCredentials(){
+
+
+		if(loginInput.trim().length === 0){
+			console.log('Login is empty');
+			return;
+		}
+		const loginTrimmed = loginInput.trim().toString();
+		setLogin(loginTrimmed);
+		/*const req: boolean = await apiReq.utilsCheck.isLoginAlreadyTaken(loginTrimmed);
+        if (req){
+            setLoginAlreadyExist(true);
+        }*/
+
+		if(passwordInput === ''){
+			console.log('No pass, return');
+			return;
+		}
+		console.log(`[SetCredentials]login: ${login}, password: ${password}`)
+		setPassword(passwordInput);
+		setAreCredsValids((login && password).length != 0);
 	}
 
 	const welcomeTitle = () => {
@@ -314,14 +350,14 @@ useEffect(() => {
 				//}
 				break;
 			case EStepLogin.tryToCreateAccount:
-					const createUser: Partial<POD.IUser> = {login: login, password: password, visit: true}
-				console.log(`at case: TryToCreateAccount: login: ${login}, password: ${password}`) //fixme: les infos sont pas envoyées
+				console.log(`at case: TryToCreateAccount: login: ${login}, password: ${password}`)
+				const createUser: Partial<POD.IUser> = {login: login, password: password, visit: true}
 					await apiReq.postApi.postUser(createUser)
 					.then((res) => {
-						if (res.status === 201)
+						if (res.status === 200)
 						{
 							const newUser: POD.IUser = res.data
-							console.log(`res 201, newUser= ${newUser.login} | pass hashed: ${newUser.password}`);
+							console.log(`res 200, newUser= ${newUser.login} | pass hashed: ${newUser.password}`);
 							setUserContext(newUser);
 							localStorage.setItem('login', newUser.login);
 							localStorage.setItem('pass', password); //cookie ?
@@ -331,6 +367,7 @@ useEffect(() => {
 							console.log("Token: ", res.data.token)
 						}
 					})
+						.catch((e) => console.error("Post User: " + e, `createUser= ${createUser.login}, ${createUser.visit}`));
 			return;
 		}
 	}
