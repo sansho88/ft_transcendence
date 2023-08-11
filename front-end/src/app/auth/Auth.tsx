@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import Axios from '@/components/api/AxiosConfig';
 import { UserContext, LoggedContext, SocketContextChat, SocketContextGame } from '@/context/globalContext';
 import Button from "@/components/CustomButtonComponent";
-import {setBearerToken} from "@/components/api/ApiReq";
+
 // import { Button } from '@/components/CustomButtonComponent'
 
 //FIXME: le re logging ne fonctionne pas bien, ne recupere les infos pour userContext = data user vide
