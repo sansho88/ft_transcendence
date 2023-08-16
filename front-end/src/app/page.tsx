@@ -14,6 +14,7 @@ import * as apiReq from '@/components/api/ApiReq'
 import ChatRoomCommponent from '@/components/chat/ChatRoomComponent'
 import {EStatus} from "@/shared/types";
 import Game from "@/components/game/Game";
+import {store} from "next/dist/build/output/store";
 
 export default function Home() {
 	preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
@@ -54,12 +55,23 @@ export default function Home() {
 
     useEffect(() => {
         console.log("Main Page: isLogged? " + logged);
-        console.log("Main Page: localStorageLogin? " + localStorage.getItem("login"));
+        let storedLogin = localStorage.getItem("login");
+        console.log("Main Page: localStorageLogin? " + storedLogin);
+
         if(!logged && !localStorage.getItem("login"))
             router.push('/auth')
         else
         {
             console.log("ID USER: " + userContext?.id_user);
+            apiReq.getApi.getUserByLogin(localStorage.getItem("login"))
+                .then((response) => {
+                    console.log('response:' + response.login);
+                    setUserLogin(response.login);
+                    setUserNickName(response.nickname ? response.nickname : "");
+                })
+                .catch((e) => {
+                    console.error('error:' + e.toString());
+                });
         }
     }, [logged])
  
@@ -73,7 +85,7 @@ export default function Home() {
         console.log("LOGGED REALLY!");
     }
 
-    useEffect(() => {
+   /* useEffect(() => {
         if (logged)
         {
             console.log("[mainPage: useEffect]User logged. Trying to get infos from database... ")
@@ -87,7 +99,7 @@ export default function Home() {
                     console.error('error:' + e.toString());
                 });
         }
-    }, [logged]);
+    }, [logged]);*/
 
     function login() {
         if (!logged)

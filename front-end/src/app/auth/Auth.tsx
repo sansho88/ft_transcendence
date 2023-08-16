@@ -6,7 +6,7 @@ import * as POD  from "@/shared/types";
 import * as apiReq from '@/components/api/ApiReq'
 import * as ClipLoader from 'react-spinners'
 import './auth.css'
-
+import axios from "axios";
 
 
 import { useRouter } from 'next/navigation';
@@ -14,6 +14,8 @@ import { useRouter } from 'next/navigation';
 import Axios from '@/components/api/AxiosConfig';
 import { UserContext, LoggedContext, SocketContextChat, SocketContextGame } from '@/context/globalContext';
 import Button from "@/components/CustomButtonComponent";
+import {IUser} from "@/shared/types";
+import {axiosInstance} from "@/components/api/ApiReq";
 
 // import { Button } from '@/components/CustomButtonComponent'
 
@@ -65,7 +67,7 @@ export default function Auth({className}: {className?: string}) {
 	const lastUserLogin = localStorage.getItem("login");
 	const lastUserPW = localStorage.getItem("password");
 	const [loginInput, setLoginInput] = useState<string>(lastUserLogin == null ? '' : lastUserLogin);
-	const [login, setLogin] = useState<string>(lastUserPW == null ? '' : lastUserPW);
+	const [login, setLogin] = useState<string>(lastUserLogin == null ? '' : lastUserLogin);
 	
 	const [passwordInput, setPasswordInput] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
@@ -139,6 +141,24 @@ export default function Auth({className}: {className?: string}) {
 		)
 	}
 
+	async function getUserMe() {
+		try {
+			const response = await apiReq.getApi.getMe()
+				.then((req) => {
+				console.log("[Get User Me]",response);
+			});
+			console.log("[Get User Me] CALLED");
+		} catch (error) {
+			console.error("[Get User Me ERROR]",error);
+		}
+	}
+	async function getMeLogin(){
+		apiReq.getApi.getMe().then((me) =>
+		{
+			return me.login;
+		})
+			.catch((e) => console.error("[GetMeLogin]", e));
+	}
 	function setCredentials(){
 
 
@@ -147,6 +167,7 @@ export default function Auth({className}: {className?: string}) {
 			return;
 		}
 		const loginTrimmed = loginInput.trim().toString();
+		/*console.log("[setCredentials] loginTrimmed = ", loginTrimmed);*/
 		setLogin(loginTrimmed);
 		/*const req: boolean = await apiReq.utilsCheck.isLoginAlreadyTaken(loginTrimmed);
         if (req){
@@ -157,9 +178,11 @@ export default function Auth({className}: {className?: string}) {
 			console.log('No pass, return');
 			return;
 		}
-		console.log(`[SetCredentials]login: ${login}, password: ${password}`)
 		setPassword(passwordInput);
+		console.log(`[SetCredentials]login: ${login}, password: ${password}`)
+		alert(`[SetCredentials]login: ${login}, password: ${password}`)
 		setAreCredsValids((login && password).length != 0);
+		getUserMe().then((req)=> console.log("GET ME LOGIN REQ:" + req));
 	}
 
 	const welcomeTitle = () => {
@@ -249,7 +272,7 @@ export default function Auth({className}: {className?: string}) {
 		
 	useEffect(() => {
 		if(login.length > 0){
-			console.log(`login = ${login}`);	
+			console.log(`login = ${login}`);
 		}
 		else{
 
@@ -353,6 +376,7 @@ useEffect(() => {
 							localStorage.setItem('token', userToken);
 							localStorage.setItem("login", login);
 							setUserContext(createUser);
+							setLogged(true);
 							apiReq.getApi.getUserByLogin(login)
 								.then((reqUser) => 	{
 									console.log("USER in Database POST creation: ", reqUser.login);
@@ -360,8 +384,6 @@ useEffect(() => {
 										setUserContext(reqUser);
 								})
 
-
-							setLogged(true);
 							setCurrentStepLogin(EStepLogin.successLogin);
 						}
 					})

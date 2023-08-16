@@ -14,7 +14,11 @@ import axios from "axios";
 		baseURL: 'http://localhost:8000/api/',
 		headers: {
 			'Authorization': `Bearer ${localStorage.getItem("token")}`
-		}
+		},
+		validateStatus: function (status) {
+			return status >= 200 && status < 204;
+		},
+		responseType: 'json'
 	});
 
 
@@ -24,9 +28,9 @@ export namespace getApi {
 
 
 	export const getUsersAll=()									: Promise<IUser[]>					=>{return axiosInstance.get(`${strRoutes.getUsersAll()}`);}
-	export const getUserByLogin= (login: string | undefined): Promise<IUser>						=>{return axiosInstance.get(`${strRoutes.getUserByLogin()}${login}`);}
+	export const getUserByLogin= (login: string): Promise<IUser>						=>{return axiosInstance.get(`users/get/${login}`, {cache: 'no-cache'});}
 	export const getUserById = (id: number) 		: Promise<IUser>						=>{return axiosInstance.get(`${strRoutes.getUserById()}${id}`);}
-  
+    export const getMe = () => {return axiosInstance.get(`users/me`, {cache: 'no-cache'})}
 }
 
 export namespace postApi {
@@ -44,7 +48,7 @@ export namespace putApi {
 export namespace deleteApi {
 
 	export const deleteUserById= (id: number)																=>{return Axios.delete(`${strRoutes.deleteUserById()}${id}`)}
-	export const deleteUsersAll= ()																					=>{return Axios.delete(`${strRoutes.deleteUsersAll()}`);}
+	export const deleteUsersAll= ()																					=>{return axiosInstance.delete(`${strRoutes.deleteUsersAll()}`);}
 }
 
 

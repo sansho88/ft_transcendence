@@ -2,6 +2,7 @@ import React, { useEffect, useState} from "react";
 import Button from "./CustomButtonComponent"
 import Avatar from "@/components/AvatarComponent";
 import axios from "axios";
+import * as apiReq from '@/components/api/ApiReq'
 
 
 import "../utils/usefulFuncs"
@@ -51,9 +52,9 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
 
     useEffect(() => { //Initialize le nickname a la creation du component
         if (modifiedNick != nickname && !editMode)
-            axios.get(`http://localhost:8000/api/users/login/${login}`)
+            apiReq.getApi.getUserByLogin(login)
                 .then((response) => {
-                    setNickText(response.data.nickname);
+                    setNickText(response.nickname ? response.nickname : "");
                 })
                 .catch((e) => {
                     console.error('error:' + e.toString());
