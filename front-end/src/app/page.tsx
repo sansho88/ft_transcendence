@@ -12,7 +12,7 @@ import axios from "axios";
 import * as POD from "@/shared/types";
 import * as apiReq from '@/components/api/ApiReq'
 import ChatRoomCommponent from '@/components/chat/ChatRoomComponent'
-import {EStatus} from "@/shared/types";
+import {EStatus, IUser} from "@/shared/types";
 import Game from "@/components/game/Game";
 import {store} from "next/dist/build/output/store";
 
@@ -53,6 +53,7 @@ export default function Home() {
         console.log('[MAIN PAGE]USER STATUS:' + userContext.status);
     }
 
+
     useEffect(() => {
         console.log("Main Page: isLogged? " + logged);
         let storedLogin = localStorage.getItem("login");
@@ -62,16 +63,18 @@ export default function Home() {
             router.push('/auth')
         else
         {
-            console.log("ID USER: " + userContext?.id_user);
-            apiReq.getApi.getUserByLogin(localStorage.getItem("login"))
-                .then((response) => {
-                    console.log('response:' + response.login);
-                    setUserLogin(response.login);
-                    setUserNickName(response.nickname ? response.nickname : "");
-                })
-                .catch((e) => {
-                    console.error('error:' + e.toString());
-                });
+            try {
+                  apiReq.getApi.getMe()
+                    .then((req) => {
+                        console.log("[Get User Me]",req.data.login);
+                        const reqUser = req.data as IUser;
+                        setUserLogin(reqUser.login)
+                        setUserNickName(reqUser.nickname ? reqUser.nickname : "");
+                    });
+
+            } catch (error) {
+                console.error("[Get User Me ERROR]",error);
+            }
         }
     }, [logged])
  
@@ -141,7 +144,7 @@ export default function Home() {
                     <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"}
                             height={"42px"}/>
 
-                    <div className={"game"} onClick={switchOnlineIngame}>
+                    {/*<div className={"game"} onClick={switchOnlineIngame}>
 
                         <Game
 
@@ -149,7 +152,7 @@ export default function Home() {
 
                         <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"}
                                 alt={"GameMode options"} radius={"0"} onClick={switchOnlineIngame}/>
-                    </div>
+                    </div>*/}
                     <ChatRoomCommponent className={"chat"} />
 
                 </main>

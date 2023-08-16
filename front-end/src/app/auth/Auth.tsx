@@ -143,21 +143,15 @@ export default function Auth({className}: {className?: string}) {
 
 	async function getUserMe() {
 		try {
-			const response = await apiReq.getApi.getMe()
+			return await apiReq.getApi.getMe()
 				.then((req) => {
-				console.log("[Get User Me]",response);
+				console.log("[Get User Me]",req.data.login);
+				return req.data as IUser;
 			});
-			console.log("[Get User Me] CALLED");
+
 		} catch (error) {
 			console.error("[Get User Me ERROR]",error);
 		}
-	}
-	async function getMeLogin(){
-		apiReq.getApi.getMe().then((me) =>
-		{
-			return me.login;
-		})
-			.catch((e) => console.error("[GetMeLogin]", e));
 	}
 	function setCredentials(){
 
@@ -368,21 +362,22 @@ useEffect(() => {
 				console.log(`at case: TryToCreateAccount: login: ${login}, password: ${password}`)
 				const createUser: Partial<POD.IUser> = {login: login, password: password, visit: true}
 					await apiReq.postApi.postUser(createUser)
-					.then((res) => {
+					.then(async (res) => {
 						if (res.status === 200)
 						{
 							const userToken = res.data
 							console.log(`Token: ${res.data}`);
 							localStorage.setItem('token', userToken);
 							localStorage.setItem("login", login);
-							setUserContext(createUser);
 							setLogged(true);
-							apiReq.getApi.getUserByLogin(login)
-								.then((reqUser) => 	{
+							const futureUser = await getUserMe();
+							console.log("[postUser futureUser] login:" + futureUser.login); //fixme: trouver un moyen d'actualiser correctement le token dans axiosIstance.create
+							setUserContext( futureUser);
+								/*.then((reqUser) => 	{
 									console.log("USER in Database POST creation: ", reqUser.login);
 									if (reqUser.login != undefined)
 										setUserContext(reqUser);
-								})
+								})*/
 
 							setCurrentStepLogin(EStepLogin.successLogin);
 						}
