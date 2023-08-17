@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useContext, useState} from "react";
 
 'user client'
 
@@ -6,22 +6,21 @@ import Axios from "./AxiosConfig";
 import { strRoutes } from "@/shared/routesApi";
 import { IUser } from "@/shared/types";
 import axios from "axios";
-
-	//const Axios = require('axios');
-
-// Créer une instance Axios avec des en-têtes d'authentification par défaut
-	export const axiosInstance = axios.create({
-		baseURL: 'http://localhost:8000/api/',
-		headers: {
-			'Authorization': `Bearer ${localStorage.getItem("token")}`
-		},
-		validateStatus: function (status) {
-			return status >= 200 && status < 204;
-		},
-		responseType: 'json'
-	});
+import {LoggedContext, TokenContext} from "@/context/globalContext";
+import {token} from "@/app/page";
 
 
+//const Axios = require('axios');
+const axiosInstance = axios.create({
+	baseURL: 'http://localhost:8000/api/',
+	headers: {
+		'Authorization': `Bearer ${token}`
+	},
+	validateStatus: function (status) {
+		return status >= 200 && status < 204;
+	},
+	responseType: 'json'
+});
 
 export namespace getApi {
 

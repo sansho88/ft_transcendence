@@ -6,7 +6,7 @@ import Profile from "../components/ProfileComponent"
 import Stats from "../components/StatsComponent"
 
 import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
-import {LoggedContext, UserContext} from '@/context/globalContext';
+import {LoggedContext, TokenContext, UserContext} from '@/context/globalContext';
 import {useRouter} from 'next/navigation';
 import axios from "axios";
 import * as POD from "@/shared/types";
@@ -16,6 +16,7 @@ import {EStatus, IUser} from "@/shared/types";
 import Game from "@/components/game/Game";
 import {store} from "next/dist/build/output/store";
 
+export   const { token, setToken } = useContext(TokenContext);
 export default function Home() {
 	preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
 	const { logged, setLogged } = useContext(LoggedContext);

@@ -6,16 +6,16 @@ import * as POD  from "@/shared/types";
 import * as apiReq from '@/components/api/ApiReq'
 import * as ClipLoader from 'react-spinners'
 import './auth.css'
-import axios from "axios";
-
 
 import { useRouter } from 'next/navigation';
 
 import Axios from '@/components/api/AxiosConfig';
-import { UserContext, LoggedContext, SocketContextChat, SocketContextGame } from '@/context/globalContext';
+import {UserContext, LoggedContext, SocketContextChat, SocketContextGame, TokenContext} from '@/context/globalContext';
 import Button from "@/components/CustomButtonComponent";
 import {IUser} from "@/shared/types";
-import {axiosInstance} from "@/components/api/ApiReq";
+
+
+
 
 // import { Button } from '@/components/CustomButtonComponent'
 
@@ -45,13 +45,18 @@ enum EStepLogin {
 }
 
 export default function Auth({className}: {className?: string}) {
-	
+
+
+
+
+
 	const {userContext, setUserContext} = useContext(UserContext);
 	const { setLogged } = useContext(LoggedContext);
 	// const [isLogged, setIsLogged] = useState<boolean | null>(null);
   const socketChat = useContext(SocketContextChat);
   const socketGame = useContext(SocketContextGame);
   const [areCredentialsValids, setAreCredsValids] = useState(false);
+  const { token, setToken } = useContext(TokenContext);
 
   
 	useEffect(() => {
@@ -71,9 +76,10 @@ export default function Auth({className}: {className?: string}) {
 	
 	const [passwordInput, setPasswordInput] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
-	
 
-	
+
+	// Créer une instance Axios avec des en-têtes d'authentification par défaut
+
 	////////////////////////////////////////////////////////
 	//////////////// INPUT SWITCH DISPLAY //////////////////
 	////////////////////////////////////////////////////////
@@ -365,13 +371,14 @@ useEffect(() => {
 					.then(async (res) => {
 						if (res.status === 200)
 						{
-							const userToken = res.data
+							const userToken = res.data;
 							console.log(`Token: ${res.data}`);
 							localStorage.setItem('token', userToken);
+							setToken(userToken);
 							localStorage.setItem("login", login);
 							setLogged(true);
 							const futureUser = await getUserMe();
-							console.log("[postUser futureUser] login:" + futureUser.login); //fixme: trouver un moyen d'actualiser correctement le token dans axiosIstance.create
+							console.log("[postUser futureUser] login:" + futureUser.login);
 							setUserContext( futureUser);
 								/*.then((reqUser) => 	{
 									console.log("USER in Database POST creation: ", reqUser.login);
