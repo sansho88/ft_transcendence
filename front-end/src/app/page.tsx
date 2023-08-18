@@ -14,14 +14,15 @@ import * as apiReq from '@/components/api/ApiReq'
 import ChatRoomCommponent from '@/components/chat/ChatRoomComponent'
 import {EStatus, IUser} from "@/shared/types";
 import Game from "@/components/game/Game";
-import {store} from "next/dist/build/output/store";
+import {getUserMe} from "@/app/auth/Auth";
 
-export   const { token, setToken } = useContext(TokenContext);
+
 export default function Home() {
 	preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
 	const { logged, setLogged } = useContext(LoggedContext);
 	const {userContext, setUserContext} = useContext(UserContext);
 	const router = useRouter();
+    const { token, setToken } = useContext(TokenContext);
 	
     enum Colors {
         "grey",  
@@ -64,14 +65,23 @@ export default function Home() {
             router.push('/auth')
         else
         {
+            console.log("User is already LOGGED as " + localStorage.getItem("login"))
             try {
-                  apiReq.getApi.getMe()
+
+                getUserMe().then((me) => { //todo: ça fonctionne bien, mais ce fonctionnement doit peut-être se faire ailleurs
+                    console.log("[Get User Me]", me.login);
+                    setUserLogin(me.login);
+                    setUserNickName(me.nickname ? me.nickname : "");
+                    console.log("ME get, so nickname = " + me.nickname);
+                    setUserContext(me);
+                })
+                  /*apiReq.getApi.getMe()
                     .then((req) => {
                         console.log("[Get User Me]",req.data.login);
                         const reqUser = req.data as IUser;
                         setUserLogin(reqUser.login)
                         setUserNickName(reqUser.nickname ? reqUser.nickname : "");
-                    });
+                    });*/
 
             } catch (error) {
                 console.error("[Get User Me ERROR]",error);

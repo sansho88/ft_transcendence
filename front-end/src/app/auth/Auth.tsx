@@ -13,8 +13,7 @@ import Axios from '@/components/api/AxiosConfig';
 import {UserContext, LoggedContext, SocketContextChat, SocketContextGame, TokenContext} from '@/context/globalContext';
 import Button from "@/components/CustomButtonComponent";
 import {IUser} from "@/shared/types";
-
-
+import {axiosInstance} from "@/components/api/ApiReq";
 
 
 // import { Button } from '@/components/CustomButtonComponent'
@@ -42,6 +41,19 @@ enum EStepLogin {
 	failLogin,
 	errorLogin,
 	bye
+}
+
+export async function getUserMe() {
+	try {
+		return await apiReq.getApi.getMe()
+			.then((req) => {
+				console.log("[Get User Me]",req.data.login);
+				return req.data as IUser;
+			});
+
+	} catch (error) {
+		console.error("[Get User Me ERROR]",error);
+	}
 }
 
 export default function Auth({className}: {className?: string}) {
@@ -147,7 +159,7 @@ export default function Auth({className}: {className?: string}) {
 		)
 	}
 
-	async function getUserMe() {
+	/*async function getUserMe() {
 		try {
 			return await apiReq.getApi.getMe()
 				.then((req) => {
@@ -158,7 +170,7 @@ export default function Auth({className}: {className?: string}) {
 		} catch (error) {
 			console.error("[Get User Me ERROR]",error);
 		}
-	}
+	}*/
 	function setCredentials(){
 
 
@@ -375,6 +387,9 @@ useEffect(() => {
 							console.log(`Token: ${res.data}`);
 							localStorage.setItem('token', userToken);
 							setToken(userToken);
+							axiosInstance.get('users/get', {headers: {
+							'Authorization': `Bearer ${userToken}`
+						}})
 							localStorage.setItem("login", login);
 							setLogged(true);
 							const futureUser = await getUserMe();

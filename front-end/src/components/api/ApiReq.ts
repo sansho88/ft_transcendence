@@ -7,14 +7,13 @@ import { strRoutes } from "@/shared/routesApi";
 import { IUser } from "@/shared/types";
 import axios from "axios";
 import {LoggedContext, TokenContext} from "@/context/globalContext";
-import {token} from "@/app/page";
 
 
 //const Axios = require('axios');
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
 	baseURL: 'http://localhost:8000/api/',
 	headers: {
-		'Authorization': `Bearer ${token}`
+		'Authorization': `Bearer ${localStorage.getItem('token')}`
 	},
 	validateStatus: function (status) {
 		return status >= 200 && status < 204;
@@ -22,14 +21,21 @@ const axiosInstance = axios.create({
 	responseType: 'json'
 });
 
+
+
 export namespace getApi {
 
+	export const getUsersAll=()									: Promise<IUser[]>					=>{
 
 
-	export const getUsersAll=()									: Promise<IUser[]>					=>{return axiosInstance.get(`${strRoutes.getUsersAll()}`);}
-	export const getUserByLogin= (login: string): Promise<IUser>						=>{return axiosInstance.get(`users/get/${login}`, {cache: 'no-cache'});}
+		return axiosInstance.get(`${strRoutes.getUsersAll()}`);}
+	export const getUserByLogin= (login: string): Promise<IUser>						=>{
+		
+		return axiosInstance.get(`users/get/${login}`, {cache: 'no-cache'});}
 	export const getUserById = (id: number) 		: Promise<IUser>						=>{return axiosInstance.get(`${strRoutes.getUserById()}${id}`);}
-    export const getMe = () => {return axiosInstance.get(`users/me`, {cache: 'no-cache'})}
+    export const getMe = () => {
+		
+		return axiosInstance.get(`users/me`, {cache: 'no-cache'})}
 }
 
 export namespace postApi {
