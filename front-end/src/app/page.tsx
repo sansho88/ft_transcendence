@@ -75,13 +75,6 @@ export default function Home() {
                     console.log("ME get, so nickname = " + me.nickname);
                     setUserContext(me);
                 })
-                  /*apiReq.getApi.getMe()
-                    .then((req) => {
-                        console.log("[Get User Me]",req.data.login);
-                        const reqUser = req.data as IUser;
-                        setUserLogin(reqUser.login)
-                        setUserNickName(reqUser.nickname ? reqUser.nickname : "");
-                    });*/
 
             } catch (error) {
                 console.error("[Get User Me ERROR]",error);

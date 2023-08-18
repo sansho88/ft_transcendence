@@ -14,6 +14,7 @@ import {UserContext, LoggedContext, SocketContextChat, SocketContextGame, TokenC
 import Button from "@/components/CustomButtonComponent";
 import {IUser} from "@/shared/types";
 import {axiosInstance} from "@/components/api/ApiReq";
+import {authManager} from "@/components/api/ApiReq";
 
 
 // import { Button } from '@/components/CustomButtonComponent'
@@ -385,21 +386,19 @@ useEffect(() => {
 						{
 							const userToken = res.data;
 							console.log(`Token: ${res.data}`);
+							localStorage.removeItem('token');
 							localStorage.setItem('token', userToken);
-							setToken(userToken);
-							axiosInstance.get('users/get', {headers: {
-							'Authorization': `Bearer ${userToken}`
-						}})
+							authManager.setToken(userToken);
 							localStorage.setItem("login", login);
-							setLogged(true);
 							const futureUser = await getUserMe();
 							console.log("[postUser futureUser] login:" + futureUser.login);
 							setUserContext( futureUser);
-								/*.then((reqUser) => 	{
-									console.log("USER in Database POST creation: ", reqUser.login);
-									if (reqUser.login != undefined)
-										setUserContext(reqUser);
-								})*/
+							setLogged(true);
+							/*.then((reqUser) => 	{
+                                console.log("USER in Database POST creation: ", reqUser.login);
+                                if (reqUser.login != undefined)
+                                    setUserContext(reqUser);
+                            })*/
 
 							setCurrentStepLogin(EStepLogin.successLogin);
 						}
