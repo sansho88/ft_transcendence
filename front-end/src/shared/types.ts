@@ -2,7 +2,7 @@
 // |                        SQL TABLE CORRESPONDENCE                     |
 // +---------------------------------------------------------------------+
 export interface IUser {
-  id_user?: number;
+  UserID?: number;
   login: string;
   nickname?: string;
   password?: string;

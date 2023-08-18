@@ -111,7 +111,7 @@ useEffect(() => {
 		if (socketRef && typeof socketRef !== "string") {
       let messObj: POD.IChatMessage = {
         user: {
-          id_user: userContext?.id_user,
+          UserID: userContext?.UserID,
           login: userContext?.login,
 					nickname: userContext?.nickname,
 				},

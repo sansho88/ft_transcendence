@@ -377,7 +377,7 @@ export default function Game({className}: {className: string}) {
   function handleSearchGame() {
     const login     = userLogged.userContext?.login
     let nickname    = userLogged.userContext?.login;
-    let id_user     = userLogged.userContext?.id_user;
+    let id_user     = userLogged.userContext?.UserID;
     if (nickname === undefined)
       nickname = userLogged.userContext?.nickname
     if (stepCurrentSession === EStatusFrontGame.idle) {

@@ -16,7 +16,7 @@ export class Matchmaking {
   private containsUser(user: userInfoSocket): boolean {
     for (let element of this.userStack.toArray()) {
       // console.log(`HEY : ${element.user.id_user} ||| ${user.user.id_user}`)
-      if (element.user.id_user === user.user.id_user) { 
+      if (element.user.UserID === user.user.UserID) {
         return true;
       }
     }
@@ -37,7 +37,7 @@ export class Matchmaking {
   public removeUser(user: userInfoSocket): void {
     if (this.containsUser(user)) {
         let array = this.userStack.toArray();
-        let index = array.findIndex(u => u.user.id_user === user.user.id_user);
+        let index = array.findIndex(u => u.user.UserID === user.user.UserID);
         if (index !== -1) {
             array.splice(index, 1);
             this.userStack = new Stack<userInfoSocket>();

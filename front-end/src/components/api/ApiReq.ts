@@ -57,13 +57,28 @@ export namespace postApi {
 
 
 export namespace putApi {
-	export const putUser= (updateUser: Partial<IUser>)		=>{return axiosInstance.put(`${strRoutes.putUser()}${updateUser.id_user}`, updateUser)}
+	export const putUser= (updateUser: Partial<IUser>)		=>{ //fixme: "404 not found ?"
+		return axiosInstance.put(`${strRoutes.putUser()}${updateUser.UserID}`, updateUser, {
+			headers: {
+				'Authorization': `Bearer ${authManager.getToken()}`
+			}
+		})}
 }
 
 export namespace deleteApi {
 
-	export const deleteUserById= (id: number)																=>{return Axios.delete(`${strRoutes.deleteUserById()}${id}`)}
-	export const deleteUsersAll= ()																					=>{return axiosInstance.delete(`${strRoutes.deleteUsersAll()}`);}
+	export const deleteUserById= (id: number)	=>{
+		return Axios.delete(`${strRoutes.deleteUserById()}${id}`, {
+		headers: {
+			'Authorization': `Bearer ${authManager.getToken()}`
+		}
+	})}
+	export const deleteUsersAll= ()	=>{
+		return axiosInstance.delete(`${strRoutes.deleteUsersAll()}`, {
+		headers: {
+			'Authorization': `Bearer ${authManager.getToken()}`
+		}
+	});}
 }
 
 

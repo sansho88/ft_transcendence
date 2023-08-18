@@ -391,7 +391,7 @@ useEffect(() => {
 							authManager.setToken(userToken);
 							localStorage.setItem("login", login);
 							const futureUser = await getUserMe();
-							console.log("[postUser futureUser] login:" + futureUser.login);
+							console.log("[postUser futureUser] nickname:" + futureUser.nickname + ", id: " + futureUser.UserID);
 							setUserContext( futureUser);
 							setLogged(true);
 							/*.then((reqUser) => 	{

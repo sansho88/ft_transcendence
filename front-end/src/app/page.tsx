@@ -36,7 +36,7 @@ export default function Home() {
     }
 
     async function updateStatusUser(id_user, status) {
-        const updateUser: Partial<POD.IUser> = {id_user: id_user, status: status}
+        const updateUser: Partial<POD.IUser> = {UserID: id_user, status: status}
         await apiReq.putApi.putUser(updateUser)
             .then(() => {
                 setUserContext(updateUser);
@@ -49,7 +49,7 @@ export default function Home() {
         userContext.status = tmpStatus;
 
         setUserContext(userContext);
-        updateStatusUser(userContext?.id_user, tmpStatus)
+        updateStatusUser(userContext?.UserID, tmpStatus)
             .catch((e) => console.error(e));
 
         console.log('[MAIN PAGE]USER STATUS:' + userContext.status);
@@ -61,12 +61,14 @@ export default function Home() {
         let storedLogin = localStorage.getItem("login");
         console.log("Main Page: localStorageLogin? " + storedLogin);
 
-        if(!logged && !localStorage.getItem("login"))
+        if(!logged /*&& !localStorage.getItem("login")*/)
             router.push('/auth')
         else
         {
             console.log("User is already LOGGED as " + localStorage.getItem("login"))
-            try {
+            setUserLogin(userContext.login ? userContext.login : "");
+            setUserNickName(userContext.nickname ? userContext.nickname : "");
+            /*try {
 
                 getUserMe().then((me) => { //todo: ça fonctionne bien, mais ce fonctionnement doit peut-être se faire ailleurs
                     console.log("[Get User Me]", me.login);
@@ -78,7 +80,7 @@ export default function Home() {
 
             } catch (error) {
                 console.error("[Get User Me ERROR]",error);
-            }
+            }*/
         }
     }, [logged])
  
@@ -91,22 +93,6 @@ export default function Home() {
        // setLog(true);
         console.log("LOGGED REALLY!");
     }
-
-   /* useEffect(() => {
-        if (logged)
-        {
-            console.log("[mainPage: useEffect]User logged. Trying to get infos from database... ")
-            apiReq.getApi.getUserByLogin(localStorage.getItem("login"))//fixme: login == undefined there
-                .then((response) => {
-                    console.log('response:' + response.login);
-                    setUserLogin(response.login);
-                    setUserNickName(response.nickname ? response.nickname : "");
-                })
-                .catch((e) => {
-                    console.error('error:' + e.toString());
-                });
-        }
-    }, [logged]);*/
 
     function login() {
         if (!logged)
@@ -148,7 +134,7 @@ export default function Home() {
                     <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"}
                             height={"42px"}/>
 
-                    {/*<div className={"game"} onClick={switchOnlineIngame}>
+                    <div className={"game"} onClick={switchOnlineIngame}>
 
                         <Game
 
@@ -156,7 +142,7 @@ export default function Home() {
 
                         <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"}
                                 alt={"GameMode options"} radius={"0"} onClick={switchOnlineIngame}/>
-                    </div>*/}
+                    </div>
                     <ChatRoomCommponent className={"chat"} />
 
                 </main>

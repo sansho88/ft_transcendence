@@ -19,7 +19,7 @@ export function NavBar({className}: {className: string}) {
   useEffect(() => {
 	  setInfoUser(
 	  <div className='flex'>id:
-	  <div className=' text-red-700'>{userContext?.id_user}</div>
+	  <div className=' text-red-700'>{userContext?.UserID}</div>
 	|
 	  <div className=' text-green-700'>{userContext?.login}</div>
 	|
