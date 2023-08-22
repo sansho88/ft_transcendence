@@ -69,6 +69,7 @@ export class UserEntity extends BaseEntity {
 	credential: UserCredentialEntity;
 
 	@OneToMany(() => MessageEntity, (message) => message.author)
+	@JoinColumn()
 	message: MessageEntity[];
 
 	//	Friends
@@ -80,26 +81,27 @@ export class UserEntity extends BaseEntity {
 	@JoinTable()
 	subscribed: UserEntity[];
 
-	
 	@OneToMany(() => InviteEntity, (invite) => invite.user)
 	invite: InviteEntity[];
-	
+
 	@OneToMany(() => MuteEntity, (mute) => mute.user)
 	mute: MuteEntity[];
-	
+
 	@OneToMany(() => BannedEntity, (banned) => banned.user)
 	banned: BannedEntity[];
-	
-	@OneToMany(() => ChannelEntity, (channel) => channel.userList)
-	@JoinTable()
+
+	@ManyToMany(() => ChannelEntity, (channel) => channel.userList)
+	// @JoinTable()
 	channelJoined: ChannelEntity[];
 
 	@OneToMany(() => ChannelEntity, (channel) => channel.adminList)
+	// @JoinTable()
 	channelAdmin: ChannelEntity[];
 
 	@OneToMany(() => ChannelEntity, (channel) => channel.owner)
+	@JoinColumn()
 	channelOwned: ChannelEntity[];
-	
+
 	// @Column()
 	// @ManyToMany(() => UserEntity)
 	// @JoinTable()

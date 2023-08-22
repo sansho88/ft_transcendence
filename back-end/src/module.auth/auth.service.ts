@@ -35,7 +35,7 @@ export class AuthService {
 			throw new UnauthorizedException();
 		}
 		console.log('success');
-		const payloadToken: accessToken = { id: user.UserID, rawPassword };
+		const payloadToken: accessToken = { id: user.UserID };
 		this.usersService.userStatus(login, UserStatus.ONLINE).then();
 		return await this.jwtService.signAsync(payloadToken);
 	}
@@ -53,11 +53,9 @@ export class AuthService {
 		if (login.length > 10) return new BadRequestException();
 		if (await this.usersService.findOne(login))
 			throw new ConflictException('login is already taken');
-		const userCredential = await this.credentialsService.create(
-			rawPassword,
-		);
+		const userCredential = await this.credentialsService.create(rawPassword);
 		const user = await this.usersService.create(login, true, userCredential);
-		const payloadToken: accessToken = { id: user.UserID, rawPassword };
+		const payloadToken: accessToken = { id: user.UserID };
 		return await this.jwtService.signAsync(payloadToken);
 	}
 

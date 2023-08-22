@@ -1,6 +1,7 @@
 import {
 	BaseEntity,
 	Entity,
+	JoinColumn,
 	ManyToOne,
 	PrimaryColumn,
 } from 'typeorm';
@@ -13,8 +14,10 @@ export class InviteEntity extends BaseEntity {
 	inviteID: number;
 
 	@ManyToOne(() => UserEntity)
+	@JoinColumn()
 	user: UserEntity;
 
 	@ManyToOne(() => ChannelEntity)
+	@JoinColumn()
 	channel: ChannelEntity;
 }

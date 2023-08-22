@@ -3,3 +3,9 @@ export class CreateChannelDTO {
 	password?: string;
 	protected: boolean;
 }
+
+export class JoinChannelDTO {
+	id: number;
+	password?: string;
+	protected: boolean;
+}

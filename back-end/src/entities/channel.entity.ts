@@ -29,16 +29,17 @@ export class ChannelEntity extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	channelID: number;
 
-	@ManyToOne(() => UserEntity)
+	@ManyToOne(() => UserEntity, (UserEntity) => UserEntity.channelOwned)
 	owner: UserEntity;
 
 	/** Only Used if it's a Direct Channel*/
-	@ManyToOne(() => UserEntity)
-	owner2: UserEntity;
+	// @ManyToOne(() => UserEntity)
+	// owner2: UserEntity;
 
 	@Column({
 		type: 'varchar',
 		length: 20,
+		unique: true,
 	})
 	name: string;
 
@@ -49,29 +50,30 @@ export class ChannelEntity extends BaseEntity {
 	type: ChannelType;
 
 	@OneToOne(() => ChannelCredentialEntity, { cascade: true })
-	@JoinColumn()
+	@JoinColumn({ name: 'TestCredential' })
 	credential: ChannelCredentialEntity;
 
-	@ManyToMany(() => UserEntity)
-	@JoinTable()
+	@ManyToMany(() => UserEntity, (UserEntity) => UserEntity.channelAdmin)
+	@JoinTable({ name: 'TestAdminList' })
 	adminList: UserEntity[];
 
-	@ManyToMany(() => UserEntity)
-	@JoinTable()
+	@ManyToMany(() => UserEntity, (UserEntity) => UserEntity.channelJoined)
+	@JoinTable({ name: 'TestUserList' })
 	userList: UserEntity[];
 
 	@OneToMany(() => MessageEntity, (MessageEntity) => MessageEntity.channel)
+	@JoinColumn({ name: 'TestMessageList' })
 	messages: MessageEntity[];
 
 	@OneToMany(() => InviteEntity, (InviteEntity) => InviteEntity.channel)
-	@JoinTable()
+	// @JoinTable({ name: 'TestInviteList' })
 	inviteList: InviteEntity[];
 
 	@OneToMany(() => MuteEntity, (MuteEntity) => MuteEntity.channel)
-	@JoinTable()
+	// @JoinTable({ name: 'TestMuteList' })
 	muteList: MuteEntity[];
 
 	@OneToMany(() => BannedEntity, (BannedEntity) => BannedEntity.channel)
-	@JoinTable()
+	// @JoinTable({ name: 'TestBannedList' })
 	bannedList: BannedEntity[];
 }

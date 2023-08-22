@@ -17,6 +17,7 @@ export class MessageService {
 			author: user,
 			channel: chan,
 			content: content,
+			sendTime: new Date(),
 		});
 		await msg.save();
 		return msg;

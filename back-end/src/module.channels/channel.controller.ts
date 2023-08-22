@@ -1,5 +1,4 @@
 import {
-	BadRequestException,
 	Body,
 	Controller,
 	Get,
@@ -12,7 +11,7 @@ import {
 import { ChannelService } from './channel.service';
 import { AuthGuard } from '../module.auth/auth.guard';
 import { CurrentUser } from '../module.auth/indentify.user';
-import { CreateChannelDTO } from '../dto/channel/create-channel.dto';
+import { CreateChannelDTO } from '../dto/channel/channel.dto';
 import { ChannelCredentialService } from './credential.service';
 import { UsersService } from '../module.users/users.service';
 
@@ -24,23 +23,26 @@ export class ChannelController {
 		private readonly credentialService: ChannelCredentialService,
 	) {}
 
-	@Post('create')
+	@Post('create') // todo: Use Websocket not http request
 	@UseGuards(AuthGuard)
 	async create(
 		@Body() createChannel: CreateChannelDTO,
 		@CurrentUser('id', ParseIntPipe) id: number,
 	) {
-		const user = await this.userService.findOne(id);
-		const credential = await this.credentialService.create(
-			createChannel.password,
-		);
-		return this.channelService.create(
-			createChannel.name,
-			credential,
-			createChannel.protected,
-			user,
-		);
+		// console.log('IN Create Controller');
+		// const user = await this.userService.findOne(id);
+		// const credential = await this.credentialService.create(
+		// 	createChannel.password,
+		// );
+		// return this.channelService.create(
+		// 	createChannel.name,
+		// 	credential,
+		// 	createChannel.protected,
+		// 	user,
+		// );
+		return "Use WebSocket event 'createRoom'";
 	}
+
 	@Get('get')
 	@UseGuards(AuthGuard)
 	findAll() {
@@ -59,11 +61,12 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@CurrentUser('id', ParseIntPipe) userID: number,
 	) {
-		const chan = await this.channelService.findOne(channelID);
-		const user = await this.userService.findOne(userID);
-		console.log(chan);
-		if (!(await this.channelService.userInChannel(user, chan)))
-			return await this.channelService.joinChannel(user, chan);
-		throw new BadRequestException('User already in channel');
+		return "Use WebSocket event 'joinRoom'";
+		// const chan = await this.channelService.findOne(channelID);
+		// const user = await this.userService.findOne(userID);
+		// console.log(chan);
+		// if (!(await this.channelService.userInChannel(user, chan)))
+		// 	return await this.channelService.joinChannel(user, chan);
+		// throw new BadRequestException('User already in channel');
 	}
 }

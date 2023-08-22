@@ -1,5 +1,8 @@
 import {
+	ConnectedSocket,
 	MessageBody,
+	OnGatewayConnection,
+	OnGatewayDisconnect,
 	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer,
@@ -10,13 +13,38 @@ import { MessageService } from './message.service';
 import { WSAuthGuard } from '../module.auth/auth.guard';
 import { ParseIntPipe, UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../module.auth/indentify.user';
+import { CreateChannelDTO, JoinChannelDTO } from '../dto/channel/channel.dto';
+import { ChannelService } from './channel.service';
+import { UsersService } from '../module.users/users.service';
+import { ChannelCredentialService } from './credential.service';
+import { ChannelEntity } from '../entities/channel.entity';
+import { UserEntity } from '../entities/user.entity';
+import { ReceiveMessageDto, SendMessageDto } from '../dto/channel/message.dto';
+import { accessToken } from '../dto/payload';
+import * as process from 'process';
+import { JwtService } from '@nestjs/jwt';
+
+class SocketUserList {
+	userID: number;
+	socketID: number;
+}
 
 @WebSocketGateway({ namespace: 'chat' })
-export class ChatGateway extends IoAdapter {
+export class ChatGateway
+	extends IoAdapter
+	implements OnGatewayConnection, OnGatewayDisconnect
+{
 	@WebSocketServer()
 	server: Server;
+	private socketUserList: SocketUserList[]; // maybe not needed
 
-	constructor(private messageService: MessageService) {
+	constructor(
+		private messageService: MessageService,
+		private channelService: ChannelService,
+		private usersService: UsersService,
+		private channelCredentialService: ChannelCredentialService,
+		private jwtService: JwtService,
+	) {
 		super();
 	}
 
@@ -24,27 +52,139 @@ export class ChatGateway extends IoAdapter {
 
 	// Todo: Maybe Give Bearer Token to auth when 1st connection then keep userID and client.ID in a map-like structure
 	// Or We could also use a 'Auth' event to identify the user post connection
-	async handleConnection(client: Socket, @MessageBody() data: string) {
-		console.log(`New Connection ${client.id}`);
+
+	async handleConnection(client: Socket) {
+		const [type, token] =
+			client.handshake.headers.authorization?.split(' ') ?? [];
+		if (type !== 'Bearer') return;
+		if (!token) client.disconnect();
+		let userID: number;
+		try {
+			const payloadToken: accessToken = await this.jwtService.verifyAsync(
+				token,
+				{
+					secret: process.env.SECRET_KEY,
+				},
+			);
+			userID = payloadToken.id;
+		} catch {
+			return client.disconnect();
+		}
+		const user = await this.usersService.findOneRelation(userID, {
+			channelJoined: true,
+		});
+		if (!user) return client.disconnect();
+
+		if (typeof user.channelJoined === 'undefined') return;
+		client.join(
+			user.channelJoined.map((chan) => {
+				return chan.name;
+			}),
+		);
+		console.log(`New connection from User ${userID}`);
 	}
-	async handleDisconnect(client: Socket, @MessageBody() data: string) {
+
+	//Todo: leave room + offline
+	async handleDisconnect(client: Socket) {
 		console.log(`DisConnection ${client.id}`);
 	}
 
-	@SubscribeMessage('event')
+	@SubscribeMessage('createRoom')
 	@UseGuards(WSAuthGuard)
-	handleEvent(
-		@MessageBody() data: string,
+	async handelCreateRoom(
+		@MessageBody() data: CreateChannelDTO,
 		@CurrentUser('id', ParseIntPipe) userID: number,
-	): string {
-		// console.log(`${data}`);
-		console.log(`new user -> ${userID}`);
-		return 'je suis un test';
+		@ConnectedSocket() client: Socket,
+	) {
+		const user = await this.usersService.findOne(userID);
+		const credential = await this.channelCredentialService.create(
+			data.password,
+		);
+		const chan = await this.channelService.create(
+			data.name,
+			credential,
+			data.protected,
+			user,
+		);
+		client.join(data.name);
+		client.emit(`createRoom`, {
+			message: `Channel Created with id ${chan.channelID}`,
+		});
 	}
-	/** * * * * * * * **/
-	@SubscribeMessage('message')
-	handleMsg(@MessageBody() data: string): string {
-		console.log(data);
-		return data;
+
+	@SubscribeMessage('joinRoom')
+	@UseGuards(WSAuthGuard)
+	async handelJoinRoom(
+		@MessageBody() data: JoinChannelDTO,
+		@CurrentUser('id', ParseIntPipe) userID: number,
+		@ConnectedSocket() client: Socket,
+	) {
+		const channel = await this.channelService.findOne(data.id);
+		const user = await this.usersService.findOne(userID);
+		if (await this.channelService.isUserOnChan(channel, user))
+			return client.emit(`joinRoom`, {
+				message: `You are already on that channel`,
+			});
+		if (!(await this.channelService.checkCredential(data)))
+			return client.emit(`joinRoom`, {
+				message: `You cannot Join that channel`,
+			});
+		await this.channelService.joinChannel(user, channel);
+		client.join(channel.name);
+		await this.SendMessage(
+			channel,
+			0,
+			`User ${user.nickname} Joined the channel ${channel.name}`,
+		);
+		console.log(`JOIN Room ${data.id} By ${userID}`);
+	}
+
+	@SubscribeMessage('sendMsg')
+	@UseGuards(WSAuthGuard)
+	async handelMessages(
+		@MessageBody() data: SendMessageDto,
+		@CurrentUser('id', ParseIntPipe) userID: number,
+		@ConnectedSocket() client: Socket,
+	) {
+		const user = await this.usersService.findOne(userID);
+		const chan = await this.channelService.findOne(data.channelID);
+		if (!chan || typeof data.channelID === 'undefined')
+			return client.emit('sendMsg', { error: 'There is no such Channel' });
+		this.server.to(chan.name).emit('sendMsg', 'Je suis un test !');
+		if (await this.channelService.userInChannel(user, chan)) {
+			await this.messageService.create(user, data.content, chan);
+			return await this.SendMessage(chan, user, data.content);
+		}
+		return client.emit('sendMsg', {
+			error: 'You are not part of this channel',
+		});
+	}
+
+	@SubscribeMessage('debug')
+	async handelDebug() {
+		console.log(await this.server.in('abc').fetchSockets());
+		// console.log(this.server.of('chat').adapter.sids);
+	}
+
+	/**
+	 * @param channel
+	 * @param user If 0-> Meant to be the system !
+	 * @param content
+	 */
+	async SendMessage(
+		channel: ChannelEntity,
+		user: UserEntity | number,
+		content: string,
+	) {
+		let userID: number;
+		if (typeof user !== 'number') userID = user.UserID;
+		else userID = user;
+		const msg: ReceiveMessageDto = {
+			ownerID: userID,
+			channelID: channel.channelID,
+			content: content,
+		};
+		this.server.to(channel.name).emit(`sendMsg`, msg);
+		console.log(` Send Message on ${channel.name}, by ${userID}`);
 	}
 }

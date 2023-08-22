@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UpdateUserDto } from '../dto/user/update-user.dto';
 import { UserEntity, UserStatus } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsRelations, Repository } from 'typeorm';
 import { UserCredentialEntity } from '../entities/credential.entity';
 
 @Injectable()
@@ -50,6 +50,16 @@ export class UsersService {
 		return this.usersRepository.findOneBy({ login: id });
 	}
 
+	async findOneRelation(
+		id: number,
+		relation: FindOptionsRelations<UserEntity>,
+	) {
+		return this.usersRepository.findOne({
+			relations: relation,
+			where: { UserID: id },
+		});
+	}
+
 	async update(id: number, updateUser: UpdateUserDto) {
 		const user = await this.usersRepository.findOneBy({ UserID: id });
 		if (updateUser.nickname !== undefined) user.nickname = updateUser.nickname;
@@ -64,12 +74,8 @@ export class UsersService {
 	}
 	async getCredential(login: string) {
 		const target = await this.usersRepository.findOne({
-			relations: {
-				credential: true,
-			},
-			where: {
-				login: login,
-			},
+			relations: { credential: true },
+			where: { login: login },
 		});
 		return target.credential;
 	}

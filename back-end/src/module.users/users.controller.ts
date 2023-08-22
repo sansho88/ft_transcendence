@@ -8,6 +8,7 @@ import {
 	Put,
 	UseGuards,
 	ParseIntPipe,
+	BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from '../dto/user/update-user.dto';
@@ -44,9 +45,9 @@ export class UsersController {
 	// 	return this.usersService.update(+login, updateUserDto);
 	// }
 
-	@Delete(':login')
-	remove(@Param('login') login: string) {
-		return this.usersService.remove(+login);
+	@Delete(':id')
+	remove(@Param('id') id: number) {
+		return this.usersService.remove(+id);
 	}
 
 	/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ***/
@@ -57,15 +58,18 @@ export class UsersController {
 		return this.usersService.findOne(id);
 	}
 
-	@Get('/get/:id')
-	@UseGuards(AuthGuard)
-	findOneID(@Param('id', ParseIntPipe) id: number) {
-		return this.usersService.findOne(id);
-	}
-	@Get('get')
+	@Get('/get')
 	@UseGuards(AuthGuard)
 	findAll() {
 		return this.usersService.findAll();
+	}
+
+	@Get('/get/:id')
+	@UseGuards(AuthGuard)
+	async findOneID(@Param('id', ParseIntPipe) id: number) {
+		const user = await this.usersService.findOne(id);
+		if (user == null) throw new BadRequestException();
+		return user;
 	}
 
 	/*************************************************/

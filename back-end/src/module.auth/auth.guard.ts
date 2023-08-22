@@ -22,14 +22,9 @@ export class AuthGuard implements CanActivate {
 			throw new UnauthorizedException();
 		}
 		try {
-			const payloadToken: accessToken = await this.jwtService.verifyAsync(
-				token,
-				{
-					secret: process.env.SECRET_KEY,
-				},
-			);
-			payloadToken.rawPassword = 'NOPE!';
-			request['user'] = payloadToken;
+			request['user'] = await this.jwtService.verifyAsync(token, {
+				secret: process.env.SECRET_KEY,
+			});
 		} catch {
 			throw new UnauthorizedException();
 		}
@@ -59,7 +54,6 @@ export class WSAuthGuard implements CanActivate {
 					secret: process.env.SECRET_KEY,
 				},
 			);
-			payloadToken.rawPassword = 'NOPE!';
 			request['user'] = payloadToken;
 		} catch {
 			throw new WsException('UnAuthorise WS');

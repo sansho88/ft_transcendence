@@ -1,6 +1,7 @@
 import {
 	BaseEntity,
 	Entity,
+	JoinColumn,
 	ManyToOne,
 	PrimaryColumn,
 } from 'typeorm';
@@ -12,9 +13,11 @@ export class MuteEntity extends BaseEntity {
 	@PrimaryColumn()
 	muteID: number;
 
-	@ManyToOne(() => UserEntity)
+	@ManyToOne(() => UserEntity, (UserEntity) => UserEntity.mute)
+	@JoinColumn()
 	user: UserEntity;
 
-	@ManyToOne(() => ChannelEntity)
+	@ManyToOne(() => ChannelEntity, (ChannelEntity) => ChannelEntity.muteList)
+	@JoinColumn()
 	channel: ChannelEntity;
 }

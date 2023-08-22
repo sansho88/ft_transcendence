@@ -1,6 +1,7 @@
 import {
 	BaseEntity,
 	Entity,
+	JoinTable,
 	ManyToOne,
 	PrimaryColumn,
 } from 'typeorm';
@@ -12,9 +13,11 @@ export class BannedEntity extends BaseEntity {
 	@PrimaryColumn()
 	bannedID: number;
 
-	@ManyToOne(() => UserEntity)
+	@ManyToOne(() => UserEntity, (UserEntity) => UserEntity.banned)
+	@JoinTable()
 	user: UserEntity;
 
-	@ManyToOne(() => ChannelEntity)
+	@ManyToOne(() => ChannelEntity, (ChannelEntity) => ChannelEntity.bannedList)
+	@JoinTable()
 	channel: ChannelEntity;
 }
