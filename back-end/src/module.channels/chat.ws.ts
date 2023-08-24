@@ -11,18 +11,24 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { Server, Socket } from 'socket.io';
 import { MessageService } from './message.service';
 import { WSAuthGuard } from '../module.auth/auth.guard';
-import { ParseIntPipe, UseGuards } from '@nestjs/common';
+import { UseGuards, ValidationPipe } from '@nestjs/common';
 import { CurrentUser } from '../module.auth/indentify.user';
-import { CreateChannelDTO, JoinChannelDTO } from '../dto/channel/channel.dto';
 import { ChannelService } from './channel.service';
 import { UsersService } from '../module.users/users.service';
 import { ChannelCredentialService } from './credential.service';
 import { ChannelEntity } from '../entities/channel.entity';
 import { UserEntity } from '../entities/user.entity';
-import { ReceiveMessageDto, SendMessageDto } from '../dto/channel/message.dto';
 import { accessToken } from '../dto/payload';
 import * as process from 'process';
 import { JwtService } from '@nestjs/jwt';
+import {
+	CreateChannelDTOPipe,
+	JoinChannelDTOPipe,
+} from '../pipe.dto/channel.dto';
+import {
+	ReceivedMessageDTOPipe,
+	SendMessageDTOPipe,
+} from '../pipe.dto/message.dto';
 
 class SocketUserList {
 	userID: number;
@@ -92,8 +98,8 @@ export class ChatGateway
 	@SubscribeMessage('createRoom')
 	@UseGuards(WSAuthGuard)
 	async handelCreateRoom(
-		@MessageBody() data: CreateChannelDTO,
-		@CurrentUser('id', ParseIntPipe) userID: number,
+		@MessageBody(new ValidationPipe()) data: CreateChannelDTOPipe,
+		@CurrentUser('id') userID: number,
 		@ConnectedSocket() client: Socket,
 	) {
 		const user = await this.usersService.findOne(userID);
@@ -103,7 +109,7 @@ export class ChatGateway
 		const chan = await this.channelService.create(
 			data.name,
 			credential,
-			data.protected,
+			data.privacy,
 			user,
 		);
 		client.join(data.name);
@@ -115,8 +121,8 @@ export class ChatGateway
 	@SubscribeMessage('joinRoom')
 	@UseGuards(WSAuthGuard)
 	async handelJoinRoom(
-		@MessageBody() data: JoinChannelDTO,
-		@CurrentUser('id', ParseIntPipe) userID: number,
+		@MessageBody(new ValidationPipe()) data: JoinChannelDTOPipe,
+		@CurrentUser('id') userID: number,
 		@ConnectedSocket() client: Socket,
 	) {
 		const channel = await this.channelService.findOne(data.id);
@@ -142,15 +148,14 @@ export class ChatGateway
 	@SubscribeMessage('sendMsg')
 	@UseGuards(WSAuthGuard)
 	async handelMessages(
-		@MessageBody() data: SendMessageDto,
-		@CurrentUser('id', ParseIntPipe) userID: number,
+		@MessageBody(new ValidationPipe()) data: SendMessageDTOPipe,
+		@CurrentUser('id') userID: number,
 		@ConnectedSocket() client: Socket,
 	) {
 		const user = await this.usersService.findOne(userID);
 		const chan = await this.channelService.findOne(data.channelID);
 		if (!chan || typeof data.channelID === 'undefined')
 			return client.emit('sendMsg', { error: 'There is no such Channel' });
-		this.server.to(chan.name).emit('sendMsg', 'Je suis un test !');
 		if (await this.channelService.userInChannel(user, chan)) {
 			await this.messageService.create(user, data.content, chan);
 			return await this.SendMessage(chan, user, data.content);
@@ -161,9 +166,8 @@ export class ChatGateway
 	}
 
 	@SubscribeMessage('debug')
-	async handelDebug() {
-		console.log(await this.server.in('abc').fetchSockets());
-		// console.log(this.server.of('chat').adapter.sids);
+	async handelDebug(client: Socket) {
+		return client.emit('This is a debug');
 	}
 
 	/**
@@ -179,8 +183,8 @@ export class ChatGateway
 		let userID: number;
 		if (typeof user !== 'number') userID = user.UserID;
 		else userID = user;
-		const msg: ReceiveMessageDto = {
-			ownerID: userID,
+		const msg: ReceivedMessageDTOPipe = {
+			authorID: userID,
 			channelID: channel.channelID,
 			content: content,
 		};

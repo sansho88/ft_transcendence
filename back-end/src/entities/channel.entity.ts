@@ -18,9 +18,9 @@ import { MuteEntity } from './mute.entity';
 import { BannedEntity } from './banned.entity';
 
 export enum ChannelType {
-	PUBLIC,
-	PROTECTED,
-	PRIVATE,
+	PUBLIC, //No password No Privacy
+	PROTECTED, //Yes Password No Privacy
+	PRIVATE, //Maybe password Yes Privacy
 	DIRECT,
 }
 
@@ -39,7 +39,6 @@ export class ChannelEntity extends BaseEntity {
 	@Column({
 		type: 'varchar',
 		length: 20,
-		unique: true,
 	})
 	name: string;
 

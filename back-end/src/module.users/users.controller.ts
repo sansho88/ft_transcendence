@@ -21,33 +21,11 @@ export class UsersController {
 
 	@Post()
 	create() {
-		// return this.usersService.create(createUserDto);
-		return 'USE `/module.auth/sign` to create a new user';
+		return 'USE `/auth/sign` to create a new user';
 	}
-
-	// @Get('/get/:login')
-	// findOne(@Param('login') login: string, @Param('login') id : number) {
-	// 	return this.usersService.findOne(login).then((result) => {
-	// 		if (!result) {
-	// 			throw new BadRequestException('This Login is not registered');
-	// 		}
-	// 		return result;
-	// 	});
-	// }
-
-	// @Put()
-	// follow(@Body() updateUser: UpdateUserDto) {
-	// 	return this.usersService.update(updateUser.login, updateUser);
-	// }
-
-	// @Patch(':login')
-	// update(@Param('login') login: string, @Body() updateUserDto: UpdateUserDto) {
-	// 	return this.usersService.update(+login, updateUserDto);
-	// }
-
 	@Delete(':id')
 	remove(@Param('id') id: number) {
-		return this.usersService.remove(+id);
+		return 'WIP';
 	}
 
 	/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ***/

@@ -12,6 +12,10 @@ export class ChannelCredentialService {
 	) {}
 
 	async create(rawPassword: string) {
+		if (!rawPassword)
+			return this.channelCredentialRepository.create({
+				password: null,
+			});
 		const salt = bcrypt.genSaltSync();
 		const hash = await bcrypt.hash(rawPassword, salt);
 
@@ -20,7 +24,11 @@ export class ChannelCredentialService {
 		});
 	}
 
-	async compare(rawPassword: string, credential: ChannelCredentialEntity) {
+	async compare(
+		rawPassword: string | undefined,
+		credential: ChannelCredentialEntity,
+	) {
+		if (typeof rawPassword === 'undefined') return false;
 		return bcrypt.compareSync(rawPassword, credential.password);
 	}
 }

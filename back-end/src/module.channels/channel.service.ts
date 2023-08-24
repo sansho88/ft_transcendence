@@ -5,8 +5,8 @@ import { ChannelEntity, ChannelType } from '../entities/channel.entity';
 import { UsersService } from '../module.users/users.service';
 import { UserEntity } from '../entities/user.entity';
 import { ChannelCredentialEntity } from '../entities/credential.entity';
-import { JoinChannelDTO } from '../dto/channel/channel.dto';
 import { ChannelCredentialService } from './credential.service';
+import { JoinChannelDTOPipe } from '../pipe.dto/channel.dto';
 
 @Injectable()
 export class ChannelService {
@@ -30,9 +30,8 @@ export class ChannelService {
 		 */
 		let privacy: ChannelType;
 		if (prv == true) privacy = ChannelType.PRIVATE;
-		else if (!(credential === undefined)) privacy = ChannelType.PROTECTED;
+		else if (credential.password != null) privacy = ChannelType.PROTECTED;
 		else privacy = ChannelType.PUBLIC;
-
 		const chan = this.channelRepository.create({
 			name: name,
 			owner: owner,
@@ -87,8 +86,7 @@ export class ChannelService {
 	async isUserOnChan(channel: ChannelEntity, user: UserEntity) {
 		const list = await this.getList(channel);
 		console.log('list get');
-		if (list.find((value) => value.UserID == user.UserID)) return true;
-		return false;
+		return !!list.find((value) => value.UserID == user.UserID);
 	}
 
 	/**
@@ -116,9 +114,9 @@ export class ChannelService {
 		return msg.slice(first, last);
 	}
 
-	async checkCredential(data: JoinChannelDTO) {
+	async checkCredential(data: JoinChannelDTOPipe) {
 		const channel = await this.channelRepository.findOne({
-			where: { channelID: 1 },
+			where: { channelID: data.id },
 			relations: ['credential'],
 		});
 		const credential = channel.credential;
@@ -129,6 +127,8 @@ export class ChannelService {
 				return this.channelCredentialService.compare(data.password, credential);
 			case ChannelType.PRIVATE:
 				return false; // todo: redo with invite !
+			case ChannelType.DIRECT:
+				return false; // todo: WIP
 		}
 	}
 }
