@@ -1,13 +1,13 @@
 import React, { useEffect, useState} from "react";
 import Button from "./CustomButtonComponent"
 import Avatar from "@/components/AvatarComponent";
-import axios from "axios";
 import * as apiReq from '@/components/api/ApiReq'
 
 
 import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
 import {EStatus} from "@/shared/types";
+import {getUserFromLogin} from "@/app/auth/Auth";
 
 
 export interface IUser {
@@ -50,35 +50,20 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
         }
     };
 
-    useEffect(() => { //Initialize le nickname a la creation du component
-        if (modifiedNick != nickname && !editMode)
-            apiReq.getApi.getUserByLogin(login)
-                .then((response) => {
-                    setNickText(response.nickname ? response.nickname : "");
-                })
-                .catch((e) => {
-                    console.error('error:' + e.toString());
-                });
-    });
-
     const turnOnEditMode = () => {
         setEditMode(true);
     }
-    const turnOffEditMode = () => {
+    const turnOffEditMode = async () => {
 
-        if (!nickErrorMsg.length)
-        {
-            axios.get(`http://localhost:8000/api/users/login/${login}`). //temporaire en attendant d'avoir un put par login
-            then((user) => {
-                axios.put(`http://localhost:8000/api/users/${user.data.id_user}`, {nickname: modifiedNick})
-                    .then((response) => {
-                        console.log(response.data);
-                        setEditMode(false);
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                    })
-            })
+        if (!nickErrorMsg.length) {
+
+            await getUserFromLogin(login).then( (userGet) => {
+            console.log("[PROFILE] login to update: " + userGet.login);
+            userGet.nickname = modifiedNick;
+            apiReq.putApi.putUser(userGet);
+            });
+
+            setEditMode(false);
 
         }
     }

@@ -24,23 +24,27 @@ export const axiosInstance = axios.create({
 
 export namespace getApi {
 
-	export const getUsersAll=()									: Promise<IUser[]>					=>{
+	export const getUsersAllPromise=()									: Promise<IUser[]>					=>{
 
 
-		return axiosInstance.get(`${strRoutes.getUsersAll()}`);}
-	export const getUserByLogin= (login: string): Promise<IUser>						=>{
+		return axiosInstance.get(`${strRoutes.getUsersAll()}`, {
+			headers: {
+				'Authorization': `Bearer ${authManager.getToken()}`
+			}
+		});}
+	export const getUserByLoginPromise= (login: string) =>{
 		
 		return axiosInstance.get(`users/get/${login}`, {
 			headers: {
 				'Authorization': `Bearer ${authManager.getToken()}`
 			}
 		});}
-	export const getUserById = (id: number) 		: Promise<IUser>						=>{return axiosInstance.get(`${strRoutes.getUserById()}${id}`, {
+	export const getUserByIdPromise = (id: number) =>{return axiosInstance.get(`${strRoutes.getUserById()}${id}`, {
 		headers: {
 			'Authorization': `Bearer ${authManager.getToken()}`
 		}
 	});}
-    export const getMe = () => {
+    export const getMePromise = () => {
 		return axiosInstance.get(`users/me`, {
 			headers: {
 				'Authorization': `Bearer ${authManager.getToken()}`
@@ -58,7 +62,7 @@ export namespace postApi {
 
 export namespace putApi {
 	export const putUser= (updateUser: Partial<IUser>)		=>{ //fixme: "404 not found ?"
-		return axiosInstance.put(`${strRoutes.putUser()}${updateUser.UserID}`, updateUser, {
+		return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, {
 			headers: {
 				'Authorization': `Bearer ${authManager.getToken()}`
 			}
@@ -95,7 +99,7 @@ export namespace utilsCheck {
 		}
 		console.log('Call isLoginAlreadyTaken: login = ||' + login + '||')
 		try {
-			await getApi.getUserByLogin(login);
+			await getApi.getUserByLoginPromise(login);
 			return true;
 		}
 		catch (error) {
@@ -118,7 +122,7 @@ export namespace utilsCheck {
 
 	export async function isOnline(id: number): Promise<boolean> {
 		try {
-			return (await getApi.getUserById(id)).status !== 0;
+			return (await getApi.getUserByIdPromise(id)).status !== 0;
 		} 
 		catch (error) {
 			console.error(error);

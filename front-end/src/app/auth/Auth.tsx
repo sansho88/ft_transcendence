@@ -6,26 +6,11 @@ import * as POD  from "@/shared/types";
 import * as apiReq from '@/components/api/ApiReq'
 import * as ClipLoader from 'react-spinners'
 import './auth.css'
-
 import { useRouter } from 'next/navigation';
-
-import Axios from '@/components/api/AxiosConfig';
-import {UserContext, LoggedContext, SocketContextChat, SocketContextGame, TokenContext} from '@/context/globalContext';
-import Button from "@/components/CustomButtonComponent";
+import {UserContext, LoggedContext, SocketContextChat, SocketContextGame} from '@/context/globalContext';
 import {IUser} from "@/shared/types";
-import {axiosInstance} from "@/components/api/ApiReq";
 import {authManager} from "@/components/api/ApiReq";
-
-
 // import { Button } from '@/components/CustomButtonComponent'
-
-//FIXME: le re logging ne fonctionne pas bien, ne recupere les infos pour userContext = data user vide
-
-enum EAuthMod {
-	api42,
-	invitMod
-}
-
 enum EStepLogin {
 	init,
 	start,
@@ -46,7 +31,7 @@ enum EStepLogin {
 
 export async function getUserMe() {
 	try {
-		return await apiReq.getApi.getMe()
+		return await apiReq.getApi.getMePromise()
 						.then((req) => {
 							console.log("[Get User Me]",req.data.login);
 							return req.data as IUser;
@@ -54,6 +39,20 @@ export async function getUserMe() {
 
 	} catch (error) {
 		console.error("[Get User Me ERROR]",error);
+	}
+}
+
+
+export async function getUserFromLogin(login: string) {
+	try {
+		return await apiReq.getApi.getUserByLoginPromise(login)
+						.then((req) => {
+							console.log("[Get User From Login]",req.data.login);
+							return req.data as IUser;
+						});
+
+	} catch (error) {
+		console.error("[Get User From Login ERROR]",error);
 	}
 }
 
@@ -68,8 +67,6 @@ export default function Auth({className}: {className?: string}) {
 	// const [isLogged, setIsLogged] = useState<boolean | null>(null);
   const socketChat = useContext(SocketContextChat);
   const socketGame = useContext(SocketContextGame);
-  const [areCredentialsValids, setAreCredsValids] = useState(false);
-  const { token, setToken } = useContext(TokenContext);
   const [isSignInMode, setIsSignInMode] = useState(false);
 
   
@@ -158,7 +155,7 @@ export default function Auth({className}: {className?: string}) {
 					setCredentials();
 				}}><span className="text">CONNECT</span></button>
 
-				<button type="button" className={"button-login"}onClick={() => {
+				<button type="button" className={"button-login"} onClick={() => {
 					setLogin(''); setLoginInput('');
 					setPassword(''); setPasswordInput('');
 					setCurrentStepLogin(EStepLogin.signOrLogIn);
@@ -200,7 +197,6 @@ export default function Auth({className}: {className?: string}) {
 			return;
 		}
 		setPassword(passwordInput);
-		setAreCredsValids((login && password).length != 0);
 		//getUserMe().then((req)=> console.log("GET ME LOGIN REQ:" + req));
 	}
 
@@ -312,12 +308,7 @@ export default function Auth({className}: {className?: string}) {
 }, [password, login]);
 
 const textInviteModeButton:string = 'INVITE MODE'
-const textSignInButton:string = 'SIGN IN'
-const textLogInButton:string = 'LOG IN'
 const [inviteButtonText, setInviteButtonText] = useState<string>(textInviteModeButton);
-const [signInButtonText, setSignInButtonText] = useState<string>(textSignInButton);
-const [logInButtonText, setLogInButtonText] = useState<string>(textLogInButton);
-const [isLoginAlreadyExist, setLoginAlreadyExist] = useState<boolean>(false);
 
 
 useEffect(() => {
