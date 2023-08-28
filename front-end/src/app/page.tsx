@@ -126,7 +126,9 @@ export default function Home() {
         return (
             <>
                 <main className="main-background">
-                    <Profile className={"main-user-profile"} nickname={userNickName} login={userLogin} status={userContext.status} avatar_path={userContext.avatar_path} isEditable={true}>
+                    <Profile className={"main-user-profile"} nickname={userContext.nickname ? userContext.nickname : "BADNICKNAME"}
+                             login={userContext.login ? userContext.login : "BADLOGIN"} status={userContext.status}
+                             avatar_path={userContext.avatar_path} isEditable={true}>
 
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
                         <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>

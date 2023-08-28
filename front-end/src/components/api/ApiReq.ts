@@ -50,8 +50,8 @@ export namespace getApi {
 
 export namespace postApi {
 
-	export const postUser= (newUser: Partial<IUser>)												=>{return axiosInstance.post(`${strRoutes.postUser()}`, newUser);}
-	export const postTryLogin= (loginTest:{login:string,password :string})	=>{return axiosInstance.post(`${strRoutes.postUserCheckLogin()}`, loginTest);}
+	export const postUser= (newUser: Partial<IUser>)		=>{return axiosInstance.post(`${strRoutes.postUser()}`, newUser);}
+	export const postTryLogin= (loginTest:Partial<IUser>)	=>{return axiosInstance.post(`${strRoutes.postUserCheckLogin()}`, loginTest);}
 
 }
 

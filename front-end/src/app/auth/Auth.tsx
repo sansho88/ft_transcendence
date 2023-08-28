@@ -47,10 +47,10 @@ enum EStepLogin {
 export async function getUserMe() {
 	try {
 		return await apiReq.getApi.getMe()
-			.then((req) => {
-				console.log("[Get User Me]",req.data.login);
-				return req.data as IUser;
-			});
+						.then((req) => {
+							console.log("[Get User Me]",req.data.login);
+							return req.data as IUser;
+						});
 
 	} catch (error) {
 		console.error("[Get User Me ERROR]",error);
@@ -70,6 +70,7 @@ export default function Auth({className}: {className?: string}) {
   const socketGame = useContext(SocketContextGame);
   const [areCredentialsValids, setAreCredsValids] = useState(false);
   const { token, setToken } = useContext(TokenContext);
+  const [isSignInMode, setIsSignInMode] = useState(false);
 
   
 	useEffect(() => {
@@ -153,9 +154,11 @@ export default function Auth({className}: {className?: string}) {
 					<div className=' font-thin'>Create password</div> 
 				}
 				<button onClick={() => {
-					setCredentials();
 					setCurrentStepLogin(currentStepLogin === EStepLogin.logIn ?
-					EStepLogin.tryToConnect : EStepLogin.tryToCreateAccount)}} className='button-login h-14'>CONNECT</button>
+					EStepLogin.tryToConnect : EStepLogin.tryToCreateAccount)
+					setCredentials();
+					}} className='button-login h-14'>CONNECT</button>
+
 			</div>
 		)
 	}
@@ -195,7 +198,7 @@ export default function Auth({className}: {className?: string}) {
 		console.log(`[SetCredentials]login: ${login}, password: ${password}`)
 		alert(`[SetCredentials]login: ${login}, password: ${password}`)
 		setAreCredsValids((login && password).length != 0);
-		getUserMe().then((req)=> console.log("GET ME LOGIN REQ:" + req));
+		//getUserMe().then((req)=> console.log("GET ME LOGIN REQ:" + req));
 	}
 
 	const welcomeTitle = () => {
@@ -230,10 +233,10 @@ export default function Auth({className}: {className?: string}) {
 	}, [currentStepLogin, router]);
 
 	const LoggedSuccess = () => {
-
+/*
     socketChat?.connect();
     socketGame?.connect();
-    
+    */
 		return (
 			<div className="flex flex-col items-center text-center">
       {showMessage && (
@@ -350,33 +353,33 @@ useEffect(() => {
 				}
 				setPassword(passwordInput);
 				break;
-			case EStepLogin.logIn: //todo: "LOG IN" et "SIGN IN"
+			case EStepLogin.tryToConnect: //todo: "LOG IN" et "SIGN IN"
 				//if(isLoginAlreadyExist) {
-					const req = await apiReq.utilsCheck.isPasswordMatch(login, password);
-					if (req)
-					{
-						Axios.get(`http://localhost:8000/api/users/get/${login}`)
-						.then((res) => {
-							const newUser: POD.IUser = res.data;
-							setUserContext(newUser);
+					/*const req = await apiReq.utilsCheck.isPasswordMatch(login, password);*/
+				console.log(`[TRY LOGIN] login: ${login}, pass: ${passwordInput}`);
+				const existingUser: Partial<POD.IUser> = {login: login, password: passwordInput, visit: true}
+				await apiReq.postApi.postTryLogin(existingUser)
+					.then(async (res) => {
+
+						if (res.status === 200) {
+							const userToken = res.data;
+							localStorage.removeItem('token');
+							localStorage.setItem('token', userToken);
+							authManager.setToken(userToken);
+
+							setUserContext( await getUserMe());
 							setLogged(true);
 							setCurrentStepLogin(EStepLogin.successLogin);
-							localStorage.setItem('login', newUser.login);
-							localStorage.setItem('pass', password);
+							localStorage.setItem('login', login);
 							localStorage.setItem('userContext', JSON.stringify(userContext))
 							console.log(localStorage.getItem(JSON.parse('userContext')));
 							console.log('you are now logged in')
+						}
 						})
 						.catch((e)=> {console.log(e); return;})
 						return;
-					}
-					else{
-						setCurrentStepLogin(EStepLogin.failLogin);
-						nextStepCheck()
-						console.log('wrong password')
-					}
+
 				//}
-				break;
 			case EStepLogin.tryToCreateAccount:
 				console.log(`at case: TryToCreateAccount: login: ${login}, password: ${password}`)
 				const createUser: Partial<POD.IUser> = {login: login, password: password, visit: true}
@@ -428,18 +431,20 @@ useEffect(() => {
 				}
 				break;
 			case EStepLogin.enterPassword:
-				console.log( "Enter Login: ", loginInput);
+				console.log( "Enter Password: ", passwordInput);
 					if(passwordInput.length === 0){
 						return;
 					}
 					else{
 						setPassword(passwordInput);
-						setCurrentStepLogin( EStepLogin.tryToCreateAccount)
+						setCurrentStepLogin( isSignInMode ? EStepLogin.tryToCreateAccount: EStepLogin.tryToConnect)
 					}
 					break;
 
 			case EStepLogin.signIn:
+				setIsSignInMode(true);
 				setCurrentStepLogin(EStepLogin.enterLogin);
+				break;
 			case EStepLogin.tryLoginAsInvite:
 
 
