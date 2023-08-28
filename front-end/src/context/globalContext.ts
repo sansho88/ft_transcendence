@@ -1,4 +1,4 @@
-import {createContext} from 'react'
+import {createContext, useEffect} from 'react'
 import { IUser, IOriginNetwork } from '../shared/types' 
 import { io, Socket } from "socket.io-client";
 
@@ -35,6 +35,6 @@ export const SocketContextGame = createContext<Socket | null>(null);
 export const ThemeContext = createContext<string>("light");
 export const OriginContext = createContext<IOriginNetwork>(originDefault);
 export const UserContext = createContext<UserContextType>({ userContext: {}, setUserContext: ()=> {}});
-export const LoggedContext = createContext<LoggedContextType>({logged: localStorage.getItem("login") != null, setLogged: ()=> {}});
+export const LoggedContext = createContext<LoggedContextType>({logged: false, setLogged: ()=> {}});
 
 export const TokenContext = createContext<TokenContextType>({token: "", setToken: () => {}});

@@ -83,10 +83,9 @@ export default function Auth({className}: {className?: string}) {
 	////////////////////////////////////////////////////////
 	////////////////// GESTION DES INPUTS //////////////////
 	////////////////////////////////////////////////////////
-	const lastUserLogin = localStorage.getItem("login");
-	const lastUserPW = localStorage.getItem("password");
-	const [loginInput, setLoginInput] = useState<string>(lastUserLogin == null ? '' : lastUserLogin);
-	const [login, setLogin] = useState<string>(lastUserLogin == null ? '' : lastUserLogin);
+
+	const [loginInput, setLoginInput] = useState<string>("");
+	const [login, setLogin] = useState<string>("");
 	
 	const [passwordInput, setPasswordInput] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
@@ -101,7 +100,7 @@ export default function Auth({className}: {className?: string}) {
 	const askForLogOrSignIn = () => {
 	  return (
 		  <div>
-			  <button type="button" onClick={() => {setCurrentStepLogin(EStepLogin.signIn)}} className={"button-login"}>
+			  <button type="button" onClick={() => {setCurrentStepLogin(EStepLogin.signIn)}} className={"button-login my-8"}>
               <span className="text">SIGN IN</span></button>
               <button type="button" onClick={() => {setCurrentStepLogin(EStepLogin.logIn)}} className={"button-login"}>
               <span className="text">LOG IN</span></button>
@@ -111,7 +110,7 @@ export default function Auth({className}: {className?: string}) {
 
 	const enterLogin = () => {
 		return (
-			<div className='flex flex-col justify-center items-center text-white'>
+			<div className='flex flex-col justify-center items-center text-white my-2'>
 				<InputPod
 					className='inputLogin'
 				props=
@@ -135,7 +134,7 @@ export default function Auth({className}: {className?: string}) {
 	const enterPassword = () => {
 
 		return (
-			<div className='flex flex-col justify-center items-center text-white'>
+			<div className='flex flex-col justify-center items-center text-white my-8'>
 				<InputPod
 				className='inputLogin'
 				props=
@@ -153,11 +152,17 @@ export default function Auth({className}: {className?: string}) {
 					<div className=' font-thin'>Enter your password</div> :
 					<div className=' font-thin'>Create password</div> 
 				}
-				<button onClick={() => {
+				<button type="button" className={"button-login my-12 "} onClick={() => {
 					setCurrentStepLogin(currentStepLogin === EStepLogin.logIn ?
 					EStepLogin.tryToConnect : EStepLogin.tryToCreateAccount)
 					setCredentials();
-					}} className='button-login h-14'>CONNECT</button>
+				}}><span className="text">CONNECT</span></button>
+
+				<button type="button" className={"button-login"}onClick={() => {
+					setLogin(''); setLoginInput('');
+					setPassword(''); setPasswordInput('');
+					setCurrentStepLogin(EStepLogin.signOrLogIn);
+					}}><span className="text">CANCEL</span></button>
 
 			</div>
 		)
@@ -176,27 +181,25 @@ export default function Auth({className}: {className?: string}) {
 		}
 	}*/
 	function setCredentials(){
-
+		//nextStepCheck();
 
 		if(loginInput.trim().length === 0){
-			console.log('Login is empty');
+			alert('Login is empty');
+			setPassword(''); setPasswordInput('');
+			setCurrentStepLogin(EStepLogin.enterLogin);
 			return;
 		}
 		const loginTrimmed = loginInput.trim().toString();
-		/*console.log("[setCredentials] loginTrimmed = ", loginTrimmed);*/
+
 		setLogin(loginTrimmed);
-		/*const req: boolean = await apiReq.utilsCheck.isLoginAlreadyTaken(loginTrimmed);
-        if (req){
-            setLoginAlreadyExist(true);
-        }*/
 
 		if(passwordInput === ''){
-			console.log('No pass, return');
+			alert("Password is empty");
+			setLogin(''); setLoginInput('');
+			setCurrentStepLogin(EStepLogin.enterLogin);
 			return;
 		}
 		setPassword(passwordInput);
-		console.log(`[SetCredentials]login: ${login}, password: ${password}`)
-		alert(`[SetCredentials]login: ${login}, password: ${password}`)
 		setAreCredsValids((login && password).length != 0);
 		//getUserMe().then((req)=> console.log("GET ME LOGIN REQ:" + req));
 	}
@@ -204,10 +207,10 @@ export default function Auth({className}: {className?: string}) {
 	const welcomeTitle = () => {
 		return (
 		<>
-		<div className="welcome space-y-10 ">
+		<div className="welcome space-y-10 my-12">
 						<div className="welcome-msg">WELCOME TO</div>
 						{/*<div className="width: 788px; height: 130px; left: 0px; top: 24px; position: absolute; justify-content: center; align-items: center; display: inline-flex">*/}
-						<div className="welcome-title">PONG POD!</div>
+						<div className="welcome-title ">PONG POD!</div>
 					</div>
 		</>
 		)
@@ -263,15 +266,18 @@ export default function Auth({className}: {className?: string}) {
 	// 	return () => clearTimeout(timer);
 	// },[currentStepLogin]);
 
+	function backToHome(){
+		setLogin(''); setLoginInput('');
+		setPassword(''); setPasswordInput('');
+
+		setCurrentStepLogin(EStepLogin.start);
+	}
 	const LoggedFailed = () => {
 		// const [showMessage, setShowMessage] = useState(true);
 		//const router = useRouter();
-		// setLogin(''); setLoginInput('');
-		setPassword(''); setPasswordInput('');
-		setInviteButtonText(textInviteModeButton)
 		alert('The login and password do not match.');
 
-		setCurrentStepLogin(EStepLogin.start);
+		backToHome();
 		// nextStepCheck();
 
 		return (
@@ -330,12 +336,10 @@ useEffect(() => {
 
 
 			case EStepLogin.enterLogin:
-				console.log('enterLogin'); 
-				setInviteButtonText('NEXT')
+				console.log('enterLogin');
 				return;
 				
 			case EStepLogin.enterPassword:
-				setInviteButtonText('VALIDATE')
 				if(loginInput.trim().length === 0){
 					console.log('Login is empty'); 
 					return;
@@ -353,14 +357,10 @@ useEffect(() => {
 				}
 				setPassword(passwordInput);
 				break;
-			case EStepLogin.tryToConnect: //todo: "LOG IN" et "SIGN IN"
-				//if(isLoginAlreadyExist) {
-					/*const req = await apiReq.utilsCheck.isPasswordMatch(login, password);*/
-				console.log(`[TRY LOGIN] login: ${login}, pass: ${passwordInput}`);
+			case EStepLogin.tryToConnect:
 				const existingUser: Partial<POD.IUser> = {login: login, password: passwordInput, visit: true}
 				await apiReq.postApi.postTryLogin(existingUser)
 					.then(async (res) => {
-
 						if (res.status === 200) {
 							const userToken = res.data;
 							localStorage.removeItem('token');
@@ -372,14 +372,15 @@ useEffect(() => {
 							setCurrentStepLogin(EStepLogin.successLogin);
 							localStorage.setItem('login', login);
 							localStorage.setItem('userContext', JSON.stringify(userContext))
-							console.log(localStorage.getItem(JSON.parse('userContext')));
+							//console.log(localStorage.getItem(JSON.parse('userContext')));
 							console.log('you are now logged in')
 						}
 						})
-						.catch((e)=> {console.log(e); return;})
+						.catch((e)=> {console.log("[TRY LOGIN ERROR]" + e);
+							LoggedFailed();
+							return;})
 						return;
 
-				//}
 			case EStepLogin.tryToCreateAccount:
 				console.log(`at case: TryToCreateAccount: login: ${login}, password: ${password}`)
 				const createUser: Partial<POD.IUser> = {login: login, password: password, visit: true}
@@ -406,7 +407,7 @@ useEffect(() => {
 							setCurrentStepLogin(EStepLogin.successLogin);
 						}
 					})
-						.catch((e) => console.error("Post User: " + e, `createUser= ${createUser.login}, ${createUser.visit}`));
+						.catch((e) => console.error("Post User ERROR: " + e, `createUser= ${createUser.login}, ${createUser.visit}`));
 			return;
 		}
 	}
@@ -433,6 +434,7 @@ useEffect(() => {
 			case EStepLogin.enterPassword:
 				console.log( "Enter Password: ", passwordInput);
 					if(passwordInput.length === 0){
+						console.log('PassWord is empty');
 						return;
 					}
 					else{
@@ -445,6 +447,12 @@ useEffect(() => {
 				setIsSignInMode(true);
 				setCurrentStepLogin(EStepLogin.enterLogin);
 				break;
+
+			case EStepLogin.logIn:
+				setIsSignInMode(false);
+				setCurrentStepLogin(EStepLogin.enterLogin);
+				break;
+
 			case EStepLogin.tryLoginAsInvite:
 
 
@@ -467,7 +475,7 @@ useEffect(() => {
 				{currentStepLogin === EStepLogin.start 					&& 
 					<button onClick={() => console.log('Not implemented')} className='button-login h-14 opacity-30'>LOGIN 42</button>}
 				{currentStepLogin < EStepLogin.tryLoginAsInvite 				&&
-					<button onClick={() => nextStepCheck()} className='button-login h-14'>{inviteButtonText}</button>}
+					<button onClick={() => nextStepCheck()} className='button-login'><span>{inviteButtonText}</span></button>}
 				{currentStepLogin === EStepLogin.signOrLogIn && askForLogOrSignIn()}
 				{currentStepLogin === EStepLogin.enterLogin  && enterLogin()}{/*
 				{currentStepLogin === EStepLogin.enterPassword 	&& enterPassword()}*/}
