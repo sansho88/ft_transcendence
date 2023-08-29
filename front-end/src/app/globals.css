@@ -1,10 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,700;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,700;1,700&display=swap');
-
 
 
 :root {
@@ -99,7 +99,7 @@ body {
 
     justify-content: center;
     align-items: center;
-    padding-top: 0vh;
+    padding-top: 0;
     height: auto;
     position: relative;
     text-align: center;
@@ -233,10 +233,13 @@ body {
 .game{
     display: inline;
     margin-inline: auto;
-    margin-block: 10vh;
+    margin-block: 20vh;
     font-family: 'VT323', monospace;
     width: 50vw;
 
+}
+
+.game-options{
 
 }
 
