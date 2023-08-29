@@ -255,8 +255,26 @@ export default function Auth({className}: { className?: string }) {
         setCurrentStepLogin(EStepLogin.start);
     }
 
-    const LoggedFailed = () => {
-        alert('The login and password do not match.');
+    enum authErrorState{
+        emptyLogin,
+        emptyPassword,
+        loginNotFound ,
+        badPassword = 401,
+        loginAlreadyTaken = 409
+    }
+    const LoggedFailed = (errorCode) => {
+        let errMsg: string;
+        console.log("error code: " + errorCode);
+
+        switch (errorCode) {
+            case authErrorState.emptyLogin: errMsg = "The login is empty"; break;
+            case authErrorState.emptyPassword: errMsg = "The password is empty"; break;
+            case authErrorState.loginNotFound: errMsg = "This login doesn't exist"; break;
+            case authErrorState.badPassword: errMsg = "The login and the password don't match"; break;
+            case authErrorState.loginAlreadyTaken: errMsg = "This login is already taken"; break;
+            default: errMsg = "Something wrong happened";
+        }
+        alert(errMsg);
         backToHome();
         return (
             <>{showMessageFail &&
@@ -335,7 +353,7 @@ export default function Auth({className}: { className?: string }) {
                         })
                         .catch((e) => {
                             console.log("[TRY LOGIN ERROR]" + e);
-                            LoggedFailed();
+                            LoggedFailed(e.response.status);
                             return;
                         })
                     return;
@@ -358,7 +376,10 @@ export default function Auth({className}: { className?: string }) {
                                 setCurrentStepLogin(EStepLogin.successLogin);
                             }
                         })
-                        .catch((e) => console.error("Post User ERROR: " + e, `createUser= ${createUser.login}, ${createUser.visit}`));
+                        .catch((e) => {
+                            console.error("Post User ERROR: " + e, `createUser= ${createUser.login}, ${createUser.visit}`);
+                            LoggedFailed(e.response.status);
+                        });
                     return;
             }
         }
@@ -430,7 +451,7 @@ export default function Auth({className}: { className?: string }) {
                 <ClipLoader.BeatLoader className='pt-[12vh]' color="#36d7b7" size={13}/>
             }
             {currentStepLogin === EStepLogin.successLogin && LoggedSuccess()}
-            {currentStepLogin === EStepLogin.failLogin && LoggedFailed()}
+            {currentStepLogin === EStepLogin.failLogin && LoggedFailed(42)}
 
         </div>
 
