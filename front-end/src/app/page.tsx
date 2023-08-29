@@ -32,8 +32,15 @@ export default function Home() {
         StatusColor.set(i, Colors[i]);
     }
 
-    async function updateStatusUser(id_user, status) {
-        const updateUser: Partial<POD.IUser> = {UserID: id_user, status: status}
+    async function updateStatusUser(id_user, status) { //to remove when the player status will be updated directly from the Back
+        const updateUser: Partial<POD.IUser> = {UserID: id_user,
+            login: userContext.login,
+            visit: userContext.visit,
+            status: status,
+            nickname: userContext.nickname,
+            avatar_path: userContext.avatar_path,
+            has_2fa: userContext.has_2fa,
+            token_2fa: userContext.token_2fa}
         await apiReq.putApi.putUser(updateUser)
             .then(() => {
                 setUserContext(updateUser);
@@ -45,9 +52,9 @@ export default function Home() {
 
     function switchOnlineIngame() {
         const tmpStatus = userContext?.status == EStatus.Online ? EStatus.InGame : EStatus.Online;
-        userContext.status = tmpStatus;
+        //userContext.status = tmpStatus;
 
-        setUserContext(userContext);
+        //setUserContext(userContext);
         updateStatusUser(userContext?.UserID, tmpStatus)
             .catch((e) => console.error(e));
 
