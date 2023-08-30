@@ -6,7 +6,7 @@ import { UsersService } from '../module.users/users.service';
 import { UserEntity } from '../entities/user.entity';
 import { ChannelCredentialEntity } from '../entities/credential.entity';
 import { ChannelCredentialService } from './credential.service';
-import { JoinChannelDTOPipe } from '../pipe.dto/channel.dto';
+import { JoinChannelDTOPipe } from '../dto.pipe/channel.dto';
 
 @Injectable()
 export class ChannelService {
@@ -92,6 +92,8 @@ export class ChannelService {
 	/**
 	 * TODO : TESTER LA FONCTION !!!
 	 * Je n ai pas encore regarder si ca fonctionne correctement
+	 *
+	 * Peut aussi etre Fais avec `take` et `skip` option pour find
 	 * */
 	async getMessages(target: ChannelEntity, time: Timestamp) {
 		const msg = await this.channelRepository

@@ -42,7 +42,7 @@ export class UsersService {
 	}
 
 	/**
-	 * Todo: return something (Error code?) if invalid id
+	 * @return UserEntity Or Undefined if user not in db
 	 */
 	async findOne(id: number | string) {
 		if (typeof id === 'number')
@@ -80,11 +80,12 @@ export class UsersService {
 		return target.credential;
 	}
 
-	async userStatus(login: string, newStatus: UserStatus) {
-		const user = await this.usersRepository.findOneBy({ login: login });
+	async userStatus(id: number, newStatus: UserStatus) {
+		const user = await this.usersRepository.findOneBy({ UserID: id });
 		user.status = newStatus;
 		await user.save();
 	}
+
 	// async getFriend(target: string) {
 	// 	return await this.usersRepository.find({
 	// 		relations: {

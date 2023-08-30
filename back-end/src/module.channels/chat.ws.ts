@@ -17,18 +17,18 @@ import { ChannelService } from './channel.service';
 import { UsersService } from '../module.users/users.service';
 import { ChannelCredentialService } from './credential.service';
 import { ChannelEntity } from '../entities/channel.entity';
-import { UserEntity } from '../entities/user.entity';
+import { UserEntity, UserStatus } from '../entities/user.entity';
 import { accessToken } from '../dto/payload';
 import * as process from 'process';
 import { JwtService } from '@nestjs/jwt';
 import {
 	CreateChannelDTOPipe,
 	JoinChannelDTOPipe,
-} from '../pipe.dto/channel.dto';
+} from '../dto.pipe/channel.dto';
 import {
 	ReceivedMessageDTOPipe,
 	SendMessageDTOPipe,
-} from '../pipe.dto/message.dto';
+} from '../dto.pipe/message.dto';
 
 class SocketUserList {
 	userID: number;
@@ -87,11 +87,19 @@ export class ChatGateway
 				return chan.name;
 			}),
 		);
+		this.usersService.userStatus(userID, UserStatus.ONLINE).then();
 		console.log(`New connection from User ${userID}`);
 	}
 
 	//Todo: leave room + offline
 	async handleDisconnect(client: Socket) {
+		const [type, token] =
+			client.handshake.headers.authorization?.split(' ') ?? [];
+		const payloadToken: accessToken = await this.jwtService.verifyAsync(token, {
+			secret: process.env.SECRET_KEY,
+		});
+		const userID = payloadToken.id;
+		this.usersService.userStatus(userID, UserStatus.OFFLINE).then();
 		console.log(`DisConnection ${client.id}`);
 	}
 

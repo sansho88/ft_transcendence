@@ -1,6 +1,5 @@
 import {
 	BadRequestException,
-	ConflictException,
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
@@ -8,10 +7,11 @@ import { UsersService } from '../module.users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { accessToken } from '../dto/payload';
 import { UserCredentialService } from './credential.service';
-import { UserStatus } from '../entities/user.entity';
 
 @Injectable()
 export class AuthService {
+	nbVisit = 0;
+
 	constructor(
 		private readonly usersService: UsersService,
 		private jwtService: JwtService,
@@ -36,30 +36,25 @@ export class AuthService {
 		}
 		console.log('success');
 		const payloadToken: accessToken = { id: user.UserID };
-		this.usersService.userStatus(login, UserStatus.ONLINE).then();
 		return await this.jwtService.signAsync(payloadToken);
 	}
 
-	logIn(login: string, password: string) {
-		throw new BadRequestException('WIP');
-	}
-
-	/** * * * * * * * * * * * * * * **/
-
-	async signInVisit(login: string, rawPassword: string) {
-		if (login === undefined || rawPassword === undefined)
-			throw new UnauthorizedException('Login or Password are empty');
-		login = login + '_g';
-		if (login.length > 10) return new BadRequestException();
-		if (await this.usersService.findOne(login))
-			throw new ConflictException('login is already taken');
+	async signInVisit(rawPassword: string) {
+		this.nbVisit++;
+		const login = 'user' + this.nbVisit;
 		const userCredential = await this.credentialsService.create(rawPassword);
 		const user = await this.usersService.create(login, true, userCredential);
 		const payloadToken: accessToken = { id: user.UserID };
 		return await this.jwtService.signAsync(payloadToken);
 	}
 
-	async signIn(login: string, password: string) {
+	/** * * * * * * * * * * * * * * **/
+
+	async signIn42(login: string, password: string) {
+		throw new BadRequestException('WIP');
+	}
+
+	logIn42(login: string, password: string) {
 		throw new BadRequestException('WIP');
 	}
 }
