@@ -1,12 +1,9 @@
-import {useContext, useState} from "react";
-
 'user client'
 
 import Axios from "./AxiosConfig";
 import { strRoutes } from "@/shared/routesApi";
 import { IUser } from "@/shared/types";
 import axios from "axios";
-import {LoggedContext} from "@/context/globalContext";
 
 const AuthManager = require('./AuthManager');
 export const authManager = new AuthManager();
@@ -24,7 +21,7 @@ export const axiosInstance = axios.create({
 
 export namespace getApi {
 
-	export const getUsersAllPromise=()									: Promise<IUser[]>					=>{
+	export const getUsersAllPromise=() =>{
 
 
 		return axiosInstance.get(`${strRoutes.getUsersAll()}`, {

@@ -6,27 +6,13 @@ import * as apiReq from '@/components/api/ApiReq'
 
 import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
-import {EStatus} from "@/shared/types";
+import {EStatus, IUser} from "@/shared/types";
 import {getUserFromLogin} from "@/app/auth/Auth";
-
-
-export interface IUser {
-    Id_USERS?: number;
-    login: string;
-    nickname: string;
-    avatar_path?: string;
-    status?: number;
-    token_2FA?: string;
-    has_2FA?: boolean;
-
-}
-
-
 
 
 const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, login, status, isEditable})=>{
 
-    const [modifiedNick, setNickText] = useState<string>(nickname);
+    const [modifiedNick, setNickText] = useState<string>(nickname ? nickname : login);
     const [editMode, setEditMode] = useState(false);
     const [nickErrorMsg, setNickErrMsg] = useState("");
     const [statusColor, setStatusColor] = useState("grey");

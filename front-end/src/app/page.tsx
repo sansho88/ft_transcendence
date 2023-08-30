@@ -3,6 +3,7 @@ import React, {useContext, useEffect} from "react";
 import Button from "../components/CustomButtonComponent"
 import Profile from "../components/ProfileComponent"
 import Stats from "../components/StatsComponent"
+import UserList from "@/components/UserListComponent";
 
 import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
 import {LoggedContext, TokenContext, UserContext} from '@/context/globalContext';
@@ -95,7 +96,7 @@ export default function Home() {
                 <main className="main-background">
                     <Profile className={"main-user-profile"}
                              nickname={userContext.nickname ? userContext.nickname : "BADNICKNAME"}
-                             login={userContext.login ? userContext.login : "BADLOGIN"} status={userContext.status}
+                             login={userContext.login ? userContext.login : "BADLOGIN"} status={userContext.status ? userContext.status : 0}
                              avatar_path={userContext.avatar_path} isEditable={true}>
 
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
@@ -103,6 +104,7 @@ export default function Home() {
                     </Profile>
                     <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"}
                             height={"42px"}/>
+                    <UserList />
 
                     <div className={"game"} onClick={switchOnlineIngame}>
 
