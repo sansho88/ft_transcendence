@@ -2,9 +2,9 @@ import ChatRoomCommponent from '@/components/chat/ChatRoomComponent'
 
 export default function ChatRoom() {
 	return (
-		<>
-			<div>ChatRoom</div>
-			<ChatRoomCommponent className='' classNameBlockMessage='m-6 overflow-auto h-[350px]'/>
-		</>
+    <div>
+    <div className=' text-white text-center font-semibold text-3xl mt-4'>CHAT ROOM PROTO</div>
+    <ChatRoomCommponent className='h-[90vh] w-screen pb-5'/>
+  </div>
 	)
 }

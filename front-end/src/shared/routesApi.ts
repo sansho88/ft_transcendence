@@ -21,6 +21,16 @@
 	const routeAdministrate = 	'administrate';
 	const routePlay = 					'play';
 	
+  const routeWsGame =          'game';
+  // const wsRouteChat =         'chat'
+
+  export namespace wsGameRoutes {
+    export const addNewPlayerToServer=()      => {return `${routeWsGame}_addPlayerToServer`}
+    export const addPlayerToMatchnaking=()    => {return `${routeWsGame}_addPlayerToMatchmaking`}
+    export const removePlayerToMatchnaking=() => {return `${routeWsGame}_removePlayerToMatchmaking`}
+  }
+
+
 //bible des routes
 	export namespace strRoutes {
 
@@ -28,17 +38,16 @@
 // |                              USERS                                  |
 // +---------------------------------------------------------------------+
 
-	export const getUsersAll=()							=>{return `${serverApi}/${routeUsers}`}
+	export const getUsersAll=()							=>{return `${serverApi}/${routeUsers}/get/`}
 	export const getUserById = () 					=>{return `${serverApi}/${routeUsers}/`}
-	export const getUserByLogin=()					=>{return `${serverApi}/${routeUsers}/login/`}
+	export const getUserByLogin=()					=>{return `${serverApi}/${routeUsers}/get/`}
 		
-	export const postUser=()								=>{return `${serverApi}/${routeUsers}`}
-	export const postUserCheckLogin=()			=>{return `${serverApi}/${routeUsers}/login/`}
+	export const postUser=()								=>{return `${serverApi}/auth/sign`}
+	export const postUserCheckLogin=()			=>{return `${serverApi}/auth/login/`}
 		
 	export const putUser=()									=>{return `${serverApi}/${routeUsers}/`}
 
 	export const deleteUsersAll=()					=>{return `${serverApi}/${routeUsers}`}
-	// export const deleteUsersAll=()					=>{return `http://localhost:8000/api/users`}
 	export const deleteUserById=()					=>{return `${serverApi}/${routeUsers}/`}
 
 // +---------------------------------------------------------------------+
