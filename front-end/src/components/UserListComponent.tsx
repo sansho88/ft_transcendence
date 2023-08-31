@@ -1,7 +1,10 @@
-import React, { useEffect, useState} from "react";
+import React, {useDebugValue, useEffect, useState} from "react";
 import {IUser} from "@/shared/types";
 import * as apiReq from '@/components/api/ApiReq';
 import Profile from "@/components/ProfileComponent";
+import Button from "@/components/CustomButtonComponent";
+import {state} from "sucrase/dist/types/parser/traverser/base";
+
 
 async function getAllUsers(): Promise<IUser[]>  {
     return await apiReq.getApi.getUsersAllPromise()
@@ -11,29 +14,52 @@ async function getAllUsers(): Promise<IUser[]>  {
         })
         .catch(e => console.error("[Get All Users ERROR]" + e));
 }
+async function waitForallUsers(dataToFill: IUser[]) {
+    await getAllUsers().then((users) => {
+
+        dataToFill = users;
+        console.log("USERLIST QUOICOUCEH" + users.length);
+    })
+    console.log("AllUsers size: " + dataToFill.length);
+}
+
 const UserList : React.FC = () => {
 
+
+    let divU: React.JSX.Element[];
+    const [divUsers, setDivUsers] = useState(divU);
+   /*
+    const tmpUser: IUser = {has_2fa: false, status: 0, login:"", UserID: 0}
+    allUsers.push(tmpUser)*/
     let allUsers : IUser[];
-    async function waitForallUsers() {
-       await getAllUsers().then((users) => {
-            allUsers = users;
-           console.log("USERLIST QUOICOUCEH" + users.length);
-       }) /*as IUser[]*/;
-        console.log("AllUsers size: " + allUsers);
+    waitForallUsers(allUsers);
+
+    useDebugValue(divUsers);
+
+    function handleClick(){
+        let users: IUser[];
+        waitForallUsers(users)
     }
 
-    waitForallUsers().catch((e) => console.error("[UserList Error]" + e));
+    function showUsers(users: IUser[]){
+        let allDiv : React.JSX.Element[] = [];
+        for (const user of users) {
+            allDiv.push(<ol>
+                {
+                    <Profile login={user.login} status={user.status} has_2fa={user.has_2fa}/>
+                }
+            </ol>)
+        }
+        return (allDiv);
+    }
 
    // console.log("Debug USERS Length: " + allUsers.length);
     return (
         <>
+            <Button image={"friends.svg"} onClick={handleClick} alt={"Online Users button"}/>
             <h3>USERS LIST</h3>
             {
-                /*usersElements.map((usersElement) => (
-                    <div>
-                        {<Profile login={usersElement.login} status={usersElement.status} has_2fa={usersElement.has_2fa}/>}
-                    </div>
-                ))*/
+               showUsers(allUsers)
             }
         </>
     )
