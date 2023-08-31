@@ -54,8 +54,6 @@ export class ChatGateway
 		super();
 	}
 
-	/** This is a test */
-
 	// Todo: Maybe Give Bearer Token to auth when 1st connection then keep userID and client.ID in a map-like structure
 	// Or We could also use a 'Auth' event to identify the user post connection
 
@@ -133,9 +131,11 @@ export class ChatGateway
 		@CurrentUser('id') userID: number,
 		@ConnectedSocket() client: Socket,
 	) {
-		const channel = await this.channelService.findOne(data.id);
+		const chan = await this.channelService.findOne(data.channelID);
 		const user = await this.usersService.findOne(userID);
-		if (await this.channelService.isUserOnChan(channel, user))
+		if (!chan || typeof data.channelID === 'undefined')
+			return client.emit('sendMsg', { error: 'There is no such Channel' });
+		if (await this.channelService.isUserOnChan(chan, user))
 			return client.emit(`joinRoom`, {
 				message: `You are already on that channel`,
 			});
@@ -143,14 +143,14 @@ export class ChatGateway
 			return client.emit(`joinRoom`, {
 				message: `You cannot Join that channel`,
 			});
-		await this.channelService.joinChannel(user, channel);
-		client.join(channel.name);
+		await this.channelService.joinChannel(user, chan);
+		client.join(chan.name);
 		await this.SendMessage(
-			channel,
+			chan,
 			0,
-			`User ${user.nickname} Joined the channel ${channel.name}`,
+			`User ${user.nickname} Joined the channel ${chan.name}`,
 		);
-		console.log(`JOIN Room ${data.id} By ${userID}`);
+		console.log(`JOIN Room ${data.channelID} By ${userID}`);
 	}
 
 	@SubscribeMessage('sendMsg')

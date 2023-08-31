@@ -25,7 +25,7 @@ export class CreateChannelDTOPipe {
 export class JoinChannelDTOPipe {
 	@IsNumber()
 	@IsNotEmpty()
-	id: number;
+	channelID: number;
 
 	@IsString()
 	@IsOptional()

@@ -118,7 +118,7 @@ export class ChannelService {
 
 	async checkCredential(data: JoinChannelDTOPipe) {
 		const channel = await this.channelRepository.findOne({
-			where: { channelID: data.id },
+			where: { channelID: data.channelID },
 			relations: ['credential'],
 		});
 		const credential = channel.credential;
