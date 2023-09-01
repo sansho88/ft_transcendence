@@ -21,9 +21,9 @@ export const axiosInstance = axios.create({
 
 export namespace getApi {
 
-	export const getUsersAllPromise=() =>{
-
-
+	const timestamp = Date.now();
+	export const getUsersAllPromise= (time) =>{
+		const tqt = time;
 		return axiosInstance.get(`${strRoutes.getUsersAll()}`, {
 			headers: {
 				'Authorization': `Bearer ${authManager.getToken()}`
@@ -58,7 +58,7 @@ export namespace postApi {
 
 
 export namespace putApi {
-	export const putUser= (updateUser: Partial<IUser>)		=>{ //fixme: "404 not found ?"
+	export const putUser= (updateUser: Partial<IUser>)		=>{
 		return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, {
 			headers: {
 				'Authorization': `Bearer ${authManager.getToken()}`

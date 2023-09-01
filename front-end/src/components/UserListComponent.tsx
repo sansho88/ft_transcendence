@@ -7,7 +7,8 @@ import Button from "@/components/CustomButtonComponent";
 
 async function getAllUsers(): Promise<IUser[]>  {
     try {
-        return await apiReq.getApi.getUsersAllPromise()
+        const timestamp = Date.now();
+        return await apiReq.getApi.getUsersAllPromise(timestamp)
             .then((req) => {
                 return req.data;
             })

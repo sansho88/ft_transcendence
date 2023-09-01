@@ -53,13 +53,11 @@ export default function Home() {
 
     function switchOnlineIngame() {
         const tmpStatus = userContext?.status == EStatus.Online ? EStatus.InGame : EStatus.Online;
-        //userContext.status = tmpStatus;
 
-        //setUserContext(userContext);
         updateStatusUser(userContext?.UserID, tmpStatus)
             .catch((e) => console.error(e));
 
-        console.log('[MAIN PAGE]USER STATUS:' + userContext.status);
+        console.log('[MAIN PAGE]USER STATUS:' + tmpStatus);
     }
 
 
