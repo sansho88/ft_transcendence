@@ -9,7 +9,6 @@ async function getAllUsers(): Promise<IUser[]>  {
     try {
         return await apiReq.getApi.getUsersAllPromise()
             .then((req) => {
-                console.log("[Get All Users DEBUG]" + req.data.length);
                 return req.data;
             })
     }catch(e){
@@ -18,29 +17,24 @@ async function getAllUsers(): Promise<IUser[]>  {
     }
 
 }
-
-function showUsersList(allUsersElements:React.JSX.Element[] ) {
-
-}
-
 const UserList : React.FC = ({className={className}}) => {
 
     const [userElements, setUserElements] = useState<React.JSX.Element[]>([]);
     const [isHidden, setIsHidden] = useState(userElements.length == 0);
     function handleClick(){
-        console.log("isHidden: " + isHidden);
         if (isHidden)
         {
             getAllUsers().then((res) => {
-                console.log("handleClick: users size: " + res.length);
-
-
                 let allDiv : React.JSX.Element[] = [];
                 for (const user of res) {
                     allDiv.push(
-                        <li key={user.login + "List"}>
-                            <Profile login={user.login} nickname={user.nickname} avatar_path={user.avatar_path} status={user.status} has_2fa={user.has_2fa}/>
-                        </li>
+                            <li key={user.login + "List"}>
+                                <Profile login={user.login}
+                                         nickname={user.nickname}
+                                         avatar_path={user.avatar_path}
+                                         status={user.status} //fixme: pas actualisé
+                                         has_2fa={user.has_2fa}/>
+                            </li>
                     )
                 }
                 setUserElements(allDiv);

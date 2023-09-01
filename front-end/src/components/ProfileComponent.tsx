@@ -93,7 +93,13 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
                     color: "#07C3FF",
-                    lineHeight: "1.5em"
+                    lineHeight: "1.5em",
+                    display: "inline-block",
+                    position: "relative",
+                    marginLeft: "10px",
+                    paddingTop: "2%",
+                    top: "2vh"
+
                 }
                 }>
                     <h2 id={"login"} style={{ color: "darkgrey"}}>{login}</h2>
