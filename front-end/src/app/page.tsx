@@ -102,9 +102,7 @@ export default function Home() {
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
                         <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
                     </Profile>
-                    <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"}
-                            height={"42px"}/>
-                    <UserList />
+                    <UserList className={"friends"}/>
 
                     <div className={"game"} onClick={switchOnlineIngame}>
 

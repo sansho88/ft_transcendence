@@ -96,7 +96,7 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
                     lineHeight: "1.5em"
                 }
                 }>
-                    <h2 id={"login"}>{login}</h2>
+                    <h2 id={"login"} style={{ color: "darkgrey"}}>{login}</h2>
                     {editedNick()}
 
                     <p id={"status"} style={{

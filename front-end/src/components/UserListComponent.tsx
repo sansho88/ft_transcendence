@@ -3,64 +3,62 @@ import {IUser} from "@/shared/types";
 import * as apiReq from '@/components/api/ApiReq';
 import Profile from "@/components/ProfileComponent";
 import Button from "@/components/CustomButtonComponent";
-import {state} from "sucrase/dist/types/parser/traverser/base";
 
 
 async function getAllUsers(): Promise<IUser[]>  {
-    return await apiReq.getApi.getUsersAllPromise()
-        .then((req) => {
-            console.log("[Get All Users DEBUG]" + req.data.length);
-            return req.data;
-        })
-        .catch(e => console.error("[Get All Users ERROR]" + e));
-}
-async function waitForallUsers(dataToFill: IUser[]) {
-    await getAllUsers().then((users) => {
+    try {
+        return await apiReq.getApi.getUsersAllPromise()
+            .then((req) => {
+                console.log("[Get All Users DEBUG]" + req.data.length);
+                return req.data;
+            })
+    }catch(e){
+        console.error("[Get All Users ERROR]" + e);
+        throw e;
+    }
 
-        dataToFill = users;
-        console.log("USERLIST QUOICOUCEH" + users.length);
-    })
-    console.log("AllUsers size: " + dataToFill.length);
 }
 
-const UserList : React.FC = () => {
+function showUsersList(allUsersElements:React.JSX.Element[] ) {
 
+}
 
-    let divU: React.JSX.Element[];
-    const [divUsers, setDivUsers] = useState(divU);
-   /*
-    const tmpUser: IUser = {has_2fa: false, status: 0, login:"", UserID: 0}
-    allUsers.push(tmpUser)*/
-    let allUsers : IUser[];
-    waitForallUsers(allUsers);
+const UserList : React.FC = ({className={className}}) => {
 
-    useDebugValue(divUsers);
-
+    const [userElements, setUserElements] = useState<React.JSX.Element[]>([]);
+    const [isHidden, setIsHidden] = useState(userElements.length == 0);
     function handleClick(){
-        let users: IUser[];
-        waitForallUsers(users)
-    }
+        console.log("isHidden: " + isHidden);
+        if (isHidden)
+        {
+            getAllUsers().then((res) => {
+                console.log("handleClick: users size: " + res.length);
 
-    function showUsers(users: IUser[]){
-        let allDiv : React.JSX.Element[] = [];
-        for (const user of users) {
-            allDiv.push(<ol>
-                {
-                    <Profile login={user.login} status={user.status} has_2fa={user.has_2fa}/>
+
+                let allDiv : React.JSX.Element[] = [];
+                for (const user of res) {
+                    allDiv.push(
+                        <li key={user.login + "List"}>
+                            <Profile login={user.login} nickname={user.nickname} avatar_path={user.avatar_path} status={user.status} has_2fa={user.has_2fa}/>
+                        </li>
+                    )
                 }
-            </ol>)
+                setUserElements(allDiv);
+            })
         }
-        return (allDiv);
-    }
+        else
+            setUserElements([]);
+        setIsHidden(userElements.length > 0);
 
-   // console.log("Debug USERS Length: " + allUsers.length);
+    }
     return (
         <>
-            <Button image={"friends.svg"} onClick={handleClick} alt={"Online Users button"}/>
-            <h3>USERS LIST</h3>
-            {
-               showUsers(allUsers)
-            }
+            <Button className={className} image={"friends.svg"} onClick={handleClick} alt={"Online Users button"}/>
+            {!isHidden && <div className={"userList"}>
+                    <ul>
+                    { userElements}
+                    </ul>
+            </div>}
         </>
     )
 }
