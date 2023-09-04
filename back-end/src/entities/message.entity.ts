@@ -24,4 +24,11 @@ export class MessageEntity extends BaseEntity {
 
 	@ManyToOne(() => ChannelEntity, (ChannelEntity) => ChannelEntity.messages)
 	channel: ChannelEntity;
+
+	@Column({
+		type: 'varchar',
+		length: 256,
+		nullable: false,
+	})
+	content: string;
 }
