@@ -33,6 +33,7 @@ const UserList : React.FC = ({className={className}}) => {
                                 <Profile login={user.login}
                                          nickname={user.nickname}
                                          avatar_path={user.avatar_path}
+                                         UserID={user.UserID}
                                          status={user.status} //fixme: pas actualisé
                                          has_2fa={user.has_2fa}/>
                             </li>

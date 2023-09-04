@@ -1,4 +1,4 @@
-'user client'
+'use client'
 
 import Axios from "./AxiosConfig";
 import { strRoutes } from "@/shared/routesApi";
@@ -16,7 +16,6 @@ export const axiosInstance = axios.create({
 	},
 	responseType: 'json'
 });
-
 
 
 export namespace getApi {
@@ -59,6 +58,8 @@ export namespace postApi {
 
 export namespace putApi {
 	export const putUser= (updateUser: Partial<IUser>)		=>{
+		console.log("[putApi/putUser] status sent: " + updateUser.status);
+
 		return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, {
 			headers: {
 				'Authorization': `Bearer ${authManager.getToken()}`

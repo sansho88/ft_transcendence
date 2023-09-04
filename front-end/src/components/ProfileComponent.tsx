@@ -7,10 +7,10 @@ import * as apiReq from '@/components/api/ApiReq'
 import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
 import {EStatus, IUser} from "@/shared/types";
-import {getUserFromLogin} from "@/app/auth/Auth";
+import {getUserFromId} from "@/app/auth/Auth";
 
 
-const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, login, status, isEditable})=>{
+const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, login, status, UserID, isEditable})=>{
 
     const [modifiedNick, setNickText] = useState<string>(nickname ? nickname : login);
     const [editMode, setEditMode] = useState(false);
@@ -43,7 +43,7 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
 
         if (!nickErrorMsg.length) {
 
-            await getUserFromLogin(login).then( (userGet) => {
+            await getUserFromId(UserID).then( (userGet) => {
             console.log("[PROFILE] login to update: " + userGet.login);
             userGet.nickname = modifiedNick;
             apiReq.putApi.putUser(userGet);

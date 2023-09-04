@@ -57,6 +57,19 @@ export async function getUserFromLogin(login: string) {
     }
 }
 
+export async function getUserFromId(id: number) {
+    try {
+        return await apiReq.getApi.getUserByIdPromise(id)
+            .then((req) => {
+                console.log("[Get User From Login]", req.data.login);
+                return req.data as IUser;
+            });
+
+    } catch (error) {
+        console.error("[Get User From Login ERROR]", error);
+    }
+}
+
 export default function Auth({className}: { className?: string }) {
 
 

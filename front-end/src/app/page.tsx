@@ -34,6 +34,7 @@ export default function Home() {
     }
 
     async function updateStatusUser(id_user, status) { //to remove when the player status will be updated directly from the Back
+
         const updateUser: Partial<POD.IUser> = {UserID: id_user,
             login: userContext.login,
             visit: userContext.visit,
@@ -41,7 +42,8 @@ export default function Home() {
             nickname: userContext.nickname,
             avatar_path: userContext.avatar_path,
             has_2fa: userContext.has_2fa,
-            token_2fa: userContext.token_2fa}
+            token_2fa: userContext.token_2fa};
+
         await apiReq.putApi.putUser(updateUser)
             .then(() => {
                 setUserContext(updateUser);
@@ -95,7 +97,9 @@ export default function Home() {
                     <Profile className={"main-user-profile"}
                              nickname={userContext.nickname ? userContext.nickname : "BADNICKNAME"}
                              login={userContext.login ? userContext.login : "BADLOGIN"} status={userContext.status ? userContext.status : 0}
-                             avatar_path={userContext.avatar_path} isEditable={true}>
+                             avatar_path={userContext.avatar_path}
+                             UserID={userContext.UserID ? userContext.UserID : 0}
+                             isEditable={true} has_2fa={false}>
 
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
                         <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
