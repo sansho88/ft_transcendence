@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CredentialEntity } from '../entities/credential.entity';
+import { UserCredentialEntity } from '../entities/credential.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class CredentialService {
+export class UserCredentialService {
 	constructor(
-		@InjectRepository(CredentialEntity)
-		private credentialRepository: Repository<CredentialEntity>,
+		@InjectRepository(UserCredentialEntity)
+		private userCredentialRepository: Repository<UserCredentialEntity>,
 	) {}
 
 	async create(rawPassword: string) {
 		const salt = bcrypt.genSaltSync();
 		const hash = await bcrypt.hash(rawPassword, salt);
 
-		return this.credentialRepository.create({
+		return this.userCredentialRepository.create({
 			password: hash,
 		});
 	}
 
-	async compare(rawPassword: string, credential: CredentialEntity) {
+	async compare(rawPassword: string, credential: UserCredentialEntity) {
 		return bcrypt.compareSync(rawPassword, credential.password);
 	}
 }

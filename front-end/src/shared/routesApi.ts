@@ -42,8 +42,8 @@
 	export const getUserById = () 					=>{return `${serverApi}/${routeUsers}/`}
 	export const getUserByLogin=()					=>{return `${serverApi}/${routeUsers}/get/`}
 		
-	export const postUser=()								=>{return `${serverApi}/auth/sign`}
-	export const postUserCheckLogin=()			=>{return `${serverApi}/auth/login/`}
+	export const postUser=()								=>{return `${serverApi}/auth/visit/sign`}
+	export const postUserCheckLogin=()			=>{return `${serverApi}/auth/visit/login/`}
 		
 	export const putUser=()									=>{return `${serverApi}/${routeUsers}/`}
 

@@ -31,6 +31,11 @@ export class GameEntity extends BaseEntity {
 	@Column()
 	score2: number;
 
+	@Column({
+		type: 'date',
+	})
+	starting_date: Date;
+
 	@Column()
 	state: GameState;
 }

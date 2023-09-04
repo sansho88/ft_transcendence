@@ -3,14 +3,21 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import * as process from 'process';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './module.users/users.module';
+import { AuthModule } from './module.auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { ChannelEntity } from './entities/channel.entity';
 import { MessageEntity } from './entities/message.entity';
-import { CredentialEntity } from './entities/credential.entity';
+import {
+	ChannelCredentialEntity,
+	UserCredentialEntity,
+} from './entities/credential.entity';
 import { GameEntity } from './entities/game.entity';
+import { ChannelModule } from './module.channels/channel.module';
+import { InviteEntity } from './entities/invite.entity';
+import { MuteEntity } from './entities/mute.entity';
+import { BannedEntity } from './entities/banned.entity';
 
 @Module({
 	imports: [
@@ -29,13 +36,18 @@ import { GameEntity } from './entities/game.entity';
 				UserEntity,
 				ChannelEntity,
 				MessageEntity,
-				CredentialEntity,
+				InviteEntity,
+				MuteEntity,
+				BannedEntity,
+				UserCredentialEntity,
+				ChannelCredentialEntity,
 				GameEntity,
 			],
 			synchronize: true, // true -> will create the Table on db if class not there
 		}),
 		UsersModule,
 		AuthModule,
+		ChannelModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
