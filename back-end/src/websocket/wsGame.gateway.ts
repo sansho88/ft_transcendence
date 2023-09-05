@@ -62,15 +62,27 @@ export class WebsocketGatewayGame
     this.serverGame.addPlayerToMatchmaking(player, this.server);
 		client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
 	}
-
+  
 	@SubscribeMessage(wsGameRoutes.removePlayerToMatchnaking())
 	RemoveUserToMatchmaking(client: Socket, payload: Partial<IUser>) {
     // console.log(`TRY removePlayerToMatchnaking:  ${payload.nickname}`); 
     if (!payload.nickname)
-      return console.error('ws/welcomeToGameServer: Bad client or user');  
-    const player: userInfoSocket = {socket: client, user: payload};
-    this.serverGame.removePlayerToMatchmaking(player);
-		// client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
-	}
+    return console.error('ws/welcomeToGameServer: Bad client or user');  
+  const player: userInfoSocket = {socket: client, user: payload};
+  this.serverGame.removePlayerToMatchmaking(player);
+  // client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
+}
 
+
+  @SubscribeMessage(wsGameRoutes.createTrainningGame())
+  createTrainningGame(client: Socket, payload: Partial<IUser>) {
+    // console.log(client.id + ': ' + payload.nickname);
+    // console.log('json user: ' + JSON.stringify(payload));
+    if (!payload.nickname)
+      return console.error('ws: Bad client or user');  
+    
+    const player: userInfoSocket = {socket: client, user: payload};
+    this.serverGame.addPlayerInTrainningSession(player, this.server);
+    client.emit('info', `Trainning game loading...`);
+  }
 }
