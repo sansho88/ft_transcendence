@@ -15,8 +15,8 @@ export class Matchmaking {
   //for check double addition protection in addUser
   private containsUser(user: userInfoSocket): boolean {
     for (let element of this.userStack.toArray()) {
-      // console.log(`HEY : ${element.user.id_user} ||| ${user.user.id_user}`)
-      if (element.user.UserID === user.user.UserID) {
+      // console.log(`HEY : ${element.user.login} ||| ${user.user.login}`)
+      if (element.user.login === user.user.login) {
         return true;
       }
     }
