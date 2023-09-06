@@ -18,6 +18,10 @@ import { ChannelModule } from './module.channels/channel.module';
 import { InviteEntity } from './entities/invite.entity';
 import { MuteEntity } from './entities/mute.entity';
 import { BannedEntity } from './entities/banned.entity';
+import { WebsocketGatewayChat } from './websocket/wsChatProto.gateway';
+import { WebsocketGatewayGame } from './websocket/wsGame.gateway';
+import { ServerGame } from './game/ServerGame';
+import { GameSession } from './game/GameSession';
 
 @Module({
 	imports: [
@@ -50,6 +54,10 @@ import { BannedEntity } from './entities/banned.entity';
 		ChannelModule,
 	],
 	controllers: [AppController],
-	providers: [AppService],
+	providers: [AppService,
+    WebsocketGatewayChat,
+		WebsocketGatewayGame,
+		ServerGame
+  ],
 })
 export class AppModule {}

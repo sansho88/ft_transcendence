@@ -1,4 +1,4 @@
-import { userInfoSocket, Stack } from 'shared/typesGame';
+import { userInfoSocket, Stack, EGameMod } from 'shared/typesGame';
 import { Server } from 'socket.io';
 import { GameSession } from './GameSession';
 import { v4 as uuidv4 } from "uuid";
@@ -15,8 +15,8 @@ export class Matchmaking {
   //for check double addition protection in addUser
   private containsUser(user: userInfoSocket): boolean {
     for (let element of this.userStack.toArray()) {
-      // console.log(`HEY : ${element.user.id_user} ||| ${user.user.id_user}`)
-      if (element.user.UserID === user.user.UserID) {
+      // console.log(`HEY : ${element.user.login} ||| ${user.user.login}`)
+      if (element.user.login === user.user.login) {
         return true;
       }
     }
@@ -63,7 +63,7 @@ export class Matchmaking {
       const startDate : Date = new Date();
       const generateSessionName : string = uuidv4();
       console.log(`NEW GAME SESSION: ${generateSessionName} | ${P1.user.nickname}(${P1.user.login}) vs ${P2.user.nickname}(${P2.user.login})`);
-      return new GameSession(server, P1, P2, startDate, game_id, generateSessionName);
+      return new GameSession(server, P1, P2, startDate, game_id, EGameMod.classic, generateSessionName);
     }
     else
       console.log('Matchmaking: Pas assez de joueurs pour lancer une partie');

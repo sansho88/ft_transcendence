@@ -1,8 +1,16 @@
+'use client'
 //mis en commun back-front des ref routesApi, pour facilite' la maintenance/evoluabilite' des routes
 
 //NOTA BENE: jai prevu toutes routes mais surments des changements a prevoir et des routes inutiles
+  const IP_HOST = () => {
+    if (typeof window !== `undefined`){
+        return window.location.hostname;
+    }
+    else
+      return `localhost`
+  }
 
-	const serverApi = "http://localhost:8000/api" //TODO utiliser le context OriginNetwork
+	const serverApi = `http://${IP_HOST()}:8000/api` //TODO utiliser le context OriginNetwork
 	
 // definition des routes root 🫠
 	const routeUsers = 					'users'
@@ -28,6 +36,7 @@
     export const addNewPlayerToServer=()      => {return `${routeWsGame}_addPlayerToServer`}
     export const addPlayerToMatchnaking=()    => {return `${routeWsGame}_addPlayerToMatchmaking`}
     export const removePlayerToMatchnaking=() => {return `${routeWsGame}_removePlayerToMatchmaking`}
+    export const createTrainningGame=()       => {return `${routeWsGame}_createTrainningGame`}
   }
 
 

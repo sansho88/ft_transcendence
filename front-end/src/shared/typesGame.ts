@@ -5,6 +5,19 @@ import { Socket } from 'socket.io';
 // |                           GAME INTERFACE                            |
 // +---------------------------------------------------------------------+
 
+export class GameTheme {
+  public neon           = 'game-theme-neon';
+  public classicPong    = 'game-theme-classic-pong';
+  public sunset         = 'game-theme-sunset'
+}
+
+export enum EGameMod {
+  classic,
+  ghost,
+  trainning,
+  rumble
+}
+
 export interface ISizeGameElements {
   tableServerSize   : IVector2D; //sert a calculer le coef d'agrandissement ou reduction cote front par rapport a la taille d'affichage
   ballSize          : IVector2D;
@@ -36,8 +49,6 @@ export interface IPodTable {
   sizeBall          : IVector2D;
 	positionP1v       : IVector2D;
 	positionP2v       : IVector2D;
-	positionP1        : number;
-	positionP2        : number;
 	maxPosP1          : number;
 	maxPosP2          : number;
 	sizeP1            : IVector2D;
@@ -45,6 +56,15 @@ export interface IPodTable {
 	tableSize         : IVector2D;
   scoreP1           : number;
   scoreP2           : number;
+  trainningHit      : number;
+  maxTrainningHit   : number;
+  }
+
+
+//vecteur unitaire pour direction de la balle
+export interface IDirectionVec2D {
+    dx                 : number;
+    dy                 : number;
   }
 
 export interface IVector2D {
