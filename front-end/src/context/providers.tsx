@@ -16,7 +16,7 @@ import { io, Socket } from "socket.io-client";
 // import websocketConnect from "@/websocket/websocket";
 
 const IP_HOST = () => {
-  if (window)
+  if (typeof window !== 'undefined') 
     return window.location.hostname;
   else
     return `localhost`
