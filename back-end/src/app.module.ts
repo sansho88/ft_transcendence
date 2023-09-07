@@ -18,8 +18,8 @@ import { ChannelModule } from './module.channels/channel.module';
 import { InviteEntity } from './entities/invite.entity';
 import { MuteEntity } from './entities/mute.entity';
 import { BannedEntity } from './entities/banned.entity';
-import { WebsocketGatewayChat } from './websocket/wsChatProto.gateway';
-import { WebsocketGatewayGame } from './websocket/wsGame.gateway';
+import { WebsocketGatewayChat } from './module.game/websocket/wsChatProto.gateway';
+import { WebsocketGatewayGame } from './module.game/websocket/wsGame.gateway';
 import { ServerGame } from './module.game/game/ServerGame';
 import { GameSession } from './module.game/game/GameSession';
 
