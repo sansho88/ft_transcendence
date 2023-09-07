@@ -7,7 +7,7 @@ import {
 	ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { IChatMessage } from '../interfaces/chatTypes';
+import { IChatMessage } from '../../interfaces/chatTypes';
 
 interface UserSocket {
 	username: string;
