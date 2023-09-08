@@ -19,7 +19,7 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus}) => {
 		setStatusColor(getEnumNameByIndex(Colors, playerStatus));
 	}, [playerStatus]);
 
-	if (userContext.avatar_path?.length == 0 || userContext.avatar_path == undefined)
+	if (userContext.avatar_path == undefined || userContext.avatar_path?.length == 0)
 		path = "/tests/avatar.jpg"
 
 	return (
@@ -30,7 +30,8 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus}) => {
 			transition: "1000ms",
 			borderRadius: "8px",
 			width: width,
-			height: height
+			height: height,
+			display: "inline-block"
 		}}/>
 	)
 }

@@ -196,6 +196,21 @@ body {
 
 }
 
+.userList{
+    max-height: 32vh;
+    width: auto;
+    overflow-y: auto;
+    position: absolute;
+    right: 2vw;
+    top: 8vh;
+    padding-inline: 2vh;
+    background: rgba(0, 0, 0, 0.27);
+    border: 2px rgba(0, 0, 0, 0.11);
+    border-style: inherit ;
+    box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
+    border-radius: 8px;
+}
+
 .main-user-profile{
     display: inline-block;
     position: absolute;
@@ -212,7 +227,7 @@ body {
 }
 
 .main-user-profile .avatar{
-    top: -2vh;
+    top: -1vh;
     margin-left: .4vw;
     position: relative;
     display: inline;
@@ -220,9 +235,6 @@ body {
 }
 
 .main-user-profile .infos{
-    display: inline-block;
-    margin-left: 10px;
-    padding-top: 2vh;
     position: relative;
     width: auto;
     font-size: 2vh;
@@ -234,10 +246,6 @@ body {
     margin-top: -0.5em;
     margin-bottom: 4px;
     padding-left: 0.4vw;
-}
-
-.main-user-profile #login{
-    color: darkgrey;
 }
 
 .game{

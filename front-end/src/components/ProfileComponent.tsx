@@ -6,27 +6,13 @@ import * as apiReq from '@/components/api/ApiReq'
 
 import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
-import {EStatus} from "@/shared/types";
-import {getUserFromLogin} from "@/app/auth/Auth";
+import {EStatus, IUser} from "@/shared/types";
+import {getUserFromId} from "@/app/auth/Auth";
 
 
-export interface IUser {
-    Id_USERS?: number;
-    login: string;
-    nickname: string;
-    avatar_path?: string;
-    status?: number;
-    token_2FA?: string;
-    has_2FA?: boolean;
+const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, login, status, UserID, isEditable})=>{
 
-}
-
-
-
-
-const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, login, status, isEditable})=>{
-
-    const [modifiedNick, setNickText] = useState<string>(nickname);
+    const [modifiedNick, setNickText] = useState<string>(nickname ? nickname : login);
     const [editMode, setEditMode] = useState(false);
     const [nickErrorMsg, setNickErrMsg] = useState("");
     const [statusColor, setStatusColor] = useState("grey");
@@ -57,7 +43,7 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
 
         if (!nickErrorMsg.length) {
 
-            await getUserFromLogin(login).then( (userGet) => {
+            await getUserFromId(UserID).then( (userGet) => {
             console.log("[PROFILE] login to update: " + userGet.login);
             userGet.nickname = modifiedNick;
             apiReq.putApi.putUser(userGet);
@@ -107,10 +93,16 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
                     color: "#07C3FF",
-                    lineHeight: "1.5em"
+                    lineHeight: "1.5em",
+                    display: "inline-block",
+                    position: "relative",
+                    marginLeft: "10px",
+                    paddingTop: "2%",
+                    top: "2vh"
+
                 }
                 }>
-                    <h2 id={"login"}>{login}</h2>
+                    <h2 id={"login"} style={{ color: "darkgrey"}}>{login}</h2>
                     {editedNick()}
 
                     <p id={"status"} style={{

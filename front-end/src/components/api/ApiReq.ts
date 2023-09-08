@@ -1,12 +1,9 @@
-import {useContext, useState} from "react";
-
-'user client'
+'use client'
 
 import Axios from "./AxiosConfig";
 import { strRoutes } from "@/shared/routesApi";
 import { IUser } from "@/shared/types";
 import axios from "axios";
-import {LoggedContext} from "@/context/globalContext";
 
 const AuthManager = require('./AuthManager');
 export const authManager = new AuthManager();
@@ -21,12 +18,11 @@ export const axiosInstance = axios.create({
 });
 
 
-
 export namespace getApi {
 
-	export const getUsersAllPromise=()									: Promise<IUser[]>					=>{
-
-
+	const timestamp = Date.now();
+	export const getUsersAllPromise= (time) =>{
+		const tqt = time;
 		return axiosInstance.get(`${strRoutes.getUsersAll()}`, {
 			headers: {
 				'Authorization': `Bearer ${authManager.getToken()}`
@@ -61,7 +57,9 @@ export namespace postApi {
 
 
 export namespace putApi {
-	export const putUser= (updateUser: Partial<IUser>)		=>{ //fixme: "404 not found ?"
+	export const putUser= (updateUser: Partial<IUser>)		=>{
+		console.log("[putApi/putUser] status sent: " + updateUser.status);
+
 		return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, {
 			headers: {
 				'Authorization': `Bearer ${authManager.getToken()}`

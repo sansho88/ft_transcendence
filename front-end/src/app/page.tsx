@@ -3,9 +3,10 @@ import React, {useContext, useEffect} from "react";
 import Button from "../components/CustomButtonComponent"
 import Profile from "../components/ProfileComponent"
 import Stats from "../components/StatsComponent"
+import UserList from "@/components/UserListComponent";
 
 import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
-import {LoggedContext, TokenContext, UserContext} from '@/context/globalContext';
+import {LoggedContext, UserContext} from '@/context/globalContext';
 import {useRouter} from 'next/navigation';
 import * as POD from "@/shared/types";
 import {EStatus} from "@/shared/types";
@@ -16,7 +17,7 @@ import Game from "@/components/game/Game";
 
 export default function Home() {
     preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
-    const {logged, setLogged} = useContext(LoggedContext);
+    const {logged} = useContext(LoggedContext);
     const {userContext, setUserContext} = useContext(UserContext);
     const router = useRouter();
 
@@ -33,6 +34,7 @@ export default function Home() {
     }
 
     async function updateStatusUser(id_user, status) { //to remove when the player status will be updated directly from the Back
+
         const updateUser: Partial<POD.IUser> = {UserID: id_user,
             login: userContext.login,
             visit: userContext.visit,
@@ -40,7 +42,8 @@ export default function Home() {
             nickname: userContext.nickname,
             avatar_path: userContext.avatar_path,
             has_2fa: userContext.has_2fa,
-            token_2fa: userContext.token_2fa}
+            token_2fa: userContext.token_2fa};
+
         await apiReq.putApi.putUser(updateUser)
             .then(() => {
                 setUserContext(updateUser);
@@ -52,13 +55,11 @@ export default function Home() {
 
     function switchOnlineIngame() {
         const tmpStatus = userContext?.status == EStatus.Online ? EStatus.InGame : EStatus.Online;
-        //userContext.status = tmpStatus;
 
-        //setUserContext(userContext);
         updateStatusUser(userContext?.UserID, tmpStatus)
             .catch((e) => console.error(e));
 
-        console.log('[MAIN PAGE]USER STATUS:' + userContext.status);
+        console.log('[MAIN PAGE]USER STATUS:' + tmpStatus);
     }
 
 
@@ -87,22 +88,21 @@ export default function Home() {
     }
 
 
-    if (!logged /*&& !localStorage.getItem("login")*/)
-        router.push('/auth')
-    else
+    if (logged /*&& !localStorage.getItem("login")*/)
         return (
             <>
                 <main className="main-background">
                     <Profile className={"main-user-profile"}
                              nickname={userContext.nickname ? userContext.nickname : "BADNICKNAME"}
-                             login={userContext.login ? userContext.login : "BADLOGIN"} status={userContext.status}
-                             avatar_path={userContext.avatar_path} isEditable={true}>
+                             login={userContext.login ? userContext.login : "BADLOGIN"} status={userContext.status ? userContext.status : 0}
+                             avatar_path={userContext.avatar_path}
+                             UserID={userContext.UserID ? userContext.UserID : 0}
+                             isEditable={true} has_2fa={false}>
 
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
                         <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
                     </Profile>
-                    <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"}
-                            height={"42px"}/>
+                    <UserList className={"friends"}/>
 
                     <div className={"game"} onClick={switchOnlineIngame}>
 
