@@ -23,9 +23,9 @@ export default function Game({className}: {className: string}) {
   const socket      = useContext(SocketContextGame);
   const socketRef   = useRef(socket);
   
-  const {logged}    = useContext(LoggedContext);
+  // const {logged}    = useContext(LoggedContext);
   const userLogged  = useContext(UserContext);
-  const router      = useRouter();
+  // const router      = useRouter();
 
 
   const tableRef    = useRef<HTMLDivElement>(null);
@@ -63,9 +63,9 @@ export default function Game({className}: {className: string}) {
   const gameMod                         = useRef<PODGAME.EGameMod>(PODGAME.EGameMod.classic);
 
 
-  function changeTheme(themeName) {
-    setCurrentGameTheme(themeName);
-}
+//   function changeTheme(themeName) {
+//     setCurrentGameTheme(themeName);
+// }
 
 
 	useEffect(() => {
@@ -78,14 +78,6 @@ export default function Game({className}: {className: string}) {
     setStepCurrentSession(EStatusFrontGame.gameSessionFind);
 	}, [nameGameSession]);
 	
-	useEffect(() => {
-	  if (!logged) {
-	    router.push('/auth'); // for dev
-	    console.error("your are not logged!");
-	  }
-	}, [logged]);
-
-
   function calculCoefTableServer(servSize: PODGAME.IVector2D) {
     if (tableRef.current) {
       coefTableServer.current = {x:  tableRef.current?.offsetWidth / servSize.x , y: tableRef.current?.offsetHeight / servSize.y}
@@ -97,119 +89,123 @@ export default function Game({className}: {className: string}) {
     |                                                                                                             |
     /*-----------------------------------------------------------------------------------------------------------*/ 
 	useEffect(() => {
-	  if (!socketRef.current?.connected)
-	    socketRef.current?.connect();
-	  if (socketRef.current?.connected && typeof socketRef.current !== 'string') {
-	
-	    socketRef.current.on('info', (data) => {
-	      console.log(`WS info recu: ${JSON.stringify(data)}`);
-	    })
-	
-	    socketRef.current.on('infoGameSession', (data: PODGAME.IGameSessionInfo) => {
-        // tableServerCoef.current = {x: data.startInitElement.tableServerSize.x / window. //taille en x de la div parent au component}
-        setNameGameSession(data.gameName);
-        setUserP1(data.player1);
-        setUserP2(data.player2);
-        setBallSize(data.startInitElement.ballSize);
-        setP1Position({x: data.startInitElement.paddleP1Pos.x, y: data.startInitElement.paddleP1Pos.y})
-        setP2Position({x: data.startInitElement.paddleP2Pos.x, y: data.startInitElement.paddleP2Pos.y})
-	      console.log(`WS name session recu: ${JSON.stringify(data)}`);
-	    })
-	
-      //client 
-	    socketRef.current.on('gameFind', (data) => {
-	      if (stepCurrentSession === EStatusFrontGame.matchmakingRequest) {
-	        setStepCurrentSession(EStatusFrontGame.gameSessionFind)
-	      }
-	      setRemoteEvent(data.remoteEvent)
-	      console.log(`WS gameFind recu: ${JSON.stringify(data)}`);
-	    })
 
 
-	    socketRef.current.on('countdown', (data) => {
-        if (stepCurrentSession !== EStatusFrontGame.countdown)
-          setStepCurrentSession(EStatusFrontGame.countdown);
-        setInfoMessage(data);
-	      // console.log(`WS countdown: ${JSON.stringify(data)}`);
-	    })
-	
-	    socketRef.current.on('startGame', () => {
-        setStepCurrentSession(EStatusFrontGame.gameInProgress);
-        setBallHidden(false);
-	    })
+    if (!socketRef.current?.connected) {
+      console.log('CGame: socket non connecter, se connect');
+  
+      socketRef.current?.on('connect', () => {
+        console.log('CGame: socket connecté YOUHOUUUUUUUU');
+        // Autres opérations à faire une fois connecté
+        
+        socketRef.current?.on('info', (data) => {
+          console.log(`WS info recu: ${JSON.stringify(data)}`);
+        })
+    
+        socketRef.current?.on('infoGameSession', (data: PODGAME.IGameSessionInfo) => {
+          // tableServerCoef.current = {x: data.startInitElement.tableServerSize.x / window. //taille en x de la div parent au component}
+          setNameGameSession(data.gameName);
+          setUserP1(data.player1);
+          setUserP2(data.player2);
+          setBallSize(data.startInitElement.ballSize);
+          setP1Position({x: data.startInitElement.paddleP1Pos.x, y: data.startInitElement.paddleP1Pos.y})
+          setP2Position({x: data.startInitElement.paddleP2Pos.x, y: data.startInitElement.paddleP2Pos.y})
+          console.log(`WS name session recu: ${JSON.stringify(data)}`);
+        })
+    
+        //client 
+        socketRef.current?.on('gameFind', (data) => {
+          if (stepCurrentSession === EStatusFrontGame.matchmakingRequest) {
+            setStepCurrentSession(EStatusFrontGame.gameSessionFind)
+          }
+          setRemoteEvent(data.remoteEvent)
+          console.log(`WS gameFind recu: ${JSON.stringify(data)}`);
+        })
+  
+  
+        socketRef.current?.on('countdown', (data) => {
+          if (stepCurrentSession !== EStatusFrontGame.countdown)
+            setStepCurrentSession(EStatusFrontGame.countdown);
+          setInfoMessage(data);
+          // console.log(`WS countdown: ${JSON.stringify(data)}`);
+        })
+    
+        socketRef.current?.on('startGame', () => {
+          setStepCurrentSession(EStatusFrontGame.gameInProgress);
+          setBallHidden(false);
+        })
+  
+        socketRef.current?.on('endgame', (data) => {
+          if (stepCurrentSession !== EStatusFrontGame.endOfGame)
+            setStepCurrentSession(EStatusFrontGame.endOfGame);
+          setNameGameSession('');
+          setRemoteEvent('');
+          setBallHidden(true);
+          if (tableRef && tableRef.current && tableRef.current.offsetHeight){
+            const offsetHeight = tableRef.current.offsetHeight;
+            setP1Position(prevState => ({
+              x: prevState.x,
+              y: (offsetHeight / 2)
+            }));
+            setP2Position(prevState => ({
+              x: prevState.x,
+              y: (offsetHeight / 2)
+            }));;
+          }
+          setInfoMessage(data);
+          console.log(`WS endgame: ${JSON.stringify(data)}`);
+        })
+  
+        socketRef.current?.on('reset', () => {
+          console.log(`WS RESET`);
+          resetPositionPaddle();
+          setInfoMessage('PLAY');
+          setScoreP1(0);
+          setScoreP2(0);
+          setUserP1({});
+          setUserP2({});
+          setStepCurrentSession(EStatusFrontGame.idle);
+        })
+  
+  
+  
+        socketRef.current?.on('setup', (data) => { //TODO: recup via ws le setup de la table
+          console.log(`WS setup recu: ${JSON.stringify(data)}`); //recupere taille des elements paddle et balle
+        })
+    
+  
+        /*-----------------------------------------------------------------------------------------------------------*\
+        |                                               TABLE UPDATE                                                  |
+        /*-----------------------------------------------------------------------------------------------------------*/  
+        socketRef.current?.on('updateTable', (data: PODGAME.IPodTable) => {
+          // console.log(JSON.stringify(data))
+          if(tableRef.current){
+            // coefTableServer.current = {x:  tableRef.current?.offsetWidth / data.tableSize.x , y: tableRef.current?.offsetHeight / data.tableSize.y}
+            calculCoefTableServer(data.tableSize);
+            setP1Position({x: data.positionP1v.x * coefTableServer.current.x, y: data.positionP1v.y * coefTableServer.current.y})
+            setP2Position({x: data.positionP2v.x * coefTableServer.current.x, y: data.positionP2v.y * coefTableServer.current.y})
+            setBallPosition({x: data.positionBall.x * coefTableServer.current.x, y: data.positionBall.y * coefTableServer.current.y});
+            setP1Size({x: data.sizeP1.x * coefTableServer.current.x, y: data.sizeP1.y * coefTableServer.current.y})
+            setP2Size({x: data.sizeP2.x * coefTableServer.current.x, y: data.sizeP2.y * coefTableServer.current.y})
+            setBallSize({x: data.sizeBall.x * coefTableServer.current.x, y: data.sizeBall.y * coefTableServer.current.y})
+  
+          }
+          if (gameMod.current !== PODGAME.EGameMod.trainning)
+          {
+            setScoreP1(data.scoreP1);
+            setScoreP2(data.scoreP2);
+          }
+          else
+          {
+            setScoreP1(data.maxTrainningHit);
+            setScoreP2(data.trainningHit);
+          }
+        })
+      });
+  
+      socketRef.current?.connect();
+    }
 
-	    socketRef.current.on('endgame', (data) => {
-        if (stepCurrentSession !== EStatusFrontGame.endOfGame)
-          setStepCurrentSession(EStatusFrontGame.endOfGame);
-        setNameGameSession('');
-        setRemoteEvent('');
-        setBallHidden(true);
-        if (tableRef && tableRef.current && tableRef.current.offsetHeight){
-          const offsetHeight = tableRef.current.offsetHeight;
-          setP1Position(prevState => ({
-            x: prevState.x,
-            y: (offsetHeight / 2)
-          }));
-          setP2Position(prevState => ({
-            x: prevState.x,
-            y: (offsetHeight / 2)
-          }));;
-        }
-        setInfoMessage(data);
-	      console.log(`WS endgame: ${JSON.stringify(data)}`);
-	    })
-
-	    socketRef.current.on('reset', () => {
-	      console.log(`WS RESET`);
-        resetPositionPaddle();
-        setInfoMessage('PLAY');
-        setScoreP1(0);
-        setScoreP2(0);
-        setUserP1({});
-        setUserP2({});
-        setStepCurrentSession(EStatusFrontGame.idle);
-	    })
-
-
-
-	    socketRef.current.on('setup', (data) => { //TODO: recup via ws le setup de la table
-	      console.log(`WS setup recu: ${JSON.stringify(data)}`); //recupere taille des elements paddle et balle
-	    })
-	
-
-    /*-----------------------------------------------------------------------------------------------------------*\
-    |                                               TABLE UPDATE                                                  |
-    /*-----------------------------------------------------------------------------------------------------------*/  
-      socketRef.current.on('updateTable', (data: PODGAME.IPodTable) => {
-        // console.log(JSON.stringify(data))
-        if(tableRef.current){
-          // coefTableServer.current = {x:  tableRef.current?.offsetWidth / data.tableSize.x , y: tableRef.current?.offsetHeight / data.tableSize.y}
-          calculCoefTableServer(data.tableSize);
-          setP1Position({x: data.positionP1v.x * coefTableServer.current.x, y: data.positionP1v.y * coefTableServer.current.y})
-          setP2Position({x: data.positionP2v.x * coefTableServer.current.x, y: data.positionP2v.y * coefTableServer.current.y})
-          setBallPosition({x: data.positionBall.x * coefTableServer.current.x, y: data.positionBall.y * coefTableServer.current.y});
-          setP1Size({x: data.sizeP1.x * coefTableServer.current.x, y: data.sizeP1.y * coefTableServer.current.y})
-          setP2Size({x: data.sizeP2.x * coefTableServer.current.x, y: data.sizeP2.y * coefTableServer.current.y})
-          setBallSize({x: data.sizeBall.x * coefTableServer.current.x, y: data.sizeBall.y * coefTableServer.current.y})
-
-        }
-        if (gameMod.current !== PODGAME.EGameMod.trainning)
-        {
-          setScoreP1(data.scoreP1);
-          setScoreP2(data.scoreP2);
-        }
-        else
-        {
-          setScoreP1(data.maxTrainningHit);
-          setScoreP2(data.trainningHit);
-        }
-
-			//ball position
-	      // console.log(`WS updateTable : ${JSON.stringify(data)}`); //recupere la position du paddles 1
-        // console.log(`dim table x:${tableRef.current?.offsetWidth} y:${tableRef.current?.offsetHeight}`)
-	    })
-     }
-  // return () => {socketRef.current?.close};
 	}, []);
 
 	const arrowUp = useRef<boolean>(false);
@@ -473,6 +469,9 @@ export default function Game({className}: {className: string}) {
 
   return (
     <div className={`${className} ${currentGameTheme} rounded-xl`}> 
+    <>
+      {console.log('DIV GAME MONTER')}
+    </>
       <Table tableRef={tableRef} className='table w-full h-full relative font-vt323'> 
         {/* <Scoreboard/> // bugger*/}
         {/* <CenterDBG/> */}

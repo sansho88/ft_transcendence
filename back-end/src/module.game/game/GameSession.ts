@@ -523,7 +523,7 @@ export class GameSession {
         else if (this.table.maxTrainningHit > 20 && this.table.maxTrainningHit < 42)
           return `${this.table.maxTrainningHit}: You have become a god, but.. return worked!`;
         else
-          return `${this.table.maxTrainningHit}: 500 Internal Server Error: It's impossible ! Otherwise: Incredible!`
+          return `${this.table.maxTrainningHit}: 542 Internal Server Error: It's impossible ! Otherwise: Incredible!`
       }
       else
         return `${this.winner.user.nickname} won this game\n${this.table.scoreP1} - ${this.table.scoreP2}`
