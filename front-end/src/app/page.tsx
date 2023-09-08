@@ -6,7 +6,7 @@ import Stats from "../components/StatsComponent"
 import UserList from "@/components/UserListComponent";
 
 import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
-import {LoggedContext, TokenContext, UserContext} from '@/context/globalContext';
+import {LoggedContext, UserContext} from '@/context/globalContext';
 import {useRouter} from 'next/navigation';
 import * as POD from "@/shared/types";
 import {EStatus} from "@/shared/types";
@@ -17,7 +17,7 @@ import Game from "@/components/game/Game";
 
 export default function Home() {
     preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
-    const {logged, setLogged} = useContext(LoggedContext);
+    const {logged} = useContext(LoggedContext);
     const {userContext, setUserContext} = useContext(UserContext);
     const router = useRouter();
 
@@ -88,9 +88,7 @@ export default function Home() {
     }
 
 
-    if (!logged /*&& !localStorage.getItem("login")*/)
-        router.push('/auth')
-    else
+    if (logged /*&& !localStorage.getItem("login")*/)
         return (
             <>
                 <main className="main-background">

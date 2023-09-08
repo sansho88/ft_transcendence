@@ -123,26 +123,35 @@ export default function Auth({className}: { className?: string }) {
     const enterLogin = () => {
         return (
             <div className='flex flex-col justify-center items-center text-white my-2'>
-                <InputPod
-                    className='inputLogin'
-                    props=
-                        {
-                            {
-                                type: "text",
-                                value: loginInput,
-                                onChange: () => (e: React.ChangeEvent<HTMLInputElement>) => {
-                                    setLoginInput(e.target.value)
-                                },
-                                onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
-                                    if (e.key === "Enter") {
-                                        () => nextStepCheck()
+                {  currentStepLogin === EStepLogin.logIn ?
+                    <>
+                        <div className=' font-thin'>LOGIN</div>
+                        <InputPod
+                            className='inputLogin'
+                            props=
+                                {
+                                    {
+                                        type: "text",
+                                        value: loginInput,
+                                        onChange: () => (e: React.ChangeEvent<HTMLInputElement>) => {
+                                            setLoginInput(e.target.value)
+                                        },
+                                        onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+                                            if (e.key === "Enter") {
+                                                () => nextStepCheck()
+                                            }
+                                        }
+
                                     }
                                 }
-
-                            }
-                        }/>
-                <div className=' font-thin'>Enter login</div>
-                {}
+                        />
+                    </>
+                    :
+                    <div className={"text-center"}>
+                        Keep in minds your future generated login.<br/>
+                        You'll need it for log in.
+                    </div>
+                }
                 {enterPassword()}
             </div>
         )
@@ -193,7 +202,7 @@ export default function Auth({className}: { className?: string }) {
     }
 
     function setCredentials() {
-        if (loginInput.trim().length === 0) {
+        if (loginInput.trim().length === 0 && isSignInMode) {
             alert('Login is empty');
             setPassword('');
             setPasswordInput('');
@@ -372,8 +381,8 @@ export default function Auth({className}: { className?: string }) {
                     return;
 
                 case EStepLogin.tryToCreateAccount:
-                    console.log(`at case: TryToCreateAccount: login: ${login}, password: ${password}`)
-                    const createUser: Partial<POD.IUser> = {login: login, password: password, visit: true}
+                    console.log(`at case: TryToCreateAccount: nickName: ${login}, password: ${password}`)
+                    const createUser: Partial<POD.IUser> = {login: "serverside", password: password, visit: true}
                     await apiReq.postApi.postUser(createUser)
                         .then(async (res) => {
                             if (res.status === 200) {
