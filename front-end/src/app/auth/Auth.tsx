@@ -400,7 +400,21 @@ export default function Auth({className}: { className?: string }) {
                         })
                         .catch((e) => {
                             console.error("Post User ERROR: " + e, `createUser= ${createUser.login}, ${createUser.visit}`);
-                            LoggedFailed(e.response.status);
+                            if (e.response)
+                            {
+                                console.error("Request made and server responded...");
+                                console.error(e.response.data);
+                                console.error(e.response.status);
+                                console.error(e.response.headers);
+                                LoggedFailed(e.response.status);
+                            }
+                            else if (e.request)
+                            {
+                                console.error("The request was made but no response was received");
+                                console.error(e.request);
+                            }
+                            else
+                                console.error(e.message);
                         });
                     return;
             }

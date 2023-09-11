@@ -23,8 +23,8 @@ async function bootstrap() {
 
 	app.setGlobalPrefix(`api`);
 	app.enableCors({
-		origin: true, // ou définissez une liste d'origines autorisées ['http://example.com', 'http://localhost:3000']
-		methods: ['GET', 'POST', 'PUT'],
+		origin: 'http://localhost:3000', // ou définissez une liste d'origines autorisées ['http://example.com', 'http://localhost:3000']
+		methods: ['GET', 'POST', 'PUT', 'DELETE'],
 		allowedHeaders: ['Content-Type', 'Authorization'],
 		credentials: true,
 	});
