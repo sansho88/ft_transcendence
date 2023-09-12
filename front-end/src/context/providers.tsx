@@ -73,13 +73,13 @@ export function SocketProvider({ children }) {
 	return (
 		<>
 			<OriginContext.Provider value={originDefaultFull(originDefault)}>
-				<LoggedContext.Provider value={{logged: isLogged, setLogged: setIsLogged}}>
+
 					<SocketProvider>
 						<UserContext.Provider value={{userContext: userContext, setUserContext: setUserContext}}>
 							{children}
 						</UserContext.Provider>
 					</SocketProvider>
-				</LoggedContext.Provider>
+
 			</OriginContext.Provider>
 		</>
 	);
