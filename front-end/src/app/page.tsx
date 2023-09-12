@@ -2,14 +2,14 @@
 import React, {useContext, useEffect} from "react";
 
 import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
-import {LoggedContext, UserContext} from '@/context/globalContext';
+import {LoggedContext} from '@/context/globalContext';
 import {useRouter} from 'next/navigation';
-import HomePage from "@/components/HomePageComponent";
+import LoadingComponent from "@/components/waiting/LoadingComponent";
 
 
 export default function Home() {
     preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
-    const {logged, setLogged} = useContext(LoggedContext);
+    const {logged} = useContext(LoggedContext);
     const router = useRouter();
 
     useEffect(() => {
@@ -48,6 +48,6 @@ export default function Home() {
 
 
    // if (logged /*&& !localStorage.getItem("login")*/)
-        return (<><ClipLoader.></ClipLoader.>
+        return (<LoadingComponent/>
         )
 }
