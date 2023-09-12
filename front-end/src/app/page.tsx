@@ -30,24 +30,13 @@ export default function Home() {
 
     }, [logged]);
 
-    /*
-    useEffect(() => {
-        console.log("Main Page: isLogged? " + logged);
-        let storedLogin = localStorage.getItem("login");
-        console.log("Main Page: localStorageLogin? " + storedLogin);
-/!*
-        if (!logged /!*&& !localStorage.getItem("login")*!/)
-            router.push('/auth')
-        else {
-            console.log("User is already LOGGED as " + localStorage.getItem("login"))
-
-        }*!/
-    }, [logged])
-
-*/
-
-
-   // if (logged /*&& !localStorage.getItem("login")*/)
-        return (<LoadingComponent/>
+        return (
+            <>
+                <div className="welcome space-y-10 my-12">
+                    <div className="welcome-msg">WELCOME TO</div>
+                    <div className="welcome-title ">PONG POD!</div>
+                </div>
+                <LoadingComponent/>
+            </>
         )
 }

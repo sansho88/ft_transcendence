@@ -244,12 +244,14 @@ export default function Auth({className}: { className?: string }) {
         if (currentStepLogin !== EStepLogin.successLogin) {
             return;
         }
+        router.push('/');
+        setShowMessage(false);/*
         const timer = setTimeout(() => {
-            setShowMessage(false);
+
             setCurrentStepLogin(EStepLogin.bye)
-            router.push('/'); //executer apres le timeout
+             //executer apres le timeout
         }, 650); // 3000 ms = 3 secondes
-        return () => clearTimeout(timer);
+        return () => clearTimeout(timer);*/
     }, [currentStepLogin, router]);
 
     const LoggedSuccess = () => {
@@ -259,12 +261,7 @@ export default function Auth({className}: { className?: string }) {
             */
         return (
             <div className="flex flex-col items-center text-center">
-                {showMessage && (
-                    <>
-                        <p className=' text-white'>Congratulations, you are now logged in!<br/>Enjoy playing!</p>
-                        <ClipLoader.PacmanLoader color='#07C3FF' size={30}/>
-                    </>
-                )}
+                {showMessage}
             </div>
         );
     }
@@ -483,8 +480,8 @@ export default function Auth({className}: { className?: string }) {
             {currentStepLogin === EStepLogin.enterLogin && enterLogin()}
             {(currentStepLogin === EStepLogin.signIn || currentStepLogin === EStepLogin.logIn) && enterLogin()}
 
-            {currentStepLogin === EStepLogin.signOrLogIn &&
-                <ClipLoader.BeatLoader className='pt-[12vh]' color="#36d7b7" size={13}/>
+            {currentStepLogin === EStepLogin.signOrLogIn /*&&
+                <ClipLoader.BeatLoader className='pt-[12vh]' color="#36d7b7" size={13}/>*/
             }
             {currentStepLogin === EStepLogin.successLogin && LoggedSuccess()}
             {currentStepLogin === EStepLogin.failLogin && LoggedFailed(42)}
