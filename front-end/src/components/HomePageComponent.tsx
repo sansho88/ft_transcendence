@@ -4,7 +4,7 @@ import Button from "@/components/CustomButtonComponent";
 import UserList from "@/components/UserListComponent";
 import Game from "@/components/game/Game";
 import ChatRoomCommponent from "@/components/chat/ChatRoomComponent";
-import React, {useContext} from "react";
+import React, {useContext, useEffect} from "react";
 import {LoggedContext, UserContext} from "@/context/globalContext";
 import {EStatus, IUser} from "@/shared/types";
 import * as apiReq from "@/components/api/ApiReq";
@@ -17,11 +17,15 @@ const HomePage = () => {
     const {logged, setLogged} = useContext(LoggedContext);
     const router = useRouter();
 
-    if (!userContext)
-    {
-        authManager.setToken(localStorage.getItem("token"));
-        getUserMe().then((me) => setUserContext(me) );
-    }
+
+
+    useEffect(() => {
+        if (!userContext)
+        {
+            authManager.setToken(localStorage.getItem("token"));
+            getUserMe().then((me) => setUserContext(me) );
+        }
+    })
 
     enum Colors {
         "grey",

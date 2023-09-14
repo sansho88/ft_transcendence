@@ -8,9 +8,11 @@ import axios from "axios";
 const AuthManager = require('./AuthManager');
 export const authManager = new AuthManager();
 
+const currentURL = 'http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/';
+
 
 export const axiosInstance = axios.create({
-	baseURL: 'http://localhost:8000/api/',
+	baseURL: currentURL,
 	validateStatus: function (status) {
 		return status >= 200 && status < 204;
 	},
