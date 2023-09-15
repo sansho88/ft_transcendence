@@ -1,7 +1,7 @@
 class AuthManager {
 
     token = "UNINITIALIZED";
-    baseURL = "emptyURL";
+    baseURL = "api";
     constructor() {
         this.token = "";
     }

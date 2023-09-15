@@ -17,9 +17,8 @@ const HomePage = () => {
     const {logged, setLogged} = useContext(LoggedContext);
     const router = useRouter();
 
-
-
     useEffect(() => {
+        authManager.setBaseURL('http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/');
         if (!userContext)
         {
             authManager.setToken(localStorage.getItem("token"));
