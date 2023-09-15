@@ -33,7 +33,7 @@ export class GameSession {
 	private speedPaddleInitial            : number;
 	private speedPaddle                   : number = 4; // in pixel per move
   private hitCounter                    : number = 0;
-  private scoreLimit                    : number = 3;
+  private scoreLimit                    : number = 5;
   private ghostZoneSize                 : number = 20; // % of total witdh
 
   // private trainningHit                  : number = 0;
@@ -416,9 +416,9 @@ export class GameSession {
    
       // Collision avec les rebords gauche droite => GOAL
     if (ballPos.x <= 0)
-      this.addGoalToPlayer(this.player1);
+      this.addGoalToPlayer(this.player2);
     if (ballPos.x >= tableSize.x)
-      this.addGoalToPlayer(this.player2)
+      this.addGoalToPlayer(this.player1);
   }
 
 
@@ -454,9 +454,9 @@ export class GameSession {
 		// console.log(`Random direction for ball engagement = ${angleRandom}`);
 
 		if (this.lastPlayerScore === this.player1) 
-      dx = -1;
-		else if (this.lastPlayerScore === this.player2) 
       dx = 1;
+		else if (this.lastPlayerScore === this.player2) 
+      dx = -1;
     else 
     {
       if (Math.random() < 0.5)
