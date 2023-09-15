@@ -68,7 +68,7 @@ export function SocketProvider({ children }) {
 
   export function Providers({children}) {
     const [isLogged, setIsLogged] = useState<boolean>(false);
-    const [userContext, setUserContext] = useState<IUser | undefined>(undefined);
+    const [userContext, setUserContext] = useState<IUser>(null);
   
 	return (
 		<>

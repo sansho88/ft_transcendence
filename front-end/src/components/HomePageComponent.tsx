@@ -17,8 +17,10 @@ const HomePage = () => {
     const {logged, setLogged} = useContext(LoggedContext);
     const router = useRouter();
 
+
     useEffect(() => {
         authManager.setBaseURL('http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/');
+        localStorage.setItem('userContext', JSON.stringify(userContext));
         if (!userContext)
         {
             authManager.setToken(localStorage.getItem("token"));
@@ -31,13 +33,6 @@ const HomePage = () => {
         "green",
         "gold"
     }
-
-    let StatusColor = new Map<number, string>();
-
-    for (let i: number = 0; i < 3; i++) {
-        StatusColor.set(i, Colors[i]);
-    }
-
     async function updateStatusUser(id_user, status) { //to remove when the player status will be updated directly from the Back
 
         let updateUser: Partial<IUser> = userContext;
@@ -66,10 +61,10 @@ const HomePage = () => {
             <main className="main-background">
                 { userContext &&
                     <Profile className={"main-user-profile"}
-                             nickname={userContext.nickname ? userContext.nickname : "BADNICKNAME"}
-                             login={userContext.login ? userContext.login : "BADLOGIN"} status={userContext.status ? userContext.status : 0}
+                             nickname={userContext.nickname}
+                             login={userContext.login} status={userContext.status }
                              avatar_path={userContext.avatar_path}
-                             UserID={userContext.UserID ? userContext.UserID : 0}
+                             UserID={userContext.UserID }
                              isEditable={true} has_2fa={false}>
 
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
@@ -78,18 +73,14 @@ const HomePage = () => {
                 }
                 <UserList className={"friends"}/>
                 <Button className={"logout"} image={"/logout.svg"} onClick={() => {
-                    localStorage.removeItem("token");
+                    localStorage.clear();
                     router.push("/auth");
                     setLogged(false);
                     }
                 } alt={"Logout button"}/>
 
                 <div className={"game"} onClick={switchOnlineIngame}>
-
                     <Game className={"game"}/>
-
-                    <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"}
-                            alt={"GameMode options"} radius={"0"} onClick={switchOnlineIngame}/>
                 </div>
                {/* <ChatRoomCommponent className={"chat"}/> fixme Fait crash la page ?*/ }
 

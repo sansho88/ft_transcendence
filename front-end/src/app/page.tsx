@@ -18,9 +18,7 @@ export default function Home() {
     });
 
     useEffect(() => {
-        console.log("DOUBIDOU");
         const tmpToken = localStorage.getItem('token');
-        console.log("token found:" + !!tmpToken + ", logged:" + logged );
         if (!logged && !tmpToken)
         {
             console.log("Redirect to auth page");
@@ -31,8 +29,6 @@ export default function Home() {
             console.log("Redirect to Home page");
             router.push('/home');
         }
-
-
     }, [logged]);
 
         return (
