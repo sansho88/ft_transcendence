@@ -33,8 +33,12 @@ export class GameSession {
 	private speedPaddleInitial            : number;
 	private speedPaddle                   : number = 4; // in pixel per move
   private hitCounter                    : number = 0;
-  private scoreLimit                    : number = 3;
-  private ghostZoneSize                 : number = 20; // % of total witdh
+  private scoreLimit                    : number = 5;
+  private ghostZoneSizeInitial          : number = 10; // % size ghostZone of total witdh/2
+  private ghostZoneSize                 : number; // % of total witdh
+  private ghostZoneSizeMax              : number = 55; // % of total witdh
+  private ghostZoneSizeCoef             : number = 1.35; // coef agrandissement de la zone tous les [ballNumberHitBtwGhostZoneUp] coups
+  private ballNumberHitBtwGhostZoneUp   : number = 3; //tous les X coup, la ball prend speed * AccelerationFactor
 
   // private trainningHit                  : number = 0;
   // private maxTrainningHit               : number = 0;
@@ -110,6 +114,13 @@ export class GameSession {
 			x: (this.table.tableSize.x / 2) - (this.table.sizeBall.x / 2),
 			y: (this.table.tableSize.y / 2) - - (this.table.sizeBall.y / 2),
 		};
+    if (this.gameMod === PODGAME.EGameMod.ghost)
+    {
+      this.ballSpeed       *= 0.67;
+      this.ballSpeedInitial = this.ballSpeed;
+      this.ballSpeedMax     = this.ballSpeedInitial * 1.032; 
+      this.ghostZoneSize    = this.ghostZoneSizeInitial;
+    }
 
     //position de depart -- centrer en y
     this.table.positionP1v = {  x: this.paddlePosMargin * this.table.tableSize.x, 
@@ -281,7 +292,7 @@ export class GameSession {
 
   private ghostModZoneManager = () =>
   {
-    const middleZoneSize: number = (this.table.tableSize.x / 2) * (this.ghostZoneSize / 10);
+    const middleZoneSize: number = (this.table.tableSize.x / 2) * (this.ghostZoneSize / 100);
     let xZone:{min: number, max:number} = {
       min: (this.table.tableSize.x / 2) - middleZoneSize,
       max: (this.table.tableSize.x / 2) + middleZoneSize
@@ -290,6 +301,15 @@ export class GameSession {
       this.table.ballIsHidden = true;
     else
       this.table.ballIsHidden = false;
+    if(this.hitCounter % this.ballNumberHitBtwGhostZoneUp)
+    {
+      console.log(`La ghost zone s'agrandie : ${this.ghostZoneSize}`)
+      if (this.ghostZoneSize < this.ghostZoneSizeMax)
+          this.ghostZoneSize *= this.ghostZoneSizeCoef;
+      else
+        this.ghostZoneSize = this.ghostZoneSizeMax;
+      this.hitCounter = 0;
+    }
   }
 
 
@@ -349,12 +369,12 @@ export class GameSession {
 
 
   private ballSpeedManagement(){
-      if (this.hitCounter % this.ballNumberHitBtwAcceleration === 0 && this.ballSpeed <= this.ballSpeedMax)
-      {
-        this.ballSpeed *= this.ballAccelerationFactor;
-        this.speedPaddle *= this.paddleAccelerationFactor;
-        console.log(`${this.gameRoomEvent}: la balle accelere ! (ballSpeed:${this.ballSpeed})`)
-      }
+    if (this.hitCounter % this.ballNumberHitBtwAcceleration === 0 && this.ballSpeed <= this.ballSpeedMax)
+    {
+      this.ballSpeed *= this.ballAccelerationFactor;
+      this.speedPaddle *= this.paddleAccelerationFactor;
+      console.log(`${this.gameRoomEvent}: la balle accelere ! (ballSpeed:${this.ballSpeed})`)
+    }
   }
 
   private handleBallCollisions() {
@@ -416,9 +436,9 @@ export class GameSession {
    
       // Collision avec les rebords gauche droite => GOAL
     if (ballPos.x <= 0)
-      this.addGoalToPlayer(this.player1);
+      this.addGoalToPlayer(this.player2);
     if (ballPos.x >= tableSize.x)
-      this.addGoalToPlayer(this.player2)
+      this.addGoalToPlayer(this.player1);
   }
 
 
@@ -454,9 +474,9 @@ export class GameSession {
 		// console.log(`Random direction for ball engagement = ${angleRandom}`);
 
 		if (this.lastPlayerScore === this.player1) 
-      dx = -1;
-		else if (this.lastPlayerScore === this.player2) 
       dx = 1;
+		else if (this.lastPlayerScore === this.player2) 
+      dx = -1;
     else 
     {
       if (Math.random() < 0.5)
@@ -470,6 +490,8 @@ export class GameSession {
     this.hitCounter = 0;
     if (this.gameMod === PODGAME.EGameMod.trainning)
       this.table.trainningHit = 0;
+    if (this.gameMod === PODGAME.EGameMod.ghost)
+      this.ghostZoneSize = this.ghostZoneSizeInitial;
 	}
 
 
