@@ -281,7 +281,7 @@ export class GameSession {
 
   private ghostModZoneManager = () =>
   {
-    const middleZoneSize: number = (this.table.tableSize.x / 2) * (this.ghostZoneSize / 10);
+    const middleZoneSize: number = (this.table.tableSize.x / 2) * (this.ghostZoneSize / 100);
     let xZone:{min: number, max:number} = {
       min: (this.table.tableSize.x / 2) - middleZoneSize,
       max: (this.table.tableSize.x / 2) + middleZoneSize
