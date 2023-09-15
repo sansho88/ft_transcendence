@@ -49,7 +49,7 @@ export default function Game({className}: {className: string}) {
   const [p1Position, setP1Position]     = useState<PODGAME.IVector2D>({x: -1, y: -1});
   const [p2Position, setP2Position]     = useState<PODGAME.IVector2D>({x: -1, y: -1});
   const [ballPosition, setBallPosition] = useState<PODGAME.IVector2D>({x: 0, y: 0});
-  const [ballHidden, setBallHidden]     = useState<boolean>(true);
+  const [ballIsHidden, setBallIsHidden] = useState<boolean>(true);
   
   const [userP1, setUserP1]             = useState<Partial<IUser>>({});
   const [userP2, setUserP2]             = useState<Partial<IUser>>({});
@@ -110,6 +110,7 @@ export default function Game({className}: {className: string}) {
           setBallSize(data.startInitElement.ballSize);
           setP1Position({x: data.startInitElement.paddleP1Pos.x, y: data.startInitElement.paddleP1Pos.y})
           setP2Position({x: data.startInitElement.paddleP2Pos.x, y: data.startInitElement.paddleP2Pos.y})
+          setBallIsHidden(data.ballIsHidden)
           console.log(`WS name session recu: ${JSON.stringify(data)}`);
         })
     
@@ -132,7 +133,7 @@ export default function Game({className}: {className: string}) {
     
         socketRef.current?.on('startGame', () => {
           setStepCurrentSession(EStatusFrontGame.gameInProgress);
-          setBallHidden(false);
+          setBallIsHidden(false);
         })
   
         socketRef.current?.on('endgame', (data) => {
@@ -140,7 +141,7 @@ export default function Game({className}: {className: string}) {
             setStepCurrentSession(EStatusFrontGame.endOfGame);
           setNameGameSession('');
           setRemoteEvent('');
-          setBallHidden(true);
+          setBallIsHidden(true);
           if (tableRef && tableRef.current && tableRef.current.offsetHeight){
             const offsetHeight = tableRef.current.offsetHeight;
             setP1Position(prevState => ({
@@ -184,11 +185,11 @@ export default function Game({className}: {className: string}) {
             calculCoefTableServer(data.tableSize);
             setP1Position({x: data.positionP1v.x * coefTableServer.current.x, y: data.positionP1v.y * coefTableServer.current.y})
             setP2Position({x: data.positionP2v.x * coefTableServer.current.x, y: data.positionP2v.y * coefTableServer.current.y})
-            setBallPosition({x: data.positionBall.x * coefTableServer.current.x, y: data.positionBall.y * coefTableServer.current.y});
             setP1Size({x: data.sizeP1.x * coefTableServer.current.x, y: data.sizeP1.y * coefTableServer.current.y})
             setP2Size({x: data.sizeP2.x * coefTableServer.current.x, y: data.sizeP2.y * coefTableServer.current.y})
+            setBallPosition({x: data.positionBall.x * coefTableServer.current.x, y: data.positionBall.y * coefTableServer.current.y});
             setBallSize({x: data.sizeBall.x * coefTableServer.current.x, y: data.sizeBall.y * coefTableServer.current.y})
-  
+            setBallIsHidden(data.ballIsHidden)
           }
           if (gameMod.current !== PODGAME.EGameMod.trainning)
           {
@@ -362,7 +363,7 @@ export default function Game({className}: {className: string}) {
 
   function cancelMatchmaking() {
     console.log('CANCEL MATCHMAKING');
-    socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchnaking(), userLogged.userContext);
+    socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchmaking(), userLogged.userContext);
     setStepCurrentSession(EStatusFrontGame.idle);
   }
 
@@ -376,7 +377,20 @@ export default function Game({className}: {className: string}) {
       setInfoMessage('PLAY');
       if (gameMod.current === PODGAME.EGameMod.classic) {
         socketRef.current?.emit(
-          `${apiRoutes.wsGameRoutes.addPlayerToMatchnaking()}`,
+          `${apiRoutes.wsGameRoutes.addPlayerToMatchmaking()}`,
+					{
+            id_user: id_user,
+						login: login,
+						nickname: nickname,
+					},
+				);
+				setStepCurrentSession(EStatusFrontGame.matchmakingRequest);
+				console.log('Cancel matchmaking not implemented for the moment');
+				return;
+			}
+      else if (gameMod.current === PODGAME.EGameMod.ghost) {
+        socketRef.current?.emit(
+          `${apiRoutes.wsGameRoutes.addPlayerToMatchmakingGhost()}`,
 					{
             id_user: id_user,
 						login: login,
@@ -477,7 +491,7 @@ export default function Game({className}: {className: string}) {
         {/* <CenterDBG/> */}
         <Player className='paddle absolute ' position='left' refDiv={pad1Ref} /> 
         <Player className='paddle absolute'  position='right' refDiv={pad2Ref} />
-        {!ballHidden && <Ball/>}
+        {!ballIsHidden && <Ball/>}
         {stepCurrentSession === EStatusFrontGame.idle &&
           <>
             <SwitcherTheme className=' absolute right-1 top-1' setThemeFunction={setCurrentGameTheme} ></SwitcherTheme>
@@ -495,6 +509,7 @@ export default function Game({className}: {className: string}) {
           {stepCurrentSession === EStatusFrontGame.modChoice &&
             <div className=' space-x-32'>
               <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.classic;handleSearchGame()}}>CLASSIC</button> 
+              <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.ghost;handleSearchGame()}}>GHOST</button> 
               <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.trainning;handleSearchGame()}}>SOLO TRAINING</button> 
             </div> }
           {stepCurrentSession === EStatusFrontGame.matchmakingRequest &&

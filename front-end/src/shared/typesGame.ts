@@ -34,6 +34,7 @@ export interface IGameSessionInfo {
   player2           : Partial<IUser>;
   launchTime        : Date;
   startInitElement  : ISizeGameElements;
+  ballIsHidden      : boolean;
   // spectators: Partial<IUser>[];
 }
 
@@ -58,6 +59,7 @@ export interface IPodTable {
   scoreP2           : number;
   trainningHit      : number;
   maxTrainningHit   : number;
+  ballIsHidden      : boolean;
   }
 
 

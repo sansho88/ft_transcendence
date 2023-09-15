@@ -33,10 +33,12 @@
   // const wsRouteChat =         'chat'
 
   export namespace wsGameRoutes {
-    export const addNewPlayerToServer=()      => {return `${routeWsGame}_addPlayerToServer`}
-    export const addPlayerToMatchnaking=()    => {return `${routeWsGame}_addPlayerToMatchmaking`}
-    export const removePlayerToMatchnaking=() => {return `${routeWsGame}_removePlayerToMatchmaking`}
-    export const createTrainningGame=()       => {return `${routeWsGame}_createTrainningGame`}
+    export const addNewPlayerToServer=()           => {return `${routeWsGame}_addPlayerToServer`}
+    export const addPlayerToMatchmaking=()         => {return `${routeWsGame}_addPlayerToMatchmaking`}
+    export const addPlayerToMatchmakingGhost=()    => {return `${routeWsGame}_addPlayerToMatchmakingGhost`}
+    export const removePlayerToMatchmaking=()      => {return `${routeWsGame}_removePlayerToMatchmaking`}
+    export const removePlayerToMatchmakingGhost=() => {return `${routeWsGame}_removePlayerToMatchmakingGhost`}
+    export const createTrainningGame=()            => {return `${routeWsGame}_createTrainningGame`}
   }
 
 

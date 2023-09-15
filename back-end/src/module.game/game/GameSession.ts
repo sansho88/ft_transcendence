@@ -34,11 +34,12 @@ export class GameSession {
 	private speedPaddle                   : number = 4; // in pixel per move
   private hitCounter                    : number = 0;
   private scoreLimit                    : number = 3;
+  private ghostZoneSize                 : number = 20; // % of total witdh
 
   // private trainningHit                  : number = 0;
   // private maxTrainningHit               : number = 0;
 
-  
+
   ///////////////////////  DEFINE FOR SIZE ELEMENTS ///////////////////////
   private classicPaddleSize: PODGAME.IVector2D = {y: 80, x: 10};
   private paddlePosMargin : number = 0.014; // % of the table // decalage barre du bord
@@ -168,6 +169,7 @@ export class GameSession {
       player2: P2.user,
       launchTime: startDate,
       startInitElement: this.initElements,
+      ballIsHidden: false,
     }
     
 
@@ -277,9 +279,25 @@ export class GameSession {
 		this.sendUpdateTable(); //lancer setInterval table
 	}
 
+  private ghostModZoneManager = () =>
+  {
+    const middleZoneSize: number = (this.table.tableSize.x / 2) * (this.ghostZoneSize / 10);
+    let xZone:{min: number, max:number} = {
+      min: (this.table.tableSize.x / 2) - middleZoneSize,
+      max: (this.table.tableSize.x / 2) + middleZoneSize
+    };
+    if(this.table.positionBall.x > xZone.min && this.table.positionBall.x < xZone.max)
+      this.table.ballIsHidden = true;
+    else
+      this.table.ballIsHidden = false;
+  }
+
+
   private ballMouvement = () => {
 		this.table.positionBall.x += this.ballSpeed * this.ballDirection.dx;
 		this.table.positionBall.y += this.ballSpeed * this.ballDirection.dy;
+    if (this.gameMod === PODGAME.EGameMod.ghost)
+      this.ghostModZoneManager()
 	}
 
   //calcul position des paddles en temp reel
