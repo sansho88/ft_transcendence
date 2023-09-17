@@ -88,6 +88,18 @@ export default function Game({className}: {className: string}) {
     |                                     SOCKET ON SUBCRITE EVENT                                                |
     |                                                                                                             |
     /*-----------------------------------------------------------------------------------------------------------*/ 
+
+    const reset = () => {
+      setStepCurrentSession(EStatusFrontGame.idle);
+      console.log(`WS RESET`);
+      resetPositionPaddle();
+      setInfoMessage('PLAY');
+      setScoreP1(0);
+      setScoreP2(0);
+      setUserP1({});
+      setUserP2({});
+    }
+
 	useEffect(() => {
 
 
@@ -156,16 +168,10 @@ export default function Game({className}: {className: string}) {
           setInfoMessage(data);
           console.log(`WS endgame: ${JSON.stringify(data)}`);
         })
-  
+        
         socketRef.current?.on('reset', () => {
-          console.log(`WS RESET`);
-          resetPositionPaddle();
-          setInfoMessage('PLAY');
-          setScoreP1(0);
-          setScoreP2(0);
-          setUserP1({});
-          setUserP2({});
-          setStepCurrentSession(EStatusFrontGame.idle);
+            if(stepCurrentSession == EStatusFrontGame.endOfGame)
+              reset();
         })
   
   
@@ -525,9 +531,9 @@ export default function Game({className}: {className: string}) {
           {stepCurrentSession === EStatusFrontGame.gameInProgress &&
           <div className='flex flex-grow relative'>
             <button className='text-white justify-center items-center' onClick={() => stopGameAndLose()}>STOP GAME</button> 
-            {gameMod.current !== PODGAME.EGameMod.trainning &&
+            {/* {gameMod.current !== PODGAME.EGameMod.trainning &&
               <button className='text-red-800 absolute top-2 right-12' onClick={() => dbgAddPlayerGoal()}>GOAL +1 </button> 
-            }
+            } */}
 
           </div>
           
@@ -535,7 +541,7 @@ export default function Game({className}: {className: string}) {
         {stepCurrentSession === EStatusFrontGame.gameSessionFind &&
           <button className='text-white' onClick={() => handleSearchGame()}>ARE YOU READY ?</button> }
           {stepCurrentSession === EStatusFrontGame.endOfGame &&
-          <button className='text-white' onClick={() => handleSearchGame()}>END OF GAME</button> }
+          <button className='text-white' onClick={() => {reset()}}>END OF GAME</button> }
 
             </div>
     </div>
