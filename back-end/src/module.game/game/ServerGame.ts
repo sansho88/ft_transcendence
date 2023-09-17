@@ -48,13 +48,14 @@ export class ServerGame {
     if (!player)
       return console.log('removePlayerToMatchmaking: Error player')
   this.matchmaking.removeUser(player);
-  // console.log(`${player.user.login}: remove in matchmaking list`);
+  console.log(`${player.user.login}: remove in matchmaking list`);
 }
 
-  public removePlayerToMatchmakingGhost(player: userInfoSocket) {
-    if (!player)
-      return console.log('removePlayerToMatchmakingGhost: Error player')
+public removePlayerToMatchmakingGhost(player: userInfoSocket) {
+  if (!player)
+    return console.log('removePlayerToMatchmakingGhost: Error player')
   this.matchmakingGhost.removeUser(player);
+console.log(`${player.user.login}: remove in matchmaking list`);
 }
 
   public addPlayerInTrainningSession(player: userInfoSocket, server: Server) {

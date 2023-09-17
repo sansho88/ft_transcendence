@@ -25,12 +25,14 @@ export class Matchmaking {
   
   //add user if not already present
   public addUser(user: userInfoSocket)  : void    { 
-    console.log(`result : ${this.containsUser(user)}`)
     if (!this.containsUser(user)) {
       this.userStack.push(user);
     }
     else
-    console.log(`User(${user.user.login}) is already in matchmaking list`)
+    { 
+      user.socket.emit('alreadyInMatchmaking');
+      console.log(`User(${user.user.login}) is already in matchmaking list`)
+    }
   }
   
   //remove user if present

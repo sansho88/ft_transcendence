@@ -143,6 +143,10 @@ export default function Game({className}: {className: string}) {
           // console.log(`WS countdown: ${JSON.stringify(data)}`);
         })
     
+        socketRef.current?.on('alreadyInMatchmaking', () => {
+          setStepCurrentSession(EStatusFrontGame.idle);
+        })
+
         socketRef.current?.on('startGame', () => {
           setStepCurrentSession(EStatusFrontGame.gameInProgress);
           setBallIsHidden(false);
@@ -170,7 +174,6 @@ export default function Game({className}: {className: string}) {
         })
         
         socketRef.current?.on('reset', () => {
-            if(stepCurrentSession == EStatusFrontGame.endOfGame)
               reset();
         })
   
@@ -364,7 +367,7 @@ export default function Game({className}: {className: string}) {
   function stopGameAndLose() {
     console.log('YOU LOSE');
     socketRef.current?.emit(`${nameGameSession}STOP`);
-    setStepCurrentSession(EStatusFrontGame.idle);
+    // setStepCurrentSession(EStatusFrontGame.idle);
   }
 
   function cancelMatchmaking() {
@@ -540,8 +543,8 @@ export default function Game({className}: {className: string}) {
         }
         {stepCurrentSession === EStatusFrontGame.gameSessionFind &&
           <button className='text-white' onClick={() => handleSearchGame()}>ARE YOU READY ?</button> }
-          {stepCurrentSession === EStatusFrontGame.endOfGame &&
-          <button className='text-white' onClick={() => {reset()}}>END OF GAME</button> }
+          {/* {stepCurrentSession === EStatusFrontGame.endOfGame &&
+          <button className='text-white' onClick={() => {reset()}}>END OF GAME</button> } */}
 
             </div>
     </div>

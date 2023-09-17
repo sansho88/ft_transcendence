@@ -569,8 +569,8 @@ export class GameSession {
     }
     // console.error(`endMessage`)
     this.serverSocket.to(this.gameRoomEvent).emit('endgame', endMessage());
-    this.serverSocket.to(this.gameRoomEvent).emit('reset'); 
     setTimeout(() => {
+      this.serverSocket.to(this.gameRoomEvent).emit('reset'); 
       console.log('reset');
       this.player1.socket.leave(this.gameRoomEvent);
       this.player2.socket.leave(this.gameRoomEvent);
