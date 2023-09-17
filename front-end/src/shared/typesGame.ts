@@ -18,6 +18,12 @@ export enum EGameMod {
   rumble
 }
 
+export enum EInfoType {
+  error,
+  errorAlreadyInGame,
+  gameFind,
+}
+
 export interface ISizeGameElements {
   tableServerSize   : IVector2D; //sert a calculer le coef d'agrandissement ou reduction cote front par rapport a la taille d'affichage
   ballSize          : IVector2D;
