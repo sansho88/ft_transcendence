@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Matchmaking } from './Matchmaking';
 import { GameSession } from './GameSession';
-import { WebsocketGatewayGame } from '../websocket/wsGame.gateway';
+import { WebsocketGatewayGame } from '../game.ws';
 import { Server, Socket } from 'socket.io';
 import { userInfoSocket, Stack, EGameMod } from 'shared/typesGame';
 import { v4 as uuidv4 } from "uuid";

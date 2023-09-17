@@ -9,7 +9,7 @@ import {
 
 import { IUser } from 'shared/types';
 import { Server, Socket } from 'socket.io';
-import { ServerGame } from 'src/module.game/game/ServerGame';
+import { ServerGame } from 'src/module.game/server/ServerGame';
 import { wsGameRoutes } from 'shared/routesApi';
 import { userInfoSocket } from 'shared/typesGame';
 import { HttpException, HttpStatus } from '@nestjs/common';

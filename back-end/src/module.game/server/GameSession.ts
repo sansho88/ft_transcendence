@@ -4,7 +4,7 @@ import { Socket } from 'socket.io';
 import { Matchmaking } from './Matchmaking';
 import { Server } from 'socket.io'
 import { Injectable, Inject } from '@nestjs/common';
-import { WebsocketGatewayGame } from '../websocket/wsGame.gateway';
+import { WebsocketGatewayGame } from '../game.ws';
 import { IUser } from 'shared/types';
 // import { Ball } from './Ball'
 
