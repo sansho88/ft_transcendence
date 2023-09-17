@@ -39,6 +39,7 @@ export class GameSession {
   private ghostZoneSizeMax              : number = 55; // % of total witdh
   private ghostZoneSizeCoef             : number = 1.35; // coef agrandissement de la zone tous les [ballNumberHitBtwGhostZoneUp] coups
   private ballNumberHitBtwGhostZoneUp   : number = 3; //tous les X coup, la ball prend speed * AccelerationFactor
+  private rageQuit                      : boolean = false;
 
   // private trainningHit                  : number = 0;
   // private maxTrainningHit               : number = 0;
@@ -340,6 +341,7 @@ export class GameSession {
 					if (this.table.positionP2v.y < this.table.maxPosP2)
 						this.table.positionP2v.y += this.speedPaddle;
 				}
+        this.playerSocketMonitoring();
         this.handleBallCollisions();
         this.ballMouvement();
 			}, this.fpsTargetInMs / 2);
@@ -445,12 +447,8 @@ export class GameSession {
   //envoi update au front des elements de la table
 	private sendUpdateTable() {
 		this.intervalIdEmit = setInterval(() => {
-      // if (this.gameMod === PODGAME.EGameMod.trainning)
-      // {
-      //   this.table.trainningHit = this.table.trainningHit;
-      //   this.table.maxTrainningHit = this.table.maxTrainningHit;
-      // }
-			this.serverSocket.to(this.gameRoomEvent).emit('updateTable', this.table);
+      if (this.isGameRunning === true)
+			  this.serverSocket.to(this.gameRoomEvent).emit('updateTable', this.table);
     }, this.fpsTargetInMs);
   }
 
@@ -493,7 +491,6 @@ export class GameSession {
     if (this.gameMod === PODGAME.EGameMod.ghost)
       this.ghostZoneSize = this.ghostZoneSizeInitial;
 	}
-
 
 
   private addGoalToPlayer(player: PODGAME.userInfoSocket)
@@ -565,18 +562,20 @@ export class GameSession {
         else
           return `${this.table.maxTrainningHit}: 542 Internal Server Error: It's impossible ! Otherwise: Incredible!`
       }
+      else if (this.rageQuit === true)
+        return `${this.looser.user.nickname} has rage quit! ${this.winner.user.nickname} won this game\n${this.table.scoreP1} - ${this.table.scoreP2}`
       else
         return `${this.winner.user.nickname} won this game\n${this.table.scoreP1} - ${this.table.scoreP2}`
     }
     // console.error(`endMessage`)
     this.serverSocket.to(this.gameRoomEvent).emit('endgame', endMessage());
     setTimeout(() => {
-      console.log('reset');
       this.serverSocket.to(this.gameRoomEvent).emit('reset'); 
+      console.log('reset');
       this.player1.socket.leave(this.gameRoomEvent);
       this.player2.socket.leave(this.gameRoomEvent);
     }
-    , 3500);
+    , 4000);
   }
 
   //Enclenche la fin du jeu
@@ -632,6 +631,21 @@ export class GameSession {
       this.player2.socket.emit('startGame');
 	}
 
+
+  private playerSocketMonitoring() {
+    if (this.player1.socket.connected === false)
+    {
+      this.table.scoreP2 = this.scoreLimit;
+      this.rageQuit = true;
+      this.isEndGameCheckScoring();
+    }
+    else if (this.player2.socket.connected === false)
+    {
+      this.table.scoreP1 = this.scoreLimit;
+      this.rageQuit = true;
+      this.isEndGameCheckScoring();
+    }
+  }
   //coder la logique de coup d'envoi pour le start et 
   // private restartAfterGoal(goaler: PODGAME.userInfoSocket) {
 
