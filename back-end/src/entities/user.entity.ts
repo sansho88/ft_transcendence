@@ -11,7 +11,11 @@ import {
 	JoinColumn,
 } from 'typeorm';
 import { MessageEntity } from './message.entity';
-import { CredentialEntity } from './credential.entity';
+import { UserCredentialEntity } from './credential.entity';
+import { InviteEntity } from './invite.entity';
+import { MuteEntity } from './mute.entity';
+import { BannedEntity } from './banned.entity';
+import { ChannelEntity } from './channel.entity';
 
 export enum UserStatus {
 	INGAME = 2,
@@ -26,8 +30,9 @@ export class UserEntity extends BaseEntity {
 
 	@PrimaryColumn({
 		type: 'varchar',
-		length: 12,
+		length: 10,
 		unique: true,
+		update: false,
 	})
 	login: string;
 
@@ -37,8 +42,10 @@ export class UserEntity extends BaseEntity {
 	})
 	nickname: string;
 
-	@Column()
-	Invite: boolean; //Todo: rename to visit
+	@Column({
+		type: 'boolean',
+	})
+	visit: boolean;
 
 	// Todo: comeback later to proper storage
 	@Column({
@@ -52,24 +59,48 @@ export class UserEntity extends BaseEntity {
 	@Column({
 		type: 'enum',
 		enum: UserStatus,
+		enumName: `User Status`,
 		default: UserStatus.ONLINE,
 	})
 	status: UserStatus;
 
-	@OneToOne(() => CredentialEntity, { cascade: true })
+	@OneToOne(() => UserCredentialEntity, { cascade: true })
 	@JoinColumn()
-	credential: CredentialEntity;
+	credential: UserCredentialEntity;
 
 	@OneToMany(() => MessageEntity, (message) => message.author)
+	@JoinColumn()
 	message: MessageEntity[];
 
 	//	Friends
 	@ManyToMany(() => UserEntity, (user) => user.subscribed)
-	followers: UserEntity;
+	@JoinTable()
+	followers: UserEntity[];
 
 	@ManyToMany(() => UserEntity, (user) => user.followers)
 	@JoinTable()
-	subscribed: UserEntity;
+	subscribed: UserEntity[];
+
+	@OneToMany(() => InviteEntity, (invite) => invite.user)
+	invite: InviteEntity[];
+
+	@OneToMany(() => MuteEntity, (mute) => mute.user)
+	mute: MuteEntity[];
+
+	@OneToMany(() => BannedEntity, (banned) => banned.user)
+	banned: BannedEntity[];
+
+	@ManyToMany(() => ChannelEntity, (channel) => channel.userList)
+	// @JoinTable()
+	channelJoined: ChannelEntity[];
+
+	@OneToMany(() => ChannelEntity, (channel) => channel.adminList)
+	// @JoinTable()
+	channelAdmin: ChannelEntity[];
+
+	@OneToMany(() => ChannelEntity, (channel) => channel.owner)
+	@JoinColumn()
+	channelOwned: ChannelEntity[];
 
 	// @Column()
 	// @ManyToMany(() => UserEntity)

@@ -1,12 +1,12 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { UsersModule } from '../users/users.module';
+import { UsersModule } from '../module.users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import * as process from 'process';
-import { CredentialService } from './credential.service';
+import { UserCredentialService } from './credential.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CredentialEntity } from '../entities/credential.entity';
+import { UserCredentialEntity } from '../entities/credential.entity';
 
 @Module({
 	imports: [
@@ -16,9 +16,9 @@ import { CredentialEntity } from '../entities/credential.entity';
 			signOptions: { expiresIn: '99d' },
 		}),
 		forwardRef(() => UsersModule),
-		TypeOrmModule.forFeature([CredentialEntity]),
+		TypeOrmModule.forFeature([UserCredentialEntity]),
 	],
 	controllers: [AuthController],
-	providers: [AuthService, CredentialService],
+	providers: [AuthService, UserCredentialService],
 })
 export class AuthModule {}

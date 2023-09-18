@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { UpdateUserDto } from '../dto/user/update-user.dto';
 import { UserEntity, UserStatus } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CredentialEntity } from '../entities/credential.entity';
+import { FindOptionsRelations, Repository } from 'typeorm';
+import { UserCredentialEntity } from '../entities/credential.entity';
 
 @Injectable()
 export class UsersService {
@@ -24,16 +24,17 @@ export class UsersService {
 	async create(
 		newLogin: string,
 		newInvite: boolean,
-		newCredential: CredentialEntity,
+		newCredential: UserCredentialEntity,
 	) {
-		const user = UserEntity.create({
+		const user = this.usersRepository.create({
 			login: newLogin,
 			nickname: newLogin,
-			Invite: newInvite,
+			visit: newInvite,
 		});
 		user.credential = newCredential;
 		await user.save();
-		return;
+		console.log(`New User \`${user.login}\` with ID ${user.UserID}`);
+		return user;
 	}
 
 	async findAll() {
@@ -41,14 +42,26 @@ export class UsersService {
 	}
 
 	/**
-	 * Todo: return something (Error code?) if invalid id
+	 * @return UserEntity Or Undefined if user not in db
 	 */
-	async findOne(login: string) {
-		return this.usersRepository.findOneBy({ login: login });
+	async findOne(id: number | string) {
+		if (typeof id === 'number')
+			return this.usersRepository.findOneBy({ UserID: id });
+		return this.usersRepository.findOneBy({ login: id });
 	}
 
-	async update(login: string, updateUser: UpdateUserDto) {
-		const user = await this.usersRepository.findOneBy({ login: login });
+	async findOneRelation(
+		id: number,
+		relation: FindOptionsRelations<UserEntity>,
+	) {
+		return this.usersRepository.findOne({
+			relations: relation,
+			where: { UserID: id },
+		});
+	}
+
+	async update(id: number, updateUser: UpdateUserDto) {
+		const user = await this.usersRepository.findOneBy({ UserID: id });
 		if (updateUser.nickname !== undefined) user.nickname = updateUser.nickname;
 		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
 		await user.save();
@@ -61,21 +74,18 @@ export class UsersService {
 	}
 	async getCredential(login: string) {
 		const target = await this.usersRepository.findOne({
-			relations: {
-				credential: true,
-			},
-			where: {
-				login: login,
-			},
+			relations: { credential: true },
+			where: { login: login },
 		});
 		return target.credential;
 	}
 
-	async userStatus(login: string, newStatus: UserStatus) {
-		const user = await this.usersRepository.findOneBy({ login: login });
+	async userStatus(id: number, newStatus: UserStatus) {
+		const user = await this.usersRepository.findOneBy({ UserID: id });
 		user.status = newStatus;
 		await user.save();
 	}
+
 	// async getFriend(target: string) {
 	// 	return await this.usersRepository.find({
 	// 		relations: {
