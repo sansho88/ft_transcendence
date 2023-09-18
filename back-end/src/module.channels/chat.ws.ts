@@ -60,8 +60,8 @@ export class ChatGateway
 	async handleConnection(client: Socket) {
 		const [type, token] =
 			client.handshake.headers.authorization?.split(' ') ?? [];
-		if (type !== 'Bearer') return;
-		if (!token) client.disconnect();
+		if (type !== 'Bearer') return client.disconnect();
+		if (!token) return client.disconnect();
 		let userID: number;
 		try {
 			const payloadToken: accessToken = await this.jwtService.verifyAsync(
@@ -86,6 +86,10 @@ export class ChatGateway
 			}),
 		);
 		this.usersService.userStatus(userID, UserStatus.ONLINE).then();
+		this.socketUserList.push({
+			socketID: client.id,
+			userID: userID
+		});
 		console.log(`New connection from User ${userID}`);
 	}
 
@@ -93,6 +97,8 @@ export class ChatGateway
 	async handleDisconnect(client: Socket) {
 		const [type, token] =
 			client.handshake.headers.authorization?.split(' ') ?? [];
+		if (type !== 'Bearer') return client.disconnect();
+		if (!token) return client.disconnect();
 		const payloadToken: accessToken = await this.jwtService.verifyAsync(token, {
 			secret: process.env.SECRET_KEY,
 		});
