@@ -19,13 +19,21 @@ const HomePage = () => {
 
 
     useEffect(() => {
-        authManager.setBaseURL('http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/');
-        localStorage.setItem('userContext', JSON.stringify(userContext));
+        //authManager.setBaseURL('http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/');
+        const token = localStorage.getItem("token");
+        if (!token)
+            router.push("/auth");
         if (!userContext)
         {
-            authManager.setToken(localStorage.getItem("token"));
-            getUserMe().then((me) => setUserContext(me) );
+
+            authManager.setToken(token);
+            getUserMe().then((me) => setUserContext(me) )
+                .catch(() => {
+                    localStorage.clear();
+                    router.push("/auth");
+                });
         }
+        localStorage.setItem('userContext', JSON.stringify(userContext));
     })
 
     enum Colors {

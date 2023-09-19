@@ -6,6 +6,8 @@ import {LoggedContext} from '@/context/globalContext';
 import {useRouter} from 'next/navigation';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
 import {authManager} from "@/components/api/ApiReq";
+import {getUserMe} from "@/app/auth/Auth";
+import {IUser} from "@/shared/types";
 
 
 export default function Home() {
@@ -26,9 +28,35 @@ export default function Home() {
         }
         else
         {
-            console.log("Redirect to Home page");
-            router.push('/home');
+            try{
+               getUserMe().then((testUser) => {
+                        if (testUser && testUser.UserID >= 0)
+                        {
+                            console.log("Redirect to Home page");
+                            router.push('/home');
+                        }
+                        else
+                        {
+                            console.log("testUser id= " + testUser.UserID);
+                            alert("An invalid token was saved in the browser." +
+                                "\nPlease, log in again or create a new account.");
+                            localStorage.clear();
+                            router.push('/auth');
+                        }
+                    })
+                        .catch((error) => {
+                            console.error("[redirect useEffect error]" + error);
+                        });
+
+            }
+            catch (e) {
+                alert("An invalid token was saved in the browser." +
+                "\nPlease, log in again or create a new account.");
+                localStorage.clear();
+                router.push('/auth');
+            }
         }
+
     }, [logged]);
 
         return (
