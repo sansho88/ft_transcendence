@@ -74,6 +74,7 @@ export class GameSession {
   private looser          : PODGAME.userInfoSocket;
 
 	private isGameRunning   : boolean = true;
+	private isGameReady     : boolean = false;
   private isP1Ready       : boolean = false;
   private isP2Ready       : boolean = false;
 
@@ -521,6 +522,7 @@ export class GameSession {
   private startCountdownIfPlayersReady(){
     if ((this.isP1Ready && this.isP2Ready) || this.gameMod === PODGAME.EGameMod.trainning)
     {
+      this.isGameReady = true;
       let countdown : number = 3;
       let intervalStart: NodeJS.Timeout = setInterval(() => {
           if (countdown  > 0)
@@ -534,13 +536,17 @@ export class GameSession {
           }
           countdown--;
       }, 1000)
+      return;
     }
     else if (this.isP1Ready || this.isP2Ready) {
       setTimeout(() => {
-        this.isP1Ready = true;
-        this.isP2Ready = true;
-        this.startCountdownIfPlayersReady();
+        if (this.isGameReady === false){
+          this.isP1Ready = true;
+          this.isP2Ready = true;
+          this.startCountdownIfPlayersReady();
+        }
       }, 8000);
+      return;
     }
   }
 
