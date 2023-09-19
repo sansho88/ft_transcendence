@@ -32,7 +32,7 @@ import {
 
 class SocketUserList {
 	userID: number;
-	socketID: number;
+	socketID: string;
 }
 
 @WebSocketGateway({ namespace: 'chat' })
