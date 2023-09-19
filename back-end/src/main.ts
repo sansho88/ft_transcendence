@@ -22,6 +22,6 @@ async function bootstrap() {
 	});
 			/////////
 	app.setGlobalPrefix(`api`);
-	await app.listen(8000);
+	await app.listen(8000, '0.0.0.0');
 }
 bootstrap();

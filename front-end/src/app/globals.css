@@ -1,11 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,700;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  --game-primary-color: #01FDFF;
+  --game-secondary-color: #000000;
+  --game-text-color: rgba(63, 105, 190, 0.268);
+  --game-line-color: var(--game-text-color);
+  --game-line-opacity: 50%;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -13,6 +23,11 @@
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
+    --game-primary-color: #01FDFF;
+    --game-secondary-color: #000000;
+    --game-text-color: rgba(63, 105, 190, 0.268);
+    --game-line-color: var(--game-text-color);
+    --game-line-opacity: 50%;
   }
 }
 
@@ -59,7 +74,7 @@ body {
 
 .button-login span {
   background-color: rgb(5, 6, 45);
-  padding: 2vh 2.7vw;
+  padding: 2vh ;
   border-radius: 6px;
   width: 100%;
   height: 100%;
@@ -94,7 +109,7 @@ body {
 
     justify-content: center;
     align-items: center;
-    padding-top: 30vh;
+    padding-top: 0;
     height: auto;
     position: relative;
     text-align: center;
@@ -159,10 +174,18 @@ body {
 
 }
 
-.game{
-    display: inline;
-    margin-inline: auto;
-    margin-block: 10vh;
+.chat{
+    display: inline-block;
+    position: sticky;
+    right: 0;
+    bottom: 0;
+    top: 48vh;
+    height: 42vh;
+    width: 42vh;
+    margin-left: -20vh;
+    margin-inside: auto;
+
+    overflow-y: scroll;
 }
 
 .friends{
@@ -171,6 +194,21 @@ body {
     right: 2vw;
     top: 1vh;
 
+}
+
+.userList{
+    max-height: 32vh;
+    width: auto;
+    overflow-y: auto;
+    position: absolute;
+    right: 2vw;
+    top: 8vh;
+    padding-inline: 2vh;
+    background: rgba(0, 0, 0, 0.27);
+    border: 2px rgba(0, 0, 0, 0.11);
+    border-style: inherit ;
+    box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
+    border-radius: 8px;
 }
 
 .main-user-profile{
@@ -189,7 +227,7 @@ body {
 }
 
 .main-user-profile .avatar{
-    top: -2vh;
+    top: -1vh;
     margin-left: .4vw;
     position: relative;
     display: inline;
@@ -197,9 +235,6 @@ body {
 }
 
 .main-user-profile .infos{
-    display: inline-block;
-    margin-left: 10px;
-    padding-top: 2vh;
     position: relative;
     width: auto;
     font-size: 2vh;
@@ -213,6 +248,102 @@ body {
     padding-left: 0.4vw;
 }
 
-.main-user-profile #login{
-    color: darkgrey;
+.game{
+    display: inline;
+    margin-inline: auto;
+    margin-block: 20vh;
+    font-family: 'VT323', monospace;
+    width: 50vw;
+
+}
+
+.game-options{
+
+}
+
+.game-scoreboard {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--game-text-color);
+  font-size: 1.75vw;/* 20px */;
+  line-height: 1.75rem/* 28px */;
+  top: 20px;
+  flex-direction: column;
+}
+
+.game-scoreboard-left {
+  left: 12vw;
+}
+
+.game-scoreboard-right {
+  right: 12vw;
+}
+
+.game-scoreboard-score {
+  font-size: 5vw/* 60px */;
+  line-height: 1;
+}
+
+.table {
+  border-radius: 0.75rem/* 12px */;
+  background-color: var(--game-primary-color);
+  transition: background-color 500ms;
+  
+}
+
+.paddle {
+  background-color: var(--game-secondary-color);
+  transition: background-color 500ms;
+}
+
+.ball {
+  background-color: var(--game-secondary-color);
+  transition: background-color 500ms;
+}
+
+.dottedLine {
+  /* border: 10px dotted; */
+  outline-style: dotted;
+  background-color: var(--game-line-color);
+  opacity: 80%;
+}
+
+.game-info-message {
+  color: var(--game-text-color);
+  background-color: var(--game-primary-color);
+  padding: 1rem;
+}
+
+.game-theme-neon {
+  --game-primary-color: #01FDFF;
+  --game-secondary-color: #000000;
+  --game-text-color: rgba(63, 105, 190, 0.268);
+  --game-line-color: var(--game-text-color);
+  --game-line-opacity: 50%;
+  outline-color: var(--game-text-color);
+
+  background-color: var(--game-primary-color);
+  color: var(--game-secondary-color);
+  transition: background-color 500ms, color 500ms;
+}
+
+.game-theme-sunset {
+  --game-primary-color: #cb6821;
+  --game-secondary-color: #ffffff;
+  --game-text-color: rgb(63, 105, 190);
+  background-color: var(--game-primary-color);
+  color: var(--game-secondary-color);
+  transition: background-color 500ms, color 500ms;
+}
+
+.game-theme-classic-pong {
+  --game-primary-color: #0f0f0f;
+  --game-secondary-color: #ffffff;
+  --game-text-color: rgb(117, 117, 117);
+  background-color: var(--game-primary-color);
+  color: var(--game-secondary-color);
+  transition: background-color 500ms, color 500ms;
 }

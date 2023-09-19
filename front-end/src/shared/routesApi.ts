@@ -1,8 +1,16 @@
+'use client'
 //mis en commun back-front des ref routesApi, pour facilite' la maintenance/evoluabilite' des routes
 
 //NOTA BENE: jai prevu toutes routes mais surments des changements a prevoir et des routes inutiles
+  const IP_HOST = () => {
+    if (typeof window !== `undefined`){
+        return window.location.hostname;
+    }
+    else
+      return `localhost`
+  }
 
-	const serverApi = "http://localhost:8000/api" //TODO utiliser le context OriginNetwork
+	const serverApi = `http://${IP_HOST()}:8000/api` //TODO utiliser le context OriginNetwork
 	
 // definition des routes root 🫠
 	const routeUsers = 					'users'
@@ -21,6 +29,17 @@
 	const routeAdministrate = 	'administrate';
 	const routePlay = 					'play';
 	
+  const routeWsGame =          'game';
+  // const wsRouteChat =         'chat'
+
+  export namespace wsGameRoutes {
+    export const addNewPlayerToServer=()      => {return `${routeWsGame}_addPlayerToServer`}
+    export const addPlayerToMatchnaking=()    => {return `${routeWsGame}_addPlayerToMatchmaking`}
+    export const removePlayerToMatchnaking=() => {return `${routeWsGame}_removePlayerToMatchmaking`}
+    export const createTrainningGame=()       => {return `${routeWsGame}_createTrainningGame`}
+  }
+
+
 //bible des routes
 	export namespace strRoutes {
 
@@ -28,17 +47,16 @@
 // |                              USERS                                  |
 // +---------------------------------------------------------------------+
 
-	export const getUsersAll=()							=>{return `${serverApi}/${routeUsers}`}
-	export const getUserById = () 					=>{return `${serverApi}/${routeUsers}/`}
-	export const getUserByLogin=()					=>{return `${serverApi}/${routeUsers}/login/`}
+	export const getUsersAll=()							=>{return `${serverApi}/${routeUsers}/get/`}
+	export const getUserById = () 					=>{return `${serverApi}/${routeUsers}/get/`}
+	export const getUserByLogin=()					=>{return `${serverApi}/${routeUsers}/get/`}
 		
-	export const postUser=()								=>{return `${serverApi}/${routeUsers}`}
-	export const postUserCheckLogin=()			=>{return `${serverApi}/${routeUsers}/login/`}
+	export const postUser=()								=>{return `${serverApi}/auth/visit/sign`}
+	export const postUserCheckLogin=()			=>{return `${serverApi}/auth/visit/login/`}
 		
 	export const putUser=()									=>{return `${serverApi}/${routeUsers}/`}
 
 	export const deleteUsersAll=()					=>{return `${serverApi}/${routeUsers}`}
-	// export const deleteUsersAll=()					=>{return `http://localhost:8000/api/users`}
 	export const deleteUserById=()					=>{return `${serverApi}/${routeUsers}/`}
 
 // +---------------------------------------------------------------------+
