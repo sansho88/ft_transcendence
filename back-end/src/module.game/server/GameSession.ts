@@ -102,7 +102,7 @@ export class GameSession {
 		game_id: number,
     gameMod: PODGAME.EGameMod,
     gameSessionRoom : string,
-	) {
+    ) {
     this.gameMod = gameMod;
     this.ballSpeedInitial = this.ballSpeed;
     this.speedPaddleInitial = this.speedPaddle;
@@ -534,7 +534,13 @@ export class GameSession {
           }
           countdown--;
       }, 1000)
-
+    }
+    else if (this.isP1Ready || this.isP2Ready) {
+      setTimeout(() => {
+        this.isP1Ready = true;
+        this.isP2Ready = true;
+        this.startCountdownIfPlayersReady();
+      }, 8000);
     }
   }
 
