@@ -18,6 +18,12 @@ export enum EGameMod {
   rumble
 }
 
+export enum EInfoType {
+  error,
+  errorAlreadyInGame,
+  gameFind,
+}
+
 export interface ISizeGameElements {
   tableServerSize   : IVector2D; //sert a calculer le coef d'agrandissement ou reduction cote front par rapport a la taille d'affichage
   ballSize          : IVector2D;
@@ -34,6 +40,7 @@ export interface IGameSessionInfo {
   player2           : Partial<IUser>;
   launchTime        : Date;
   startInitElement  : ISizeGameElements;
+  ballIsHidden      : boolean;
   // spectators: Partial<IUser>[];
 }
 
@@ -58,6 +65,7 @@ export interface IPodTable {
   scoreP2           : number;
   trainningHit      : number;
   maxTrainningHit   : number;
+  ballIsHidden      : boolean;
   }
 
 
