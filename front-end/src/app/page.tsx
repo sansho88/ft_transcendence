@@ -1,128 +1,119 @@
 'use client';
-import Image from 'next/image'
-import * as React from "react";
-import Button from "./components/CustomButtonComponent"
-import Profile from "./components/ProfileComponent"
-import Stats from "./components/StatsComponent"
+import React, {useContext, useEffect} from "react";
+import Button from "../components/CustomButtonComponent"
+import Profile from "../components/ProfileComponent"
+import Stats from "../components/StatsComponent"
+import UserList from "@/components/UserListComponent";
+
 import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
+import {LoggedContext, UserContext} from '@/context/globalContext';
+import {useRouter} from 'next/navigation';
+import * as POD from "@/shared/types";
+import {EStatus} from "@/shared/types";
+import * as apiReq from '@/components/api/ApiReq'
+import ChatRoomCommponent from '@/components/chat/ChatRoomComponent'
+import Game from "@/components/game/Game";
+
 
 export default function Home() {
-preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
-    enum AllStatus {
-        Offline,
-        Online,
-        InGame
-    }
+    preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
+    const {logged} = useContext(LoggedContext);
+    const {userContext, setUserContext} = useContext(UserContext);
+    const router = useRouter();
+
     enum Colors {
         "grey",
         "green",
         "gold"
     }
+
     let StatusColor = new Map<number, string>();
 
     for (let i: number = 0; i < 3; i++) {
         StatusColor.set(i, Colors[i]);
     }
 
+    async function updateStatusUser(id_user, status) { //to remove when the player status will be updated directly from the Back
 
-    const [isLogged, setLog] = React.useState(false);
-    const [userStatus, setUserStatus] = React.useState(AllStatus.Online);
+        const updateUser: Partial<POD.IUser> = {UserID: id_user,
+            login: userContext.login,
+            visit: userContext.visit,
+            status: status,
+            nickname: userContext.nickname,
+            avatar_path: userContext.avatar_path,
+            has_2fa: userContext.has_2fa,
+            token_2fa: userContext.token_2fa};
 
-    let userNickName : string = "NickTaMer";
+        await apiReq.putApi.putUser(updateUser)
+            .then(() => {
+                setUserContext(updateUser);
+            })
+            .catch((e) => {
+                console.error(e)
+            })
+    }
 
+    function switchOnlineIngame() {
+        const tmpStatus = userContext?.status == EStatus.Online ? EStatus.InGame : EStatus.Online;
+
+        updateStatusUser(userContext?.UserID, tmpStatus)
+            .catch((e) => console.error(e));
+
+        console.log('[MAIN PAGE]USER STATUS:' + tmpStatus);
+    }
+
+
+    useEffect(() => {
+        console.log("Main Page: isLogged? " + logged);
+        let storedLogin = localStorage.getItem("login");
+        console.log("Main Page: localStorageLogin? " + storedLogin);
+
+        if (!logged /*&& !localStorage.getItem("login")*/)
+            router.push('/auth')
+        else {
+            console.log("User is already LOGGED as " + localStorage.getItem("login"))
+            setUserLogin(userContext.login ? userContext.login : "");
+            setUserNickName(userContext.nickname ? userContext.nickname : "");
+
+        }
+    }, [logged])
+
+
+    const [userLogin, setUserLogin] = React.useState("lelogin");
+    const [userNickName, setUserNickName] = React.useState("Nick");
 
     function handleLogin() {
-        setLog(true);
-        console.log("LOGGED BIM!");
+        // setLog(true);
+        console.log("LOGGED REALLY!");
     }
 
-    function handleUserStatus() {
 
-        setUserStatus(userStatus === AllStatus.InGame ? AllStatus.Online : AllStatus.InGame);
-        console.log(`User Status: ${userStatus}; statusColor ${StatusColor.get(userStatus)}`);
-    }
+    if (logged /*&& !localStorage.getItem("login")*/)
+        return (
+            <>
+                <main className="main-background">
+                    <Profile className={"main-user-profile"}
+                             nickname={userContext.nickname ? userContext.nickname : "BADNICKNAME"}
+                             login={userContext.login ? userContext.login : "BADLOGIN"} status={userContext.status ? userContext.status : 0}
+                             avatar_path={userContext.avatar_path}
+                             UserID={userContext.UserID ? userContext.UserID : 0}
+                             isEditable={true} has_2fa={false}>
 
-    const Header = () => {
-        <head>
-            <link rel={"icon"} href={"./favicon.ico"}/>
-        </head>
-    }
+                        <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
+                        <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
+                    </Profile>
+                    <UserList className={"friends"}/>
 
-  function login(){
-    if (!isLogged)
-      return (
-            <button type="button" onClick={handleLogin} className={"button-login"}>
-              <span className="text">LOGIN</span></button>
-          /*<Button border={"2px"} color={"#FFFFFF"} image={"linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB)"} height={"30px"} width={"60px"} radius={"4px"} onClick={handleLogin}>LOGIN</Button>*/
-      )
-    else
-      return hello("Sansho");
-  }
-  function hello(name: string){
+                    <div className={"game"} onClick={switchOnlineIngame}>
 
-    let msg: string = "";
+                        <Game className={"game"}/>
 
-    if (name.length)
-      msg = "dear " + name + " !\n";
-    return (
-        <div>
-            Hello {msg}
-        </div>
-    )
-  }
+                        <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"}
+                                alt={"GameMode options"} radius={"0"} onClick={switchOnlineIngame}/>
+                    </div>
+                    <ChatRoomCommponent className={"chat"}/>
 
-  if (!isLogged)
-    return (
-        <>
-            <Header/>
-        <div className="main-background">
-          <div className="welcome">
-            <div className="welcome-msg">WELCOME TO</div>
-            {/*<div className="width: 788px; height: 130px; left: 0px; top: 24px; position: absolute; justify-content: center; align-items: center; display: inline-flex">*/}
-              <div className="welcome-title">PONG POD! {login()}</div>
-
-            </div>
-        </div>
-     </>
-    )
-  else
-    return (
-        <>
-            <Header/>
-      <main className="main-background">
-        {/*  <div className={"sidebar"}>
-              <menu className="menu" autoCapitalize={"words"}  title={"Menu"}>
-                <li tabIndex={1}> <img src={"/joystick.svg"} alt={"joystick-logo"}/>Game Mode</li>
-                <li tabIndex={2}><img src={"/profile.svg"} alt={"profile-logo"}/>Profile</li>
-                <li tabIndex={3}><img src={"/friends.svg"} alt={"friends-logo"}/>Friends</li>
-              </menu>
-          </div>*/}
-
-          <Profile className={"main-user-profile"} avatar={"/tests/avatar.jpg"} login={"lelogin"} nickname={userNickName}
-                   status={AllStatus[userStatus]} statusColor={StatusColor.get(userStatus)} isEditable={true}>
-              <p style={{paddingBottom: "1vh"}}><Stats level={42} victories={112} defeats={24} rank={1}/></p>
-              <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
-          </Profile>
-          <Button className={"friends"} image={"/friends.svg"} onClick={handleLogin} alt={"Friends list"} height={"42px"}/>
-
-        <div className="game">
-
-          <Image
-            className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] max-w-fit max-h-fit"
-            src="/pong-logo.png"
-            alt="Pong Logo"
-            width={768}
-            height={768}
-            priority
-            onClick={handleUserStatus}
-          />
-            <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"} alt={"GameMode options"}  radius={"0"} onClick={handleUserStatus}/>
-        </div>
-
-
-      </main>
-        </>
-
-    )
-
+                </main>
+            </>
+        )
 }
