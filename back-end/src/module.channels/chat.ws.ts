@@ -32,17 +32,17 @@ import {
 
 class SocketUserList {
 	userID: number;
-	socketID: number;
+	socketID: string;
 }
 
-@WebSocketGateway({ namespace: 'chat' })
+@WebSocketGateway({ namespace: 'chat' ,cors: true})
 export class ChatGateway
 	extends IoAdapter
 	implements OnGatewayConnection, OnGatewayDisconnect
 {
 	@WebSocketServer()
 	server: Server;
-	private socketUserList: SocketUserList[]; // maybe not needed
+	private socketUserList: SocketUserList[];
 
 	constructor(
 		private messageService: MessageService,
@@ -179,11 +179,6 @@ export class ChatGateway
 		});
 	}
 
-	@SubscribeMessage('debug')
-	async handelDebug(client: Socket) {
-		return client.emit('This is a debug');
-	}
-
 	/**
 	 * @param channel
 	 * @param user If 0-> Meant to be the system !
@@ -204,5 +199,18 @@ export class ChatGateway
 		};
 		this.server.to(channel.name).emit(`sendMsg`, msg);
 		console.log(` Send Message on ${channel.name}, by ${userID}`);
+	}
+
+	// @SubscribeMessage('addAdmin')
+	// @SubscribeMessage('removeAdmin')
+	// @SubscribeMessage('ban')
+	// @SubscribeMessage('pardon')
+	// @SubscribeMessage('kick')
+
+
+
+	@SubscribeMessage('debug')
+	async handelDebug(client: Socket) {
+		return client.emit('This is a debug');
 	}
 }
