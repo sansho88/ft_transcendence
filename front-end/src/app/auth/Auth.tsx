@@ -474,7 +474,7 @@ export default function Auth({className}: { className?: string }) {
                 return `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}`;
             };
             console.log(generateOAuthURI()); // Affiche l'URI générée
-            // router.push(generateOAuthURI())
+            router.push(generateOAuthURI())
             
         }
 
