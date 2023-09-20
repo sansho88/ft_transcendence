@@ -8,44 +8,39 @@ import axios from "axios";
 const AuthManager = require('./AuthManager');
 export const authManager = new AuthManager();
 
-
 export const axiosInstance = axios.create({
-	baseURL: 'http://localhost:8000/api/',
+	baseURL: "http://localhost:8000/api/",
 	validateStatus: function (status) {
 		return status >= 200 && status < 204;
 	},
 	responseType: 'json'
 });
 
+function updateAxiosInstance() {
+	return {
+		baseURL: authManager.getBaseURL(),
+		headers: {
+			'Authorization': `Bearer ${authManager.getToken()}`
+		}
+	}
+}
 
 export namespace getApi {
 
 	const timestamp = Date.now();
 	export const getUsersAllPromise= (time) =>{
 		const tqt = time;
-		return axiosInstance.get(`${strRoutes.getUsersAll()}`, {
-			headers: {
-				'Authorization': `Bearer ${authManager.getToken()}`
-			}
-		});}
+		return axiosInstance.get(`${strRoutes.getUsersAll()}`, updateAxiosInstance());}
 	export const getUserByLoginPromise= (login: string) =>{
 		
-		return axiosInstance.get(`users/get/${login}`, {
-			headers: {
-				'Authorization': `Bearer ${authManager.getToken()}`
-			}
-		});}
+		return axiosInstance.get(`users/get/${login}`, );}
 	export const getUserByIdPromise = (id: number) =>{return axiosInstance.get(`${strRoutes.getUserById()}${id}`, {
 		headers: {
 			'Authorization': `Bearer ${authManager.getToken()}`
 		}
 	});}
     export const getMePromise = () => {
-		return axiosInstance.get(`users/me`, {
-			headers: {
-				'Authorization': `Bearer ${authManager.getToken()}`
-			}
-		})}
+		return axiosInstance.get(`users/me`, updateAxiosInstance())}
 }
 
 export namespace postApi {
@@ -61,11 +56,7 @@ export namespace putApi {
 	export const putUser= (updateUser: Partial<IUser>)		=>{
 		console.log("[putApi/putUser] status sent: " + updateUser.status);
 
-		return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, {
-			headers: {
-				'Authorization': `Bearer ${authManager.getToken()}`
-			}
-		})}
+		return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, updateAxiosInstance())}
 }
 
 export namespace deleteApi {
