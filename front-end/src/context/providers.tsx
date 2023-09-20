@@ -68,18 +68,18 @@ export function SocketProvider({ children }) {
 
   export function Providers({children}) {
     const [isLogged, setIsLogged] = useState<boolean>(false);
-    const [userContext, setUserContext] = useState<IUser | undefined>(undefined);
+    const [userContext, setUserContext] = useState<IUser>(null);
   
 	return (
 		<>
 			<OriginContext.Provider value={originDefaultFull(originDefault)}>
-				<LoggedContext.Provider value={{logged: isLogged, setLogged: setIsLogged}}>
+
 					<SocketProvider>
 						<UserContext.Provider value={{userContext: userContext, setUserContext: setUserContext}}>
 							{children}
 						</UserContext.Provider>
 					</SocketProvider>
-				</LoggedContext.Provider>
+
 			</OriginContext.Provider>
 		</>
 	);

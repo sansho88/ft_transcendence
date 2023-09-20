@@ -25,6 +25,8 @@ export default function Game({className}: {className: string}) {
   
   // const {logged}    = useContext(LoggedContext);
   const userLogged  = useContext(UserContext);
+  const {logged, setLogged} = useContext(LoggedContext);
+
   // const router      = useRouter();
 
 
@@ -67,6 +69,13 @@ export default function Game({className}: {className: string}) {
 //     setCurrentGameTheme(themeName);
 // }
 
+
+  useEffect(( ) => {
+    if (logged === true)
+      socketRef.current?.connect();
+    else
+      socketRef.current?.disconnect();
+  }, [logged])
 
 	useEffect(() => {
 	  if (nameGameSession === "") {
@@ -215,7 +224,9 @@ export default function Game({className}: {className: string}) {
   
       socketRef.current?.connect();
     }
-
+    return () => {
+      socketRef.current?.disconnect();
+    }
 	}, []);
 
 	const arrowUp = useRef<boolean>(false);
