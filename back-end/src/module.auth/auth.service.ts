@@ -51,6 +51,7 @@ export class AuthService {
 	/** * * * * * * * * * * * * * * **/
 
 	async signIn42(login: string, password: string) {
+		
 		throw new BadRequestException('WIP');
 	}
 
