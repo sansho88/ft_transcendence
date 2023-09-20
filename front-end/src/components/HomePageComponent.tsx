@@ -11,8 +11,15 @@ import * as apiReq from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
 import {authManager} from "@/components/api/ApiReq";
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import NotifComponent from "@/components/notif/NotificationComponent";
+import {getEnumNameByIndex} from "@/utils/usefulFuncs";
 
-const HomePage = () => {
+interface HomePageProps {
+    className: unknown
+}
+
+const HomePage = ({className}: HomePageProps) => {
     const {userContext, setUserContext} = useContext(UserContext);
     const {logged, setLogged} = useContext(LoggedContext);
     const router = useRouter();
@@ -57,6 +64,7 @@ const HomePage = () => {
 
     function switchOnlineIngame() {
         const tmpStatus = userContext?.status == EStatus.Online ? EStatus.InGame : EStatus.Online;
+        NotificationManager.info(userContext.nickname + ' is actually ' + getEnumNameByIndex(EStatus, userContext.status));
 
         updateStatusUser(userContext?.UserID, tmpStatus)
             .catch((e) => console.error(e));
@@ -90,6 +98,7 @@ const HomePage = () => {
                 <div className={"game"} onClick={switchOnlineIngame}>
                     <Game className={"game"}/>
                 </div>
+                <div className={"absolute bottom-0 left-0"}>Notif Component<NotifComponent /></div>
                {/* <ChatRoomCommponent className={"chat"}/> fixme Fait crash la page ?*/ }
 
             </main>
