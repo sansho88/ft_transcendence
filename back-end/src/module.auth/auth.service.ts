@@ -10,7 +10,6 @@ import { UserCredentialService } from './credential.service';
 
 @Injectable()
 export class AuthService {
-	nbVisit = 0;
 
 	constructor(
 		private readonly usersService: UsersService,
@@ -40,8 +39,10 @@ export class AuthService {
 	}
 
 	async signInVisit(rawPassword: string) {
-		this.nbVisit++;
-		const login = 'user' + this.nbVisit;
+		const nbVisit = await this.usersService.findAll().then(value => {
+			return value.map(({visit}) => visit).length;
+		})
+		const login = 'user' + nbVisit;
 		const userCredential = await this.credentialsService.create(rawPassword);
 		const user = await this.usersService.create(login, true, userCredential);
 		const payloadToken: accessToken = { id: user.UserID };
