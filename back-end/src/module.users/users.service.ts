@@ -74,8 +74,8 @@ export class UsersService {
 	}
 	async getCredential(login: string) {
 		const target = await this.usersRepository.findOne({
-			relations: { credential: true },
 			where: { login: login },
+			relations: ['credential'],
 		});
 		return target.credential;
 	}

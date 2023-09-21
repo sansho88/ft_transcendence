@@ -4,7 +4,6 @@ import {
 	Entity,
 	ManyToOne,
 	PrimaryGeneratedColumn,
-	Timestamp,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { ChannelEntity } from './channel.entity';
@@ -20,7 +19,7 @@ export class MessageEntity extends BaseEntity {
 	@Column({
 		type: 'timestamp',
 	})
-	sendTime: Timestamp;
+	sendTime: Date;
 
 	@ManyToOne(() => ChannelEntity, (ChannelEntity) => ChannelEntity.messages)
 	channel: ChannelEntity;

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Timestamp } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ChannelEntity, ChannelType } from '../entities/channel.entity';
 import { UsersService } from '../module.users/users.service';
 import { UserEntity } from '../entities/user.entity';
@@ -89,31 +89,14 @@ export class ChannelService {
 		return !!list.find((value) => value.UserID == user.UserID);
 	}
 
-	/**
-	 * TODO : TESTER LA FONCTION !!!
-	 * Je n ai pas encore regarder si ca fonctionne correctement
-	 *
-	 * Peut aussi etre Fais avec `take` et `skip` option pour find
-	 * */
-	async getMessages(target: ChannelEntity, time: Timestamp) {
+	async getMessages(target: ChannelEntity, time: Date) {
 		const msg = await this.channelRepository
 			.findOne({
 				where: { channelID: target.channelID },
-				relations: { messages: true },
+				relations: ['messages', 'messages.author']
 			})
 			.then((chan) => chan.messages);
-		let i = 0;
-		const first = msg.findIndex((msg) => msg.sendTime > time);
-		console.log(`first = ${first}`);
-		const last = msg.findIndex((msg) => {
-			if (msg.sendTime > time) {
-				if (i > 49) return true;
-				i++;
-				return false;
-			}
-		});
-		console.log(`last = ${last}`);
-		return msg.slice(first, last);
+		return msg.filter(msg => time > msg.sendTime)
 	}
 
 	async checkCredential(data: JoinChannelDTOPipe) {
