@@ -60,18 +60,13 @@ export class UsersService {
 		});
 	}
 
-	async update(id: number, updateUser: UpdateUserDto) {
-		const user = await this.usersRepository.findOneBy({ UserID: id });
+	async update(user: UserEntity, updateUser: UpdateUserDto) {
 		if (updateUser.nickname !== undefined) user.nickname = updateUser.nickname;
 		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
 		await user.save();
 		return user;
 	}
 
-	// todo: remove user from db
-	remove(id: number) {
-		return `This action removes a #${id} user`;
-	}
 	async getCredential(login: string) {
 		const target = await this.usersRepository.findOne({
 			where: { login: login },
@@ -80,8 +75,7 @@ export class UsersService {
 		return target.credential;
 	}
 
-	async userStatus(id: number, newStatus: UserStatus) {
-		const user = await this.usersRepository.findOneBy({ UserID: id });
+	async userStatus(user : UserEntity, newStatus: UserStatus) {
 		user.status = newStatus;
 		await user.save();
 	}

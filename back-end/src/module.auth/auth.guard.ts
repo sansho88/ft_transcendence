@@ -10,10 +10,14 @@ import { Request } from 'express';
 import { accessToken } from '../dto/payload';
 import { Socket } from 'socket.io';
 import { WsException } from '@nestjs/websockets';
+import { UsersService } from "../module.users/users.service";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-	constructor(private jwtService: JwtService) {}
+	constructor(
+		private jwtService: JwtService,
+		private usersService: UsersService,
+	) {}
 
 	async canActivate(context: ExecutionContext) {
 		const request = context.switchToHttp().getRequest();
@@ -21,14 +25,23 @@ export class AuthGuard implements CanActivate {
 		if (!token) {
 			throw new UnauthorizedException();
 		}
+		let payloadToken: accessToken;
 		try {
-			request['user'] = await this.jwtService.verifyAsync(token, {
-				secret: process.env.SECRET_KEY,
-			});
+			 payloadToken = await this.jwtService.verifyAsync(
+				token,
+				{secret: process.env.SECRET_KEY},
+			);
 		} catch {
 			throw new UnauthorizedException();
 		}
+		const user = await this.getUser(payloadToken);
+		if (user == null) throw new UnauthorizedException();
+		request['user'] = user;
 		return true;
+	}
+
+	private async getUser(payloadToken: accessToken){
+		return await this.usersService.findOne(payloadToken.id);
 	}
 
 	private extractTokenFromHeader(request: Request): string | undefined {
@@ -39,28 +52,35 @@ export class AuthGuard implements CanActivate {
 
 @Injectable()
 export class WSAuthGuard implements CanActivate {
-	constructor(private jwtService: JwtService) {}
+	constructor(
+			private jwtService: JwtService,
+			private usersService: UsersService,
+		) {}
 
 	async canActivate(context: ExecutionContext) {
 		const request = context.switchToWs().getClient();
 		const token = this.extractTokenFromHeaderWS(request);
 		if (!token) {
-			throw new UnauthorizedException();
+			throw new WsException('No token');
 		}
+		let payloadToken: accessToken;
 		try {
-			const payloadToken: accessToken = await this.jwtService.verifyAsync(
+			payloadToken = await this.jwtService.verifyAsync(
 				token,
-				{
-					secret: process.env.SECRET_KEY,
-				},
+				{secret: process.env.SECRET_KEY},
 			);
-			request['user'] = payloadToken;
 		} catch {
-			throw new WsException('UnAuthorise WS');
+			return false
 		}
+		const user = await this.getUser(payloadToken);
+		if (user == null) return false
+		request['user'] = user;
 		return true;
 	}
 
+	private getUser(payloadToken: accessToken){
+		return this.usersService.findOne(payloadToken.id);
+	}
 	private extractTokenFromHeaderWS(client: Socket): string | undefined {
 		const [type, token] =
 			client.handshake.headers.authorization?.split(' ') ?? [];

@@ -11,7 +11,7 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { Server, Socket } from 'socket.io';
 import { MessageService } from './message.service';
 import { WSAuthGuard } from '../module.auth/auth.guard';
-import { UseGuards, ValidationPipe } from '@nestjs/common';
+import { ParseIntPipe, UseGuards, ValidationPipe} from '@nestjs/common';
 import { CurrentUser } from '../module.auth/indentify.user';
 import { ChannelService } from './channel.service';
 import { UsersService } from '../module.users/users.service';
@@ -42,7 +42,7 @@ export class ChatGateway
 {
 	@WebSocketServer()
 	server: Server;
-	private socketUserList: SocketUserList[];
+	private socketUserList: SocketUserList[] = [];
 
 	constructor(
 		private messageService: MessageService,
@@ -77,7 +77,7 @@ export class ChatGateway
 		const user = await this.usersService.findOneRelation(userID, {
 			channelJoined: true,
 		});
-		if (!user) return client.disconnect();
+		if (user == null) return client.disconnect();
 
 		if (typeof user.channelJoined === 'undefined') return;
 		client.join(
@@ -85,7 +85,7 @@ export class ChatGateway
 				return chan.name;
 			}),
 		);
-		this.usersService.userStatus(userID, UserStatus.ONLINE).then();
+		await this.usersService.userStatus(user , UserStatus.ONLINE);
 		this.socketUserList.push({
 			socketID: client.id,
 			userID: userID
@@ -99,11 +99,19 @@ export class ChatGateway
 			client.handshake.headers.authorization?.split(' ') ?? [];
 		if (type !== 'Bearer') return client.disconnect();
 		if (!token) return client.disconnect();
-		const payloadToken: accessToken = await this.jwtService.verifyAsync(token, {
-			secret: process.env.SECRET_KEY,
-		});
-		const userID = payloadToken.id;
-		this.usersService.userStatus(userID, UserStatus.OFFLINE).then();
+		let payloadToken: accessToken;
+		try {
+			payloadToken= await this.jwtService.verifyAsync(token, {
+				secret: process.env.SECRET_KEY,
+			});
+		} catch {
+			return client.disconnect();
+		}
+		const user = await this.usersService.findOne(payloadToken.id);
+		if (!user) return client.disconnect();
+		this.usersService.userStatus(user, UserStatus.OFFLINE).then();
+		// const index = this.socketUserList.indexOf()
+		// this.socketUserList.slice()
 		console.log(`DisConnection ${client.id}`);
 	}
 
@@ -111,10 +119,9 @@ export class ChatGateway
 	@UseGuards(WSAuthGuard)
 	async handelCreateRoom(
 		@MessageBody(new ValidationPipe()) data: CreateChannelDTOPipe,
-		@CurrentUser('id') userID: number,
+		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
-		const user = await this.usersService.findOne(userID);
 		const credential = await this.channelCredentialService.create(
 			data.password,
 		);
@@ -134,11 +141,10 @@ export class ChatGateway
 	@UseGuards(WSAuthGuard)
 	async handelJoinRoom(
 		@MessageBody(new ValidationPipe()) data: JoinChannelDTOPipe,
-		@CurrentUser('id') userID: number,
+		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
 		const chan = await this.channelService.findOne(data.channelID);
-		const user = await this.usersService.findOne(userID);
 		if (!chan || typeof data.channelID === 'undefined')
 			return client.emit('sendMsg', { error: 'There is no such Channel' });
 		if (await this.channelService.isUserOnChan(chan, user))
@@ -156,17 +162,16 @@ export class ChatGateway
 			0,
 			`User ${user.nickname} Joined the channel ${chan.name}`,
 		);
-		console.log(`JOIN Room ${data.channelID} By ${userID}`);
+		console.log(`JOIN Room ${data.channelID} By ${user.UserID}`);
 	}
 
 	@SubscribeMessage('sendMsg')
 	@UseGuards(WSAuthGuard)
 	async handelMessages(
 		@MessageBody(new ValidationPipe()) data: SendMessageDTOPipe,
-		@CurrentUser('id') userID: number,
+		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
-		const user = await this.usersService.findOne(userID);
 		const chan = await this.channelService.findOne(data.channelID);
 		if (!chan || typeof data.channelID === 'undefined')
 			return client.emit('sendMsg', { error: 'There is no such Channel' });
@@ -201,16 +206,33 @@ export class ChatGateway
 		console.log(` Send Message on ${channel.name}, by ${userID}`);
 	}
 
-	// @SubscribeMessage('addAdmin')
-	// @SubscribeMessage('removeAdmin')
-	// @SubscribeMessage('ban')
-	// @SubscribeMessage('pardon')
-	// @SubscribeMessage('kick')
+	private async getSocket(userID: number){
+		const clientID = this.socketUserList.find(value => userID == value.userID).socketID;
+		return this.server.fetchSockets().then(value => {
+			return value.find(value1 => value1.id == clientID);
+		})
+	}
 
+
+	// // // // // // // // //
+	// /	Admin Services	/ //
+	// // // // // // // // //
+
+
+	public async addAdmin(){}
+	public async removeAdmin(){}
+	public async ban(){}
+	public async pardon(){}
+	public async kick(){}
 
 
 	@SubscribeMessage('debug')
-	async handelDebug(client: Socket) {
-		return client.emit('This is a debug');
+	async handelDebug(
+		@ConnectedSocket() client: Socket,
+		@MessageBody(ParseIntPipe) id: number,
+	) {
+		console.log(' ==== debug !');
+		const target = await this.getSocket(id);
+		target.emit('debug', 'AHAHHA CA MARCHE');
 	}
 }

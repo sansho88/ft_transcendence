@@ -14,26 +14,18 @@ import { UsersService } from './users.service';
 import { UpdateUserDto } from '../dto/user/update-user.dto';
 import { CurrentUser } from '../module.auth/indentify.user';
 import { AuthGuard } from '../module.auth/auth.guard';
+import {UserEntity} from "../entities/user.entity";
 
 @Controller('users')
 export class UsersController {
 	constructor(private readonly usersService: UsersService) {}
 
-	@Post()
-	create() {
-		return 'USE `/auth/sign` to create a new user';
-	}
-	@Delete(':id')
-	remove(@Param('id') id: number) {
-		return 'WIP';
-	}
-
 	/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ***/
 
 	@Get('me')
 	@UseGuards(AuthGuard)
-	me(@CurrentUser('id', ParseIntPipe) id: number) {
-		return this.usersService.findOne(id);
+	me(@CurrentUser() user: UserEntity) {
+		return user;
 	}
 
 	@Get('/get')
@@ -55,9 +47,9 @@ export class UsersController {
 	@Put('update')
 	@UseGuards(AuthGuard)
 	updateNickname(
-		@CurrentUser('id', ParseIntPipe) id: number,
+		@CurrentUser() user: UserEntity,
 		@Body() update: UpdateUserDto,
 	) {
-		return this.usersService.update(id, update);
+		return this.usersService.update(user, update);
 	}
 }
