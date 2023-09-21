@@ -1,0 +1,58 @@
+import React, {useState} from "react";
+
+import "./2FAstyleSheet.css"
+import {NotificationManager} from 'react-notifications';
+
+
+const Button2FA: React.FC = ({className, children}) => {
+    const [isChecked, setIsChecked] = useState(false);
+    const [isActivated, setIsActivated] = useState(true);
+
+    const settings2FA = () => {
+      if (isActivated)
+      {
+          console.log("Settings 2FA showed")
+          return (
+              <div className={"settings"}>
+                  <h1>SCAN THIS QR CODE</h1>
+                  <img src={"/pong-logo.png"} alt={"PH QR Code"}/>
+                  <h1>Now enter your code</h1>
+                  <input className={"codeInput"}
+                         type={"text"} inputMode={"numeric"} pattern={"\d*"}
+                         id={"code2FA"}
+                         name={"validationCode"}
+                         min={0} minLength={5} maxLength={10}/>
+                  <input type={"submit"} value={"OK"} className={"submitCode"}/>
+              </div>
+          )
+      }
+      else
+      {
+          <h1>Turn off 2FA now</h1>
+      }
+    }
+
+    const handleCheckboxChange = (event) => {
+        setIsChecked(event.target.checked);
+        if (!isChecked)
+        {
+            NotificationManager.success("2FA is turned on");
+            return settings2FA();
+        }
+        else
+            NotificationManager.warning("2FA is turned off");
+    };
+
+    return (
+        <span className={"doubleFA"}>
+            {children}
+            <label className="switch">
+                <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange}/>
+                <span className="slider round"></span>
+            </label>
+            { isChecked && settings2FA()}
+        </span>
+    )
+}
+
+export default Button2FA;
