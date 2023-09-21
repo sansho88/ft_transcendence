@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LogVisitDTOPipe, SignVisitDTOPipe } from '../dto.pipe/auth/visit';
-import { Log42DTOPipe, Sign42DTOPipe } from '../dto.pipe/auth/42';
+import { connect42DTO } from '../dto.pipe/auth/42';
 
 @Controller('auth')
 export class AuthController {
@@ -26,17 +26,12 @@ export class AuthController {
 	}
 
 	// /**************************************/
-	// Todo : 42 Authentication
+	//            42 Authentication
 	// /**************************************/
-	@HttpCode(HttpStatus.OK)
-	@Post('42/sign')
-	sign42In(@Body(new ValidationPipe()) signDto: Sign42DTOPipe) {
-		return this.authService.signIn42(signDto.login, signDto.password);
-	}
 
 	@HttpCode(HttpStatus.OK)
-	@Post('42/login')
-	log42In(@Body(new ValidationPipe()) loginDto: Log42DTOPipe) {
-		return this.authService.logIn42(loginDto.login, loginDto.password);
+	@Post('42/connect')
+	connect42(@Body(new ValidationPipe()) signDto: connect42DTO) {
+		return this.authService.connect42(signDto.token);
 	}
 }
