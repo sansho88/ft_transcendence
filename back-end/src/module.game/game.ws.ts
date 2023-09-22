@@ -15,8 +15,6 @@ import { userInfoSocket } from 'shared/typesGame';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 @WebSocketGateway({
-	transports: ['websocket'],
-	cors: true,
 	namespace: '/game',
 })
 
@@ -29,7 +27,7 @@ export class WebsocketGatewayGame
 	public server: Server;
 
 	handleConnection(@ConnectedSocket() client: Socket) {
-		console.log('NEW CONNEXION CLIENT THEGAME, id = ' + client.id);
+		console.log('NEW CONNEXION WS CLIENT THEGAME, id = ' + client.id);
 		this.server.to(client.id).emit('welcome', 'Bienvenue sur TheGame');
 	}
 
