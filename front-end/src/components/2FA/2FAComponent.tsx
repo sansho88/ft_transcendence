@@ -2,12 +2,33 @@ import React, {useState} from "react";
 
 import "./2FAstyleSheet.css"
 import {NotificationManager} from 'react-notifications';
+import * as apiReq from "@/components/api/ApiReq";
 
 
 const Button2FA: React.FC = ({className, children}) => {
     const [isChecked, setIsChecked] = useState(false);
     const [isActivated, setIsActivated] = useState(true);
+    const [code2FA, setCode2FA] = useState("");
+    let inputCode: string;
 
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        NotificationManager.success(`2FA code sent:${code2FA}`);
+       /* try{
+            await apiReq.putApi.send2faCode()
+                .then((response) => {
+                    ...
+                });
+        }
+        catch (e) {
+
+        }*/
+    }
+
+    const handleChange = (e) => {
+        inputCode = e.target.value;
+        setCode2FA(inputCode);
+    }
     const settings2FA = () => {
       if (isActivated)
       {
@@ -17,12 +38,16 @@ const Button2FA: React.FC = ({className, children}) => {
                   <h1>SCAN THIS QR CODE</h1>
                   <img src={"/pong-logo.png"} alt={"PH QR Code"}/>
                   <h1>Now enter your code</h1>
-                  <input className={"codeInput"}
-                         type={"text"} inputMode={"numeric"} pattern={"\d*"}
-                         id={"code2FA"}
-                         name={"validationCode"}
-                         min={0} minLength={5} maxLength={10}/>
-                  <input type={"submit"} value={"OK"} className={"submitCode"}/>
+                  <form onSubmit={handleSubmit}>
+                      <input className={"codeInput"}
+                             type={"text"} inputMode={"numeric"}
+                             id={"code2FA"}
+                             name={"validationCode"}
+                             value={inputCode}
+                             onChange={handleChange}
+                             min={0} minLength={5} maxLength={10}/>
+                      <input type={"submit"} value={"OK"} className={"submitCode"} />
+                  </form>
               </div>
           )
       }

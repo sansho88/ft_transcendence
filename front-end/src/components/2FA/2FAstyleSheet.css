@@ -73,8 +73,13 @@ input:checked + .slider:before {
     width: 242px;
     z-index: 1;
 
-    border-radius: 6px;
-    border: 2px solid black ;
+    background: rgba(0, 0, 0, 0.27);
+    border: 2px rgba(0, 0, 0, 0.11);
+    border-style: inherit ;
+    box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
+    border-radius: 8px;
+
+    color: darkgrey;
 }
 
 .settings h1{
