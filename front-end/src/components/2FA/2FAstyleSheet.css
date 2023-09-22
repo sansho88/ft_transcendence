@@ -70,10 +70,10 @@ input:checked + .slider:before {
     position: absolute;
     top: 100px;
     left: -100px;
-    width: 242px;
+    width: auto;
     z-index: 1;
 
-    background: rgba(0, 0, 0, 0.27);
+    background: rgba(126, 126, 126, 0.27);
     border: 2px rgba(0, 0, 0, 0.11);
     border-style: inherit ;
     box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
@@ -84,20 +84,22 @@ input:checked + .slider:before {
 
 .settings h1{
     font-size: 0.8em;
+    text-align: center;
 }
 
 .settings .codeInput{
-    width: 60%;
+    width: 100%;
     text-align: center;
     border-radius: 4px;
-    border-bottom: 1px solid #07C3FF ;
+    border-bottom: 3px solid #07C3FF ;
+    border-inline: 1px solid #07C3FF ;
     background-color: #999999;
 
 
-    margin: 2em auto;
+    margin-bottom: 1em;
 
     padding: 0;
-    /*background: none;*/
+    background: none;
     font: 2ch droid sans mono, consolas, monospace;
     letter-spacing: 0.5ch;
 }
@@ -106,6 +108,7 @@ textarea:focus, input:focus  .settings .codeInput {
 }
 
 .settings .submitCode{
+    display: inline-block;
     background-color: white;
     margin-inline: 15px;
     padding-inline: 6px;

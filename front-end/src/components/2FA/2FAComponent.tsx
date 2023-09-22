@@ -3,22 +3,29 @@ import React, {useState} from "react";
 import "./2FAstyleSheet.css"
 import {NotificationManager} from 'react-notifications';
 import * as apiReq from "@/components/api/ApiReq";
+import DraggableComponent from "@/components/draggableComponent";
+import QRCode from 'qrcode.react';
 
 
-const Button2FA: React.FC = ({className, children}) => {
+interface userData2Fa {
+    login: string,
+    secret: string
+}
+const Button2FA: React.FC<userData2Fa> = ({className, children, login, secret}) => {
     const [isChecked, setIsChecked] = useState(false);
     const [isActivated, setIsActivated] = useState(true);
     const [code2FA, setCode2FA] = useState("");
     let inputCode: string;
 
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         NotificationManager.success(`2FA code sent:${code2FA}`);
-       /* try{
-            await apiReq.putApi.send2faCode()
-                .then((response) => {
-                    ...
-                });
+       /* try{ //todo: activer ce bloc de code quand le back sera prêt
+           const res = await fetch('/api/verify', {
+              method: 'POST',
+              body: JSON.stringify({ token: code }),
+            });
         }
         catch (e) {
 
@@ -36,8 +43,9 @@ const Button2FA: React.FC = ({className, children}) => {
           return (
               <div className={"settings"}>
                   <h1>SCAN THIS QR CODE</h1>
-                  <img src={"/pong-logo.png"} alt={"PH QR Code"}/>
-                  <h1>Now enter your code</h1>
+                  {/*<img src={"/pong-logo.png"} alt={"PH QR Code"}/>*/}
+                  <QRCode value={"https://42lyon.fr"} style={{margin: "1.5em"}}/>
+                  <h1>OR ENTER YOUR CODE:</h1>
                   <form onSubmit={handleSubmit}>
                       <input className={"codeInput"}
                              type={"text"} inputMode={"numeric"}
@@ -75,7 +83,8 @@ const Button2FA: React.FC = ({className, children}) => {
                 <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange}/>
                 <span className="slider round"></span>
             </label>
-            { isChecked && settings2FA()}
+            { isChecked &&
+                <DraggableComponent>{settings2FA()}</DraggableComponent> }
         </span>
     )
 }

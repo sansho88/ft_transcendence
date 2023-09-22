@@ -31,7 +31,8 @@
     "socket.io-client": "^4.7.1",
     "tailwindcss": "3.3.2",
     "utf-8-validate": "^5.0.10",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "qrcode.react": "latest"
   },
   "devDependencies": {
     "ts-loader": "^9.4.4",

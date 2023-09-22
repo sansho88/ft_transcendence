@@ -100,7 +100,7 @@ const HomePage = ({className}: HomePageProps) => {
                 <div className={"game"} onClick={switchOnlineIngame}>
                     <Game className={"game"}/>
                 </div>
-                <div className={"absolute bottom-0 left-0"}>Notif Component<NotifComponent /></div>
+                <div className={"absolute bottom-0 left-0"}><NotifComponent /></div>
                {/* <ChatRoomCommponent className={"chat"}/> fixme Fait crash la page ?*/ }
 
             </main>
