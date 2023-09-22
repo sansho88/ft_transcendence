@@ -116,4 +116,28 @@ export class ChannelService {
 				return false; // todo: WIP
 		}
 	}
+
+	async userIsAdmin(user: UserEntity, channelID: number) {
+		const adminList = await this.channelRepository.findOne({
+			where: {channelID},
+			relations: ['adminList'],
+		}).then(channel => channel.adminList)
+		console.log(adminList)
+		const index = adminList.findIndex(value => value.UserID == user.UserID );
+		console.log(index);
+		return index + 1;
+	}
+
+	async addAdmin(target: UserEntity, channel: ChannelEntity) {
+		if (!await this.userInChannel(target, channel))
+			throw new BadRequestException('The target isn t par of this salon');
+		channel = await this.channelRepository.findOne({
+			where: { channelID: channel.channelID },
+			relations: ['adminList'],
+		});
+		channel.adminList.push(target);
+		await channel.save();
+		return channel;
+	}
+
 }
