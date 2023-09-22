@@ -13,12 +13,13 @@ import { AuthGuard } from '../module.auth/auth.guard';
 import {CurrentUser} from "../module.auth/indentify.user";
 import {UserEntity} from "../entities/user.entity";
 import {UsersService} from "../module.users/users.service";
+import {ChatGateway} from "./chat.ws";
 
 @Controller('channel')
 export class ChannelController {
-	constructor(private readonly channelService: ChannelService) {}
 	constructor(private readonly channelService: ChannelService,
 							private readonly usersService: UsersService,
+							private readonly chatGateway: ChatGateway) {}
 
 	@Post('create')
 	@UseGuards(AuthGuard)
@@ -36,12 +37,6 @@ export class ChannelController {
 	@UseGuards(AuthGuard)
 	findOne(@Param('channelID', ParseIntPipe) channelID: number) {
 		return this.channelService.findOne(channelID);
-	}
-
-	@Put('join/:channelID')
-	@UseGuards(AuthGuard)
-	async joinChannel() {
-		return "Use WebSocket event 'joinRoom'";
 	}
 
 	@Get('msg/:channelID/:timestamp')
