@@ -464,12 +464,25 @@ export default function Auth({className}: { className?: string }) {
     } else
         defaultClassName = className;
 
+        function goto42auth(){
+            const generateOAuthURI = (): string => {
+                const clientId = "u-s4t2ud-0788fba92bafcab10cfac65db3d676f1b630ab7658c79526d0f6a00b74373cc4";
+                const responseType = "code";
+                const hostname = window.location.hostname; // Récupérer le nom d'hôte du serveur
+                const redirectUri = encodeURIComponent(`http://${hostname}:3000/callback`);
+                
+                return `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}`;
+            };
+            console.log(generateOAuthURI()); // Affiche l'URI générée
+            router.push(generateOAuthURI())
+            
+        }
 
     return (
         <div className={defaultClassName}>
             {welcomeTitle()}
             {currentStepLogin === EStepLogin.start &&
-                <button onClick={() => console.log('Not implemented')} className='button-login h-14 opacity-30'>LOGIN
+                <button onClick={() => goto42auth()} className='button-login h-14'>LOGIN
                     42</button>}
             {currentStepLogin < EStepLogin.tryLoginAsInvite &&
                 <button onClick={() => nextStepCheck()} className='button-login'><span>{inviteButtonText}</span>
