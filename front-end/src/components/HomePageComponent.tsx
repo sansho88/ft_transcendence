@@ -4,18 +4,20 @@ import Button from "@/components/CustomButtonComponent";
 import UserList from "@/components/UserListComponent";
 import Game from "@/components/game/Game";
 import ChatRoomCommponent from "@/components/chat/ChatRoomComponent";
-import React, {useContext, useEffect} from "react";
-import {LoggedContext, UserContext} from "@/context/globalContext";
+import React, {useContext, useEffect, useRef} from "react";
+import {LoggedContext, TokenContext, UserContext} from "@/context/globalContext";
 import {EStatus, IUser} from "@/shared/types";
 import * as apiReq from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
 import {authManager} from "@/components/api/ApiReq";
+import ChatMaster from "./chat/ChatMaster";
 
 const HomePage = () => {
     const {userContext, setUserContext} = useContext(UserContext);
     const {logged, setLogged} = useContext(LoggedContext);
     const router = useRouter();
+    const tokenRef = useRef<string>('');
 
 
     useEffect(() => {
@@ -23,6 +25,8 @@ const HomePage = () => {
         const token = localStorage.getItem("token");
         if (!token)
             router.push("/auth");
+        else
+            tokenRef.current = token;
         if (!userContext)
         {
 
@@ -91,6 +95,7 @@ const HomePage = () => {
                     <Game className={"game"}/>
                 </div>
                {/* <ChatRoomCommponent className={"chat"}/> fixme Fait crash la page ?*/ }
+               <ChatMaster className={'flex w-[28rem] h-[35rem] items-end absolute bottom-5 right-1'} token={tokenRef.current}/>
 
             </main>
         </>
