@@ -33,9 +33,9 @@ const HomePage = ({className}: HomePageProps) => {
             router.push("/auth");
         if (!userContext)
         {
-
+            let user;
             authManager.setToken(token);
-            getUserMe().then((me) => setUserContext(me) )
+            getUserMe(user).then((me) => setUserContext(me) )
                 .catch(() => {
                     localStorage.clear();
                     router.push("/auth");
