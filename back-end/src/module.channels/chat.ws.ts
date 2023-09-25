@@ -81,7 +81,7 @@ export class ChatGateway
 		if (typeof user.channelJoined === 'undefined') return;
 		client.join(
 			user.channelJoined.map((chan) => {
-				return chan.name;
+				return `${chan.channelID}`;
 			}),
 		);
 		await this.usersService.userStatus(user, UserStatus.ONLINE);
@@ -92,7 +92,7 @@ export class ChatGateway
 		console.log(`New connection from User ${userID}`);
 	}
 
-	//Todo: leave room + offline
+	//Todo: Remove Socket from SocketList
 	async handleDisconnect(client: Socket) {
 		const [type, token] = client.handshake.headers.authorization?.split(' ') ?? [];
 		if (type !== 'Bearer') return client.disconnect();
@@ -111,7 +111,7 @@ export class ChatGateway
 		if (!user) return client.disconnect();
 		this.usersService.userStatus(user, UserStatus.OFFLINE).then();
 		// const index = this.socketUserList.indexOf()
-		// this.socketUserList.slice()
+		// this.socketUserList = this.socketUserList.slice()
 		console.log(`DisConnection ${client.id}`);
 	}
 
@@ -125,15 +125,15 @@ export class ChatGateway
 		const credential = await this.channelCredentialService.create(
 			data.password,
 		);
-		const chan = await this.channelService.create(
+		const channel = await this.channelService.create(
 			data.name,
 			credential,
 			data.privacy,
 			user,
 		);
-		client.join(data.name);
+		client.join(`${channel.channelID}`);
 		client.emit(`createRoom`, {
-			message: `Channel Created with id ${chan.channelID}`,
+			message: `Channel Created with id ${channel.channelID}`,
 		});
 	}
 
@@ -158,7 +158,7 @@ export class ChatGateway
 				message: `You cannot Join that channel`,
 			});
 		await this.channelService.joinChannel(user, channel);
-		client.join(channel.name);
+		client.join(`${channel.channelID}`);
 		await this.SendMessage(
 			channel,
 			0,
@@ -222,34 +222,52 @@ export class ChatGateway
 			channelID: channel.channelID,
 			content: content,
 		};
-		this.server.to(channel.name).emit(`sendMsg`, msg);
+		this.server.to(`${channel.channelID}`).emit(`sendMsg`, msg);
 		console.log(` Send Message on ${channel.name}, by ${userID}`);
 	}
 
 	private async getSocket(userID: number) {
-		const clientID = this.socketUserList.find(
+		const index = this.socketUserList.findIndex(
 			(value) => userID == value.userID,
-		).socketID;
+		);
+		if (index == -1)
+			return undefined;
 		return this.server.fetchSockets().then((value) => {
-			return value.find((value1) => value1.id == clientID);
+			return value.find(socket =>
+				socket.id == this.socketUserList[index].socketID)
 		});
 	}
 
 	@SubscribeMessage('debug')
+	@UseGuards(WSAuthGuard)
 	async handelDebug(
 		@ConnectedSocket() client: Socket,
 		@MessageBody(ParseIntPipe) id: number,
+		@CurrentUser() user: UserEntity,
 	) {
 		console.log(' ==== debug !');
-		const target = await this.getSocket(id);
-		target.emit('debug', 'AHAHHA CA MARCHE');
+		console.log(user);
+		await this.ban(await this.channelService.findOne(id), await this.usersService.findOne(id));
 	}
 
-	private async leaveChat(channel: ChannelEntity, user: UserEntity) {
+	async leaveChat(channel: ChannelEntity, user: UserEntity) {
 		if (this.channelService.userIsAdmin(user, channel))
 			channel = await this.channelService.removeAdmin(user, channel);
-		channel.userList = channel.userList.filter(target => target.UserID != user.UserID)
-		await channel.save();
+		channel = await this.channelService.leaveChannel(channel, user);
+		const socketTarget = await this.getSocket(user.UserID);
+		if (typeof socketTarget === 'undefined')
+			return await this.SendMessage(channel, 0, `User ${user.nickname} Leaved the channel ${channel.name}`);
+		socketTarget.leave(`${channel.channelID}`)
+		await this.SendMessage(channel, 0, `User ${user.nickname} Leaved the channel ${channel.name}`)
 		return channel;
+	}
+
+	async ban(channel: ChannelEntity, user: UserEntity) {
+		console.log(user);
+		// await this.leaveChat(channel, user);
+		const socket = await this.getSocket(user.UserID);
+		if (!socket)
+			return;
+		return await this.leaveChat(channel, user);
 	}
 }

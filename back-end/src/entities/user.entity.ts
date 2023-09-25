@@ -10,12 +10,12 @@ import {
 	OneToOne,
 	JoinColumn,
 } from 'typeorm';
-import { MessageEntity } from './message.entity';
-import { UserCredentialEntity } from './credential.entity';
-import { InviteEntity } from './invite.entity';
-import { MuteEntity } from './mute.entity';
-import { BannedEntity } from './banned.entity';
-import { ChannelEntity } from './channel.entity';
+import {MessageEntity} from './message.entity';
+import {UserCredentialEntity} from './credential.entity';
+import {InviteEntity} from './invite.entity';
+import {MuteEntity} from './mute.entity';
+import {BannedEntity} from './banned.entity';
+import {ChannelEntity} from './channel.entity';
 
 export enum UserStatus {
 	INGAME = 2,

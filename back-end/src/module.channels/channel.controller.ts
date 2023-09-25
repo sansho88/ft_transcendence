@@ -14,11 +14,13 @@ import {CurrentUser} from '../module.auth/indentify.user';
 import {UserEntity} from '../entities/user.entity';
 import {UsersService} from '../module.users/users.service';
 import {ChatGateway} from './chat.ws';
+import {BannedService} from "./banned.service";
 
 @Controller('channel')
 export class ChannelController {
 	constructor(
 		private readonly channelService: ChannelService,
+		private readonly bannedService: BannedService,
 		private readonly usersService: UsersService,
 		private readonly chatGateway: ChatGateway,
 	) {
@@ -92,5 +94,24 @@ export class ChannelController {
 			);
 		}
 		return this.channelService.removeAdmin(target, channel);
+	}
+
+	@Put('ban/:channelID/:targetID/:banDuration')
+	@UseGuards(AuthGuard)
+	async banUser(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Param('targetID', ParseIntPipe) targetID: number,
+		@Param('banDuration', ParseIntPipe) duration: number, // Time of ban in sec()
+	) {
+		await this.bannedService.update();
+		const channel = await this.channelService.findOne(channelID, ['adminList']);
+		if (!(this.channelService.userIsAdmin(user, channel))) {
+			throw new BadRequestException("You aren't administrator on this channel");
+		}
+		const target = await this.usersService.findOne(targetID);
+		await this.channelService.banUser(target, channel, duration);
+		if (await this.channelService.userInChannel(target, channel))
+			await this.chatGateway.leaveChat(channel, target);
 	}
 }

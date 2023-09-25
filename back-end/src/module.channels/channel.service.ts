@@ -1,12 +1,3 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { ChannelEntity, ChannelType } from '../entities/channel.entity';
-import { UsersService } from '../module.users/users.service';
-import { UserEntity } from '../entities/user.entity';
-import { ChannelCredentialEntity } from '../entities/credential.entity';
-import { ChannelCredentialService } from './credential.service';
-import { JoinChannelDTOPipe } from '../dto.pipe/channel.dto';
 import {BadRequestException, Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
@@ -16,6 +7,7 @@ import {UserEntity} from '../entities/user.entity';
 import {ChannelCredentialEntity} from '../entities/credential.entity';
 import {ChannelCredentialService} from './credential.service';
 import {JoinChannelDTOPipe} from '../dto.pipe/channel.dto';
+import {BannedService} from "./banned.service";
 
 @Injectable()
 export class ChannelService {
@@ -24,7 +16,9 @@ export class ChannelService {
 		private channelRepository: Repository<ChannelEntity>,
 		private userService: UsersService,
 		private channelCredentialService: ChannelCredentialService,
-	) {}
+		private bannedService: BannedService,
+	) {
+	}
 
 	async create(
 		name: string,
@@ -71,13 +65,19 @@ export class ChannelService {
 		return channel;
 	}
 
-	async joinChannel(user: UserEntity, chan: ChannelEntity) {
-		this.getList(chan).then(async (lst) => {
-			chan.userList = lst;
-			chan.userList.push(user);
-			await chan.save();
-			return chan;
+	async joinChannel(user: UserEntity, channel: ChannelEntity) {
+		this.getList(channel).then(async (lst) => {
+			channel.userList = lst;
+			channel.userList.push(user);
+			await channel.save();
+			return channel;
 		});
+	}
+
+	async leaveChannel(channel: ChannelEntity, user: UserEntity) {
+		const lst = await this.getList(channel)
+		channel.userList = lst.filter(usr => usr.UserID != user.UserID)
+		return await channel.save();
 	}
 
 	/**
@@ -161,5 +161,23 @@ export class ChannelService {
 		channel.adminList = channel.adminList.filter((usr) => usr.UserID != target.UserID);
 		await channel.save();
 		return channel;
+	}
+
+	async banUser(target: UserEntity, channel: ChannelEntity, duration: number) {
+		console.log('banUser', target)
+		if (target.UserID == channel.owner.UserID)
+			throw new BadRequestException('The target is the ChannelOwner and cannot be ban');
+		if (await this.userIsBan(channel, target))
+			throw new BadRequestException('The target is already banned and cannot be ban again');
+		// if (await this.isUserOnChan(channel, target))
+		// 	this.chatGateway.leave(channel, target);
+		await this.bannedService.create(target, channel, duration);
+	}
+
+	async userIsBan(channel: ChannelEntity, usr: UserEntity) {
+		console.log('userIsBan', usr);
+		return !!(await this.bannedService.findAll().then(bans => {
+			return bans.findIndex(ban => ban.user.UserID == usr.UserID)
+		}) + 1)
 	}
 }
