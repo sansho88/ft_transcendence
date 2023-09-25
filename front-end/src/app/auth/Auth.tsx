@@ -466,7 +466,7 @@ export default function Auth({className}: { className?: string }) {
 
         function goto42auth(){
             const generateOAuthURI = (): string => {
-                const clientId = "u-s4t2ud-0788fba92bafcab10cfac65db3d676f1b630ab7658c79526d0f6a00b74373cc4";
+                const clientId = "u-s4t2ud-11d5ef61bfceb369b228b9eac5ee836a0ebdf73e0fc0703f5803f1faa54b87cf";
                 const responseType = "code";
                 const hostname = window.location.hostname; // Récupérer le nom d'hôte du serveur
                 const redirectUri = encodeURIComponent(`http://${hostname}:3000/callback`);

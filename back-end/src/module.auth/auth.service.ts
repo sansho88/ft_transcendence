@@ -1,9 +1,11 @@
 import {
 	BadRequestException,
 	HttpException,
+	HttpStatus,
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { UsersService } from '../module.users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { accessToken } from '../dto/payload';
@@ -53,6 +55,17 @@ export class AuthService {
 	/** * * * * * * * * * * * * * * **/
 
 
+	getIntraUrl(req: Request) {
+		if (!process.env.PORT_SERVER)
+			throw new HttpException('server port error', HttpStatus.BAD_REQUEST);
+		const params = JSON.stringify({
+			client_id: process.env.CLIENT_ID,
+			redirect_uri: `${ req.protocol }://${ req.hostname.slice(0, -(process.env.PORT_SERVER.length + 1)) }:${process.env.PORT_CLIENT}/waiting`,
+			response_type: 'code',
+		})
+		return `https://api.intra.42.fr/oauth/authorize?${params}`;
+	}
+
 	async connect42(token: string) {
 		const axios = require('axios');
 
@@ -61,26 +74,31 @@ export class AuthService {
 			client_id: process.env.CLIENT_ID,
 			client_secret: process.env.CLIENT_SECRET,
 			code: token,
-			redirect_uri: process.env.CALLBACK_URL,
+			redirect_uri: "http://localhost:3000/callback",
 		};
-		let request: any;
-		axios.post('https://api.intra.42.fr/oauth/token', tokenRequestData)
+		let request = await axios.post('https://api.intra.42.fr/oauth/token', tokenRequestData)
 			.then(async (response) => {
-				request = await this.usersService.findOne(response.data.login);
+				if (response.status !== 200)
+					throw new HttpException(response.data.error + " / ERROR INTRA TOKEN", response.status);
+				//console.log(JSON.stringify(response.data, null, 4));
+				const headers = {
+					Authorization: `${response.data.token_type} ${response.data.access_token}`,
+				}
+				//console.log("++++++++++++++" + JSON.stringify(headers, null, 4))
+				try {
+					return await axios.get('https://api.intra.42.fr/v2/me', { headers, });
+					//console.log("---------------" + JSON.stringify(request?.data, null, 4))
+				}
+				catch (error) {
+					console.log(error);
+					throw new HttpException(error.message + " / ERROR INTRA TOKEN (/me)", response.status);
+				}
 			})
-			.catch((error) => {
+			.catch(async (error) => {
 				console.log(error);
-				throw new HttpException(error.message + " / ERROR INTRA TOKEN", error.response.status);
+				throw new HttpException(error.message + " / ERROR INTRA TOKEN", HttpStatus.UNAUTHORIZED);
 			});
-		const headers = {
-			Authorization: `Bearer ${request.data.access_token}`,
-		}
-		try {
-			request = await axios.get('https://api.intra.42.fr/v2/me', { headers });
-		}
-		catch (error) {
-			throw new HttpException(error.message + " / ERROR INTRA TOKEN (/me)", error.response.status);
-		}
+
 		const login = request.data.login;
 		// null = sign in
 		if (await this.usersService.findOne(login) === null) {

@@ -2,7 +2,8 @@
 
 # dotenv environment variables file
 .env
-
+.env_42
+.env_nest
 
 # compiled output
 /dist

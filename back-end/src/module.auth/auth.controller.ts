@@ -31,7 +31,8 @@ export class AuthController {
 
 	@HttpCode(HttpStatus.OK)
 	@Post('42/connect')
-	connect42(@Body(new ValidationPipe()) signDto: connect42DTO) {
-		return this.authService.connect42(signDto.token);
+	connect42(/*@Body(new ValidationPipe()) signDto: connect42DTO*/@Body()body) {
+		console.log(body);
+		return this.authService.connect42(Object.keys(body)[0]);
 	}
 }
