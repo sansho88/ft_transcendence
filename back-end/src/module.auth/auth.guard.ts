@@ -10,7 +10,7 @@ import { Request } from 'express';
 import { accessToken } from '../dto/payload';
 import { Socket } from 'socket.io';
 import { WsException } from '@nestjs/websockets';
-import { UsersService } from "../module.users/users.service";
+import { UsersService } from '../module.users/users.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -27,10 +27,9 @@ export class AuthGuard implements CanActivate {
 		}
 		let payloadToken: accessToken;
 		try {
-			 payloadToken = await this.jwtService.verifyAsync(
-				token,
-				{secret: process.env.SECRET_KEY},
-			);
+			payloadToken = await this.jwtService.verifyAsync(token, {
+				secret: process.env.SECRET_KEY,
+			});
 		} catch {
 			throw new UnauthorizedException('Bad token');
 		}
@@ -40,8 +39,8 @@ export class AuthGuard implements CanActivate {
 		return true;
 	}
 
-	private async getUser(payloadToken: accessToken){
-		return await this.usersService.findOne(payloadToken.id);
+	private async getUser(payloadToken: accessToken) {
+		return await this.usersService.findOne(payloadToken.id).catch(() => null);
 	}
 
 	private extractTokenFromHeader(request: Request): string | undefined {
@@ -53,9 +52,9 @@ export class AuthGuard implements CanActivate {
 @Injectable()
 export class WSAuthGuard implements CanActivate {
 	constructor(
-			private jwtService: JwtService,
-			private usersService: UsersService,
-		) {}
+		private jwtService: JwtService,
+		private usersService: UsersService,
+	) {}
 
 	async canActivate(context: ExecutionContext) {
 		const request = context.switchToWs().getClient();
@@ -65,21 +64,20 @@ export class WSAuthGuard implements CanActivate {
 		}
 		let payloadToken: accessToken;
 		try {
-			payloadToken = await this.jwtService.verifyAsync(
-				token,
-				{secret: process.env.SECRET_KEY},
-			);
+			payloadToken = await this.jwtService.verifyAsync(token, {
+				secret: process.env.SECRET_KEY,
+			});
 		} catch {
 			throw new WsException('Bad token');
 		}
 		const user = await this.getUser(payloadToken);
-		if (user == null) return false
+		if (user == null) return false;
 		request['user'] = user;
 		return true;
 	}
 
-	private getUser(payloadToken: accessToken){
-		return this.usersService.findOne(payloadToken.id);
+	private async getUser(payloadToken: accessToken) {
+		return await this.usersService.findOne(payloadToken.id).catch(() => null);
 	}
 	private extractTokenFromHeaderWS(client: Socket): string | undefined {
 		const [type, token] =

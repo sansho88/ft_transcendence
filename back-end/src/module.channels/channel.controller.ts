@@ -10,16 +10,18 @@ import {
 } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { AuthGuard } from '../module.auth/auth.guard';
-import {CurrentUser} from "../module.auth/indentify.user";
-import {UserEntity} from "../entities/user.entity";
-import {UsersService} from "../module.users/users.service";
-import {ChatGateway} from "./chat.ws";
+import { CurrentUser } from '../module.auth/indentify.user';
+import { UserEntity } from '../entities/user.entity';
+import { UsersService } from '../module.users/users.service';
+import { ChatGateway } from './chat.ws';
 
 @Controller('channel')
 export class ChannelController {
-	constructor(private readonly channelService: ChannelService,
-							private readonly usersService: UsersService,
-							private readonly chatGateway: ChatGateway) {}
+	constructor(
+		private readonly channelService: ChannelService,
+		private readonly usersService: UsersService,
+		private readonly chatGateway: ChatGateway,
+	) {}
 
 	@Post('create')
 	@UseGuards(AuthGuard)
@@ -41,32 +43,55 @@ export class ChannelController {
 
 	@Get('msg/:channelID/:timestamp')
 	@UseGuards(AuthGuard)
-	async getMessages(@Param('channelID', ParseIntPipe) channelID: number,
-									@Param('timestamp', ParseIntPipe) timestamp: number,
-	){
+	async getMessages(
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Param('timestamp', ParseIntPipe) timestamp: number,
+	) {
 		const minTime = new Date(timestamp * 1000);
-		minTime.setUTCHours(minTime.getHours() + 2)
+		minTime.setUTCHours(minTime.getHours() + 2);
 		const channel = await this.channelService.findOne(channelID);
-		if (channel == null) throw new BadRequestException('this channel doesn\'t exist');
+		if (channel == null)
+			throw new BadRequestException("This channel doesn't exist");
 		return this.channelService.getMessages(channel, minTime);
 	}
 
 	@Put('admin/add/:channelID/:targetID')
 	@UseGuards(AuthGuard)
-	async addAdmin(@CurrentUser() user: UserEntity,
-								 @Param('channelID', ParseIntPipe) channelID: number,
-								 @Param('targetID', ParseIntPipe) targetID: number,
-	){
-		if (!await this.channelService.userIsAdmin(user, channelID)) {
-			throw new BadRequestException('You aren\'t administrator on this channel');
+	async addAdmin(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Param('targetID', ParseIntPipe) targetID: number,
+	) {
+		const channel = await this.channelService.findOne(channelID, ['adminList']);
+		if (!(await this.channelService.userIsAdmin(user, channel))) {
+			throw new BadRequestException("You aren't administrator on this channel");
 		}
 		const target = await this.usersService.findOne(targetID);
-		if (await this.channelService.userIsAdmin(target, channelID)) {
-			throw new BadRequestException('This User have already administrator power');
+		if (await this.channelService.userIsAdmin(target, channel)) {
+			throw new BadRequestException(
+				'This user have already administrator power',
+			);
 		}
-		const channel = await this.channelService.findOne(channelID);
-		if (channel == null) throw new BadRequestException('this channel doesn\'t exist');
-		if (target == null) throw new BadRequestException('this user doesn\'t exist');
 		return this.channelService.addAdmin(target, channel);
+	}
+
+	@Put('admin/remove/:channelID/:targetID')
+	@UseGuards(AuthGuard)
+	async removeAdmin(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Param('targetID', ParseIntPipe) targetID: number,
+	) {
+		const channel = await this.channelService.findOne(channelID, ['adminList']);
+		if (!(await this.channelService.userIsAdmin(user, channel))) {
+			throw new BadRequestException("You aren't administrator on this channel");
+		}
+		const target = await this.usersService.findOne(targetID);
+		if (!(await this.channelService.userIsAdmin(target, channel))) {
+			throw new BadRequestException(
+				"This user doesn't have administrator power",
+			);
+		}
+		return this.channelService.removeAdmin(target, channel);
 	}
 }

@@ -11,7 +11,7 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { Server, Socket } from 'socket.io';
 import { MessageService } from './message.service';
 import { WSAuthGuard } from '../module.auth/auth.guard';
-import { ParseIntPipe, UseGuards, ValidationPipe} from '@nestjs/common';
+import { ParseIntPipe, UseGuards, ValidationPipe } from '@nestjs/common';
 import { CurrentUser } from '../module.auth/indentify.user';
 import { ChannelService } from './channel.service';
 import { UsersService } from '../module.users/users.service';
@@ -35,7 +35,7 @@ class SocketUserList {
 	socketID: string;
 }
 
-@WebSocketGateway({ namespace: 'chat' ,cors: true})
+@WebSocketGateway({ namespace: 'chat', cors: true })
 export class ChatGateway
 	extends IoAdapter
 	implements OnGatewayConnection, OnGatewayDisconnect
@@ -74,9 +74,9 @@ export class ChatGateway
 		} catch {
 			return client.disconnect();
 		}
-		const user = await this.usersService.findOneRelation(userID, {
-			channelJoined: true,
-		});
+		const user = await this.usersService
+			.findOne(userID, ['channelJoined'])
+			.catch(() => null);
 		if (user == null) return client.disconnect();
 
 		if (typeof user.channelJoined === 'undefined') return;
@@ -85,10 +85,10 @@ export class ChatGateway
 				return chan.name;
 			}),
 		);
-		await this.usersService.userStatus(user , UserStatus.ONLINE);
+		await this.usersService.userStatus(user, UserStatus.ONLINE);
 		this.socketUserList.push({
 			socketID: client.id,
-			userID: userID
+			userID: userID,
 		});
 		console.log(`New connection from User ${userID}`);
 	}
@@ -101,13 +101,15 @@ export class ChatGateway
 		if (!token) return client.disconnect();
 		let payloadToken: accessToken;
 		try {
-			payloadToken= await this.jwtService.verifyAsync(token, {
+			payloadToken = await this.jwtService.verifyAsync(token, {
 				secret: process.env.SECRET_KEY,
 			});
 		} catch {
 			return client.disconnect();
 		}
-		const user = await this.usersService.findOne(payloadToken.id);
+		const user = await this.usersService
+			.findOne(payloadToken.id)
+			.catch(() => null);
 		if (!user) return client.disconnect();
 		this.usersService.userStatus(user, UserStatus.OFFLINE).then();
 		// const index = this.socketUserList.indexOf()
@@ -144,10 +146,12 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
-		const chan = await this.channelService.findOne(data.channelID);
-		if (!chan || typeof data.channelID === 'undefined')
+		const channel = await this.channelService
+			.findOne(data.channelID)
+			.catch(() => null);
+		if (channel == null)
 			return client.emit('sendMsg', { error: 'There is no such Channel' });
-		if (await this.channelService.isUserOnChan(chan, user))
+		if (await this.channelService.isUserOnChan(channel, user))
 			return client.emit(`joinRoom`, {
 				message: `You are already on that channel`,
 			});
@@ -155,12 +159,12 @@ export class ChatGateway
 			return client.emit(`joinRoom`, {
 				message: `You cannot Join that channel`,
 			});
-		await this.channelService.joinChannel(user, chan);
-		client.join(chan.name);
+		await this.channelService.joinChannel(user, channel);
+		client.join(channel.name);
 		await this.SendMessage(
-			chan,
+			channel,
 			0,
-			`User ${user.nickname} Joined the channel ${chan.name}`,
+			`User ${user.nickname} Joined the channel ${channel.name}`,
 		);
 		console.log(`JOIN Room ${data.channelID} By ${user.UserID}`);
 	}
@@ -172,12 +176,14 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
-		const chan = await this.channelService.findOne(data.channelID);
-		if (!chan || typeof data.channelID === 'undefined')
+		const channel = await this.channelService
+			.findOne(data.channelID)
+			.catch(() => null);
+		if (channel == null)
 			return client.emit('sendMsg', { error: 'There is no such Channel' });
-		if (await this.channelService.userInChannel(user, chan)) {
-			await this.messageService.create(user, data.content, chan);
-			return await this.SendMessage(chan, user, data.content);
+		if (await this.channelService.userInChannel(user, channel)) {
+			await this.messageService.create(user, data.content, channel);
+			return await this.SendMessage(channel, user, data.content);
 		}
 		return client.emit('sendMsg', {
 			error: 'You are not part of this channel',
@@ -206,25 +212,23 @@ export class ChatGateway
 		console.log(` Send Message on ${channel.name}, by ${userID}`);
 	}
 
-	private async getSocket(userID: number){
-		const clientID = this.socketUserList.find(value => userID == value.userID).socketID;
-		return this.server.fetchSockets().then(value => {
-			return value.find(value1 => value1.id == clientID);
-		})
+	private async getSocket(userID: number) {
+		const clientID = this.socketUserList.find(
+			(value) => userID == value.userID,
+		).socketID;
+		return this.server.fetchSockets().then((value) => {
+			return value.find((value1) => value1.id == clientID);
+		});
 	}
-
 
 	// // // // // // // // //
 	// /	Admin Services	/ //
 	// // // // // // // // //
 
-
-	public async addAdmin(){}
-	public async removeAdmin(){}
-	public async ban(){}
-	public async pardon(){}
-	public async kick(){}
-
+	public async removeAdmin() {}
+	public async ban() {}
+	public async pardon() {}
+	public async kick() {}
 
 	@SubscribeMessage('debug')
 	async handelDebug(

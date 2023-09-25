@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChannelEntity, ChannelType } from '../entities/channel.entity';
@@ -48,10 +48,18 @@ export class ChannelService {
 		return this.channelRepository.find();
 	}
 
-	async findOne(id: number | string) {
-		if (typeof id === 'number')
-			return await this.channelRepository.findOneBy({ channelID: id });
-		return await this.channelRepository.findOneBy({ name: id });
+	async findOne(id: number, relations?: string[]) {
+		let channel;
+		if (!relations)
+			channel = await this.channelRepository.findOneBy({ channelID: id });
+		else
+			channel = await this.channelRepository.findOne({
+				where: { channelID: id },
+				relations,
+			});
+		if (channel == null)
+			throw new BadRequestException("this channel doesn't exist");
+		return channel;
 	}
 
 	async joinChannel(user: UserEntity, chan: ChannelEntity) {
@@ -93,10 +101,10 @@ export class ChannelService {
 		const msg = await this.channelRepository
 			.findOne({
 				where: { channelID: target.channelID },
-				relations: ['messages', 'messages.author']
+				relations: ['messages', 'messages.author'],
 			})
 			.then((chan) => chan.messages);
-		return msg.filter(msg => time > msg.sendTime)
+		return msg.filter((msg) => time > msg.sendTime);
 	}
 
 	async checkCredential(data: JoinChannelDTOPipe) {
@@ -117,20 +125,14 @@ export class ChannelService {
 		}
 	}
 
-	async userIsAdmin(user: UserEntity, channelID: number) {
-		const adminList = await this.channelRepository.findOne({
-			where: {channelID},
-			relations: ['adminList'],
-		}).then(channel => channel.adminList)
-		console.log(adminList)
-		const index = adminList.findIndex(value => value.UserID == user.UserID );
-		console.log(index);
-		return index + 1;
+	async userIsAdmin(user: UserEntity, channel: ChannelEntity) {
+		const adminList = channel.adminList;
+		return adminList.findIndex((value) => value.UserID == user.UserID) + 1;
 	}
 
 	async addAdmin(target: UserEntity, channel: ChannelEntity) {
-		if (!await this.userInChannel(target, channel))
-			throw new BadRequestException('The target isn t par of this salon');
+		if (!(await this.userInChannel(target, channel)))
+			throw new BadRequestException("The target isn't part of this Channel");
 		channel = await this.channelRepository.findOne({
 			where: { channelID: channel.channelID },
 			relations: ['adminList'],
@@ -140,4 +142,20 @@ export class ChannelService {
 		return channel;
 	}
 
+	async removeAdmin(target: UserEntity, channel: ChannelEntity) {
+		if (!(await this.userInChannel(target, channel)))
+			throw new BadRequestException("The target isn't part of this Channel");
+		channel = await this.channelRepository.findOne({
+			where: { channelID: channel.channelID },
+			relations: ['adminList'],
+		});
+		const index = channel.adminList.findIndex(
+			(usr) => usr.UserID == target.UserID,
+		);
+		console.log('index == ', index);
+		channel.adminList.filter((usr) => usr.UserID != target.UserID);
+		await channel.save();
+		console.log(channel);
+		return channel;
+	}
 }
