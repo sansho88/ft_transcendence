@@ -64,7 +64,7 @@ export class UserEntity extends BaseEntity {
 	})
 	status: UserStatus;
 
-	@OneToOne(() => UserCredentialEntity, { cascade: true })
+	@OneToOne(() => UserCredentialEntity, {cascade: true})
 	@JoinColumn()
 	credential: UserCredentialEntity;
 
@@ -91,11 +91,11 @@ export class UserEntity extends BaseEntity {
 	banned: BannedEntity[];
 
 	@ManyToMany(() => ChannelEntity, (channel) => channel.userList)
-	// @JoinTable()
+		// @JoinTable()
 	channelJoined: ChannelEntity[];
 
 	@OneToMany(() => ChannelEntity, (channel) => channel.adminList)
-	// @JoinTable()
+		// @JoinTable()
 	channelAdmin: ChannelEntity[];
 
 	@OneToMany(() => ChannelEntity, (channel) => channel.owner)

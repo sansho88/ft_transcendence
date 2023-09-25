@@ -8,12 +8,12 @@ import {
 	Put,
 	UseGuards,
 } from '@nestjs/common';
-import { ChannelService } from './channel.service';
-import { AuthGuard } from '../module.auth/auth.guard';
-import { CurrentUser } from '../module.auth/indentify.user';
-import { UserEntity } from '../entities/user.entity';
-import { UsersService } from '../module.users/users.service';
-import { ChatGateway } from './chat.ws';
+import {ChannelService} from './channel.service';
+import {AuthGuard} from '../module.auth/auth.guard';
+import {CurrentUser} from '../module.auth/indentify.user';
+import {UserEntity} from '../entities/user.entity';
+import {UsersService} from '../module.users/users.service';
+import {ChatGateway} from './chat.ws';
 
 @Controller('channel')
 export class ChannelController {
@@ -21,7 +21,8 @@ export class ChannelController {
 		private readonly channelService: ChannelService,
 		private readonly usersService: UsersService,
 		private readonly chatGateway: ChatGateway,
-	) {}
+	) {
+	}
 
 	@Post('create')
 	@UseGuards(AuthGuard)

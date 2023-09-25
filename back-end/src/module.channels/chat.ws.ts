@@ -7,23 +7,24 @@ import {
 	WebSocketGateway,
 	WebSocketServer,
 } from '@nestjs/websockets';
-import { IoAdapter } from '@nestjs/platform-socket.io';
-import { Server, Socket } from 'socket.io';
-import { MessageService } from './message.service';
-import { WSAuthGuard } from '../module.auth/auth.guard';
-import { ParseIntPipe, UseGuards, ValidationPipe } from '@nestjs/common';
-import { CurrentUser } from '../module.auth/indentify.user';
-import { ChannelService } from './channel.service';
-import { UsersService } from '../module.users/users.service';
-import { ChannelCredentialService } from './credential.service';
-import { ChannelEntity } from '../entities/channel.entity';
-import { UserEntity, UserStatus } from '../entities/user.entity';
-import { accessToken } from '../dto/payload';
+import {IoAdapter} from '@nestjs/platform-socket.io';
+import {Server, Socket} from 'socket.io';
+import {MessageService} from './message.service';
+import {WSAuthGuard} from '../module.auth/auth.guard';
+import {ParseIntPipe, UseGuards, ValidationPipe} from '@nestjs/common';
+import {CurrentUser} from '../module.auth/indentify.user';
+import {ChannelService} from './channel.service';
+import {UsersService} from '../module.users/users.service';
+import {ChannelCredentialService} from './credential.service';
+import {ChannelEntity} from '../entities/channel.entity';
+import {UserEntity, UserStatus} from '../entities/user.entity';
+import {accessToken} from '../dto/payload';
 import * as process from 'process';
-import { JwtService } from '@nestjs/jwt';
+import {JwtService} from '@nestjs/jwt';
 import {
 	CreateChannelDTOPipe,
 	JoinChannelDTOPipe,
+	LeaveChannelDTOPipe,
 } from '../dto.pipe/channel.dto';
 import {
 	ReceivedMessageDTOPipe,
@@ -35,11 +36,10 @@ class SocketUserList {
 	socketID: string;
 }
 
-@WebSocketGateway({ namespace: 'chat', cors: true })
+@WebSocketGateway({namespace: 'chat', cors: true})
 export class ChatGateway
 	extends IoAdapter
-	implements OnGatewayConnection, OnGatewayDisconnect
-{
+	implements OnGatewayConnection, OnGatewayDisconnect {
 	@WebSocketServer()
 	server: Server;
 	private socketUserList: SocketUserList[] = [];
@@ -58,8 +58,7 @@ export class ChatGateway
 	// Or We could also use a 'Auth' event to identify the user post connection
 
 	async handleConnection(client: Socket) {
-		const [type, token] =
-			client.handshake.headers.authorization?.split(' ') ?? [];
+		const [type, token] = client.handshake.headers.authorization?.split(' ') ?? [];
 		if (type !== 'Bearer') return client.disconnect();
 		if (!token) return client.disconnect();
 		let userID: number;
@@ -95,8 +94,7 @@ export class ChatGateway
 
 	//Todo: leave room + offline
 	async handleDisconnect(client: Socket) {
-		const [type, token] =
-			client.handshake.headers.authorization?.split(' ') ?? [];
+		const [type, token] = client.handshake.headers.authorization?.split(' ') ?? [];
 		if (type !== 'Bearer') return client.disconnect();
 		if (!token) return client.disconnect();
 		let payloadToken: accessToken;
@@ -145,12 +143,12 @@ export class ChatGateway
 		@MessageBody(new ValidationPipe()) data: JoinChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
-	) {
+	) { // Todo: Need to check for invite / ban
 		const channel = await this.channelService
 			.findOne(data.channelID)
 			.catch(() => null);
 		if (channel == null)
-			return client.emit('sendMsg', { error: 'There is no such Channel' });
+			return client.emit('sendMsg', {error: 'There is no such Channel'});
 		if (await this.channelService.isUserOnChan(channel, user))
 			return client.emit(`joinRoom`, {
 				message: `You are already on that channel`,
@@ -169,6 +167,22 @@ export class ChatGateway
 		console.log(`JOIN Room ${data.channelID} By ${user.UserID}`);
 	}
 
+	@SubscribeMessage('leaveRoom')
+	@UseGuards(WSAuthGuard)
+	async handelLeaveRoom(  // Todo : Need To check if Owner leave The channel
+		@MessageBody(new ValidationPipe()) data: LeaveChannelDTOPipe,
+		@CurrentUser() user: UserEntity,
+		@ConnectedSocket() client: Socket,) {
+		const channel = await this.channelService
+			.findOne(data.channelID, ['adminList', 'userList'])
+			.catch(() => null);
+		if (channel == null)
+			return client.emit('leaveRoom', {error: 'There is no such Channel'});
+		if (!await this.channelService.isUserOnChan(channel, user))
+			return client.emit('leaveRoom', {error: 'You are not part of this channel'});
+		return this.leaveChat(channel, user);
+	}
+
 	@SubscribeMessage('sendMsg')
 	@UseGuards(WSAuthGuard)
 	async handelMessages(
@@ -180,7 +194,7 @@ export class ChatGateway
 			.findOne(data.channelID)
 			.catch(() => null);
 		if (channel == null)
-			return client.emit('sendMsg', { error: 'There is no such Channel' });
+			return client.emit('sendMsg', {error: 'There is no such Channel'});
 		if (await this.channelService.userInChannel(user, channel)) {
 			await this.messageService.create(user, data.content, channel);
 			return await this.SendMessage(channel, user, data.content);
@@ -221,15 +235,6 @@ export class ChatGateway
 		});
 	}
 
-	// // // // // // // // //
-	// /	Admin Services	/ //
-	// // // // // // // // //
-
-	public async removeAdmin() {}
-	public async ban() {}
-	public async pardon() {}
-	public async kick() {}
-
 	@SubscribeMessage('debug')
 	async handelDebug(
 		@ConnectedSocket() client: Socket,
@@ -238,5 +243,13 @@ export class ChatGateway
 		console.log(' ==== debug !');
 		const target = await this.getSocket(id);
 		target.emit('debug', 'AHAHHA CA MARCHE');
+	}
+
+	private async leaveChat(channel: ChannelEntity, user: UserEntity) {
+		if (this.channelService.userIsAdmin(user, channel))
+			channel = await this.channelService.removeAdmin(user, channel);
+		channel.userList = channel.userList.filter(target => target.UserID != user.UserID)
+		await channel.save();
+		return channel;
 	}
 }

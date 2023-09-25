@@ -7,6 +7,15 @@ import { UserEntity } from '../entities/user.entity';
 import { ChannelCredentialEntity } from '../entities/credential.entity';
 import { ChannelCredentialService } from './credential.service';
 import { JoinChannelDTOPipe } from '../dto.pipe/channel.dto';
+import {BadRequestException, Injectable} from '@nestjs/common';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Repository} from 'typeorm';
+import {ChannelEntity, ChannelType} from '../entities/channel.entity';
+import {UsersService} from '../module.users/users.service';
+import {UserEntity} from '../entities/user.entity';
+import {ChannelCredentialEntity} from '../entities/credential.entity';
+import {ChannelCredentialService} from './credential.service';
+import {JoinChannelDTOPipe} from '../dto.pipe/channel.dto';
 
 @Injectable()
 export class ChannelService {
@@ -51,14 +60,14 @@ export class ChannelService {
 	async findOne(id: number, relations?: string[]) {
 		let channel;
 		if (!relations)
-			channel = await this.channelRepository.findOneBy({ channelID: id });
+			channel = await this.channelRepository.findOneBy({channelID: id});
 		else
 			channel = await this.channelRepository.findOne({
-				where: { channelID: id },
+				where: {channelID: id},
 				relations,
 			});
 		if (channel == null)
-			throw new BadRequestException("this channel doesn't exist");
+			throw new BadRequestException('this channel doesn\'t exist');
 		return channel;
 	}
 
@@ -85,22 +94,21 @@ export class ChannelService {
 	async getList(target: ChannelEntity) {
 		return this.channelRepository
 			.findOne({
-				where: { channelID: target.channelID },
-				relations: { userList: true },
+				where: {channelID: target.channelID},
+				relations: {userList: true},
 			})
 			.then((chan) => chan.userList);
 	}
 
 	async isUserOnChan(channel: ChannelEntity, user: UserEntity) {
 		const list = await this.getList(channel);
-		console.log('list get');
 		return !!list.find((value) => value.UserID == user.UserID);
 	}
 
 	async getMessages(target: ChannelEntity, time: Date) {
 		const msg = await this.channelRepository
 			.findOne({
-				where: { channelID: target.channelID },
+				where: {channelID: target.channelID},
 				relations: ['messages', 'messages.author'],
 			})
 			.then((chan) => chan.messages);
@@ -109,7 +117,7 @@ export class ChannelService {
 
 	async checkCredential(data: JoinChannelDTOPipe) {
 		const channel = await this.channelRepository.findOne({
-			where: { channelID: data.channelID },
+			where: {channelID: data.channelID},
 			relations: ['credential'],
 		});
 		const credential = channel.credential;
@@ -125,16 +133,16 @@ export class ChannelService {
 		}
 	}
 
-	async userIsAdmin(user: UserEntity, channel: ChannelEntity) {
+	userIsAdmin(user: UserEntity, channel: ChannelEntity) {
 		const adminList = channel.adminList;
 		return adminList.findIndex((value) => value.UserID == user.UserID) + 1;
 	}
 
 	async addAdmin(target: UserEntity, channel: ChannelEntity) {
 		if (!(await this.userInChannel(target, channel)))
-			throw new BadRequestException("The target isn't part of this Channel");
+			throw new BadRequestException('The target isn\'t part of this Channel');
 		channel = await this.channelRepository.findOne({
-			where: { channelID: channel.channelID },
+			where: {channelID: channel.channelID},
 			relations: ['adminList'],
 		});
 		channel.adminList.push(target);
@@ -144,11 +152,9 @@ export class ChannelService {
 
 	async removeAdmin(target: UserEntity, channel: ChannelEntity) {
 		if (!(await this.userInChannel(target, channel)))
-			throw new BadRequestException("The target isn't part of this Channel");
-		channel = await this.channelRepository.findOne({
-			where: { channelID: channel.channelID },
-			relations: ['adminList'],
-		});
+			throw new BadRequestException('The target isn\'t part of this Channel');
+		if (target.UserID == channel.owner.UserID)
+			throw new BadRequestException('The target is the ChannelOwner and cannot lost his Administrator Power');
 		channel.adminList.findIndex(
 			(usr) => usr.UserID == target.UserID,
 		);
