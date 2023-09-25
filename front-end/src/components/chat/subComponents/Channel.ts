@@ -3,6 +3,9 @@ import { IChannel, IChannelMessage } from "@/shared/typesChannel";
 import { useContext } from "react";
 import { Socket } from "socket.io-client";
 
+/**
+ * class channel pour gerer la logique par channel individuel, contenant les messages et users
+ */
 export class Channel {
 
   private chanInfo        : IChannel;
@@ -47,5 +50,6 @@ export class Channel {
 
   public getOldMessages(targetDate: Date) {}    //demander 10 messages plus ancien a partir de <targetDate> // pour smooth loading on scrolling up
   public setOwnerUser(userID: number, userLogin: string) { this.chanInfo.ownerUserID = userID, this.chanInfo.ownerLogin = userLogin}
+  public getChannelID(): number {return this.chanInfo.channelID};
 
 }

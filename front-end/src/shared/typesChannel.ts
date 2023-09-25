@@ -4,6 +4,7 @@
 
 import { Socket } from "socket.io";
 import { IUser } from "./types";
+import { Channel } from "@/components/chat/subComponents/Channel";
 
 export interface IChannel {
   channelID: number;
