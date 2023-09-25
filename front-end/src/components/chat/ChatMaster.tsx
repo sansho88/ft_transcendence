@@ -4,9 +4,10 @@ import { IChannel, IChannelMessage } from '@/shared/typesChannel'
 import {Channel} from './subComponents/Channel'
 import React, { useContext, useEffect, useState } from 'react'
 import ChatChannelList from './subComponents/ChatChannelList'
-import ChatMessage from './subComponents/elements/ChatMessage'
+import ChatMessage from './subComponents/elements/ChatMessageListElement'
 import ChatInput from './subComponents/ChatInput'
 import { SocketContextChat } from '@/context/globalContext'
+import ChatMessagesList from './subComponents/ChatMessagesList'
 
 export default function ChatMaster({className, token}: {className: string, token: string}) {
 
@@ -36,10 +37,7 @@ export default function ChatMaster({className, token}: {className: string, token
       
       <div className='flex flex-col w-2/3 h-full'>
         <div className=''>
-          <ChatMessage className={' h-20 items-end justify-center'}/>
-          <ChatMessage className={' h-20 items-end justify-center'}/>
-          <ChatMessage className={' h-20 items-end justify-center'}/>
-          <ChatMessage className={' h-20 items-end justify-center'}/>
+          <ChatMessagesList />
         </div>
         <ChatInput className={' absolute bottom-0 h-20 justify-center'}/>
       </div>

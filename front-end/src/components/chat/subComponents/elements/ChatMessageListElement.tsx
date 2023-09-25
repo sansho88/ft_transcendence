@@ -9,7 +9,7 @@ import React from 'react'
 export default function ChatMessage({className}) {
   return (
     <div className={className}>
-      
+      MESSAGES
 
     </div>
   )
