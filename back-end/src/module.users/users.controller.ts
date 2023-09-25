@@ -1,18 +1,17 @@
 import {
-	Controller,
-	Param,
 	Body,
+	Controller,
 	Get,
+	Param,
 	Put,
 	UseGuards,
 	ParseIntPipe,
-	BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from '../dto/user/update-user.dto';
-import { CurrentUser } from '../module.auth/indentify.user';
 import { AuthGuard } from '../module.auth/auth.guard';
-import {UserEntity} from "../entities/user.entity";
+import { UserEntity } from "../entities/user.entity";
+import { CurrentUser } from '../module.auth/indentify.user';
 
 @Controller('users')
 export class UsersController {
@@ -35,9 +34,7 @@ export class UsersController {
 	@Get('/get/:id')
 	@UseGuards(AuthGuard)
 	async findOneID(@Param('id', ParseIntPipe) id: number) {
-		const user = await this.usersService.findOne(id);
-		if (user == null) throw new BadRequestException();
-		return user;
+		return await this.usersService.findOne(id);
 	}
 
 	/*************************************************/

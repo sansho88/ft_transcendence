@@ -149,13 +149,11 @@ export class ChannelService {
 			where: { channelID: channel.channelID },
 			relations: ['adminList'],
 		});
-		const index = channel.adminList.findIndex(
+		channel.adminList.findIndex(
 			(usr) => usr.UserID == target.UserID,
 		);
-		console.log('index == ', index);
-		channel.adminList.filter((usr) => usr.UserID != target.UserID);
+		channel.adminList = channel.adminList.filter((usr) => usr.UserID != target.UserID);
 		await channel.save();
-		console.log(channel);
 		return channel;
 	}
 }

@@ -50,8 +50,6 @@ export class ChannelController {
 		const minTime = new Date(timestamp * 1000);
 		minTime.setUTCHours(minTime.getHours() + 2);
 		const channel = await this.channelService.findOne(channelID);
-		if (channel == null)
-			throw new BadRequestException("This channel doesn't exist");
 		return this.channelService.getMessages(channel, minTime);
 	}
 

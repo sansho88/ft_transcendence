@@ -21,7 +21,6 @@ import { BannedEntity } from './entities/banned.entity';
 import { WebsocketGatewayChat } from './module.game/websocket/wsChatProto.gateway';
 import { WebsocketGatewayGame } from './module.game/websocket/wsGame.gateway';
 import { ServerGame } from './module.game/game/ServerGame';
-import { GameSession } from './module.game/game/GameSession';
 
 @Module({
 	imports: [
