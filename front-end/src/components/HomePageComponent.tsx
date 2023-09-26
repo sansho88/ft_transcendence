@@ -95,7 +95,7 @@ const HomePage = () => {
                     <Game className={"game"}/>
                 </div>
                {/* <ChatRoomCommponent className={"chat"}/> fixme Fait crash la page ?*/ }
-               <ChatMaster className={'flex w-[28rem] h-[35rem] items-end absolute bottom-5 right-1'} token={tokenRef.current}/>
+               <ChatMaster className={'flex w-[24%] h-[56%] items-end absolute bottom-5 right-1'} token={tokenRef.current}/>
 
             </main>
         </>

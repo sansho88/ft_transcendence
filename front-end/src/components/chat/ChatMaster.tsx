@@ -39,7 +39,7 @@ export default function ChatMaster({className, token}: {className: string, token
       const chan1 = new Channel({ channelID: 1, name: 'chan1', ownerUserID: 0, type: 0, ownerLogin: 'bducrocq'  }, socketChat)
       const chan2 = new Channel({ channelID: 2, name: 'chan2', ownerUserID: 0, type: 0, ownerLogin: 'babar'     }, socketChat)
       const chan3 = new Channel({ channelID: 3, name: 'chan3', ownerUserID: 0, type: 0, ownerLogin: 'zephyr'    }, socketChat)
-      setChannels([...Channels, chan0, chan1, chan2, chan3] )
+      // setChannels([...Channels, chan0, chan1, chan2, chan3] )
       manager.current.addChannel(chan0);
       manager.current.addChannel(chan1);
       manager.current.addChannel(chan2);
@@ -53,7 +53,7 @@ export default function ChatMaster({className, token}: {className: string, token
     <div className={`bg-slate-950 flex w-full h-full rounded-xl ${className}`}>
       <ChatChannelList className={' bg-slate-900 flex-grow w-1/3 h-full rounded-l-xl'} setChannel={console.log} />
 
-      <div className='flex flex-col w-2/3 h-full'>
+      <div className='flex-col w-2/3 h-full'>
         <div className=''>
           {/* <ChatMessagesList className='' messages={ } /> */}
         </div>
