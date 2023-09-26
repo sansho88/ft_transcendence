@@ -7,6 +7,7 @@ import {LoggedContext, SocketContextChat, SocketContextGame, UserContext} from '
 import LoadingComponent from "@/components/waiting/LoadingComponent";
 import { getUserMe } from '../auth/Auth';
 import * as ClipLoader from 'react-spinners'
+import { useRouter } from 'next/navigation';
 
 
 
@@ -19,6 +20,8 @@ export default function Callback() {
 	const socketChat = useContext(SocketContextChat);
 	const socketGame = useContext(SocketContextGame);
 	const [isSignInMode, setIsSignInMode] = useState(false);
+
+	const router = useRouter();
 
 
 	enum authErrorState{
@@ -55,30 +58,21 @@ export default function Callback() {
  const fetchData = async (code :string) => { 
 	await apiReq.postApi.postTryLogin42(code)
 	.then(async (res) => {
+		console.log(`ret tryLogin42: ${JSON.stringify(res)}`)
 			if (res.status === 200) {
 					const userToken = res.data;
 					localStorage.removeItem('token');
 					localStorage.setItem('token', userToken);
 					apiReq.authManager.setToken(userToken);
-
-					await getUserMe()
-					.then((data: POD.IUser | undefined) => {
-						setLogged(true);
-						if (data !== undefined)	{
-							setUserContext(data);
-							localStorage.setItem('login', data.login);
-						}
-						localStorage.setItem('userContext', JSON.stringify(userContext));
-						console.log('you are now logged in');
-				}
-		)}
+					router.push('/home');
+		}
 	})
 	.catch((e) => {
-			console.log("[TRY LOGIN ERROR]" + e);
-			LoggedFailed(e.response.status);
+			// LoggedFailed(e.response.status); // pas adapter car dit mdp incoorect si echoue
+			router.push('/auth');
 			return;
 		})
-return;
+	return;
 
  }
 
