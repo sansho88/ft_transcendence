@@ -12,6 +12,7 @@ import {MessageEntity} from '../entities/message.entity';
 import {BannedEntity} from "../entities/banned.entity";
 import {MuteEntity} from "../entities/mute.entity";
 import {BannedService} from "./banned.service";
+import {MutedService} from "./muted.service";
 
 @Module({
 	controllers: [ChannelController],
@@ -21,16 +22,17 @@ import {BannedService} from "./banned.service";
 			ChannelEntity,
 			MessageEntity,
 			BannedEntity,
-			// MuteEntity,
+			MuteEntity,
 		]),
 		forwardRef(() => UsersModule),
 	],
 	providers: [
-		ChannelService,
 		ChannelCredentialService,
-		ChatGateway,
+		ChannelService,
 		MessageService,
 		BannedService,
+		MutedService,
+		ChatGateway,
 	],
 })
 export class ChannelModule {

@@ -14,7 +14,6 @@ export class BannedService {
 	}
 
 	async create(user: UserEntity, channel: ChannelEntity, duration: number) {
-		console.log('create BanEntity');
 		let endTime = null;
 		if (duration) {
 			endTime = new Date();
@@ -37,10 +36,10 @@ export class BannedService {
 		return lst.filter(ban => ban.channel.channelID == channel.channelID)
 	}
 
-	async findOne(banID: any) {
+	async findOne(banID: number) {
 		const ban = await this.bannedRepository.findOneBy({bannedID: banID});
 		if (ban == null)
-			throw new BadRequestException('This Ban ID is not in use (possibly already unban or not banned yet)');
+			throw new BadRequestException('This Ban ID is not in use (possibly already pardon or not banned yet)');
 		return ban;
 	}
 

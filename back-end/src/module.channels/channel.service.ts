@@ -8,6 +8,7 @@ import {ChannelCredentialEntity} from '../entities/credential.entity';
 import {ChannelCredentialService} from './credential.service';
 import {JoinChannelDTOPipe} from '../dto.pipe/channel.dto';
 import {BannedService} from "./banned.service";
+import {MutedService} from "./muted.service";
 
 @Injectable()
 export class ChannelService {
@@ -17,6 +18,7 @@ export class ChannelService {
 		private userService: UsersService,
 		private channelCredentialService: ChannelCredentialService,
 		private bannedService: BannedService,
+		private mutedService: MutedService,
 	) {
 	}
 
@@ -174,8 +176,22 @@ export class ChannelService {
 	}
 
 	async userIsBan(channel: ChannelEntity, usr: UserEntity) {
-		return !!(await this.bannedService.findAll().then(bans => {
+		return !!(await this.bannedService.findAll(channel).then(bans => {
 			return bans.findIndex(ban => ban.user.UserID == usr.UserID)
+		}) + 1)
+	}
+
+	async muteUser(target: UserEntity, channel: ChannelEntity, duration: number) {
+		if (target.UserID == channel.owner.UserID)
+			throw new BadRequestException('The target is the ChannelOwner and cannot be mute');
+		if (await this.userIsMute(channel, target))
+			throw new BadRequestException('The target is already mutes and cannot be mute again');
+		await this.mutedService.create(target, channel, duration);
+	}
+
+	async userIsMute(channel: ChannelEntity, usr: UserEntity) {
+		return !!(await this.mutedService.findAll(channel).then(mutes => {
+			return mutes.findIndex(mute => mute.user.UserID == usr.UserID)
 		}) + 1)
 	}
 }

@@ -4,21 +4,21 @@ import {
 	Entity,
 	JoinColumn,
 	ManyToOne,
-	PrimaryColumn,
+	PrimaryGeneratedColumn,
 } from 'typeorm';
 import {UserEntity} from './user.entity';
 import {ChannelEntity} from './channel.entity';
 
 @Entity('TestMute')
 export class MuteEntity extends BaseEntity {
-	@PrimaryColumn()
+	@PrimaryGeneratedColumn()
 	muteID: number;
 
-	@ManyToOne(() => UserEntity, (UserEntity) => UserEntity.mute)
+	@ManyToOne(() => UserEntity, (UserEntity) => UserEntity.mute, {eager: true})
 	@JoinColumn()
 	user: UserEntity;
 
-	@ManyToOne(() => ChannelEntity, (ChannelEntity) => ChannelEntity.muteList)
+	@ManyToOne(() => ChannelEntity, (ChannelEntity) => ChannelEntity.muteList, {eager: true})
 	@JoinColumn()
 	channel: ChannelEntity;
 

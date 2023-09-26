@@ -15,12 +15,14 @@ import {UserEntity} from '../entities/user.entity';
 import {UsersService} from '../module.users/users.service';
 import {ChatGateway} from './chat.ws';
 import {BannedService} from "./banned.service";
+import {MutedService} from "./muted.service";
 
 @Controller('channel')
 export class ChannelController {
 	constructor(
 		private readonly channelService: ChannelService,
 		private readonly bannedService: BannedService,
+		private readonly mutedService: MutedService,
 		private readonly usersService: UsersService,
 		private readonly chatGateway: ChatGateway,
 	) {
@@ -64,11 +66,11 @@ export class ChannelController {
 		@Param('targetID', ParseIntPipe) targetID: number,
 	) {
 		const channel = await this.channelService.findOne(channelID, ['adminList']);
-		if (!(await this.channelService.userIsAdmin(user, channel))) {
+		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
 		const target = await this.usersService.findOne(targetID);
-		if (await this.channelService.userIsAdmin(target, channel)) {
+		if (this.channelService.userIsAdmin(target, channel)) {
 			throw new BadRequestException(
 				'This user have already administrator power',
 			);
@@ -143,5 +145,51 @@ export class ChannelController {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
 		await this.bannedService.pardon(ban);
+	}
+
+	@Get('get/mute/:channelID')
+	@UseGuards(AuthGuard)
+	async getMute(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+	) {
+		await this.mutedService.update();
+		const channel = await this.channelService.findOne(channelID, ['adminList', 'muteList']);
+		if (!(this.channelService.userIsAdmin(user, channel))) {
+			throw new BadRequestException("You aren't administrator on this channel");
+		}
+		return this.mutedService.findAll(channel);
+	}
+
+	@Put('mute/:channelID/:userID/:duration')
+	@UseGuards(AuthGuard)
+	async muteUser(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Param('userID', ParseIntPipe) targetID: number,
+		@Param('duration', ParseIntPipe) duration: number,
+	) {
+		await this.mutedService.update();
+		const channel = await this.channelService.findOne(channelID, ['adminList', 'muteList']);
+		if (!(this.channelService.userIsAdmin(user, channel))) {
+			throw new BadRequestException("You aren't administrator on this channel");
+		}
+		const target = await this.usersService.findOne(targetID);
+		await this.channelService.muteUser(target, channel, duration);
+	}
+
+	@Put('unmute/:muteID')
+	@UseGuards(AuthGuard)
+	async unMuteUser(
+		@CurrentUser() user: UserEntity,
+		@Param('muteID', ParseIntPipe) muteID: number,
+	) {
+		await this.mutedService.update();
+		const mute = await this.mutedService.findOne(muteID);
+		const channel = await this.channelService.findOne(mute.channel.channelID, ['adminList', 'muteList']);
+		if (!(this.channelService.userIsAdmin(user, channel))) {
+			throw new BadRequestException("You aren't administrator on this channel");
+		}
+		await this.mutedService.unmute(mute);
 	}
 }
