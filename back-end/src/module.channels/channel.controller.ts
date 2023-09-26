@@ -84,16 +84,31 @@ export class ChannelController {
 		@Param('targetID', ParseIntPipe) targetID: number,
 	) {
 		const channel = await this.channelService.findOne(channelID, ['adminList']);
-		if (!(await this.channelService.userIsAdmin(user, channel))) {
+		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
 		const target = await this.usersService.findOne(targetID);
-		if (!(await this.channelService.userIsAdmin(target, channel))) {
+		if (!(this.channelService.userIsAdmin(target, channel))) {
 			throw new BadRequestException(
 				"This user doesn't have administrator power",
 			);
 		}
 		return this.channelService.removeAdmin(target, channel);
+	}
+
+
+	@Get('ban/get/:channelID')
+	@UseGuards(AuthGuard)
+	async getBan(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+	) {
+		await this.bannedService.update();
+		const channel = await this.channelService.findOne(channelID, ['adminList']);
+		if (!(this.channelService.userIsAdmin(user, channel))) {
+			throw new BadRequestException("You aren't administrator on this channel");
+		}
+		return this.bannedService.findAll(channel);
 	}
 
 	@Put('ban/:channelID/:targetID/:banDuration')
@@ -113,5 +128,20 @@ export class ChannelController {
 		await this.channelService.banUser(target, channel, duration);
 		if (await this.channelService.userInChannel(target, channel))
 			await this.chatGateway.leaveChat(channel, target);
+	}
+
+	@Put('pardon/:banID')
+	@UseGuards(AuthGuard)
+	async pardonUser(
+		@CurrentUser() user: UserEntity,
+		@Param('banID', ParseIntPipe) banID: number
+	) {
+		await this.bannedService.update();
+		const ban = await this.bannedService.findOne(banID);
+		const channel = await this.channelService.findOne(ban.channel.channelID, ['adminList']);
+		if (!(this.channelService.userIsAdmin(user, channel))) {
+			throw new BadRequestException("You aren't administrator on this channel");
+		}
+		await this.bannedService.pardon(ban);
 	}
 }

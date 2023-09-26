@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {IsNotEmpty, IsNumber, IsString} from 'class-validator';
 
 export class SendMessageDTOPipe {
 	@IsNumber()
@@ -10,7 +10,7 @@ export class SendMessageDTOPipe {
 	content: string;
 }
 
-export class ReceivedMessageDTOPipe {
+export class ReceivedMessageDTOPipe { // Todo: change UserID to UserEntity
 	@IsNumber()
 	@IsNotEmpty()
 	channelID: number;

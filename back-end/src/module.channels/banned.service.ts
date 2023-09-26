@@ -1,4 +1,4 @@
-import {Injectable} from "@nestjs/common";
+import {BadRequestException, Injectable} from "@nestjs/common";
 import {Repository} from "typeorm";
 import {BannedEntity} from "../entities/banned.entity";
 import {UserEntity} from "../entities/user.entity";
@@ -30,8 +30,18 @@ export class BannedService {
 		return ban;
 	}
 
-	async findAll() {
-		return this.bannedRepository.find();
+	async findAll(channel?: ChannelEntity) {
+		let lst = await this.bannedRepository.find();
+		if (!channel)
+			return lst;
+		return lst.filter(ban => ban.channel.channelID == channel.channelID)
+	}
+
+	async findOne(banID: any) {
+		const ban = await this.bannedRepository.findOneBy({bannedID: banID});
+		if (ban == null)
+			throw new BadRequestException('This Ban ID is not in use (possibly already unban or not banned yet)');
+		return ban;
 	}
 
 	async update() {
@@ -42,7 +52,9 @@ export class BannedService {
 		pardons.map(pardon => {
 			pardon.remove();
 		})
-		console.log('updates !', pardons, '\n====');
 	}
 
+	pardon(ban: BannedEntity) {
+		return ban.remove();
+	}
 }

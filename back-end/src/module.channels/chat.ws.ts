@@ -14,10 +14,11 @@ import {WSAuthGuard} from '../module.auth/auth.guard';
 import {ParseIntPipe, UseGuards, ValidationPipe} from '@nestjs/common';
 import {CurrentUser} from '../module.auth/indentify.user';
 import {ChannelService} from './channel.service';
+import {BannedService} from "./banned.service";
 import {UsersService} from '../module.users/users.service';
 import {ChannelCredentialService} from './credential.service';
-import {ChannelEntity} from '../entities/channel.entity';
 import {UserEntity, UserStatus} from '../entities/user.entity';
+import {ChannelEntity} from '../entities/channel.entity';
 import {accessToken} from '../dto/payload';
 import * as process from 'process';
 import {JwtService} from '@nestjs/jwt';
@@ -48,6 +49,7 @@ export class ChatGateway
 		private messageService: MessageService,
 		private channelService: ChannelService,
 		private usersService: UsersService,
+		private bannedService: BannedService,
 		private channelCredentialService: ChannelCredentialService,
 		private jwtService: JwtService,
 	) {
@@ -144,16 +146,17 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) { // Todo: Need to check for invite / ban
+		await this.bannedService.update();
 		const channel = await this.channelService
 			.findOne(data.channelID)
 			.catch(() => null);
 		if (channel == null)
-			return client.emit('sendMsg', {error: 'There is no such Channel'});
+			return client.emit('joinRoom', {error: 'There is no such Channel'});
 		if (await this.channelService.isUserOnChan(channel, user))
 			return client.emit(`joinRoom`, {
 				message: `You are already on that channel`,
 			});
-		if (!(await this.channelService.checkCredential(data)))
+		if (!(await this.channelService.checkCredential(data)) || await this.channelService.userIsBan(channel, user))
 			return client.emit(`joinRoom`, {
 				message: `You cannot Join that channel`,
 			});

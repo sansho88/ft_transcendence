@@ -164,7 +164,6 @@ export class ChannelService {
 	}
 
 	async banUser(target: UserEntity, channel: ChannelEntity, duration: number) {
-		console.log('banUser', target)
 		if (target.UserID == channel.owner.UserID)
 			throw new BadRequestException('The target is the ChannelOwner and cannot be ban');
 		if (await this.userIsBan(channel, target))
@@ -175,7 +174,6 @@ export class ChannelService {
 	}
 
 	async userIsBan(channel: ChannelEntity, usr: UserEntity) {
-		console.log('userIsBan', usr);
 		return !!(await this.bannedService.findAll().then(bans => {
 			return bans.findIndex(ban => ban.user.UserID == usr.UserID)
 		}) + 1)
