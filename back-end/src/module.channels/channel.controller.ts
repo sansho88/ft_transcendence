@@ -38,7 +38,7 @@ export class ChannelController {
 		return this.channelService.findAll();
 	}
 
-	@Get('get/:channelID')
+	@Get('get/users/:channelID')
 	@UseGuards(AuthGuard)
 	findOne(@Param('channelID', ParseIntPipe) channelID: number) {
 		return this.channelService.findOne(channelID);
@@ -97,7 +97,7 @@ export class ChannelController {
 	}
 
 
-	@Get('ban/get/:channelID')
+	@Get('get/ban/:channelID')
 	@UseGuards(AuthGuard)
 	async getBan(
 		@CurrentUser() user: UserEntity,
