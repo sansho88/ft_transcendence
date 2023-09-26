@@ -10,12 +10,12 @@ import {
 	OneToOne,
 	JoinColumn,
 } from 'typeorm';
-import { MessageEntity } from './message.entity';
-import { UserCredentialEntity } from './credential.entity';
-import { InviteEntity } from './invite.entity';
-import { MuteEntity } from './mute.entity';
-import { BannedEntity } from './banned.entity';
-import { ChannelEntity } from './channel.entity';
+import {MessageEntity} from './message.entity';
+import {UserCredentialEntity} from './credential.entity';
+import {InviteEntity} from './invite.entity';
+import {MuteEntity} from './mute.entity';
+import {BannedEntity} from './banned.entity';
+import {ChannelEntity} from './channel.entity';
 
 export enum UserStatus {
 	INGAME = 2,
@@ -47,6 +47,12 @@ export class UserEntity extends BaseEntity {
 	})
 	visit: boolean;
 
+	@Column({
+		type: 'boolean',
+		default: false,
+	})
+	has_2fa: boolean;
+
 	// Todo: comeback later to proper storage
 	@Column({
 		type: 'varchar',
@@ -64,7 +70,7 @@ export class UserEntity extends BaseEntity {
 	})
 	status: UserStatus;
 
-	@OneToOne(() => UserCredentialEntity, { cascade: true })
+	@OneToOne(() => UserCredentialEntity, {cascade: true})
 	@JoinColumn()
 	credential: UserCredentialEntity;
 
@@ -91,11 +97,11 @@ export class UserEntity extends BaseEntity {
 	banned: BannedEntity[];
 
 	@ManyToMany(() => ChannelEntity, (channel) => channel.userList)
-	// @JoinTable()
+		// @JoinTable()
 	channelJoined: ChannelEntity[];
 
 	@OneToMany(() => ChannelEntity, (channel) => channel.adminList)
-	// @JoinTable()
+		// @JoinTable()
 	channelAdmin: ChannelEntity[];
 
 	@OneToMany(() => ChannelEntity, (channel) => channel.owner)
