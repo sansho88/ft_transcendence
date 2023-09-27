@@ -6,18 +6,17 @@ import * as apiReq from "@/components/api/ApiReq";
 import DraggableComponent from "@/components/draggableComponent";
 import QRCode from 'qrcode.react';
 import {UserContext} from "@/context/globalContext";
-import notificationComponent from "@/components/notif/NotificationComponent";
 
 
 interface userData2Fa {
-    login: string,
-    secret: string
+    hasActive2FA: boolean
 }
-const Button2FA: React.FC = ({className, children, hasActive2FA}) => {
-    const [isActivated, setIsActivated] = useState(false);
+const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) => {
+    const [isActivated, setIsActivated] = useState(hasActive2FA);
     const [code2FA, setCode2FA] = useState("");
     const [deactivationCode2FA, setDeactivationCode2FA] = useState("");
-    const [isChecked, setIsChecked] = useState(false);
+    const [isChecked, setIsChecked] = useState(hasActive2FA ? hasActive2FA : false);
+    const [onProcess, setOnProcess] = useState(false);
     const {user, setUserContext} = useContext(UserContext);
     let inputCode: string;
 
@@ -37,7 +36,8 @@ const Button2FA: React.FC = ({className, children, hasActive2FA}) => {
                     setUserContext(updatedUser);
                     setIsChecked(true);
                     setIsActivated(true);
-                    NotificationManager.success(`2FA activated on ${user.login}`);
+                    setOnProcess(false);
+                    NotificationManager.success(`2FA activated on ${updatedUser.login}`);
                 });
         }
         else
@@ -60,17 +60,19 @@ const Button2FA: React.FC = ({className, children, hasActive2FA}) => {
             event.preventDefault();
             let updatedUser = JSON.parse(localStorage.getItem("userContext"));
             updatedUser.has_2fa = false;
-            if (code2FA == '848484')
+            if (deactivationCode2FA == '848484')
             {
                 apiReq.putApi.putUser(updatedUser)
                     .then(() => {
                         setUserContext(updatedUser);
                         setIsChecked(false);
                         setIsActivated(false);
+                        setOnProcess(false);
                     });
             }
             else
-                NotificationManager.error("Wrong Deactivation 2FA code");
+                NotificationManager.error(`Wrong Deactivation 2FA code.
+This is not ${deactivationCode2FA}`);
 
            /* try{ //todo: activer ce bloc de code quand le back sera prêt
                const res = await fetch('/api/verify', {
@@ -94,7 +96,6 @@ const Button2FA: React.FC = ({className, children, hasActive2FA}) => {
     const settings2FA = () => {
       if (!isActivated)
       {
-          console.log("Settings 2FA showed")
           return (
               <div className={"settings"}>
                   <h1>SCAN THIS QR CODE</h1>
@@ -136,26 +137,16 @@ const Button2FA: React.FC = ({className, children, hasActive2FA}) => {
     }
 
     const handleCheckboxChange = (event) => {
-        setIsChecked(event.target.checked);
-       /* if (isChecked )
-        {
-           // settings2FA();
-
-        }
-        else
-            NotificationManager.warning("2FA is turned off");*/
-
-
     };
 
     return (
         <span className={"doubleFA"}>
             {children}
             <label className="switch">
-                <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} />
+                <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} onClick={() => setOnProcess(!onProcess)}/>
                 <span className="slider round"></span>
             </label>
-            { isChecked &&
+            { onProcess &&
                 <DraggableComponent>{settings2FA()}</DraggableComponent> }
         </span>
     )
