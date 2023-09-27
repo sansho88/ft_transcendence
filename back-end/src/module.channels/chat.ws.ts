@@ -147,10 +147,10 @@ export class ChatGateway
 		@MessageBody(new ValidationPipe()) data: JoinChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
-	) { // Todo: Need to check for invite / ban
+	) { // Todo: Need to check for invite
 		await this.bannedService.update();
 		const channel = await this.channelService
-			.findOne(data.channelID)
+			.findOne(data.channelID, ['userList'])
 			.catch(() => null);
 		if (channel == null)
 			return client.emit('joinRoom', {error: 'There is no such Channel'});
@@ -164,7 +164,7 @@ export class ChatGateway
 			});
 		await this.channelService.joinChannel(user, channel);
 		client.join(`${channel.channelID}`);
-		const content: JoinEventDTOPipe = {user: user, channel: channel}
+		const content: JoinEventDTOPipe = {user: user, channelID: channel.channelID}
 		this.server.to(`${channel.channelID}`).emit(`joinRoom`, content);
 		console.log(`JOIN Room ${data.channelID} By ${user.UserID}`);
 	}
@@ -250,11 +250,11 @@ export class ChatGateway
 	}
 
 	async leaveChat(channel: ChannelEntity, user: UserEntity) {
-		const content: LeaveEventDTOPipe = {user: user, channelID: channel.channelID}
 		if (this.channelService.userIsAdmin(user, channel))
 			channel = await this.channelService.removeAdmin(user, channel);
 		channel = await this.channelService.leaveChannel(channel, user);
 		const socketTarget = await this.getSocket(user.UserID);
+		const content: LeaveEventDTOPipe = {user: user, channelID: channel.channelID};
 		this.server.to(`${channel.channelID}`).emit(`leaveRoom`, content);
 		if (typeof socketTarget !== 'undefined')
 			socketTarget.leave(`${channel.channelID}`)
