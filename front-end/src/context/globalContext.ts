@@ -9,7 +9,7 @@ const originDefault: IOriginNetwork = {
 }
 
 export type UserContextType = {
-	userContext: Partial<IUser> ;
+	userContext: IUser ;
 	setUserContext: (value: Partial<IUser>) => void;
 };
 
@@ -34,7 +34,7 @@ export const SocketContextChat = createContext<Socket | null>(null);
 export const SocketContextGame = createContext<Socket | null>(null);
 export const ThemeContext = createContext<string>("light");
 export const OriginContext = createContext<IOriginNetwork>(originDefault);
-export const UserContext = createContext<UserContextType>({ userContext: {}, setUserContext: ()=> {}});
+export const UserContext = createContext<UserContextType>({ userContext: <IUser>{}, setUserContext: ()=> {}});
 export const LoggedContext = createContext<LoggedContextType>({logged: false, setLogged: ()=> {}});
 
 export const TokenContext = createContext<TokenContextType>({token: "", setToken: () => {}});

@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Matchmaking } from './Matchmaking';
 import { GameSession } from './GameSession';
-import { WebsocketGatewayGame } from '../websocket/wsGame.gateway';
+import { WebsocketGatewayGame } from '../game.ws';
 import { Server, Socket } from 'socket.io';
 import { userInfoSocket, Stack, EGameMod } from 'shared/typesGame';
 import { v4 as uuidv4 } from "uuid";
@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from "uuid";
 @Injectable()
 export class ServerGame {
   private matchmaking: Matchmaking = new Matchmaking();
+  private matchmakingGhost: Matchmaking = new Matchmaking();
   private gameSession: GameSession[] = [];
   private trainningSession: GameSession[] = []; //pour ne pas les melangers, pas de spectator, donc pas besoin de get cette liste
 
@@ -27,15 +28,34 @@ export class ServerGame {
     if(this.matchmaking.getUsersNumber() >= 2)
     {
       //TODO: push en DB ? ou alors push en db uniquement si game terminé
-      this.gameSession.push(this.matchmaking.createGame(server, this.gameSession.length)); //FIXME: recup game_id de la DB
+      this.gameSession.push(this.matchmaking.createGame(server, this.gameSession.length, EGameMod.classic));
+    }
+  }
+
+  public addPlayerToMatchmakingGhost(player: userInfoSocket, server: Server) {
+    if (!player)
+        return console.log('addPlayerToMatchmakingGhost: Error player')
+    this.matchmakingGhost.addUser(player);
+    console.log(`${player.user.login}: add in matchmakingGhost list`);
+    if(this.matchmakingGhost.getUsersNumber() >= 2)
+    {
+      //TODO: push en DB ? ou alors push en db uniquement si game terminé
+      this.gameSession.push(this.matchmakingGhost.createGame(server, this.gameSession.length, EGameMod.ghost)); 
     }
   }
 
   public removePlayerToMatchmaking(player: userInfoSocket) {
     if (!player)
-    return console.log('removePlayerToMatchmaking: Error player')
+      return console.log('removePlayerToMatchmaking: Error player')
   this.matchmaking.removeUser(player);
-  // console.log(`${player.user.login}: remove in matchmaking list`);
+  console.log(`${player.user.login}: remove in matchmaking list`);
+}
+
+public removePlayerToMatchmakingGhost(player: userInfoSocket) {
+  if (!player)
+    return console.log('removePlayerToMatchmakingGhost: Error player')
+  this.matchmakingGhost.removeUser(player);
+console.log(`${player.user.login}: remove in matchmaking list`);
 }
 
   public addPlayerInTrainningSession(player: userInfoSocket, server: Server) {

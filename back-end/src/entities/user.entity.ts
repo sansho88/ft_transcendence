@@ -47,6 +47,12 @@ export class UserEntity extends BaseEntity {
 	})
 	visit: boolean;
 
+	@Column({
+		type: 'boolean',
+		default: false,
+	})
+	has_2fa: boolean;
+
 	// Todo: comeback later to proper storage
 	@Column({
 		type: 'varchar',
