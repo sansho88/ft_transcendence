@@ -75,7 +75,6 @@ export class UsersService {
 	}
 
 	async userStatus(user: UserEntity, newStatus: UserStatus) {
-		const user = await this.usersRepository.findOneBy({UserID: id});
 		user.status = newStatus;
 		await user.save();
 	}
