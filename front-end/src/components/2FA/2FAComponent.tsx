@@ -92,7 +92,6 @@ const Button2FA: React.FC = ({className, children, hasActive2FA}) => {
         setDeactivationCode2FA(inputCode);
     }
     const settings2FA = () => {
-        NotificationManager.warning(`isActivated: ${isActivated}`)
       if (!isActivated)
       {
           console.log("Settings 2FA showed")
