@@ -9,7 +9,7 @@ import {
 
 import { IUser } from 'shared/types';
 import { Server, Socket } from 'socket.io';
-import { ServerGame } from 'src/module.game/game/ServerGame';
+import { ServerGame } from 'src/module.game/server/ServerGame';
 import { wsGameRoutes } from 'shared/routesApi';
 import { userInfoSocket } from 'shared/typesGame';
 import { HttpException, HttpStatus } from '@nestjs/common';
@@ -51,27 +51,49 @@ export class WebsocketGatewayGame
 		client.emit('welcome', 'Bienvenue sur le game server'); //message dacceuil connection websocket
 	}
 
-	@SubscribeMessage(wsGameRoutes.addPlayerToMatchnaking())
+	@SubscribeMessage(wsGameRoutes.addPlayerToMatchmaking())
 	addPlayerToMatchmaking(client: Socket, payload: Partial<IUser>) {
 		// console.log(client.id + ': ' + payload.nickname);
 		// console.log('json user: ' + JSON.stringify(payload));
     if (!payload.nickname)
-      return console.error('ws/welcomeToGameServer: Bad client or user');  
+      return console.error('ws/GameServer: Bad client or user');  
     
     const player: userInfoSocket = {socket: client, user: payload};
     this.serverGame.addPlayerToMatchmaking(player, this.server);
 		client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
 	}
+
+	@SubscribeMessage(wsGameRoutes.addPlayerToMatchmakingGhost())
+	addPlayerToMatchmakingGhost(client: Socket, payload: Partial<IUser>) {
+		// console.log(client.id + ': ' + payload.nickname);
+		// console.log('json user: ' + JSON.stringify(payload));
+    if (!payload.nickname)
+      return console.error('ws/GameServer: Bad client or user');  
+    
+    const player: userInfoSocket = {socket: client, user: payload};
+    this.serverGame.addPlayerToMatchmakingGhost(player, this.server);
+		client.emit('info', `MatchmakingGhost: attente d\'autres joueurs...`);
+	}
   
-	@SubscribeMessage(wsGameRoutes.removePlayerToMatchnaking())
+	@SubscribeMessage(wsGameRoutes.removePlayerToMatchmaking())
 	RemoveUserToMatchmaking(client: Socket, payload: Partial<IUser>) {
     // console.log(`TRY removePlayerToMatchnaking:  ${payload.nickname}`); 
     if (!payload.nickname)
-    return console.error('ws/welcomeToGameServer: Bad client or user');  
-  const player: userInfoSocket = {socket: client, user: payload};
-  this.serverGame.removePlayerToMatchmaking(player);
-  // client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
-}
+    	return console.error('ws/GameServer: Bad client or user');  
+  	const player: userInfoSocket = {socket: client, user: payload};
+  	this.serverGame.removePlayerToMatchmaking(player);
+  	// client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
+	}
+
+	@SubscribeMessage(wsGameRoutes.removePlayerToMatchmakingGhost())
+	RemoveUserToMatchmakingGhost(client: Socket, payload: Partial<IUser>) {
+    // console.log(`TRY removePlayerToMatchnaking:  ${payload.nickname}`); 
+    if (!payload.nickname)
+    	return console.error('ws/GameServer: Bad client or user');  
+  	const player: userInfoSocket = {socket: client, user: payload};
+  	this.serverGame.removePlayerToMatchmakingGhost(player);
+  	// client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
+	}
 
 
   @SubscribeMessage(wsGameRoutes.createTrainningGame())

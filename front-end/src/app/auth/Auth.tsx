@@ -10,6 +10,7 @@ import * as ClipLoader from 'react-spinners'
 import './auth.css'
 import {useRouter} from 'next/navigation';
 import {LoggedContext, SocketContextChat, SocketContextGame, UserContext} from '@/context/globalContext';
+import LoadingComponent from "@/components/waiting/LoadingComponent";
 
 // import { Button } from '@/components/CustomButtonComponent'
 enum EStepLogin {
@@ -82,8 +83,10 @@ export default function Auth({className}: { className?: string }) {
 
 
     useEffect(() => {
+        authManager.setBaseURL('http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/');
+        setUserContext({login:"", nickname:"", UserID:-1, avatar_path:undefined, visit:undefined, status:0, token_2fa:""});
         console.log('UseEffect : userContext.login = ' + userContext?.login + ' pass: ' + userContext?.password);
-    }, [userContext]);
+    }, [isSignInMode]);
 
     const [currentStepLogin, setCurrentStepLogin] = useState<EStepLogin>(EStepLogin.start);
 
@@ -244,12 +247,8 @@ export default function Auth({className}: { className?: string }) {
         if (currentStepLogin !== EStepLogin.successLogin) {
             return;
         }
-        const timer = setTimeout(() => {
-            setShowMessage(false);
-            setCurrentStepLogin(EStepLogin.bye)
-            router.push('/'); //executer apres le timeout
-        }, 650); // 3000 ms = 3 secondes
-        return () => clearTimeout(timer);
+        router.push('/');
+        setShowMessage(false);
     }, [currentStepLogin, router]);
 
     const LoggedSuccess = () => {
@@ -259,12 +258,7 @@ export default function Auth({className}: { className?: string }) {
             */
         return (
             <div className="flex flex-col items-center text-center">
-                {showMessage && (
-                    <>
-                        <p className=' text-white'>Congratulations, you are now logged in!<br/>Enjoy playing!</p>
-                        <ClipLoader.PacmanLoader color='#07C3FF' size={30}/>
-                    </>
-                )}
+                {showMessage && <LoadingComponent/>}
             </div>
         );
     }
@@ -365,12 +359,13 @@ export default function Auth({className}: { className?: string }) {
                                 localStorage.setItem('token', userToken);
                                 authManager.setToken(userToken);
 
-                                setUserContext(await getUserMe());
-                                setLogged(true);
-                                setCurrentStepLogin(EStepLogin.successLogin);
-                                localStorage.setItem('login', login);
-                                localStorage.setItem('userContext', JSON.stringify(userContext));
-                                console.log('you are now logged in')
+                                setUserContext(await getUserMe().then(() => {
+                                    setLogged(true);
+                                    setCurrentStepLogin(EStepLogin.successLogin);
+                                    localStorage.setItem('login', login);
+                                    localStorage.setItem('userContext', JSON.stringify(userContext));
+                                    console.log('you are now logged in');
+                                }));
                             }
                         })
                         .catch((e) => {
@@ -387,20 +382,34 @@ export default function Auth({className}: { className?: string }) {
                         .then(async (res) => {
                             if (res.status === 200) {
                                 const userToken = res.data;
-                                console.log(`Token: ${res.data}`);
                                 localStorage.removeItem('token');
                                 localStorage.setItem('token', userToken);
                                 authManager.setToken(userToken);
                                 localStorage.setItem("login", login);
-                                const futureUser = await getUserMe();
-                                setUserContext(futureUser);
-                                setLogged(true);
-                                setCurrentStepLogin(EStepLogin.successLogin);
+                                setUserContext(await getUserMe().then(() => {
+                                        setLogged(true);
+                                        setCurrentStepLogin(EStepLogin.successLogin);
+                                    }
+                                ));
                             }
                         })
                         .catch((e) => {
                             console.error("Post User ERROR: " + e, `createUser= ${createUser.login}, ${createUser.visit}`);
-                            LoggedFailed(e.response.status);
+                            if (e.response)
+                            {
+                                console.error("Request made and server responded...");
+                                console.error(e.response.data);
+                                console.error(e.response.status);
+                                console.error(e.response.headers);
+                                LoggedFailed(e.response.status);
+                            }
+                            else if (e.request)
+                            {
+                                console.error("The request was made but no response was received");
+                                console.error(e.request);
+                            }
+                            else
+                                console.error(e.message);
                         });
                     return;
             }
@@ -469,8 +478,8 @@ export default function Auth({className}: { className?: string }) {
             {currentStepLogin === EStepLogin.enterLogin && enterLogin()}
             {(currentStepLogin === EStepLogin.signIn || currentStepLogin === EStepLogin.logIn) && enterLogin()}
 
-            {currentStepLogin === EStepLogin.signOrLogIn &&
-                <ClipLoader.BeatLoader className='pt-[12vh]' color="#36d7b7" size={13}/>
+            {currentStepLogin === EStepLogin.signOrLogIn /*&&
+                <ClipLoader.BeatLoader className='pt-[12vh]' color="#36d7b7" size={13}/>*/
             }
             {currentStepLogin === EStepLogin.successLogin && LoggedSuccess()}
             {currentStepLogin === EStepLogin.failLogin && LoggedFailed(42)}

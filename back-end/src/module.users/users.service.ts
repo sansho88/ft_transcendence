@@ -1,16 +1,17 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { UpdateUserDto } from '../dto/user/update-user.dto';
-import { UserEntity, UserStatus } from '../entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserCredentialEntity } from '../entities/credential.entity';
+import {BadRequestException, Injectable} from '@nestjs/common';
+import {UpdateUserDto} from '../dto/user/update-user.dto';
+import {UserEntity, UserStatus} from '../entities/user.entity';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Repository} from 'typeorm';
+import {UserCredentialEntity} from '../entities/credential.entity';
 
 @Injectable()
 export class UsersService {
 	constructor(
 		@InjectRepository(UserEntity)
 		private usersRepository: Repository<UserEntity>,
-	) {}
+	) {
+	}
 
 	/**
 	 * Todo: update with new thing in table
@@ -56,9 +57,11 @@ export class UsersService {
 		if (user == null) throw new BadRequestException("this user doesn't exist");
 		return user;
 	}
+
 	async update(user: UserEntity, updateUser: UpdateUserDto) {
 		if (updateUser.nickname !== undefined) user.nickname = updateUser.nickname;
 		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
+		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
 		await user.save();
 		return user;
 	}
@@ -72,6 +75,7 @@ export class UsersService {
 	}
 
 	async userStatus(user: UserEntity, newStatus: UserStatus) {
+		const user = await this.usersRepository.findOneBy({UserID: id});
 		user.status = newStatus;
 		await user.save();
 	}
