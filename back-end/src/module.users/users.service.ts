@@ -1,8 +1,8 @@
-import {Injectable} from '@nestjs/common';
+import {BadRequestException, Injectable} from '@nestjs/common';
 import {UpdateUserDto} from '../dto/user/update-user.dto';
 import {UserEntity, UserStatus} from '../entities/user.entity';
 import {InjectRepository} from '@nestjs/typeorm';
-import {FindOptionsRelations, Repository} from 'typeorm';
+import {Repository} from 'typeorm';
 import {UserCredentialEntity} from '../entities/credential.entity';
 
 @Injectable()
@@ -45,24 +45,20 @@ export class UsersService {
 	/**
 	 * @return UserEntity Or Undefined if user not in db
 	 */
-	async findOne(id: number | string) {
-		if (typeof id === 'number')
-			return this.usersRepository.findOneBy({UserID: id});
-		return this.usersRepository.findOneBy({login: id});
+	async findOne(userID: number, relations?: string[]) {
+		let user;
+		if (!relations)
+			user = await this.usersRepository.findOneBy({ UserID: userID });
+		else
+			user = await this.usersRepository.findOne({
+				where: { UserID: userID },
+				relations,
+			});
+		if (user == null) throw new BadRequestException("this user doesn't exist");
+		return user;
 	}
 
-	async findOneRelation(
-		id: number,
-		relation: FindOptionsRelations<UserEntity>,
-	) {
-		return this.usersRepository.findOne({
-			relations: relation,
-			where: {UserID: id},
-		});
-	}
-
-	async update(id: number, updateUser: UpdateUserDto) {
-		const user = await this.usersRepository.findOneBy({UserID: id});
+	async update(user: UserEntity, updateUser: UpdateUserDto) {
 		if (updateUser.nickname !== undefined) user.nickname = updateUser.nickname;
 		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
@@ -70,20 +66,15 @@ export class UsersService {
 		return user;
 	}
 
-	// todo: remove user from db
-	remove(id: number) {
-		return `This action removes a #${id} user`;
-	}
-
 	async getCredential(login: string) {
 		const target = await this.usersRepository.findOne({
-			where: {login: login},
-			relations: {credential: true},
+			where: { login: login },
+			relations: ['credential'],
 		});
 		return target.credential;
 	}
 
-	async userStatus(id: number, newStatus: UserStatus) {
+	async userStatus(user: UserEntity, newStatus: UserStatus) {
 		const user = await this.usersRepository.findOneBy({UserID: id});
 		user.status = newStatus;
 		await user.save();

@@ -1,4 +1,6 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {IsNotEmpty, IsNumber, IsString} from 'class-validator';
+import {UserEntity} from "../entities/user.entity";
+import {ChannelEntity} from "../entities/channel.entity";
 
 export class SendMessageDTOPipe {
 	@IsNumber()
@@ -10,16 +12,36 @@ export class SendMessageDTOPipe {
 	content: string;
 }
 
-export class ReceivedMessageDTOPipe {
+export class ReceivedMessageDTOPipe { // Todo: change UserID to UserEntity
 	@IsNumber()
 	@IsNotEmpty()
 	channelID: number;
 
 	@IsNumber()
 	@IsNotEmpty()
-	authorID: number;
+	author: UserEntity;
 
 	@IsString()
 	@IsNotEmpty()
 	content: string;
+}
+
+export class JoinEventDTOPipe {
+	@IsNumber()
+	@IsNotEmpty()
+	channel: ChannelEntity;
+
+	@IsString()
+	@IsNotEmpty()
+	user: UserEntity;
+}
+
+export class LeaveEventDTOPipe {
+	@IsNumber()
+	@IsNotEmpty()
+	channelID: number;
+
+	@IsNumber()
+	@IsNotEmpty()
+	user: UserEntity;
 }
