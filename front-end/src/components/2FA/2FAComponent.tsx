@@ -109,7 +109,7 @@ This is not ${deactivationCode2FA}`);
                              value={inputCode}
                              onChange={handleInput2FAChange}
                              min={0} minLength={5} maxLength={10}/>
-                      <input type={"submit"} value={"OK"} className={"submitCode"} />
+                      <input type={"image"} value={"OK"} className={"submitCode"} src={"/confirm.svg"}/>
                   </form>
               </div>
           )
@@ -127,7 +127,7 @@ This is not ${deactivationCode2FA}`);
                                  value={inputCode}
                                  onChange={handleInputDeactivation2FAChange}
                                  min={0} minLength={5} maxLength={10}/>
-                          <input type={"submit"} value={"OK"} className={"submitCode"} />
+                          <input type={"image"} value={"OK"} className={"submitCode"} src={"/confirm.svg"}/>
                       </form>
                   </div>
               )

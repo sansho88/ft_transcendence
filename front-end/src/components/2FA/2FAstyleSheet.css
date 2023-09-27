@@ -71,11 +71,12 @@ input:checked + .slider:before {
 .settings{
     background-color: #AAAAAA;
     padding: 14px;
+    margin-inline: auto;
 
     position: absolute;
     top: 100px;
     left: -100px;
-    width: auto;
+    width: 12vw;
     z-index: 1;
 
     background: rgba(126, 126, 126, 0.27);
@@ -94,31 +95,30 @@ input:checked + .slider:before {
 }
 
 .settings .codeInput{
-    width: 100%;
+    width: 70%;
     text-align: center;
     border-radius: 4px;
     border-bottom: 3px solid #07C3FF ;
     border-inline: 1px solid #07C3FF ;
-    background-color: #999999;
-
-
     margin-bottom: 1em;
 
     padding: 0;
     background: none;
-    font: 2ch droid sans mono, consolas, monospace;
-    letter-spacing: 0.5ch;
+    font: 1.5ch droid sans mono, consolas, monospace;
+    letter-spacing: 0.2ch;
 }
 textarea:focus, input:focus  .settings .codeInput {
     outline: none;
 }
 
 .settings .submitCode{
+    position: relative;
+    padding: 11px 0 0 10px;
+    width: 25%;
+}
+
+.settings form{
     display: inline-block;
-    background-color: white;
-    margin-inline: 15px;
-    padding-inline: 6px;
-    border-radius: 4px;
 }
 
 .doubleFA{

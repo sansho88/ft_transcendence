@@ -11,6 +11,7 @@ import './auth.css'
 import {useRouter} from 'next/navigation';
 import {LoggedContext, SocketContextChat, SocketContextGame, UserContext} from '@/context/globalContext';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
+import {NotificationManager, NotificationContainer} from 'react-notifications';
 
 // import { Button } from '@/components/CustomButtonComponent'
 enum EStepLogin {
@@ -242,7 +243,10 @@ export default function Auth({className}: { className?: string }) {
                     <div className=' font-thin'>Enter your 2FA Code</div>
                 }
                 <button type="button" className={"button-login my-12 "} onClick={() => {
-                   connectUser();
+                   if (code2FAInput == "424242")
+                       connectUser();
+                   else
+                       NotificationManager.error("Invalid 2FA code");
 
                 }}><span className="text">CONFIRM</span></button>
 
@@ -528,6 +532,7 @@ export default function Auth({className}: { className?: string }) {
 
     return (
         <div className={defaultClassName}>
+            <NotificationContainer/>
             {welcomeTitle()}
             {currentStepLogin === EStepLogin.start &&
                 <button onClick={() => console.log('Not implemented')} className='button-login h-14 opacity-30'>LOGIN
