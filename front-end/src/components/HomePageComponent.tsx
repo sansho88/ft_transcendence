@@ -12,6 +12,7 @@ import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
 import {authManager} from "@/components/api/ApiReq";
 import ChatMaster from "./chat/ChatMaster";
+import '@/components/chat/chat.css'
 
 const HomePage = () => {
     const {userContext, setUserContext} = useContext(UserContext);
@@ -94,9 +95,7 @@ const HomePage = () => {
                 <div className={"game"} onClick={switchOnlineIngame}>
                     <Game className={"game"}/>
                 </div>
-               {/* <ChatRoomCommponent className={"chat"}/> fixme Fait crash la page ?*/ }
-               <ChatMaster className={'flex w-[24%] h-[56%] items-end absolute bottom-5 right-1'} token={tokenRef.current}/>
-
+               <ChatMaster className={'chat_master'} token={tokenRef.current}/>
             </main>
         </>
     )

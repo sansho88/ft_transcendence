@@ -1,6 +1,5 @@
 import { SocketContextChat } from "@/context/globalContext";
 import { IChannel, IChannelMessage } from "@/shared/typesChannel";
-import { useContext } from "react";
 import { Socket } from "socket.io-client";
 
 /**
@@ -15,7 +14,7 @@ export class Channel {
   private hasPassword     : boolean = false;                // password requis ?
   private isPrivate       : boolean = false;                // channel caché/private ?
   private adminUserID     : number[] = [];
-  private socketChat = useContext(SocketContextChat);
+  private socketChat      : Socket;
 
 
   constructor(chanInfo: IChannel, userSocket: Socket) {
@@ -27,6 +26,7 @@ export class Channel {
     else if (this.chanInfo.type === 1)
       this.isPrivate = true
 
+    this.socketChat = userSocket;
 
     this.apiGetMessages();
     this.getBanUsers();

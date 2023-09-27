@@ -35,29 +35,36 @@ export default function ChatMaster({className, token}: {className: string, token
   useEffect(() => {
     if (socketChat?.connected)
     {
-      const chan0 = new Channel({ channelID: 0, name: 'chan0', ownerUserID: 0, type: 0, ownerLogin: 'ben'       }, socketChat)
-      const chan1 = new Channel({ channelID: 1, name: 'chan1', ownerUserID: 0, type: 0, ownerLogin: 'bducrocq'  }, socketChat)
-      const chan2 = new Channel({ channelID: 2, name: 'chan2', ownerUserID: 0, type: 0, ownerLogin: 'babar'     }, socketChat)
-      const chan3 = new Channel({ channelID: 3, name: 'chan3', ownerUserID: 0, type: 0, ownerLogin: 'zephyr'    }, socketChat)
+      const chan0 = new Channel({ channelID: 0, name: 'chan0', ownerUserID: 1, type: 0, ownerLogin: 'ben'       }, socketChat)
+      const chan1 = new Channel({ channelID: 1, name: 'chan1', ownerUserID: 1, type: 0, ownerLogin: 'bducrocq'  }, socketChat)
+      const chan2 = new Channel({ channelID: 2, name: 'chan2', ownerUserID: 1, type: 0, ownerLogin: 'babar'     }, socketChat)
+      const chan3 = new Channel({ channelID: 3, name: 'chan3', ownerUserID: 1, type: 0, ownerLogin: 'zephyr'    }, socketChat)
       // setChannels([...Channels, chan0, chan1, chan2, chan3] )
       manager.current.addChannel(chan0);
       manager.current.addChannel(chan1);
       manager.current.addChannel(chan2);
       manager.current.addChannel(chan3);
+
     }
   }, [socketChat?.connected])
-
+  
+  const sys0: IChannelMessage = {channelID: 0, content: 'ben has created this channel', ownerUser:                      {has_2fa: false, login: "system", status: 0,  UserID: 0, nickname: 'Benj3D'}}
+  const mess1: IChannelMessage = {channelID: 0, content: 'Hello, ceci est un message de test code en dur', ownerUser:   {has_2fa: false, login: "ben", status: 0,     UserID: 1, nickname: 'BenNick'}}
+  const mess2: IChannelMessage = {channelID: 0, content: 'c\'est la deuxieme ligne du message de test', ownerUser:      {has_2fa: false, login: "ben", status: 0,     UserID: 1, nickname: 'BenNick'}}
+  const mess3: IChannelMessage = {channelID: 0, content: 'et ca la troisieme ligne', ownerUser:                         {has_2fa: false, login: "ben", status: 0,     UserID: 1, nickname: 'BenNick'}}
+  const sys1: IChannelMessage = {channelID: 0, content: 'bducrocq has join this channel', ownerUser:                    {has_2fa: false, login: "system", status: 0,  UserID: 0, nickname: 'none'}}
+  const mess4: IChannelMessage = {channelID: 0, content: 'Hello et moi je suis un autre user', ownerUser:               {has_2fa: false, login: "bducrocq", status: 2,UserID: 2, nickname: 'Benj3D'}}
+  
   // const testChan: Channel = new Channel({channelID: 0, name: '#chan0', ownerUserID: 0, ownerLogin: 'user1', type: 0})
 
-  return (
-    <div className={`bg-slate-950 flex w-full h-full rounded-xl ${className}`}>
-      <ChatChannelList className={' bg-slate-900 flex-grow w-1/3 h-full rounded-l-xl'} setChannel={console.log} />
 
-      <div className='flex-col w-2/3 h-full'>
-        <div className=''>
-          {/* <ChatMessagesList className='' messages={ } /> */}
-        </div>
-        <ChatInput className={' absolute bottom-0 h-20 justify-center'} />
+  return (
+    <div className={`${className}`}>
+      <ChatChannelList className={'chat_channel_list'} setChannel={console.log} />
+
+      <div className='chat_block_messages'>
+        <ChatMessagesList className='flex-1 overflow-y-auto' messages={[sys0, mess1, mess2, mess3, sys1, mess4]} />
+        <ChatInput className={'chat_block_messages_input'} />
       </div>
 
     </div>

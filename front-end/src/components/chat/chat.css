@@ -1,0 +1,93 @@
+
+/*main parent component*/
+.chat_master {
+  background-color: #090b10;
+  display: flex;
+  position: absolute;
+  width: 24%;
+  height: 58%;
+  align-items: flex-end;
+  bottom: 1.25rem;
+  right: 0.25rem;
+  border-radius: 1rem;
+}
+
+/*main parent component*/
+.chat_channel_list {
+  background-color: #111827;
+  flex-grow: 1;
+  width: 33.3333%;
+  height: 100%;
+  border-top-left-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+}
+
+/* */
+.chat_block_messages {
+  flex-direction: column;
+  width: 66.6667%;
+  height: 100%;
+}
+
+.chat_block_messages_input {
+  position: absolute;
+  bottom: 0;
+  height: 5rem;
+  justify-content: center;
+}
+
+
+
+/* le bloc englobe nickname + content*/
+.chat_message_list_block {
+  margin: 0.5rem;
+}
+.chat_message_list_nickname {
+  list-style-type: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #64748B;
+}
+
+.chat_message_list_nickname_left {
+  text-align: left;
+}
+
+.chat_message_list_nickname_right {
+  text-align: right;
+}
+
+/* c'est la string du message*/
+.chat_message_list_content {
+  color: #ffffff;
+  padding: 0rem;
+  border-radius: 0.6rem;
+  max-width: max-content;
+  min-width: 10rem;
+  list-style-type: none;
+}
+
+/*regle si c'est nous meme l'autheur du message*/
+.chat_message_list_content_right {
+  text-align: right;
+  margin-left: auto;
+  margin-right: 0rem;
+  background-color: #0D3331
+}
+
+/*regleles autre message du message*/
+.chat_message_list_content_left {
+  text-align: left;
+  margin-left: 0rem;
+  margin-right: 0rem;
+  background-color: #2D3748;
+}
+
+
+/*message info du serveur*/
+.chat_message_list_content_system {
+  color: #346d75;
+  text-align: center;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}

@@ -11,15 +11,33 @@ export default function ChatMessagesList({className, messages}: {className: stri
 
 
   return (
-    <div className={`flex flex-col ${className}`}>
-      <div className="flex-1 overflow-y-auto text-sm text-neutral-300 pt-4">
+    <div className={`${className}`}>
+      {/* <div className="flex-1 overflow-y-auto pt-4 "> */}
         {messages.map((obj, index) => (
-        <div
-          key={'blocMessage-' + uuidv4()}>
+          <>
+          {obj.ownerUser.UserID > 0 ? 
+          <div key={'blocMessage-' + uuidv4()} className='chat_message_list_block'>
+            <li className={`chat_message_list_nickname ${obj.ownerUser.UserID === 2 ? 
+                            'chat_message_list_nickname_right' : 'chat_message_list_nickname_left'}`}>
+              {obj.ownerUser.nickname} ({obj.ownerUser.login})
+            </li>
+            <li className={`chat_message_list_content ${obj.ownerUser.UserID === 2 ?
+                            'chat_message_list_content_right' : 'chat_message_list_content_left'}`}>
+              {obj.content}
+            </li>
+            
           </div>
-        ))}
-        <div ref={} />
-      </div>
+            :
+            <div className='chat_message_list_content_system'>
+              Message system
+            </div>
+          }
+                              </>
+        ))
+        }
+        
+        {/* <div ref={} /> */}
+      {/* </div> */}
     </div>
   )
 }
