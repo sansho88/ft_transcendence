@@ -28,6 +28,8 @@ import {
 	LeaveChannelDTOPipe,
 } from '../dto.pipe/channel.dto';
 import {
+	JoinEventDTOPipe,
+	LeaveEventDTOPipe,
 	ReceivedMessageDTOPipe,
 	SendMessageDTOPipe,
 } from '../dto.pipe/message.dto';
@@ -162,11 +164,8 @@ export class ChatGateway
 			});
 		await this.channelService.joinChannel(user, channel);
 		client.join(`${channel.channelID}`);
-		await this.SendMessage(
-			channel,
-			0,
-			`User ${user.nickname} Joined the channel ${channel.name}`,
-		);
+		const content: JoinEventDTOPipe = {user: user, channel: channel}
+		this.server.to(`${channel.channelID}`).emit(`joinRoom`, content);
 		console.log(`JOIN Room ${data.channelID} By ${user.UserID}`);
 	}
 
@@ -214,19 +213,16 @@ export class ChatGateway
 	 */
 	async SendMessage(
 		channel: ChannelEntity,
-		user: UserEntity | number,
+		user: UserEntity,
 		content: string,
 	) {
-		let userID: number;
-		if (typeof user !== 'number') userID = user.UserID;
-		else userID = user;
 		const msg: ReceivedMessageDTOPipe = {
-			authorID: userID,
+			author: user,
 			channelID: channel.channelID,
 			content: content,
 		};
 		this.server.to(`${channel.channelID}`).emit(`sendMsg`, msg);
-		console.log(` Send Message on ${channel.name}, by ${userID}`);
+		console.log(` Send Message on ${channel.name}, by ${user.UserID}`);
 	}
 
 	private async getSocket(userID: number) {
@@ -254,14 +250,14 @@ export class ChatGateway
 	}
 
 	async leaveChat(channel: ChannelEntity, user: UserEntity) {
+		const content: LeaveEventDTOPipe = {user: user, channelID: channel.channelID}
 		if (this.channelService.userIsAdmin(user, channel))
 			channel = await this.channelService.removeAdmin(user, channel);
 		channel = await this.channelService.leaveChannel(channel, user);
 		const socketTarget = await this.getSocket(user.UserID);
-		if (typeof socketTarget === 'undefined')
-			return await this.SendMessage(channel, 0, `User ${user.nickname} Leaved the channel ${channel.name}`);
-		socketTarget.leave(`${channel.channelID}`)
-		await this.SendMessage(channel, 0, `User ${user.nickname} Leaved the channel ${channel.name}`)
+		this.server.to(`${channel.channelID}`).emit(`leaveRoom`, content);
+		if (typeof socketTarget !== 'undefined')
+			socketTarget.leave(`${channel.channelID}`)
 		return channel;
 	}
 
