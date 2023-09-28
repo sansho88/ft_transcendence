@@ -99,7 +99,7 @@ This is not ${deactivationCode2FA}`);
           return (
               <div className={"settings"}>
                   <h1>SCAN THIS QR CODE</h1>
-                  <QRCode value={"https://42lyon.fr"} style={{margin: "1.5em"}}/>
+                  <QRCode value={"https://42lyon.fr"} style={{margin: "auto"}}/>
                   <h1>OR ENTER YOUR CODE:</h1>
                   <form onSubmit={handleSubmitActivationCode}>
                       <input className={"codeInput"}
@@ -108,7 +108,7 @@ This is not ${deactivationCode2FA}`);
                              name={"validationCode"}
                              value={inputCode}
                              onChange={handleInput2FAChange}
-                             min={0} minLength={5} maxLength={10}/>
+                             min={0} minLength={6} maxLength={6}/>
                       <input type={"image"} value={"OK"} className={"submitCode"} src={"/confirm.svg"}/>
                   </form>
               </div>
@@ -126,7 +126,7 @@ This is not ${deactivationCode2FA}`);
                                  name={"deactivationCode"}
                                  value={inputCode}
                                  onChange={handleInputDeactivation2FAChange}
-                                 min={0} minLength={5} maxLength={10}/>
+                                 min={0} minLength={6} maxLength={6}/>
                           <input type={"image"} value={"OK"} className={"submitCode"} src={"/confirm.svg"}/>
                       </form>
                   </div>
