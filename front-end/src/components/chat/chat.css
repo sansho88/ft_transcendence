@@ -14,7 +14,10 @@
 
 
 
-
+/* +---------------------------------------------------------------------+
+/* |                              CHANNEL                                |
+/* +---------------------------------------------------------------------+
+*/
 /*main parent channel component*/
 .chat_channel_block {
   background-color: #111827;
@@ -81,8 +84,11 @@
 
 
 
-
-/*partie droite qui contient le block messages et input */
+/* +---------------------------------------------------------------------+
+/* |                                CHAT                                 |
+/* +---------------------------------------------------------------------+
+*/
+/*partie droite qui contient le block messageS et input */
 .chat_block_main {
   flex-direction: column;
   padding-top: 0.5rem;
