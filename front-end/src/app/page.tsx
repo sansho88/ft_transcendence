@@ -1,119 +1,71 @@
 'use client';
 import React, {useContext, useEffect} from "react";
-import Button from "../components/CustomButtonComponent"
-import Profile from "../components/ProfileComponent"
-import Stats from "../components/StatsComponent"
-import UserList from "@/components/UserListComponent";
 
 import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
-import {LoggedContext, UserContext} from '@/context/globalContext';
+import {LoggedContext} from '@/context/globalContext';
 import {useRouter} from 'next/navigation';
-import * as POD from "@/shared/types";
-import {EStatus} from "@/shared/types";
-import * as apiReq from '@/components/api/ApiReq'
-import ChatRoomCommponent from '@/components/chat/ChatRoomComponent'
-import Game from "@/components/game/Game";
+import LoadingComponent from "@/components/waiting/LoadingComponent";
+import {authManager} from "@/components/api/ApiReq";
+import {getUserMe} from "@/app/auth/Auth";
+import {IUser} from "@/shared/types";
 
 
 export default function Home() {
-    preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");
+   /* preloadFont("../../_next/static/media/2aaf0723e720e8b9-s.p.woff2", "font/woff2");*/
     const {logged} = useContext(LoggedContext);
-    const {userContext, setUserContext} = useContext(UserContext);
     const router = useRouter();
 
-    enum Colors {
-        "grey",
-        "green",
-        "gold"
-    }
-
-    let StatusColor = new Map<number, string>();
-
-    for (let i: number = 0; i < 3; i++) {
-        StatusColor.set(i, Colors[i]);
-    }
-
-    async function updateStatusUser(id_user, status) { //to remove when the player status will be updated directly from the Back
-
-        const updateUser: Partial<POD.IUser> = {UserID: id_user,
-            login: userContext.login,
-            visit: userContext.visit,
-            status: status,
-            nickname: userContext.nickname,
-            avatar_path: userContext.avatar_path,
-            has_2fa: userContext.has_2fa,
-            token_2fa: userContext.token_2fa};
-
-        await apiReq.putApi.putUser(updateUser)
-            .then(() => {
-                setUserContext(updateUser);
-            })
-            .catch((e) => {
-                console.error(e)
-            })
-    }
-
-    function switchOnlineIngame() {
-        const tmpStatus = userContext?.status == EStatus.Online ? EStatus.InGame : EStatus.Online;
-
-        updateStatusUser(userContext?.UserID, tmpStatus)
-            .catch((e) => console.error(e));
-
-        console.log('[MAIN PAGE]USER STATUS:' + tmpStatus);
-    }
-
+    useEffect(() => {
+        authManager.setBaseURL('http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/');
+    });
 
     useEffect(() => {
-        console.log("Main Page: isLogged? " + logged);
-        let storedLogin = localStorage.getItem("login");
-        console.log("Main Page: localStorageLogin? " + storedLogin);
-
-        if (!logged /*&& !localStorage.getItem("login")*/)
-            router.push('/auth')
-        else {
-            console.log("User is already LOGGED as " + localStorage.getItem("login"))
-            setUserLogin(userContext.login ? userContext.login : "");
-            setUserNickName(userContext.nickname ? userContext.nickname : "");
-
+        const tmpToken = localStorage.getItem('token');
+        if (!logged && !tmpToken)
+        {
+            console.log("Redirect to auth page");
+            router.push('/auth');
         }
-    }, [logged])
+        else
+        {
+            try{
+               getUserMe().then((testUser) => {
+                        if (testUser && testUser.UserID >= 0)
+                        {
+                            console.log("Redirect to Home page");
+                            router.push('/home');
+                        }
+                        else
+                        {
+                            console.log("testUser id= " + testUser.UserID);
+                            alert("An invalid token was saved in the browser." +
+                                "\nPlease, log in again or create a new account.");
+                            localStorage.clear();
+                            router.push('/auth');
+                        }
+                    })
+                        .catch((error) => {
+                            console.error("[redirect useEffect error]" + error);
+                        });
 
+            }
+            catch (e) {
+                alert("An invalid token was saved in the browser." +
+                "\nPlease, log in again or create a new account.");
+                localStorage.clear();
+                router.push('/auth');
+            }
+        }
 
-    const [userLogin, setUserLogin] = React.useState("lelogin");
-    const [userNickName, setUserNickName] = React.useState("Nick");
+    }, [logged]);
 
-    function handleLogin() {
-        // setLog(true);
-        console.log("LOGGED REALLY!");
-    }
-
-
-    if (logged /*&& !localStorage.getItem("login")*/)
         return (
             <>
-                <main className="main-background">
-                    <Profile className={"main-user-profile"}
-                             nickname={userContext.nickname ? userContext.nickname : "BADNICKNAME"}
-                             login={userContext.login ? userContext.login : "BADLOGIN"} status={userContext.status ? userContext.status : 0}
-                             avatar_path={userContext.avatar_path}
-                             UserID={userContext.UserID ? userContext.UserID : 0}
-                             isEditable={true} has_2fa={false}>
-
-                        <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
-                        <Button image={"/history-list.svg"} onClick={handleLogin} alt={"Match History button"}/>
-                    </Profile>
-                    <UserList className={"friends"}/>
-
-                    <div className={"game"} onClick={switchOnlineIngame}>
-
-                        <Game className={"game"}/>
-
-                        <Button className={"game-options"} border={""} color={""} image={"/joystick.svg"}
-                                alt={"GameMode options"} radius={"0"} onClick={switchOnlineIngame}/>
-                    </div>
-                    <ChatRoomCommponent className={"chat"}/>
-
-                </main>
+                <div className="welcome space-y-10 my-12">
+                    <div className="welcome-msg">WELCOME TO</div>
+                    <div className="welcome-title ">PONG POD!</div>
+                </div>
+                <LoadingComponent/>
             </>
         )
 }

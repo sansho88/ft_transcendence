@@ -32,11 +32,21 @@
   const routeWsGame =          'game';
   // const wsRouteChat =         'chat'
 
+
+// +---------------------------------------------------------------------+
+// |                       		EVENTS GAME WS              	             |
+// +---------------------------------------------------------------------+
   export namespace wsGameRoutes {
-    export const addNewPlayerToServer=()      => {return `${routeWsGame}_addPlayerToServer`}
-    export const addPlayerToMatchnaking=()    => {return `${routeWsGame}_addPlayerToMatchmaking`}
-    export const removePlayerToMatchnaking=() => {return `${routeWsGame}_removePlayerToMatchmaking`}
-    export const createTrainningGame=()       => {return `${routeWsGame}_createTrainningGame`}
+    export const addNewPlayerToServer=()           => {return `${routeWsGame}_addPlayerToServer`}
+    export const addPlayerToMatchmaking=()         => {return `${routeWsGame}_addPlayerToMatchmaking`}
+    export const addPlayerToMatchmakingGhost=()    => {return `${routeWsGame}_addPlayerToMatchmakingGhost`}
+    export const removePlayerToMatchmaking=()      => {return `${routeWsGame}_removePlayerToMatchmaking`}
+    export const removePlayerToMatchmakingGhost=() => {return `${routeWsGame}_removePlayerToMatchmakingGhost`}
+    export const createTrainningGame=()            => {return `${routeWsGame}_createTrainningGame`}
+		
+    export const serverGameInfo=()                 => {return `${routeWsGame}_serverGameInfo`} //retour message concernant le process de matchmaking 
+    export const serverGameCurrentSession=()       => {return `${routeWsGame}_serverGameCurrentSession`} //list des games en cours
+
   }
 
 
