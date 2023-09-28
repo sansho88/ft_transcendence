@@ -11,10 +11,18 @@ import * as apiReq from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
 import {authManager} from "@/components/api/ApiReq";
-import ChatMaster from "./chat/ChatMaster";
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import NotifComponent from "@/components/notif/NotificationComponent";
+import {getEnumNameByIndex} from "@/utils/usefulFuncs";
+import Button2FA from "@/components/2FA/2FAComponent";
 import '@/components/chat/chat.css'
+import ChatMaster from "./chat/ChatMaster";
 
-const HomePage = () => {
+interface HomePageProps {
+    className: unknown
+}
+
+const HomePage = ({className}: HomePageProps) => {
     const {userContext, setUserContext} = useContext(UserContext);
     const {logged, setLogged} = useContext(LoggedContext);
     const router = useRouter();
@@ -62,6 +70,7 @@ const HomePage = () => {
 
     function switchOnlineIngame() {
         const tmpStatus = userContext?.status == EStatus.Online ? EStatus.InGame : EStatus.Online;
+        NotificationManager.info(userContext.nickname + ' is actually ' + getEnumNameByIndex(EStatus, userContext.status));
 
         updateStatusUser(userContext?.UserID, tmpStatus)
             .catch((e) => console.error(e));
@@ -82,6 +91,7 @@ const HomePage = () => {
 
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
                         <Button image={"/history-list.svg"} onClick={() => console.log("history list button")} alt={"Match History button"}/>
+                        <Button2FA>2FA</Button2FA>
                     </Profile>
                 }
                 <UserList className={"friends"}/>
@@ -96,6 +106,8 @@ const HomePage = () => {
                     <Game className={"game"}/>
                 </div>
                <ChatMaster className={'chat_master'} token={tokenRef.current}/>
+                <div className={"absolute bottom-0 left-0"}><NotifComponent /></div>
+
             </main>
         </>
     )

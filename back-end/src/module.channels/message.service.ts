@@ -13,11 +13,13 @@ export class MessageService {
 	) {}
 
 	async create(user: UserEntity, content: string, chan: ChannelEntity) {
+		let sendTime = new Date();
+		sendTime.setUTCHours(sendTime.getHours() + 2)
 		const msg = await this.messageRepository.create({
 			author: user,
 			channel: chan,
 			content: content,
-			sendTime: new Date(),
+			sendTime: sendTime,
 		});
 		await msg.save();
 		return msg;

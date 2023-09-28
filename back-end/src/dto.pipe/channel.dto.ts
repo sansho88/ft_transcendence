@@ -31,3 +31,9 @@ export class JoinChannelDTOPipe {
 	@IsOptional()
 	password?: string;
 }
+
+export class LeaveChannelDTOPipe {
+	@IsNumber()
+	@IsNotEmpty()
+	channelID: number;
+}
