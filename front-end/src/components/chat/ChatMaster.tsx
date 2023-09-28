@@ -44,7 +44,6 @@ export default function ChatMaster({className, token}: {className: string, token
       manager.current.addChannel(chan1);
       manager.current.addChannel(chan2);
       manager.current.addChannel(chan3);
-
     }
   }, [socketChat?.connected])
   
@@ -60,10 +59,10 @@ export default function ChatMaster({className, token}: {className: string, token
 
   return (
     <div className={`${className}`}>
-      <ChatChannelList className={'chat_channel_list'} setChannel={console.log} />
+      <ChatChannelList className={'chat_channel_block'} setChannel={console.log} />
 
-      <div className='chat_block_messages'>
-        <ChatMessagesList className='flex-1 overflow-y-auto' messages={[sys0, mess1, mess2, mess3, sys1, mess4]} />
+      <div className='chat_block_main'>
+        <ChatMessagesList className='chat_message_list' messages={[sys0, mess1, mess2, mess3, sys1, mess4, sys0, mess1, mess2, mess3, sys1, mess4]} />
         <ChatInput className={'chat_block_messages_input'} />
       </div>
 

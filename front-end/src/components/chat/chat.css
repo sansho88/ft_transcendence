@@ -7,41 +7,135 @@
   width: 24%;
   height: 58%;
   align-items: flex-end;
-  bottom: 1.25rem;
+  bottom: 2rem;
   right: 0.25rem;
   border-radius: 1rem;
 }
 
-/*main parent component*/
-.chat_channel_list {
+
+
+
+/*main parent channel component*/
+.chat_channel_block {
   background-color: #111827;
   flex-grow: 1;
-  width: 33.3333%;
+  min-width: 22%;
   height: 100%;
   border-top-left-radius: 1rem;
   border-bottom-left-radius: 1rem;
 }
 
-/* */
-.chat_block_messages {
+
+
+
+/*main parent channel component*/
+.chat_channel_list {
+  overflow-y: auto;
+  height: 95%;
+
+}
+/* Pour Chrome, Safari et Opera */
+.chat_channel_list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pour Firefox */
+.chat_channel_list {
+  scrollbar-width: none;
+}
+
+/* Pour IE et Edge */
+.chat_channel_list {
+  -ms-overflow-style: none;
+}
+
+
+
+
+
+
+/* element channel (button channel.name) */
+.chat_channel_list_element {
+  height: 2rem;
+  margin-left: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+/*partie droite qui contient le block messages et input */
+.chat_block_main {
   flex-direction: column;
-  width: 66.6667%;
+  padding-top: 0.5rem;
+  width: 60%;
   height: 100%;
 }
 
+
+
+
+
+
+/* contient input + bouton flech envoyer*/
 .chat_block_messages_input {
+  display: flex;
   position: absolute;
-  bottom: 0;
-  height: 5rem;
+  padding: 1rem;
+  padding-bottom: 0rem;
+  bottom: 0.5rem;
   justify-content: center;
+  align-items: center;
+}
+
+/* cible uniquement l'input element*/
+.chat_block_messages_input_input {
+  color: #C0C0C0;
+  background-color: #13131a;
+  border-radius: 0.5rem;
+  height: 3rem;
+  width: calc(100% - 50px);
+}
+
+.chat_block_messages_input_button {
+  width: 32px;
+  margin-left: 1rem;
+}
+
+
+/* pour le chat message list component= contient la liste des message (list de chat_message_list_block)*/
+.chat_message_list {
+  display: flex;
+  flex-direction: column;
+  height: 90%; /* BURK , not responsive*/
+  overflow-y: auto;
+  scrollbar-width: 1rem;
+}
+/* Pour Chrome, Safari et Opera */
+.chat_message_list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pour Firefox */
+.chat_message_list {
+  scrollbar-width: none;
+}
+
+/* Pour IE et Edge */
+.chat_message_list {
+  -ms-overflow-style: none;
 }
 
 
 
-/* le bloc englobe nickname + content*/
+
+
+
+
+/* englobe nickname + content pour un message*/
 .chat_message_list_block {
   margin: 0.5rem;
+  margin-top: 0rem;
 }
+
 .chat_message_list_nickname {
   list-style-type: none;
   font-weight: 600;
@@ -60,26 +154,25 @@
 /* c'est la string du message*/
 .chat_message_list_content {
   color: #ffffff;
-  padding: 0rem;
+  padding: 0.4rem;
   border-radius: 0.6rem;
+  list-style-type: none;
   max-width: max-content;
   min-width: 10rem;
-  list-style-type: none;
+  min-height: 2rem;
+  font-size: small;
 }
 
 /*regle si c'est nous meme l'autheur du message*/
 .chat_message_list_content_right {
   text-align: right;
   margin-left: auto;
-  margin-right: 0rem;
   background-color: #0D3331
 }
 
 /*regleles autre message du message*/
 .chat_message_list_content_left {
   text-align: left;
-  margin-left: 0rem;
-  margin-right: 0rem;
   background-color: #2D3748;
 }
 
@@ -88,6 +181,7 @@
 .chat_message_list_content_system {
   color: #346d75;
   text-align: center;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  font-size: 0.8rem;
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
 }

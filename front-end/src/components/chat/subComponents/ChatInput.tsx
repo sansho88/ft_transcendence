@@ -3,12 +3,13 @@
 import Image from 'next/image';
 import React from 'react'
 
+//TODO: recup userContext pour envoi message + props channel ID 
+
 export default function ChatInput({className}) {
 
   let message: string = '';
   return (
-    <div className={className}>
-      <div className='flex absolute bottom-2 pl-2'>
+    <div className={`${className}`}>
 
         <input
           type="text"
@@ -17,18 +18,16 @@ export default function ChatInput({className}) {
           onKeyDown={(e) => {
             if (e.key === 'Enter') () => { };
           }}
-          className="text-zinc-200 bg-neutral-800 rounded-lg h-10 w-[15rem]"
+          className="chat_block_messages_input_input"
         />
-        <button onClick={() => { }} className="ml-2">
+        <button onClick={() => { }} className="chat_block_messages_input_button">
           <Image
             src="/chat/send.svg"
             alt="Send button"
-            className="max-w-[2rem] min-w-[1rem]"
             width={32}
             height={32}
           />
         </button>
-      </div>
     </div>
-  )
+    )
 }
