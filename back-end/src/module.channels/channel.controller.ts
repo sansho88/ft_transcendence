@@ -192,4 +192,21 @@ export class ChannelController {
 		}
 		await this.mutedService.unmute(mute);
 	}
+
+	@Put('kick/:channelID/:userID')
+	@UseGuards(AuthGuard)
+	async kickUSer(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Param('userID', ParseIntPipe) targetID: number,
+	) {
+		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList'])
+		if (!(this.channelService.userIsAdmin(user, channel))) {
+			throw new BadRequestException("You aren't administrator on this channel");
+		}
+		const target = await this.usersService.findOne(targetID);
+		if (!(await this.channelService.userInChannel(target, channel)))
+			throw new BadRequestException('This user isn\'t part of this channel')
+		await this.chatGateway.leaveChat(channel, target);
+	}
 }

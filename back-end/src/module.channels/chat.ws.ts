@@ -197,6 +197,8 @@ export class ChatGateway
 			.catch(() => null);
 		if (channel == null)
 			return client.emit('sendMsg', {error: 'There is no such Channel'});
+		if (await this.channelService.userIsMute(channel, user))
+			return client.emit('sendMsg', {error: 'You are muted on that channel'});
 		if (await this.channelService.userInChannel(user, channel)) {
 			await this.messageService.create(user, data.content, channel);
 			return await this.SendMessage(channel, user, data.content);
@@ -263,7 +265,6 @@ export class ChatGateway
 
 	async ban(channel: ChannelEntity, user: UserEntity) {
 		console.log(user);
-		// await this.leaveChat(channel, user);
 		const socket = await this.getSocket(user.UserID);
 		if (!socket)
 			return;
