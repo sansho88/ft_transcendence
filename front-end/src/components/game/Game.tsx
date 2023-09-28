@@ -389,7 +389,7 @@ export default function Game({className}: {className: string}) {
 
   function handleSearchGame() {
     const login     = userLogged.userContext?.login
-    let nickname    = userLogged.userContext?.login;
+    let nickname    = userLogged.userContext?.nickname;
     let id_user     = userLogged.userContext?.UserID;
     if (nickname === undefined)
       nickname = userLogged.userContext?.nickname
