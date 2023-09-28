@@ -11,6 +11,7 @@ import './auth.css'
 import {useRouter} from 'next/navigation';
 import {LoggedContext, SocketContextChat, SocketContextGame, UserContext} from '@/context/globalContext';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
+import {NotificationManager, NotificationContainer} from 'react-notifications';
 
 // import { Button } from '@/components/CustomButtonComponent'
 enum EStepLogin {
@@ -24,6 +25,7 @@ enum EStepLogin {
     enterPassword,
     tryToCreateAccount,
     tryToConnect,
+    check2FA,
     loading,
     successLogin,
     failLogin,
@@ -31,13 +33,14 @@ enum EStepLogin {
     bye
 }
 
-export async function getUserMe() {
+export async function getUserMe(userReceived: IUser | undefined) {
     try {
-        return await apiReq.getApi.getMePromise()
+        userReceived = await apiReq.getApi.getMePromise()
             .then((req) => {
                 console.log("[Get User Me]", req.data.login);
                 return req.data as IUser;
             });
+        return userReceived;
 
     } catch (error) {
         console.error("[Get User Me ERROR]", error);
@@ -100,6 +103,9 @@ export default function Auth({className}: { className?: string }) {
 
     const [passwordInput, setPasswordInput] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    
+    const [code2FAInput, setcode2FAInput] = useState<string>('');
+    const [code2FA, setcode2FA] = useState<string>('');
 
 
     // Créer une instance Axios avec des en-têtes d'authentification par défaut
@@ -107,6 +113,14 @@ export default function Auth({className}: { className?: string }) {
     ////////////////////////////////////////////////////////
     //////////////// INPUT SWITCH DISPLAY //////////////////
     ////////////////////////////////////////////////////////
+
+    function connectUser(){
+        setLogged(true);
+        setCurrentStepLogin(EStepLogin.successLogin);
+        localStorage.setItem('login', login);
+        localStorage.setItem('userContext', JSON.stringify(userContext));
+        console.log('you are now logged in');
+    }
 
     const askForLogOrSignIn = () => {
         return (
@@ -197,6 +211,50 @@ export default function Auth({className}: { className?: string }) {
                     setLoginInput('');
                     setPassword('');
                     setPasswordInput('');
+                    setCurrentStepLogin(EStepLogin.signOrLogIn);
+                }}><span className="text">CANCEL</span></button>
+
+            </div>
+        )
+    }
+    const enterCode2FA = () => {
+
+        return (
+            <div className='flex flex-col justify-center items-center text-white my-8'>
+                <InputPod
+                    className='inputLogin'
+                    props=
+                        {
+                            {
+                                type: "number",
+                                value: code2FAInput,
+                                onChange: () => (e: React.ChangeEvent<HTMLInputElement>) => {
+                                    setcode2FAInput(e.target.value)
+                                },
+                                onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+                                    if (e.key === "Enter") {
+                                        setCurrentStepLogin(currentStepLogin);
+                                    }
+                                }
+                            }
+                        }
+                />
+                {
+                    <div className=' font-thin'>Enter your 2FA Code</div>
+                }
+                <button type="button" className={"button-login my-12 "} onClick={() => {
+                   if (code2FAInput == "424242")
+                       connectUser();
+                   else
+                       NotificationManager.error("Invalid 2FA code");
+
+                }}><span className="text">CONFIRM</span></button>
+
+                <button type="button" className={"button-login"} onClick={() => {
+                    setLogin('');
+                    setLoginInput('');
+                    setcode2FA('');
+                    setcode2FAInput('');
                     setCurrentStepLogin(EStepLogin.signOrLogIn);
                 }}><span className="text">CANCEL</span></button>
 
@@ -322,6 +380,7 @@ export default function Auth({className}: { className?: string }) {
 
 
     useEffect(() => {
+        let user;
         const fetchData = async () => {
             switch (currentStepLogin) {
                 case EStepLogin.start:
@@ -349,31 +408,6 @@ export default function Auth({className}: { className?: string }) {
                     }
                     setPassword(passwordInput);
                     break;
-                case EStepLogin.tryToConnect:
-                    const existingUser: Partial<POD.IUser> = {login: login, password: passwordInput, visit: true}
-                    await apiReq.postApi.postTryLogin(existingUser)
-                        .then(async (res) => {
-                            if (res.status === 200) {
-                                const userToken = res.data;
-                                localStorage.removeItem('token');
-                                localStorage.setItem('token', userToken);
-                                authManager.setToken(userToken);
-
-                                setUserContext(await getUserMe().then(() => {
-                                    setLogged(true);
-                                    setCurrentStepLogin(EStepLogin.successLogin);
-                                    localStorage.setItem('login', login);
-                                    localStorage.setItem('userContext', JSON.stringify(userContext));
-                                    console.log('you are now logged in');
-                                }));
-                            }
-                        })
-                        .catch((e) => {
-                            console.log("[TRY LOGIN ERROR]" + e);
-                            LoggedFailed(e.response.status);
-                            return;
-                        })
-                    return;
 
                 case EStepLogin.tryToCreateAccount:
                     console.log(`at case: TryToCreateAccount: nickName: ${login}, password: ${password}`)
@@ -386,7 +420,7 @@ export default function Auth({className}: { className?: string }) {
                                 localStorage.setItem('token', userToken);
                                 authManager.setToken(userToken);
                                 localStorage.setItem("login", login);
-                                setUserContext(await getUserMe().then(() => {
+                                setUserContext(await getUserMe(user).then(() => {
                                         setLogged(true);
                                         setCurrentStepLogin(EStepLogin.successLogin);
                                     }
@@ -412,6 +446,37 @@ export default function Auth({className}: { className?: string }) {
                                 console.error(e.message);
                         });
                     return;
+
+                case EStepLogin.tryToConnect:
+                    const existingUser: Partial<POD.IUser> = {login: login, password: passwordInput, visit: true}
+                    await apiReq.postApi.postTryLogin(existingUser)
+                        .then(async (res) => {
+                            if (res.status === 200) {
+                                const userToken = res.data;
+                                localStorage.removeItem('token');
+                                localStorage.setItem('token', userToken);
+                                authManager.setToken(userToken);
+
+                                setUserContext(await getUserMe(user).then((me) => {
+                                    if (me?.has_2fa)
+                                    {
+                                        setCurrentStepLogin(EStepLogin.check2FA);
+                                    }
+                                    else
+                                        connectUser();
+
+                                }));
+                            }
+                        })
+                        .catch((e) => {
+                            console.log("[TRY LOGIN ERROR]" + e);
+                            LoggedFailed(e.response.status);
+                            return;
+                        })
+                    return;
+
+                /*case EStepLogin.check2FA:*/
+
             }
         }
         fetchData();
@@ -467,6 +532,7 @@ export default function Auth({className}: { className?: string }) {
 
     return (
         <div className={defaultClassName}>
+            <NotificationContainer/>
             {welcomeTitle()}
             {currentStepLogin === EStepLogin.start &&
                 <button onClick={() => console.log('Not implemented')} className='button-login h-14 opacity-30'>LOGIN
@@ -481,6 +547,7 @@ export default function Auth({className}: { className?: string }) {
             {currentStepLogin === EStepLogin.signOrLogIn /*&&
                 <ClipLoader.BeatLoader className='pt-[12vh]' color="#36d7b7" size={13}/>*/
             }
+            {currentStepLogin === EStepLogin.check2FA && enterCode2FA()}
             {currentStepLogin === EStepLogin.successLogin && LoggedSuccess()}
             {currentStepLogin === EStepLogin.failLogin && LoggedFailed(42)}
 

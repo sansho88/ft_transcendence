@@ -29,7 +29,7 @@ export class ReceivedMessageDTOPipe { // Todo: change UserID to UserEntity
 export class JoinEventDTOPipe {
 	@IsNumber()
 	@IsNotEmpty()
-	channel: ChannelEntity;
+	channelID: number;
 
 	@IsString()
 	@IsNotEmpty()

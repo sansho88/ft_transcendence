@@ -29,7 +29,8 @@ export default function Home() {
         else
         {
             try{
-               getUserMe().then((testUser) => {
+                let user;
+               getUserMe(user).then((testUser) => {
                         if (testUser && testUser.UserID >= 0)
                         {
                             console.log("Redirect to Home page");
@@ -37,7 +38,7 @@ export default function Home() {
                         }
                         else
                         {
-                            console.log("testUser id= " + testUser.UserID);
+                            console.log("testUser id= " + user.UserID);
                             alert("An invalid token was saved in the browser." +
                                 "\nPlease, log in again or create a new account.");
                             localStorage.clear();

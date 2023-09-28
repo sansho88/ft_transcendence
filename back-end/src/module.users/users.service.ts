@@ -48,10 +48,10 @@ export class UsersService {
 	async findOne(userID: number, relations?: string[]) {
 		let user;
 		if (!relations)
-			user = await this.usersRepository.findOneBy({ UserID: userID });
+			user = await this.usersRepository.findOneBy({UserID: userID});
 		else
 			user = await this.usersRepository.findOne({
-				where: { UserID: userID },
+				where: {UserID: userID},
 				relations,
 			});
 		if (user == null) throw new BadRequestException("this user doesn't exist");
@@ -66,9 +66,9 @@ export class UsersService {
 		return user;
 	}
 
-	async getCredential(login: string) {
+	async getCredential(userID: number) {
 		const target = await this.usersRepository.findOne({
-			where: { login: login },
+			where: {UserID: userID},
 			relations: ['credential'],
 		});
 		return target.credential;
