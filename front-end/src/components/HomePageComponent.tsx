@@ -38,9 +38,9 @@ const HomePage = ({className}: HomePageProps) => {
             tokenRef.current = token;
         if (!userContext)
         {
-
+            let user;
             authManager.setToken(token);
-            getUserMe().then((me) => setUserContext(me) )
+            getUserMe(user).then((me) => setUserContext(me) )
                 .catch(() => {
                     localStorage.clear();
                     router.push("/auth");
@@ -91,7 +91,7 @@ const HomePage = ({className}: HomePageProps) => {
 
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
                         <Button image={"/history-list.svg"} onClick={() => console.log("history list button")} alt={"Match History button"}/>
-                        <Button2FA>2FA</Button2FA>
+                        <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
                     </Profile>
                 }
                 <UserList className={"friends"}/>
