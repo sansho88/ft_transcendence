@@ -1,7 +1,7 @@
 'use client'
 
 import {useContext, useEffect, useState} from 'react'
-import InputPod from '@/components/(ben_proto)/login/InputPod'
+import InputPod from './InputPod'
 import * as POD from "@/shared/types";
 import {IUser} from "@/shared/types";
 import * as apiReq from '@/components/api/ApiReq'

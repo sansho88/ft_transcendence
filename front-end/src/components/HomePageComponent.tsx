@@ -4,8 +4,8 @@ import Button from "@/components/CustomButtonComponent";
 import UserList from "@/components/UserListComponent";
 import Game from "@/components/game/Game";
 import ChatRoomCommponent from "@/components/chat/ChatRoomComponent";
-import React, {useContext, useEffect} from "react";
-import {LoggedContext, UserContext} from "@/context/globalContext";
+import React, {useContext, useEffect, useRef} from "react";
+import {LoggedContext, TokenContext, UserContext} from "@/context/globalContext";
 import {EStatus, IUser} from "@/shared/types";
 import * as apiReq from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
@@ -15,6 +15,8 @@ import {NotificationContainer, NotificationManager} from 'react-notifications';
 import NotifComponent from "@/components/notif/NotificationComponent";
 import {getEnumNameByIndex} from "@/utils/usefulFuncs";
 import Button2FA from "@/components/2FA/2FAComponent";
+import '@/components/chat/chat.css'
+import ChatMaster from "./chat/ChatMaster";
 
 interface HomePageProps {
     className: unknown
@@ -24,6 +26,7 @@ const HomePage = ({className}: HomePageProps) => {
     const {userContext, setUserContext} = useContext(UserContext);
     const {logged, setLogged} = useContext(LoggedContext);
     const router = useRouter();
+    const tokenRef = useRef<string>('');
 
 
     useEffect(() => {
@@ -31,6 +34,8 @@ const HomePage = ({className}: HomePageProps) => {
         const token = localStorage.getItem("token");
         if (!token)
             router.push("/auth");
+        else
+            tokenRef.current = token;
         if (!userContext)
         {
 
@@ -100,8 +105,8 @@ const HomePage = ({className}: HomePageProps) => {
                 <div className={"game"} onClick={switchOnlineIngame}>
                     <Game className={"game"}/>
                 </div>
+               <ChatMaster className={'chat_master'} token={tokenRef.current}/>
                 <div className={"absolute bottom-0 left-0"}><NotifComponent /></div>
-               {/* <ChatRoomCommponent className={"chat"}/> fixme Fait crash la page ?*/ }
 
             </main>
         </>

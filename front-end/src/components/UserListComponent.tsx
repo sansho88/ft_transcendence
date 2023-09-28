@@ -3,6 +3,7 @@ import {IUser} from "@/shared/types";
 import * as apiReq from '@/components/api/ApiReq';
 import Profile from "@/components/ProfileComponent";
 import Button from "@/components/CustomButtonComponent";
+import {v4 as uuidv4} from "uuid";
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 import NotifComponent from "@/components/notif/NotificationComponent";
 
@@ -31,7 +32,7 @@ const UserList : React.FC = ({className={className}}) => {
                 let allDiv : React.JSX.Element[] = [];
                 for (const user of res) {
                     allDiv.push(
-                            <li key={user.login + "List"}>
+                            <li key={user.login + "List" + uuidv4()}>
                                 <Profile login={user.login}
                                          nickname={user.nickname}
                                          avatar_path={user.avatar_path}
