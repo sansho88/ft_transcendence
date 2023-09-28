@@ -121,11 +121,14 @@
 }
 
 
+
+
+
 /* pour le chat message list component= contient la liste des message (list de chat_message_list_block)*/
 .chat_message_list {
   display: flex;
   flex-direction: column;
-  height: 90%; /* BURK , not responsive*/
+  height: 95%; /* BURK , not responsive*/
   overflow-y: auto;
   scrollbar-width: 1rem;
 }
@@ -141,6 +144,32 @@
 
 /* Pour IE et Edge */
 .chat_message_list {
+  -ms-overflow-style: none;
+}
+
+
+
+/* pour la div enfant direct de chat message list 
+(bidouille pour garder le bouton END fix quand en scroll vers le haut)*/
+.chat_message_list_sub {
+  display: flex;
+  flex-direction: column;
+  height: 90%; /* BURK , not responsive*/
+  overflow-y: auto;
+  scrollbar-width: 1rem;
+}
+/* Pour Chrome, Safari et Opera */
+.chat_message_list_sub::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pour Firefox */
+.chat_message_list_sub {
+  scrollbar-width: none;
+}
+
+/* Pour IE et Edge */
+.chat_message_list_sub {
   -ms-overflow-style: none;
 }
 
