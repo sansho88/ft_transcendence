@@ -8,7 +8,7 @@ export default function ChatChannelList({className, setChannel}: {className: str
   const addChannel = () => {
     return (
 
-        <button onClick={() => console.log('ADD CHANNEL')}>
+        <button onClick={() => console.log('ADD CHANNEL POPUP')}>
           JOIN
         </button>
     )
@@ -16,7 +16,7 @@ export default function ChatChannelList({className, setChannel}: {className: str
   const paramChannel = () => {
     return (
 
-        <button onClick={() => console.log('ADD CHANNEL')}>
+        <button onClick={() => console.log('OPEN PARAM CURRENT CHANNEL POPUP')}>
           PARAM
         </button>
     )
@@ -46,11 +46,19 @@ export default function ChatChannelList({className, setChannel}: {className: str
         <ChatChannelListElement channelID={19} channelName='#Channel 19' f={setChannel} />
         <ChatChannelListElement channelID={20} channelName='#Channel 20' f={setChannel} />
         <ChatChannelListElement channelID={21} channelName='#Channel 21' f={setChannel} />
-        <ChatChannelListElement channelID={22} channelName='#Channel 11' f={setChannel} />
+        <ChatChannelListElement channelID={22} channelName='#Channel 22' f={setChannel} />
+        <ChatChannelListElement channelID={23} channelName='#Channel 23' f={setChannel} />
+        <ChatChannelListElement channelID={24} channelName='#Channel 24' f={setChannel} />
+        <ChatChannelListElement channelID={25} channelName='#Channel 25' f={setChannel} />
+        <ChatChannelListElement channelID={26} channelName='#Channel 26' f={setChannel} />
+        <ChatChannelListElement channelID={27} channelName='#Channel 27' f={setChannel} />
+        <ChatChannelListElement channelID={28} channelName='#Channel 28' f={setChannel} />
+        <ChatChannelListElement channelID={29} channelName='#Channel 29' f={setChannel} />
+        <ChatChannelListElement channelID={30} channelName='#Channel 30' f={setChannel} />
 
       </div>
-      <div className=' text-center h-16 items-end relative bottom-1 space-x-2 font-bold text-sm'>
-        {addChannel()} {`|`} {paramChannel()}
+      <div className='chat_channel_buttons'>
+        {addChannel()} &nbsp; &nbsp; | &nbsp; &nbsp; {paramChannel()}
       </div>
     </div>
   )

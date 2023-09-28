@@ -55,14 +55,14 @@ export default function ChatMaster({className, token}: {className: string, token
   const mess4: IChannelMessage = {channelID: 0, content: 'Hello et moi je suis un autre user', ownerUser:               {has_2fa: false, login: "bducrocq", status: 2,UserID: 2, nickname: 'Benj3D'}}
   
   // const testChan: Channel = new Channel({channelID: 0, name: '#chan0', ownerUserID: 0, ownerLogin: 'user1', type: 0})
-
+  const mockMsg: IChannelMessage[] = [sys0, mess1, mess2, mess3, sys1, mess4, sys0, mess1, mess2, mess3, sys1, mess4, sys0, mess1, mess2, mess3, sys1, mess4, sys0, mess1, mess2, mess3, sys1, mess4, sys0, mess1, mess2, mess3, sys1, mess4, sys0, mess1, mess2, mess3, sys1, mess4]
 
   return (
     <div className={`${className}`}>
       <ChatChannelList className={'chat_channel_block'} setChannel={console.log} />
 
       <div className='chat_block_main'>
-        <ChatMessagesList className='chat_message_list' messages={[sys0, mess1, mess2, mess3, sys1, mess4, sys0, mess1, mess2, mess3, sys1, mess4]} />
+        <ChatMessagesList className='chat_message_list' messages={mockMsg} />
         <ChatInput className={'chat_block_messages_input'} />
       </div>
 

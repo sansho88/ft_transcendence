@@ -19,7 +19,7 @@
 .chat_channel_block {
   background-color: #111827;
   flex-grow: 1;
-  min-width: 22%;
+  min-width: 15%;
   height: 100%;
   border-top-left-radius: 1rem;
   border-bottom-left-radius: 1rem;
@@ -31,7 +31,7 @@
 /*main parent channel component*/
 .chat_channel_list {
   overflow-y: auto;
-  height: 95%;
+  height: 93%;
 
 }
 /* Pour Chrome, Safari et Opera */
@@ -52,6 +52,18 @@
 
 
 
+/*main parent channel component*/
+.chat_channel_buttons {
+  text-align: center;
+  align-items: flex-end;
+  position: relative;
+  padding: 0.25rem;
+  margin-top: 0.5rem;
+  bottom: 0.25rem;
+  font-weight: bold;
+  font-size: 0.85rem;
+
+}
 
 
 /* element channel (button channel.name) */
@@ -62,11 +74,19 @@
   align-items: center;
 }
 
+
+
+
+
+
+
+
+
 /*partie droite qui contient le block messages et input */
 .chat_block_main {
   flex-direction: column;
   padding-top: 0.5rem;
-  width: 60%;
+  width: 70%;
   height: 100%;
 }
 
