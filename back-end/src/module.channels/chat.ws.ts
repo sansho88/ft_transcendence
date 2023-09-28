@@ -62,7 +62,8 @@ export class ChatGateway
 	// Or We could also use a 'Auth' event to identify the user post connection
 
 	async handleConnection(client: Socket) {
-		const [type, token] = client.handshake.headers.authorization?.split(' ') ?? [];
+		const type = client.handshake.auth.type;
+		const token = client.handshake.auth.token;
 		if (type !== 'Bearer') return client.disconnect();
 		if (!token) return client.disconnect();
 		let userID: number;
@@ -93,12 +94,13 @@ export class ChatGateway
 			socketID: client.id,
 			userID: userID,
 		});
-		console.log(`New connection from User ${userID}`);
+		console.log('NEW CONNEXION WS CLIENT CHAT v2, id = ' + client.id + ` | userID: ${userID}`);
 	}
 
-	//Todo: Remove Socket from SocketList
-	async handleDisconnect(client: Socket) {
-		const [type, token] = client.handshake.headers.authorization?.split(' ') ?? [];
+	//Todo: leave room + offline
+	async handleDisconnect(client: Socket) { 
+		const [type, token] =
+			client.handshake.headers.authorization?.split(' ') ?? [];
 		if (type !== 'Bearer') return client.disconnect();
 		if (!token) return client.disconnect();
 		let payloadToken: accessToken;
