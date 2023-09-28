@@ -2,6 +2,7 @@
 
 import React from 'react'
 import ChatChannelListElement from './elements/ChatChannelListElement'
+import Image from "next/image";
 
 export default function ChatChannelList({className, setChannel}: {className: string, setChannel: Function}) {
 
@@ -9,7 +10,12 @@ export default function ChatChannelList({className, setChannel}: {className: str
     return (
 
         <button onClick={() => console.log('ADD CHANNEL POPUP')}>
-          JOIN
+          <Image
+              src="/channel-add.svg"
+              alt="ADD CHANNEL BUTTON"
+              width={26}
+              height={22}
+          />
         </button>
     )
   }
@@ -17,7 +23,12 @@ export default function ChatChannelList({className, setChannel}: {className: str
     return (
 
         <button onClick={() => console.log('OPEN PARAM CURRENT CHANNEL POPUP')}>
-          PARAM
+          <Image
+              src="/settings.svg"
+              alt="OPEN PARAMS BUTTON"
+              width={18}
+              height={18}
+          />
         </button>
     )
   }
