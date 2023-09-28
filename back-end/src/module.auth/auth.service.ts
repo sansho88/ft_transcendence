@@ -10,8 +10,6 @@ import { UserCredentialService } from './credential.service';
 
 @Injectable()
 export class AuthService {
-	nbVisit = 0;
-
 	constructor(
 		private readonly usersService: UsersService,
 		private jwtService: JwtService,
@@ -24,24 +22,28 @@ export class AuthService {
 		console.log(`NEW CONNECTION ===== \nlogin: ${login}\npass: ${rawPassword}`);
 		if (login === undefined || rawPassword === undefined)
 			throw new UnauthorizedException('Login or Password are empty');
-		const user = await this.usersService.findOne(login);
+		const user = await this.usersService
+			.findAll()
+			.then((users) => users[users.findIndex((usr) => usr.login == login)]);
 		if (!user) {
-			console.log('failed');
+			console.log(`Login failed :\`${login}' is not used`);
 			throw new UnauthorizedException();
 		}
 		const credential = await this.usersService.getCredential(login);
 		if (!(await this.credentialsService.compare(rawPassword, credential))) {
-			console.log('failed');
+			console.log(`Login failed :Wrong password`);
 			throw new UnauthorizedException();
 		}
-		console.log('success');
+		console.log('Login success');
 		const payloadToken: accessToken = { id: user.UserID };
 		return await this.jwtService.signAsync(payloadToken);
 	}
 
 	async signInVisit(rawPassword: string) {
-		this.nbVisit++;
-		const login = 'user' + this.nbVisit;
+		const nbVisit = await this.usersService.findAll().then((value) => {
+			return value.map(({ visit }) => visit).length;
+		});
+		const login = 'user' + nbVisit;
 		const userCredential = await this.credentialsService.create(rawPassword);
 		const user = await this.usersService.create(login, true, userCredential);
 		const payloadToken: accessToken = { id: user.UserID };
