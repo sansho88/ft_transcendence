@@ -49,18 +49,34 @@ export class ChannelController {
 		return this.channelService.findOne(channelID);
 	}
 
-	// @Get('msg/:channelID/:timestamp')
-	// @UseGuards(AuthGuard)
-	// async getMessages(
-	// 	@Param('channelID', ParseIntPipe) channelID: number,
-	// 	@Param('timestamp', ParseIntPipe) timestamp: number,
-	// ) {
-	// 	const minTime = new Date(timestamp * 1000);
-	// 	minTime.setUTCHours(minTime.getHours() + 2);
-	// 	const channel = await this.channelService.findOne(channelID);
-	// 	return this.channelService.getMessages(channel);
-	// }
 
+	/**
+	 *
+	 *  ## Path for admin in Channel
+	 *  . Admin
+	 *  	-  admin/add/:channelID/:targetID
+	 *  	-  admin/remove/:channelID/:targetID
+	 *
+	 *  . Ban
+	 *  	- get/ban/:channelID
+	 *  	- ban/:channelID/:targetID/:banDuration
+	 *  	- pardon/:banID
+	 *
+	 *  . Mute
+	 *   	- get/mute/:channelID
+	 *   	- mute/:channelID/:userID/:duration
+	 *   	- unmute/:muteID
+	 *
+	 *  . Kick
+	 *   	- kick/:channelID/:userID
+	 *    -------
+	 *
+	 *    Path For messages related get
+	 *   - msg/:channelID
+	 *   - msg/after/:channelID/:timestamp
+	 *   - msg/before/:channelID/:timestamp
+	 *
+	 **/
 	@Put('admin/add/:channelID/:targetID')
 	@UseGuards(AuthGuard)
 	async addAdmin(
