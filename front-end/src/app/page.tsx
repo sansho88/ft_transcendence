@@ -1,7 +1,6 @@
 'use client';
 import React, {useContext, useEffect} from "react";
 
-import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
 import {LoggedContext} from '@/context/globalContext';
 import {useRouter} from 'next/navigation';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
@@ -30,7 +29,7 @@ export default function Home() {
         else
         {
             try{
-                let user;
+                let user: IUser;
                getUserMe(user)
                    .then((testUser) => {
                         if (testUser && testUser.UserID >= 0)
@@ -43,8 +42,6 @@ export default function Home() {
                             console.log("testUser id= " + testUser.UserID);
                             alert("An invalid token was saved in the browser." +
                                 "\nPlease, log in again or create a new account.");
-                           /* localStorage.clear();
-                            router.push('/auth');*/
                         }
                     })
                     .catch((error) => {
@@ -56,8 +53,6 @@ export default function Home() {
             catch (e) {
                 alert("An invalid token was saved in the browser." +
                 "\nPlease, log in again or create a new account.");
-               /* localStorage.clear();
-                router.push('/auth');*/
             }
         }
 

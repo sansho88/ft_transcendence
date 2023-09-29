@@ -1,11 +1,10 @@
 'use client'
 
-import React, {useContext, useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import HomePage from "@/components/HomePageComponent";
-import {authManager, getApi} from "@/components/api/ApiReq";
+import {authManager} from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
 import LoadingComponent from "@/components/waiting/LoadingComponent";
-import {getUserMe} from "@/app/auth/Auth";
 
 export default function ShowHomePage() {
 	const router = useRouter();
@@ -20,7 +19,6 @@ export default function ShowHomePage() {
 		else
 			setIsTokenExists(true);
 	});
-	console.log("Home page loaded");
 	return (
 		isTokenExists ?
 			<HomePage className={""}/> : <LoadingComponent/>
