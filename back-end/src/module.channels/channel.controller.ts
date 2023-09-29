@@ -205,12 +205,42 @@ export class ChannelController {
 	) {
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList'])
 		if (!(this.channelService.userIsAdmin(user, channel))) {
-			throw new BadRequestException("You aren't administrator on this channel");
+			throw new BadRequestException('You aren\'t administrator on this channel');
 		}
 		const target = await this.usersService.findOne(targetID);
 		if (!(await this.channelService.userInChannel(target, channel)))
 			throw new BadRequestException('This user isn\'t part of this channel')
 		await this.chatGateway.leaveChat(channel, target);
+	}
+
+	@Get('msg/before/:channelID/:timestamp')
+	@UseGuards(AuthGuard)
+	async beforeMsg(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Param('timestamp', ParseIntPipe) timestamp: number,
+	) {
+		const minTime = new Date(timestamp);
+		minTime.setUTCHours(minTime.getHours() + 2);
+		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'])
+		if (!(await this.channelService.userInChannel(user, channel)))
+			throw new BadRequestException('You aren\'t part of that channel')
+		return this.messageService.filterBefore(channel.messages, minTime);
+	}
+
+	@Get('msg/after/:channelID/:timestamp')
+	@UseGuards(AuthGuard)
+	async afterMsg(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Param('timestamp', ParseIntPipe) timestamp: number,
+	) {
+		const maxTime = new Date(timestamp);
+		maxTime.setUTCHours(maxTime.getHours() + 2);
+		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'])
+		if (!(await this.channelService.userInChannel(user, channel)))
+			throw new BadRequestException('You aren\'t part of that channel')
+		return this.messageService.filterAfter(channel.messages, maxTime);
 	}
 
 	@Get('msg/:channelID')

@@ -1,6 +1,5 @@
 import {IsNotEmpty, IsNumber, IsString} from 'class-validator';
 import {UserEntity} from "../entities/user.entity";
-import {ChannelEntity} from "../entities/channel.entity";
 
 export class SendMessageDTOPipe {
 	@IsNumber()
