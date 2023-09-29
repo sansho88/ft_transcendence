@@ -3,12 +3,12 @@
 import React, { useContext, useEffect, useState, useRef } from 'react'
 import { LoggedContext, SocketContextChat } from '@/context/globalContext'
 import { IChannel, IChannelMessage } from '@/shared/typesChannel'
-import { Channel } from './subComponents/Channel'
+import { Channel } from './class/Channel'
 import ChatInput from './subComponents/ChatInput'
 import ChatChannelList from './subComponents/ChatChannelList'
 import ChatMessagesList from './subComponents/ChatMessagesList'
 import { Socket } from 'socket.io-client'
-import { ChannelsManager } from './subComponents/ChannelsManager'
+import { ChannelsManager } from './class/ChannelsServerManager'
 
 
 export default function ChatMaster({className, token}: {className: string, token: string}) {
