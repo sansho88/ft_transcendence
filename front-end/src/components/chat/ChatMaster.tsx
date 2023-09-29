@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useContext, useEffect, useState, useRef } from 'react'
-import { SocketContextChat } from '@/context/globalContext'
+import { LoggedContext, SocketContextChat } from '@/context/globalContext'
 import { IChannel, IChannelMessage } from '@/shared/typesChannel'
 import { Channel } from './subComponents/Channel'
 import ChatInput from './subComponents/ChatInput'
@@ -9,6 +9,7 @@ import ChatChannelList from './subComponents/ChatChannelList'
 import ChatMessagesList from './subComponents/ChatMessagesList'
 import { Socket } from 'socket.io-client'
 import { ChannelsManager } from './subComponents/ChannelsManager'
+
 
 export default function ChatMaster({className, token}: {className: string, token: string}) {
 
@@ -19,6 +20,7 @@ export default function ChatMaster({className, token}: {className: string, token
   const manager = useRef<ChannelsManager>(new ChannelsManager());
 
   const socketChat = useContext(SocketContextChat);
+  const {logged, setLogged} = useContext(LoggedContext);
 
   if(socketChat?.disconnected) 
   { 
@@ -26,7 +28,21 @@ export default function ChatMaster({className, token}: {className: string, token
     socketChat.auth = { type: `Bearer`, token: `${token}` };
     socketChat.connect();
   }
-  
+
+  useEffect(( ) => {
+    if (logged === true)
+      socketChat?.connect();
+    else
+      socketChat?.disconnect();
+  }, [logged])
+
+  useEffect(() => {
+
+    return (() => {
+      socketChat?.disconnect();
+    })
+  }, [])
+
   useEffect(() => {
     console.log(`currentChannel =  ${currentChannel}`);
     //TODO Charger les messages du channel correspondant

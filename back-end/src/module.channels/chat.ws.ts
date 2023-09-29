@@ -124,7 +124,7 @@ export class ChatGateway
 		this.usersService.userStatus(user, UserStatus.OFFLINE).then();
 		// const index = this.socketUserList.indexOf()
 		// this.socketUserList = this.socketUserList.slice()
-		console.log(`DisConnection ${client.id}`);
+		console.log(`CLIENT ${client.id} left CHAT WS`);
 	}
 
 	@SubscribeMessage('createRoom')
