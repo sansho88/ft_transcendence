@@ -7,6 +7,7 @@ import * as PODGAME from '@/shared/typesGame'
 import * as apiRoutes from '@/shared/routesApi'
 import * as ClipLoader from 'react-spinners'
 import SwitcherTheme from '@/components/game/SwitcherTheme'
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 
 enum EStatusFrontGame {
   idle,
@@ -142,6 +143,12 @@ export default function Game({className}: {className: string}) {
           }
           setRemoteEvent(data.remoteEvent)
           console.log(`WS gameFind recu: ${JSON.stringify(data)}`);
+            let player2;
+            if (!data.player2 || data.player1 == data.player2)
+                player2 = "yourself";
+            else
+                player2 = data.player2.nickname;
+            NotificationManager.info(`You'll play against ${player2}`, "GAME FOUND");
         })
   
   
@@ -180,6 +187,7 @@ export default function Game({className}: {className: string}) {
           }
           setInfoMessage(data);
           console.log(`WS endgame: ${JSON.stringify(data)}`);
+            NotificationManager.success(JSON.stringify(data), "GAME OVER");
         })
         
         socketRef.current?.on('reset', () => {

@@ -4,7 +4,7 @@ import Button from "@/components/CustomButtonComponent";
 import UserList from "@/components/UserListComponent";
 import Game from "@/components/game/Game";
 import React, {useContext, useEffect, useRef} from "react";
-import {LoggedContext, UserContext} from "@/context/globalContext";
+import {LoggedContext, SocketContextGame, UserContext} from "@/context/globalContext";
 import {EStatus, IUser} from "@/shared/types";
 import * as apiReq from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
@@ -16,6 +16,7 @@ import {getEnumNameByIndex} from "@/utils/usefulFuncs";
 import Button2FA from "@/components/2FA/2FAComponent";
 import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
+import * as PODGAME from "@/shared/typesGame";
 
 interface HomePageProps {
     className: unknown
@@ -26,6 +27,9 @@ const HomePage = ({className}: HomePageProps) => {
     const {setLogged} = useContext(LoggedContext);
     const router = useRouter();
     const tokenRef = useRef<string>('');
+    const socket      = useContext(SocketContextGame);
+    const socketRef   = useRef(socket);
+
 
 
     useEffect(() => {
@@ -46,29 +50,42 @@ const HomePage = ({className}: HomePageProps) => {
                 });
         }
         localStorage.setItem('userContext', JSON.stringify(userContext));
+
     })
+
+
+    socketRef.current?.on('gameFind', (data) => {
+
+        updateStatusUser(userContext?.UserID, EStatus.InGame)
+            .catch((e) => console.error(e));
+    });
+
+    socketRef.current?.on('endgame', (data) => {
+
+        updateStatusUser(userContext?.UserID, EStatus.Online)
+            .catch((e) => console.error(e));
+    });
+
     async function updateStatusUser(id_user, status) { //to remove when the player status will be updated directly from the Back
 
-        let updateUser: Partial<IUser> = userContext;
-        updateUser.status = status;
+        let updateUser = userContext;
+        if (updateUser)
+        {
+            updateUser.status = status;
+            //console.warn(JSON.stringify(updateUser));
 
-        await apiReq.putApi.putUser(updateUser)
-            .then(() => {
-                setUserContext(updateUser);
-            })
-            .catch((e) => {
-                console.error(e)
-            })
-    }
-
-    function switchOnlineIngame() {
-        const tmpStatus = userContext?.status == EStatus.Online ? EStatus.InGame : EStatus.Online;
-        NotificationManager.info(userContext.nickname + ' is actually ' + getEnumNameByIndex(EStatus, userContext.status));
-
-        updateStatusUser(userContext?.UserID, tmpStatus)
-            .catch((e) => console.error(e));
+            await apiReq.putApi.putUser(updateUser)
+                .then(() => {
+                    setUserContext(updateUser);
+                    console.warn("updateUser status: " + updateUser.status);
+                })
+                .catch((e) => {
+                   // console.error(e)
+                })
+        }
 
     }
+
 
     return (
         <>
@@ -94,7 +111,7 @@ const HomePage = ({className}: HomePageProps) => {
                     }
                 } alt={"Logout button"}/>
 
-                <div className={"game"} onClick={switchOnlineIngame}>
+                <div className={"game"}>
                     <Game className={"game"}/>
                 </div>
                <ChatMaster className={'chat_master'} token={tokenRef.current}/>

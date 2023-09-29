@@ -1,4 +1,4 @@
-import React, { useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Button from "./CustomButtonComponent"
 import Avatar from "@/components/AvatarComponent";
 import * as apiReq from '@/components/api/ApiReq'
@@ -8,6 +8,7 @@ import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
 import {EStatus, IUser} from "@/shared/types";
 import {getUserFromId} from "@/app/auth/Auth";
+import {UserContext} from "@/context/globalContext";
 
 
 const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, login, status, UserID, isEditable})=>{
@@ -16,6 +17,12 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
     const [editMode, setEditMode] = useState(false);
     const [nickErrorMsg, setNickErrMsg] = useState("");
     const [statusColor, setStatusColor] = useState("grey");
+    const {userContext, setUserContext} = useContext(UserContext);
+
+    useEffect(() => {
+        setStatusColor(getEnumNameByIndex(Colors, status ? status : 0));
+        console.warn("NTM");
+    }, [userContext])
 
     if (status == undefined)
         status = 0;
