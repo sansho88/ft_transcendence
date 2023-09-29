@@ -52,9 +52,9 @@ export default function ChatMessagesList({className, messages}: {className: stri
   }, [refDivParent.current]);
   
   
-  const btnGoToEnd = (classNameOverride?) => {
+  const btnGoToEnd = (className?) => {
     return (
-      <button className={`text-sm text-orange-900 pointer-events-auto z-10 ${classNameOverride}`} onClick={goToEndMessage}>GOTO END</button>
+      <button className={`pointer-events-auto z-10 ${className}`} onClick={goToEndMessage}>GOTO END</button>
     )
   }
 
@@ -87,7 +87,7 @@ export default function ChatMessagesList({className, messages}: {className: stri
         }
         <div ref={refDivEndMessage} />
       </div>
-      {buttonGoToEnd && btnGoToEnd(`text-xs mt-2`)}
+      {buttonGoToEnd && btnGoToEnd(`chat_message_list_goToEndButton`)}
     </div>
   )
 }
