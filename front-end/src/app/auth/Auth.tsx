@@ -43,7 +43,9 @@ export async function getUserMe(userReceived: IUser | undefined) {
         return userReceived;
 
     } catch (error) {
-        console.error("[Get User Me ERROR]", error);
+        console.error("[Get User Me ERROR] Wrong token used. Trying to fix issue...", error);
+        localStorage.clear();
+        location.reload();
     }
 }
 
@@ -78,15 +80,37 @@ export default function Auth({className}: { className?: string }) {
 
 
     const {userContext, setUserContext} = useContext(UserContext);
-    const {setLogged} = useContext(LoggedContext);
+    const {logged, setLogged} = useContext(LoggedContext);
     // const [isLogged, setIsLogged] = useState<boolean | null>(null);
     const socketChat = useContext(SocketContextChat);
     const socketGame = useContext(SocketContextGame);
     const [isSignInMode, setIsSignInMode] = useState(false);
+    const router = useRouter();
 
+
+    if (logged)
+        router.push("/home");
 
     useEffect(() => {
         authManager.setBaseURL('http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/');
+        const tmpToken = localStorage.getItem('token');
+        if (tmpToken)
+        {
+            console.log("Logged. Redirect to home.");
+            authManager.setToken(tmpToken);
+
+            router.push("/home");
+        }
+    })
+
+    useEffect(() => {
+        /*authManager.setBaseURL('http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/');
+        const tmpToken = localStorage.getItem('token');
+        if (tmpToken)
+        {
+            authManager.setToken(tmpToken);
+            router.push("/home");
+        }*/
         setUserContext({login:"", nickname:"", UserID:-1, avatar_path:undefined, visit:undefined, status:0, token_2fa:""});
         console.log('UseEffect : userContext.login = ' + userContext?.login + ' pass: ' + userContext?.password);
     }, [isSignInMode]);
@@ -117,7 +141,6 @@ export default function Auth({className}: { className?: string }) {
     function connectUser(){
         setLogged(true);
         setCurrentStepLogin(EStepLogin.successLogin);
-        localStorage.setItem('login', login);
         localStorage.setItem('userContext', JSON.stringify(userContext));
         console.log('you are now logged in');
     }
@@ -299,7 +322,7 @@ export default function Auth({className}: { className?: string }) {
 
     const [showMessage, setShowMessage] = useState(true);
     const [showMessageFail, setShowMessageFail] = useState(true);
-    const router = useRouter();
+
 
     useEffect(() => {
         if (currentStepLogin !== EStepLogin.successLogin) {
