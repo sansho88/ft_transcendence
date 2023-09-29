@@ -3,15 +3,14 @@ import Stats from "@/components/StatsComponent";
 import Button from "@/components/CustomButtonComponent";
 import UserList from "@/components/UserListComponent";
 import Game from "@/components/game/Game";
-import ChatRoomCommponent from "@/components/chat/ChatRoomComponent";
 import React, {useContext, useEffect, useRef} from "react";
-import {LoggedContext, TokenContext, UserContext} from "@/context/globalContext";
+import {LoggedContext, UserContext} from "@/context/globalContext";
 import {EStatus, IUser} from "@/shared/types";
 import * as apiReq from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
 import {authManager} from "@/components/api/ApiReq";
-import {NotificationContainer, NotificationManager} from 'react-notifications';
+import {NotificationManager} from 'react-notifications';
 import NotifComponent from "@/components/notif/NotificationComponent";
 import {getEnumNameByIndex} from "@/utils/usefulFuncs";
 import Button2FA from "@/components/2FA/2FAComponent";
@@ -24,7 +23,7 @@ interface HomePageProps {
 
 const HomePage = ({className}: HomePageProps) => {
     const {userContext, setUserContext} = useContext(UserContext);
-    const {logged, setLogged} = useContext(LoggedContext);
+    const {setLogged} = useContext(LoggedContext);
     const router = useRouter();
     const tokenRef = useRef<string>('');
 
@@ -48,12 +47,6 @@ const HomePage = ({className}: HomePageProps) => {
         }
         localStorage.setItem('userContext', JSON.stringify(userContext));
     })
-
-    enum Colors {
-        "grey",
-        "green",
-        "gold"
-    }
     async function updateStatusUser(id_user, status) { //to remove when the player status will be updated directly from the Back
 
         let updateUser: Partial<IUser> = userContext;
@@ -75,7 +68,6 @@ const HomePage = ({className}: HomePageProps) => {
         updateStatusUser(userContext?.UserID, tmpStatus)
             .catch((e) => console.error(e));
 
-        console.log('[MAIN PAGE]USER STATUS:' + tmpStatus);
     }
 
     return (

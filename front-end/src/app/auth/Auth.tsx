@@ -37,13 +37,14 @@ export async function getUserMe(userReceived: IUser | undefined) {
     try {
         userReceived = await apiReq.getApi.getMePromise()
             .then((req) => {
-                console.log("[Get User Me]", req.data.login);
                 return req.data as IUser;
             });
         return userReceived;
 
     } catch (error) {
-        console.error("[Get User Me ERROR]", error);
+        console.error("[Get User Me ERROR] Wrong token used. Trying to fix issue...", error);
+        localStorage.clear();
+        location.reload();
     }
 }
 
@@ -52,7 +53,6 @@ export async function getUserFromLogin(login: string) {
     try {
         return await apiReq.getApi.getUserByLoginPromise(login)
             .then((req) => {
-                console.log("[Get User From Login]", req.data.login);
                 return req.data as IUser;
             });
 
@@ -65,7 +65,6 @@ export async function getUserFromId(id: number) {
     try {
         return await apiReq.getApi.getUserByIdPromise(id)
             .then((req) => {
-                console.log("[Get User From Login]", req.data.login);
                 return req.data as IUser;
             });
 
@@ -78,17 +77,27 @@ export default function Auth({className}: { className?: string }) {
 
 
     const {userContext, setUserContext} = useContext(UserContext);
-    const {setLogged} = useContext(LoggedContext);
-    // const [isLogged, setIsLogged] = useState<boolean | null>(null);
-    const socketChat = useContext(SocketContextChat);
-    const socketGame = useContext(SocketContextGame);
+    const {logged, setLogged} = useContext(LoggedContext);
     const [isSignInMode, setIsSignInMode] = useState(false);
+    const router = useRouter();
 
+
+    if (logged)
+        router.push("/home");
 
     useEffect(() => {
         authManager.setBaseURL('http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/');
+        const tmpToken = localStorage.getItem('token');
+        if (tmpToken)
+        {
+            console.log("Logged. Redirect to home.");
+            authManager.setToken(tmpToken);
+            router.push("/home");
+        }
+    })
+
+    useEffect(() => {
         setUserContext({login:"", nickname:"", UserID:-1, avatar_path:undefined, visit:undefined, status:0, token_2fa:""});
-        console.log('UseEffect : userContext.login = ' + userContext?.login + ' pass: ' + userContext?.password);
     }, [isSignInMode]);
 
     const [currentStepLogin, setCurrentStepLogin] = useState<EStepLogin>(EStepLogin.start);
@@ -117,9 +126,7 @@ export default function Auth({className}: { className?: string }) {
     function connectUser(){
         setLogged(true);
         setCurrentStepLogin(EStepLogin.successLogin);
-        localStorage.setItem('login', login);
         localStorage.setItem('userContext', JSON.stringify(userContext));
-        console.log('you are now logged in');
     }
 
     const askForLogOrSignIn = () => {
@@ -298,8 +305,8 @@ export default function Auth({className}: { className?: string }) {
 
 
     const [showMessage, setShowMessage] = useState(true);
-    const [showMessageFail, setShowMessageFail] = useState(true);
-    const router = useRouter();
+    const [showMessageFail] = useState(true);
+
 
     useEffect(() => {
         if (currentStepLogin !== EStepLogin.successLogin) {
@@ -361,7 +368,7 @@ export default function Auth({className}: { className?: string }) {
         );
     }
 
-
+/*
     useEffect(() => {
         if (login.length > 0) {
             console.log(`login = ${login}`);
@@ -373,10 +380,10 @@ export default function Auth({className}: { className?: string }) {
                 ret += '❓️';
             console.log(`password = ${ret}`);
         }
-    }, [password, login]);
+    }, [password, login]);*/
 
     const textInviteModeButton: string = 'INVITE MODE'
-    const [inviteButtonText, setInviteButtonText] = useState<string>(textInviteModeButton);
+    const [inviteButtonText] = useState<string>(textInviteModeButton);
 
 
     useEffect(() => {
@@ -385,15 +392,6 @@ export default function Auth({className}: { className?: string }) {
             switch (currentStepLogin) {
                 case EStepLogin.start:
                     break;
-
-                case EStepLogin.signOrLogIn:
-                    console.log("Asked for sign in or Log in");
-                    break;
-
-
-                case EStepLogin.enterLogin:
-                    console.log('enterLogin');
-                    return;
 
                 case EStepLogin.enterPassword:
                     if (loginInput.trim().length === 0) {
@@ -410,7 +408,6 @@ export default function Auth({className}: { className?: string }) {
                     break;
 
                 case EStepLogin.tryToCreateAccount:
-                    console.log(`at case: TryToCreateAccount: nickName: ${login}, password: ${password}`)
                     const createUser: Partial<POD.IUser> = {login: "serverside", password: password, visit: true}
                     await apiReq.postApi.postUser(createUser)
                         .then(async (res) => {
@@ -474,13 +471,9 @@ export default function Auth({className}: { className?: string }) {
                             return;
                         })
                     return;
-
-                /*case EStepLogin.check2FA:*/
-
             }
         }
         fetchData();
-        console.log('currentStep= ' + currentStepLogin)
     }, [currentStepLogin])
 
 
@@ -499,7 +492,6 @@ export default function Auth({className}: { className?: string }) {
                 }
                 break;
             case EStepLogin.enterPassword:
-                console.log("Enter Password: ", passwordInput);
                 if (passwordInput.length === 0) {
                     console.log('PassWord is empty');
                     return;
