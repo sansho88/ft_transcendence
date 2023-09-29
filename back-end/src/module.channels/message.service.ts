@@ -26,11 +26,16 @@ export class MessageService {
 		return msg;
 	}
 
-	filterBefore(messages: MessageEntity[], timestamp: Date) {
-		// let i = 2;
-		// return messages
-		// 	.sort((a, b) => b.sendTime.getTime() - a.sendTime.getTime())
-		// 	.filter(() => i-- > 0)
+	filterBefore(messages: MessageEntity[], minTime: Date) {
+		let i = 10;
+		return messages
+			.sort((a, b) => b.sendTime.getTime() - a.sendTime.getTime())
+			.filter((msg) => {
+				if (msg.sendTime.getTime() < minTime.getTime())
+					return i-- > 0;
+				else
+					return false;
+			})
 	}
 
 	filterAfter(messages: MessageEntity[], maxTime: Date) {
