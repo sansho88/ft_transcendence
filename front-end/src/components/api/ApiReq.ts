@@ -13,7 +13,7 @@ export const axiosInstance = axios.create({
 	validateStatus: function (status) {
 		return status >= 200 && status < 204;
 	},
-	responseType: 'json'
+	responseThttps://www.uploadvr.com/quest-3-body-tracking/ype: 'json'
 });
 
 function updateAxiosInstance() {

@@ -14,7 +14,7 @@
 	
 // definition des routes root 🫠
 	const routeUsers = 					'users'
-	const routeChannels = 			'channels'
+	const routeChannels = 			'channel'
 	const routeMessages = 			'messages'
 	const routeGame = 					'game';
 	const routeMatchmaking = 		'matchmaking';
@@ -96,16 +96,15 @@
 // +---------------------------------------------------------------------+
 // |                             CHANNELS                                |
 // +---------------------------------------------------------------------+
+export namespace channel {
+	export const postCreateChannel = () 											=> {return `${serverApi}/${routeChannels}/create`}
+	export const getAll = () 																	=> {return `${serverApi}/${routeChannels}/get`};
+	export const getUsersChannel = (channelID: number)				=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
+	export const getUsersChannel = (channelID: number)				=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
 
-	export const getChannelsAll = () 				=> {return `${serverApi}/${routeChannels}`};								//list de tous les channels
-	export const getChannelsAllPublic = ()	=> {return `${serverApi}/${routeChannels}/public`};	//list de tous les channels public
-	export const getChannelById = () 				=> {return `${serverApi}/${routeChannels}/`};							//params: :Channel_Id
-	
-	export const postChannel = () 					=> {return `${serverApi}/${routeChannels}`};									
-	
-	export const putChannelById = () 				=> {return `${serverApi}/${routeChannels}/`};
-	
-	export const deleteChannelById = () 		=> {return `${serverApi}/${routeChannels}/`};
+
+}
+
 
 // +---------------------------------------------------------------------+
 // |                             MESSAGES                                |
