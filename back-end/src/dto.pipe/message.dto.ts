@@ -12,7 +12,7 @@ export class SendMessageDTOPipe {
 	content: string;
 }
 
-export class ReceivedMessageDTOPipe { // Todo: change UserID to UserEntity
+export class ReceivedMessageDTOPipe {
 	@IsNumber()
 	@IsNotEmpty()
 	channelID: number;

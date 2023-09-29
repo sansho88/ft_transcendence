@@ -10,7 +10,8 @@ export class MessageService {
 	constructor(
 		@InjectRepository(MessageEntity)
 		private messageRepository: Repository<MessageEntity>,
-	) {}
+	) {
+	}
 
 	async create(user: UserEntity, content: string, chan: ChannelEntity) {
 		let sendTime = new Date();
@@ -23,5 +24,22 @@ export class MessageService {
 		});
 		await msg.save();
 		return msg;
+	}
+
+	filterBefore(messages: MessageEntity[], timestamp: Date) {
+		// let i = 2;
+		// return messages
+		// .sort((a, b) => a.sendTime - b.sendTime)
+		// .filter(msg => i-- > 0)
+	}
+
+	filterAfter(messages: MessageEntity[], maxTime: Date) {
+	}
+
+	filterRecent(messages: MessageEntity[]) {
+		let i = 30;
+		return messages
+			.sort((a, b) => b.sendTime.getTime() - a.sendTime.getTime())
+			.filter(() => i-- > 0)
 	}
 }
