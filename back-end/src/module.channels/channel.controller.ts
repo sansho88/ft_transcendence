@@ -58,6 +58,15 @@ export class ChannelController {
 		return this.channelService.getMessages(channel, minTime);
 	}
 
+	@Get('msg/:channelID')
+	@UseGuards(AuthGuard)
+	async getAllMessages(
+		@Param('channelID', ParseIntPipe) channelID: number,
+	) {
+		const channel = await this.channelService.findOne(channelID);
+		return this.channelService.getAllMessages(channel);
+	}
+
 	@Put('admin/add/:channelID/:targetID')
 	@UseGuards(AuthGuard)
 	async addAdmin(

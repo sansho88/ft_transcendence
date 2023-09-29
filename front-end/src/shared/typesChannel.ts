@@ -25,12 +25,12 @@ export interface IChannel {
   owner: IUser;
   name: string;
   type: ChannelType;
-  adminList: User[];
-  userList: User[];
-  messages: Message[];
-  inviteList: Invite[];
-  muteList: Mute[];
-  bannedList: Banned[];
+  // adminList: User[];
+  // userList: User[];
+  // messages: Message[];
+  // inviteList: Invite[];
+  // muteList: Mute[];
+  // bannedList: Banned[];
 }
 
 export interface IChannelMessage {

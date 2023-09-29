@@ -97,14 +97,13 @@
 // |                             CHANNELS                                |
 // +---------------------------------------------------------------------+
 export namespace channel {
-	export const postCreateChannel = () 											=> {return `${serverApi}/${routeChannels}/create`}
-	export const getAll = () 																	=> {return `${serverApi}/${routeChannels}/get`};
-	export const getUsersChannel = (channelID: number)				=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
-	export const getUsersChannel = (channelID: number)				=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
+	export const postCreateChannel = () 																					=> {return `${serverApi}/${routeChannels}/create`}
+	export const getAll = () 																											=> {return `${serverApi}/${routeChannels}/get`};
+	export const getUsersChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
+	export const getMsgsChannel = (channelID: number, timestamp: number)					=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
 
 
 }
-
 
 // +---------------------------------------------------------------------+
 // |                             MESSAGES                                |

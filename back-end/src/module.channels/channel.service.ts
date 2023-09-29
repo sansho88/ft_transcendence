@@ -117,6 +117,16 @@ export class ChannelService {
 		return msg.filter((msg) => time > msg.sendTime);
 	}
 
+	async getAllMessages(target: ChannelEntity) {
+		const msg = await this.channelRepository
+			.findOne({
+				where: {channelID: target.channelID},
+				relations: ['messages', 'messages.author'],
+			})
+			.then((chan) => chan.messages);
+		return msg;
+	}
+
 	async checkCredential(data: JoinChannelDTOPipe) {
 		const channel = await this.channelRepository.findOne({
 			where: {channelID: data.channelID},
