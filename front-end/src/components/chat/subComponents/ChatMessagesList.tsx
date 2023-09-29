@@ -11,6 +11,7 @@ export default function ChatMessagesList({className, messages}: {className: stri
   const refDivEndMessage = useRef<HTMLDivElement>(null);
   const refDivParent = useRef<HTMLDivElement>(null);
   const [buttonGoToEnd, setButtonGoToEnd] = useState<boolean>(false);
+  const [newMessageNoRead, setNewMessageNoRead] = useState<boolean>(false);
 
 
   const goToEndMessage = () => {
@@ -52,9 +53,9 @@ export default function ChatMessagesList({className, messages}: {className: stri
   }, [refDivParent.current]);
   
   
-  const btnGoToEnd = (className?) => {
+  const btnGoToEnd = (message: string, className?: string) => {
     return (
-      <button className={`pointer-events-auto z-10 ${className}`} onClick={goToEndMessage}>GOTO END</button>
+      <button className={`pointer-events-auto z-10 ${className}`} onClick={goToEndMessage}>{message}</button>
     )
   }
 
@@ -87,7 +88,12 @@ export default function ChatMessagesList({className, messages}: {className: stri
         }
         <div ref={refDivEndMessage} />
       </div>
-      {buttonGoToEnd && btnGoToEnd(`chat_message_list_goToEndButton`)}
+      {buttonGoToEnd && 
+        (newMessageNoRead ?  
+            btnGoToEnd(`! NEW MESSAGE !`, `chat_message_list_goToEndButton chat_message_list_goToEndButton_newMessage`)
+          : btnGoToEnd(`GOTO END`, `chat_message_list_goToEndButton`))
+      }
+        
     </div>
   )
 }

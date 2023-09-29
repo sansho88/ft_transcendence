@@ -196,6 +196,11 @@
   font-weight: bold;
 }
 
+/* pour differencier si nouveau messaage recu */
+.chat_message_list_goToEndButton_newMessage {
+  background: #00b5cd; /* Oo' */
+}
+
 
 
 
