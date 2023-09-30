@@ -33,6 +33,7 @@ import {
 	ReceivedMessageDTOPipe,
 	SendMessageDTOPipe,
 } from '../dto.pipe/message.dto';
+import { getToken } from '../module.auth/auth.guard';
 
 class SocketUserList {
 	userID: number;
@@ -45,10 +46,10 @@ export class ChatGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {
 	@WebSocketServer()
 	server: Server;
-	private socketUserList: SocketUserList[] = [];
+	private socketUserList: SocketUserList[] = [] = [];
 
 	constructor(
-		private messageService: MessageService,
+		private messageService: MessageService, 
 		private channelService: ChannelService,
 		private usersService: UsersService,
 		private bannedService: BannedService,
@@ -61,20 +62,25 @@ export class ChatGateway
 	// Todo: Maybe Give Bearer Token to auth when 1st connection then keep userID and client.ID in a map-like structure
 	// Or We could also use a 'Auth' event to identify the user post connection
 
-	async handleConnection(client: Socket) {
-		const [type, token] = client.handshake.headers.authorization?.split(' ') ?? [];
-		if (type !== 'Bearer') return client.disconnect();
-		if (!token) return client.disconnect();
-		let userID: number;
-		try {
-			const payloadToken: accessToken = await this.jwtService.verifyAsync(
+		async handleConnection(client: Socket) {
+			
+			const tokenInfo = getToken(client);
+			
+			const type = tokenInfo.type;
+			const token = tokenInfo.token;
+			if (type !== 'Bearer') return client.disconnect();
+			if (!token) return client.disconnect();
+			let userID: number;
+			try {
+				const payloadToken: accessToken = await this.jwtService.verifyAsync(
 				token,
 				{
 					secret: process.env.SECRET_KEY,
 				},
-			);
+				);
 			userID = payloadToken.id;
 		} catch {
+
 			return client.disconnect();
 		}
 		const user = await this.usersService
@@ -93,12 +99,14 @@ export class ChatGateway
 			socketID: client.id,
 			userID: userID,
 		});
-		console.log(`New connection from User ${userID}`);
+		console.log('NEW CONNEXION WS CLIENT CHAT v2, id = ' + client.id + ` | userID: ${userID}`);
 	}
 
-	//Todo: Remove Socket from SocketList
-	async handleDisconnect(client: Socket) {
-		const [type, token] = client.handshake.headers.authorization?.split(' ') ?? [];
+	//Todo: leave room + offline
+	async handleDisconnect(client: Socket) { 
+		const tokenInfo = getToken(client);
+		const type = tokenInfo.type;
+		const token = tokenInfo.token;
 		if (type !== 'Bearer') return client.disconnect();
 		if (!token) return client.disconnect();
 		let payloadToken: accessToken;
@@ -116,7 +124,7 @@ export class ChatGateway
 		this.usersService.userStatus(user, UserStatus.OFFLINE).then();
 		// const index = this.socketUserList.indexOf()
 		// this.socketUserList = this.socketUserList.slice()
-		console.log(`DisConnection ${client.id}`);
+		console.log(`CLIENT ${client.id} left CHAT WS`);
 	}
 
 	@SubscribeMessage('createRoom')

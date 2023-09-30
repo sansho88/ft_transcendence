@@ -24,9 +24,9 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus}) => {
 
 	return (
 		<img className={"avatar"} src={path} alt="Avatar" style={{
-			borderWidth: "2px",
+			borderWidth: "0.15em",
 			borderColor: statusColor,
-			boxShadow: `1px 2px 5px ${statusColor}`,
+			boxShadow: `0.1em 0.2em 0.5em ${statusColor}`,
 			transition: "1000ms",
 			borderRadius: "8px",
 			width: width,
