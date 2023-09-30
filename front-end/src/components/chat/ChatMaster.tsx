@@ -8,7 +8,7 @@ import ChatInput from './subComponents/ChatInput'
 import ChatChannelList from './subComponents/ChatChannelList'
 import ChatMessagesList from './subComponents/ChatMessagesList'
 import { Socket } from 'socket.io-client'
-import { ChannelsManager } from './class/ChannelsServerManager'
+import { ChannelsServerManager } from './class/ChannelsServerManager'
 
 
 export default function ChatMaster({className, token}: {className: string, token: string}) {
@@ -17,7 +17,7 @@ export default function ChatMaster({className, token}: {className: string, token
   const [messagesChannel, setMessagesChannel] = useState<IChannel[]>()
   const [currentChannel, setCurrentChannel] = useState<number>(-1);
 
-  const manager = useRef<ChannelsManager>(new ChannelsManager());
+  // const manager = useRef<ChannelsServerManager>(new ChannelsServerManager());
 
   const socketChat = useContext(SocketContextChat);
   const {logged, setLogged} = useContext(LoggedContext);

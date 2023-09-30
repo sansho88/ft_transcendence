@@ -89,13 +89,32 @@ export class WSAuthGuard implements CanActivate {
 }
 
 //compromis pour utiliser a la fois auth via header pour POSTMAN et handshake.auth pour le front
-export function getToken(client: Socket):{type: string, token: string} {
-  if (client.handshake.auth.type === 'Bearer'){
-      return {type: client.handshake.auth.type, token: client.handshake.auth.token}
-    }
-    else {
-      const [type, token] =
-      client.handshake.headers.authorization?.split(' ') ?? [];
-      return type === 'Bearer' ? {type: type, token: token } : undefined;
-    }
-  }
+export function getToken(client: Socket): { type: string, token: string } {
+	if (client.handshake.auth.type === 'Bearer') {
+		console.log('CHECK POINT 1');
+		return { type: client.handshake.auth.type, token: client.handshake.auth.token }
+	}
+	else {
+		console.log('CHECK POINT 2');
+		const [type, token] =
+		client.handshake.headers.authorization?.split(' ') ?? [];
+		console.log('CHECK POINT 2b');
+		// return type === 'Bearer' ? {type: type, token: token } : undefined;
+		console.log('CHECK POINT 2c');
+		if (type === 'Bearer') {
+			if (token !== undefined) {
+				
+				console.log('CHECK POINT 3');
+				return { type: type, token: token };
+			}
+			else {
+				console.log('CHECK POINT 4');
+				throw new WsException('No token');
+			}
+		}
+		else {
+			console.log('CHECK POINT 4');
+			throw new WsException('No token');
+		}
+	}
+}

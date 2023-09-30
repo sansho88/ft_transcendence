@@ -62,10 +62,19 @@ export class ChatGateway
 	// Todo: Maybe Give Bearer Token to auth when 1st connection then keep userID and client.ID in a map-like structure
 	// Or We could also use a 'Auth' event to identify the user post connection
 
-		async handleConnection(client: Socket) {
-			
-			const tokenInfo = getToken(client);
-			
+	async handleConnection(client: Socket) {
+
+		try {
+			let tokenInfo;
+			try {
+
+				tokenInfo = getToken(client);
+			}
+			catch(e) {
+				console.log('CATCHERRR:' + e)
+				return;
+			}
+
 			const type = tokenInfo.type;
 			const token = tokenInfo.token;
 			if (type !== 'Bearer') return client.disconnect();
@@ -73,58 +82,72 @@ export class ChatGateway
 			let userID: number;
 			try {
 				const payloadToken: accessToken = await this.jwtService.verifyAsync(
-				token,
-				{
-					secret: process.env.SECRET_KEY,
-				},
+					token,
+					{
+						secret: process.env.SECRET_KEY,
+					},
 				);
-			userID = payloadToken.id;
-		} catch {
+				userID = payloadToken.id;
+			} catch {
 
-			return client.disconnect();
+				return client.disconnect();
+			}
+
+			const user = await this.usersService
+				.findOne(userID, ['channelJoined'])
+				.catch(() => null);
+			if (user == null) return client.disconnect();
+
+			if (typeof user.channelJoined === 'undefined') return;
+			client.join(
+				user.channelJoined.map((chan) => {
+					return `${chan.channelID}`;
+				}),
+			);
+			await this.usersService.userStatus(user, UserStatus.ONLINE);
+			this.socketUserList.push({
+				socketID: client.id,
+				userID: userID,
+			});
+			console.log('NEW CONNEXION WS CLIENT CHAT v2, id = ' + client.id + ` | userID: ${userID}`);
 		}
-		const user = await this.usersService
-			.findOne(userID, ['channelJoined'])
-			.catch(() => null);
-		if (user == null) return client.disconnect();
-
-		if (typeof user.channelJoined === 'undefined') return;
-		client.join(
-			user.channelJoined.map((chan) => {
-				return `${chan.channelID}`;
-			}),
-		);
-		await this.usersService.userStatus(user, UserStatus.ONLINE);
-		this.socketUserList.push({
-			socketID: client.id,
-			userID: userID,
-		});
-		console.log('NEW CONNEXION WS CLIENT CHAT v2, id = ' + client.id + ` | userID: ${userID}`);
+		catch (e) {
+			console.log(e);
+			client.disconnect();
+			return;
+		}
 	}
 
 	//Todo: leave room + offline
-	async handleDisconnect(client: Socket) { 
-		const tokenInfo = getToken(client);
-		const type = tokenInfo.type;
-		const token = tokenInfo.token;
-		if (type !== 'Bearer') return client.disconnect();
-		if (!token) return client.disconnect();
-		let payloadToken: accessToken;
+	async handleDisconnect(client: Socket) {
 		try {
-			payloadToken = await this.jwtService.verifyAsync(token, {
-				secret: process.env.SECRET_KEY,
-			});
-		} catch {
-			return client.disconnect();
+			const tokenInfo = getToken(client);
+			const type = tokenInfo.type;
+			const token = tokenInfo.token;
+			if (type !== 'Bearer') return client.disconnect();
+			if (!token) return client.disconnect();
+			let payloadToken: accessToken;
+			try {
+				payloadToken = await this.jwtService.verifyAsync(token, {
+					secret: process.env.SECRET_KEY,
+				});
+			} catch {
+				return client.disconnect();
+			}
+			const user = await this.usersService
+				.findOne(payloadToken.id)
+				.catch(() => null);
+			if (!user) return client.disconnect();
+			this.usersService.userStatus(user, UserStatus.OFFLINE).then();
+			// const index = this.socketUserList.indexOf()
+			// this.socketUserList = this.socketUserList.slice()
+			console.log(`CLIENT ${client.id} left CHAT WS`);
 		}
-		const user = await this.usersService
-			.findOne(payloadToken.id)
-			.catch(() => null);
-		if (!user) return client.disconnect();
-		this.usersService.userStatus(user, UserStatus.OFFLINE).then();
-		// const index = this.socketUserList.indexOf()
-		// this.socketUserList = this.socketUserList.slice()
-		console.log(`CLIENT ${client.id} left CHAT WS`);
+		catch (e) {
+			console.log('checkout out point')
+			console.error(e);
+			return;
+		}
 	}
 
 	@SubscribeMessage('createRoom')

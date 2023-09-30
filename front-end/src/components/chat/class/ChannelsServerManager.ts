@@ -4,12 +4,13 @@ import { Socket } from "socket.io-client";
 /**
  * Recupere les id et nom des channel public existant
  */
-export class ChannelsManager {
+export class ChannelsServerManager {
 
   private channels: Channel[] = [];
 
   constructor(socketChat: Socket, updateEvent: string) {
-    socketChat.on(updateEvent, (data) => {
+    console.log('contrutor ChannelsServerManager')
+      socketChat.on(updateEvent, (data) => {
       
     })
 
@@ -21,5 +22,4 @@ export class ChannelsManager {
     this.channels = this.channels.filter(channel => channel.getChannelID() !== removeChannelID);  }
 
   public getChannelById(channelID: number) : Channel | undefined {
-    return this.channels.find(channel => channel.getChannelID() === channelID);}
-}
+    return this.channels.find(channel => channel.getChannelID() === channelID);}  

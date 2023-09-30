@@ -19,36 +19,49 @@
 	const routeGame = 					'game';
 	const routeMatchmaking = 		'matchmaking';
 	const routeBanned = 				'banned';
-	const routeChannelInvite = 	'channel-invite';
-	const routeMute = 					'mute';
-	const routeChallenge = 			'challenge';
-	const routeFollow = 				'follow';
-	const routeSubscribe = 			'subscribe';
-	const routeBlock = 					'block';
-	const routeJoined = 				'joined';
-	const routeAdministrate = 	'administrate';
-	const routePlay = 					'play';
+	// const routeChannelInvite = 	'channel-invite';
+	// const routeMute = 					'mute';
+	// const routeChallenge = 			'challenge';
+	// const routeFollow = 				'follow';
+	// const routeSubscribe = 			'subscribe';
+	// const routeBlock = 					'block';
+	// const routeJoined = 				'joined';
+	// const routeAdministrate = 	'administrate';
+	// const routePlay = 					'play';
 	
   const routeWsGame =          'game';
-  // const wsRouteChat =         'chat'
+  const routeWsChat =          'chat'
 
 
 // +---------------------------------------------------------------------+
 // |                       		EVENTS GAME WS              	             |
 // +---------------------------------------------------------------------+
-  export namespace wsGameRoutes {
-    export const addNewPlayerToServer=()           => {return `${routeWsGame}_addPlayerToServer`}
-    export const addPlayerToMatchmaking=()         => {return `${routeWsGame}_addPlayerToMatchmaking`}
-    export const addPlayerToMatchmakingGhost=()    => {return `${routeWsGame}_addPlayerToMatchmakingGhost`}
-    export const removePlayerToMatchmaking=()      => {return `${routeWsGame}_removePlayerToMatchmaking`}
-    export const removePlayerToMatchmakingGhost=() => {return `${routeWsGame}_removePlayerToMatchmakingGhost`}
-    export const createTrainningGame=()            => {return `${routeWsGame}_createTrainningGame`}
-		
-    export const serverGameInfo=()                 => {return `${routeWsGame}_serverGameInfo`} //retour message concernant le process de matchmaking 
-    export const serverGameCurrentSession=()       => {return `${routeWsGame}_serverGameCurrentSession`} //list des games en cours
+	export namespace wsGameRoutes {
+	export const addNewPlayerToServer=()           => {return `${routeWsGame}_addPlayerToServer`}
+	export const addPlayerToMatchmaking=()         => {return `${routeWsGame}_addPlayerToMatchmaking`}
+	export const addPlayerToMatchmakingGhost=()    => {return `${routeWsGame}_addPlayerToMatchmakingGhost`}
+	export const removePlayerToMatchmaking=()      => {return `${routeWsGame}_removePlayerToMatchmaking`}
+  export const removePlayerToMatchmakingGhost=() => {return `${routeWsGame}_removePlayerToMatchmakingGhost`}
+  export const createTrainningGame=()            => {return `${routeWsGame}_createTrainningGame`}
+  export const serverGameInfo=()                 => {return `${routeWsGame}_serverGameInfo`} //retour message concernant le process de matchmaking 
+  export const serverGameCurrentSession=()       => {return `${routeWsGame}_serverGameCurrentSession`} //list des games en cours
+	
+}
 
-  }
+// +---------------------------------------------------------------------+
+// |                       		EVENTS CHAT WS              	             |
+// +---------------------------------------------------------------------+
+export namespace wsChatRoutesBack {
+	export const createRoom=()      						  	=> {return `createRoom`} //retour message concernant le process de matchmaking 
+	export const joinRoom=()      						   		=> {return `joinRoom`} //retour message concernant le process de matchmaking 
+	export const leaveRoom=()      						   		=> {return `leaveRoom`} //retour message concernant le process de matchmaking 
+	export const sendMsg=()      						   			=> {return `sendMsg`} //retour message concernant le process de matchmaking 
 
+}
+export namespace wsChatRoutesClient {
+	export const updateChannel=()      						  	=> {return `createRoom`} //retour message concernant le process de matchmaking 
+
+}
 
 //bible des routes
 	export namespace strRoutes {
@@ -126,8 +139,8 @@ export namespace channel {
 		/* route ban et unban un user dun channel */
 	// export const getBannedByChannelId = () => {return `${serverApi}/${routeBanned}/`}; // params :channelId
 	// export const getBannedByUserId = () => {return `${serverApi}/${routeBanned}/`};		// params :userId			| return: Array de tous les chan ou user est ban
-	export const postBannedById= () => {return `${serverApi}/${routeBanned}/`}; 					// params :{channel_Id, userId}
-	export const deleteBannedById = () => {return `${serverApi}/${routeBanned}/`};				// params :{channel_Id, userId}
+	// export const postBannedById= () => {return `${serverApi}/${routeBanned}/`}; 					// params :{channel_Id, userId}
+	// export const deleteBannedById = () => {return `${serverApi}/${routeBanned}/`};				// params :{channel_Id, userId}
 
 // +---------------------------------------------------------------------+
 // |                         CHANNEL INVITE                              |
