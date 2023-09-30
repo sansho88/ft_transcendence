@@ -464,18 +464,19 @@ export default function Auth({className}: { className?: string }) {
     } else
         defaultClassName = className;
 
-        function goto42auth(){
-            const generateOAuthURI = (): string => {
-                const clientId = "u-s4t2ud-11d5ef61bfceb369b228b9eac5ee836a0ebdf73e0fc0703f5803f1faa54b87cf";
+        async function goto42auth(){
+            const generateOAuthURI = async (): Promise<string> => {
+							const req = await apiReq.postApi.postTryGetClientID();
+							//console.log(JSON.stringify(await apiReq.postApi.postTryGetClientID(), null, 4))//TODO REMOVE
+                const clientId = req?.data ?? "clientID_is_missing";
                 const responseType = "code";
                 const hostname = window.location.hostname; // Récupérer le nom d'hôte du serveur
                 const redirectUri = encodeURIComponent(`http://${hostname}:3000/callback`);
                 
                 return `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}`;
             };
-            console.log(generateOAuthURI()); // Affiche l'URI générée
-            router.push(generateOAuthURI())
-            
+            console.log(await generateOAuthURI()); // Affiche l'URI générée
+            router.push(await generateOAuthURI())
         }
 
     return (

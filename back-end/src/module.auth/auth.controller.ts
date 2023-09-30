@@ -5,10 +5,11 @@ import {
 	HttpStatus,
 	Post,
 	ValidationPipe,
+	Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LogVisitDTOPipe, SignVisitDTOPipe } from '../dto.pipe/auth/visit';
-import { connect42DTO } from '../dto.pipe/auth/42';
+import { Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -30,9 +31,14 @@ export class AuthController {
 	// /**************************************/
 
 	@HttpCode(HttpStatus.OK)
+	@Post('42/getClientID')
+	getIntraUrl() {
+		return this.authService.getClientID();
+	}
+
+	@HttpCode(HttpStatus.OK)
 	@Post('42/connect')
 	connect42(/*@Body(new ValidationPipe()) signDto: connect42DTO*/@Body()body) {
-		console.log(body);
 		return this.authService.connect42(Object.keys(body)[0]);
 	}
 }

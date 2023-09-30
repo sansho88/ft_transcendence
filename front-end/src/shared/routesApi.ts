@@ -57,6 +57,7 @@
 // |                            USERS 42                                 |
 // +---------------------------------------------------------------------+
 	export const postUser42=()							=>{return `${serverApi}/auth/42/connect/`}
+	export const getClientID=()							=>{return `${serverApi}/auth/42/getClientID/`}
 
 
 // +---------------------------------------------------------------------+
