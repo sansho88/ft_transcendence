@@ -107,14 +107,12 @@ export class ChannelService {
 		return !!list.find((value) => value.UserID == user.UserID);
 	}
 
-	async getMessages(target: ChannelEntity, time: Date) {
-		const msg = await this.channelRepository
+	async getMessages(target: ChannelEntity) {
+		return this.channelRepository
 			.findOne({
 				where: {channelID: target.channelID},
 				relations: ['messages', 'messages.author'],
-			})
-			.then((chan) => chan.messages);
-		return msg.filter((msg) => time > msg.sendTime);
+			}).then((chan) => chan.messages);
 	}
 
 	async getAllMessages(target: ChannelEntity) {
