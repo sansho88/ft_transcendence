@@ -9,6 +9,7 @@ import ChatChannelList from './subComponents/ChatChannelList'
 import ChatMessagesList from './subComponents/ChatMessagesList'
 import { Socket } from 'socket.io-client'
 import { ChannelsServerManager } from './class/ChannelsServerManager'
+import { IUser } from '@/shared/types'
 
 
 export default function ChatMaster({className, token}: {className: string, token: string}) {
@@ -51,15 +52,14 @@ export default function ChatMaster({className, token}: {className: string, token
   useEffect(() => {
     if (socketChat?.connected)
     {
-      const chan0 = new Channel({ channelID: 0, name: 'chan0', ownerUserID: 1, type: 0, ownerLogin: 'ben'       }, socketChat)
-      const chan1 = new Channel({ channelID: 1, name: 'chan1', ownerUserID: 1, type: 0, ownerLogin: 'bducrocq'  }, socketChat)
-      const chan2 = new Channel({ channelID: 2, name: 'chan2', ownerUserID: 1, type: 0, ownerLogin: 'babar'     }, socketChat)
-      const chan3 = new Channel({ channelID: 3, name: 'chan3', ownerUserID: 1, type: 0, ownerLogin: 'zephyr'    }, socketChat)
+      var user1 : IUser = {has_2fa: false, login: "ben", status: 0,     UserID: 1, nickname: 'BenNick'};
+      const chan0 = new Channel({ channelID: 0, name: 'chan0', owner: user1, type: 0 }, socketChat)
+
       // setChannels([...Channels, chan0, chan1, chan2, chan3] )
-      manager.current.addChannel(chan0);
-      manager.current.addChannel(chan1);
-      manager.current.addChannel(chan2);
-      manager.current.addChannel(chan3);
+      // manager.current.addChannel(chan0);
+      // manager.current.addChannel(chan1);
+      // manager.current.addChannel(chan2);
+      // manager.current.addChannel(chan3);
     }
   }, [socketChat?.connected])
   
