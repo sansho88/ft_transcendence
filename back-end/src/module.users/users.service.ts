@@ -62,6 +62,7 @@ export class UsersService {
 		if (updateUser.nickname !== undefined) user.nickname = updateUser.nickname;
 		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
+		if (updateUser.status !== undefined) user.status = updateUser.status;
 		await user.save();
 		return user;
 	}

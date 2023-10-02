@@ -46,7 +46,7 @@
 		
     export const serverGameInfo=()                 => {return `${routeWsGame}_serverGameInfo`} //retour message concernant le process de matchmaking 
     export const serverGameCurrentSession=()       => {return `${routeWsGame}_serverGameCurrentSession`} //list des games en cours
-
+    export const statusUpdate=()       						 => {return `statusUpdate`} //Update Status en temps reel
   }
 
 
