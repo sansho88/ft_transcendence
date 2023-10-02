@@ -6,6 +6,7 @@ import { Server } from 'socket.io'
 import { Injectable, Inject } from '@nestjs/common';
 import { WebsocketGatewayGame } from '../game.ws';
 import { IUser } from 'shared/types';
+import { wsGameRoutes } from 'shared/routesApi';
 // import { Ball } from './Ball'
 
 interface KeyPlayerState{
@@ -199,6 +200,13 @@ export class GameSession {
     }
 		
     P2.socket.join(this.gameRoomEvent);
+
+
+    //passer en IN GAME les deux joueurs
+    P1.socket.emit(wsGameRoutes.statusUpdate(), POD.EStatus.InGame);
+    P2.socket.emit(wsGameRoutes.statusUpdate(), POD.EStatus.InGame);
+
+
 
 		//j'envoi un nom d'event custom a chaque player sur lequel il vont emettre pour informer qu'il bouge
 		P2.socket.emit('gameFind', { remoteEvent: `${this.gameRoomEvent}PLAYER2` });
@@ -584,6 +592,8 @@ export class GameSession {
     setTimeout(() => {
       this.serverSocket.to(this.gameRoomEvent).emit('reset'); 
       console.log('reset');
+      this.player1.socket.emit(wsGameRoutes.statusUpdate(), POD.EStatus.Online);
+      this.player2.socket.emit(wsGameRoutes.statusUpdate(), POD.EStatus.Online); 
       this.player1.socket.leave(this.gameRoomEvent);
       this.player2.socket.leave(this.gameRoomEvent);
     }
