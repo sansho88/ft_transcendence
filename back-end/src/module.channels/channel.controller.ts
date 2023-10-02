@@ -52,6 +52,15 @@ export class ChannelController {
 	}
 
 
+	@Get('msg/:channelID')
+	@UseGuards(AuthGuard)
+	async getAllMessages(
+		@Param('channelID', ParseIntPipe) channelID: number,
+	) {
+		const channel = await this.channelService.findOne(channelID);
+		return this.channelService.getAllMessages(channel);
+	}
+
 	/**
 	 *
 	 *  ## Path for admin in Channel

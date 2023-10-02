@@ -142,9 +142,7 @@ useEffect(() => {
 						className={
 							obj.user.nickname === username ? 'text-right' : 'text-left'}>
 						<li	className={`text-neutral-400 font-semibold text-base ml-4  list-none 
-              ${obj.user.nickname === username
-				      ? 'text-right ml-auto mr-5'
-				      : 'text-left ml-2'}`}>
+              ${obj.user.nickname === username? 'text-right ml-auto mr-5': 'text-left ml-2'}`}>
 							{obj.user.nickname}
 						</li>
 						<li	className={`text-white p-2 mb-4 rounded-xl max-w-max min-w-[10rem] list-none
