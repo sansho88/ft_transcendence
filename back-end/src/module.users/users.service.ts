@@ -1,16 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import { UpdateUserDto } from '../dto/user/update-user.dto';
-import { UserEntity, UserStatus } from '../entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsRelations, Repository } from 'typeorm';
-import { UserCredentialEntity } from '../entities/credential.entity';
+import {BadRequestException, Injectable} from '@nestjs/common';
+import {UpdateUserDto} from '../dto/user/update-user.dto';
+import {UserEntity, UserStatus} from '../entities/user.entity';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Repository} from 'typeorm';
+import {UserCredentialEntity} from '../entities/credential.entity';
 
 @Injectable()
 export class UsersService {
 	constructor(
 		@InjectRepository(UserEntity)
 		private usersRepository: Repository<UserEntity>,
-	) {}
+	) {
+	}
 
 	/**
 	 * Todo: update with new thing in table
@@ -26,9 +27,15 @@ export class UsersService {
 		newInvite: boolean,
 		newCredential: UserCredentialEntity,
 	) {
+		let nickname: string;
+		nickname = newLogin;
+		if (newInvite)
+			nickname = this.generateNickname();
+		while (await this.nicknameUsed(nickname))
+			nickname = this.generateNickname();
 		const user = this.usersRepository.create({
 			login: newLogin,
-			nickname: newLogin,
+			nickname: nickname,
 			visit: newInvite,
 		});
 		user.credential = newCredential;
@@ -44,56 +51,59 @@ export class UsersService {
 	/**
 	 * @return UserEntity Or Undefined if user not in db
 	 */
-	async findOne(id: number | string) {
-		if (typeof id === 'number')
-			return this.usersRepository.findOneBy({ UserID: id });
-		return this.usersRepository.findOneBy({ login: id });
-	}
-
-	async findOneRelation(
-		id: number,
-		relation: FindOptionsRelations<UserEntity>,
-	) {
-		return this.usersRepository.findOne({
-			relations: relation,
-			where: { UserID: id },
-		});
-	}
-
-	async update(id: number, updateUser: UpdateUserDto) {
-		const user = await this.usersRepository.findOneBy({ UserID: id });
-		if (updateUser.nickname !== undefined) user.nickname = updateUser.nickname;
-		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
-		await user.save();
+	async findOne(userID: number, relations?: string[]) {
+		let user;
+		if (!relations)
+			user = await this.usersRepository.findOneBy({UserID: userID});
+		else
+			user = await this.usersRepository.findOne({
+				where: {UserID: userID},
+				relations,
+			});
+		if (user == null) throw new BadRequestException("this user doesn't exist");
 		return user;
 	}
 
-	// todo: remove user from db
-	remove(id: number) {
-		return `This action removes a #${id} user`;
+	async update(user: UserEntity, updateUser: UpdateUserDto) {
+		if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
+		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
+		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
+		await user.save();
+		console.log(user);
+		return user;
 	}
-	async getCredential(login: string) {
+
+	async getCredential(userID: number) {
 		const target = await this.usersRepository.findOne({
-			relations: { credential: true },
-			where: { login: login },
+			where: {UserID: userID},
+			relations: ['credential'],
 		});
 		return target.credential;
 	}
 
-	async userStatus(id: number, newStatus: UserStatus) {
-		const user = await this.usersRepository.findOneBy({ UserID: id });
+	async userStatus(user: UserEntity, newStatus: UserStatus) {
 		user.status = newStatus;
 		await user.save();
 	}
 
-	// async getFriend(target: string) {
-	// 	return await this.usersRepository.find({
-	// 		relations: {
-	// 			friend_list: true,
-	// 		},
-	// 		where: {
-	// 			login: target,
-	// 		},
-	// 	});
-	// }
+	private generateNickname() {
+		let result = '';
+		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		const charactersLength = characters.length;
+		let counter = 0;
+		while (counter < 12) {
+			result += characters.charAt(Math.floor(Math.random() * charactersLength));
+			counter += 1;
+		}
+		return result;
+	}
+
+	/**
+	 * return false if nickname is not used
+	 */
+	private async nicknameUsed(nickname: string) {
+		const test = !!await this.usersRepository.findOneBy({nickname: nickname});
+		console.log('checkNick', test);
+		return test;
+	}
 }
