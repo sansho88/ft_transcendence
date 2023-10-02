@@ -157,8 +157,7 @@ export class ChannelController {
 		}
 		const target = await this.usersService.findOne(targetID);
 		await this.channelService.banUser(target, channel, duration);
-		if (await this.channelService.userInChannel(target, channel))
-			await this.chatGateway.leaveChat(channel, target);
+		await this.chatGateway.ban(channel, target, duration, user);
 	}
 
 	@Put('pardon/:banID')
@@ -205,6 +204,7 @@ export class ChannelController {
 		}
 		const target = await this.usersService.findOne(targetID);
 		await this.channelService.muteUser(target, channel, duration);
+		await this.chatGateway.mute(channel, target, duration, user)
 	}
 
 	@Put('unmute/:muteID')
@@ -236,7 +236,7 @@ export class ChannelController {
 		const target = await this.usersService.findOne(targetID);
 		if (!(await this.channelService.userInChannel(target, channel)))
 			throw new BadRequestException('This user isn\'t part of this channel')
-		await this.chatGateway.leaveChat(channel, target);
+		await this.chatGateway.kick(channel, target);
 	}
 
 	@Get('msg/before/:channelID/:timestamp')
@@ -311,9 +311,8 @@ export class ChannelController {
 		if (await this.inviteService.userIsInvite(channel, target))
 			throw new BadRequestException('This user has already an invite to this channel');
 		const invite = await this.inviteService.create(target, channel, user);
+		await this.chatGateway.receivedInvite(invite);
 		return invite;
-		// Todo: send notif to user
-		// this.chatGateway.inviteNotif()
 	}
 
 	@Put('invite/remove/:inviteID')
