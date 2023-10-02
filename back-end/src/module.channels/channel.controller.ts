@@ -18,6 +18,7 @@ import {BannedService} from "./banned.service";
 import {MutedService} from "./muted.service";
 import {MessageService} from "./message.service";
 import {ChannelEntity} from "../entities/channel.entity";
+import {InviteService} from "./invite.service";
 
 @Controller('channel')
 export class ChannelController {
@@ -28,6 +29,7 @@ export class ChannelController {
 		private readonly mutedService: MutedService,
 		private readonly usersService: UsersService,
 		private readonly chatGateway: ChatGateway,
+		private readonly inviteService: InviteService,
 	) {
 	}
 
@@ -63,28 +65,36 @@ export class ChannelController {
 	 *
 	 *  ## Path for admin in Channel
 	 *  . Admin
-	 *  	-  admin/add/:channelID/:targetID
-	 *  	-  admin/remove/:channelID/:targetID
+	 *    - TODO: admin/:channelID
+	 *  	- admin/add/:channelID/:targetID -------- PUT
+	 *  	- admin/remove/:channelID/:targetID ----- PUT
 	 *
 	 *  . Ban
-	 *  	- get/ban/:channelID
-	 *  	- ban/:channelID/:targetID/:banDuration
-	 *  	- pardon/:banID
+	 *  	- get/ban/:channelID -------------------- GET
+	 *  	- ban/:channelID/:targetID/:banDuration - PUT
+	 *  	- pardon/:banID ------------------------- PUT
 	 *
 	 *  . Mute
-	 *   	- get/mute/:channelID
-	 *   	- mute/:channelID/:userID/:duration
-	 *   	- unmute/:muteID
+	 *   	- get/mute/:channelID ------------------- GET
+	 *   	- mute/:channelID/:userID/:duration ----- PUT
+	 *   	- unmute/:muteID ------------------------ PUT
 	 *
 	 *  . Kick
-	 *   	- kick/:channelID/:userID
+	 *   	- kick/:channelID/:userID --------------- PUT
+	 *
 	 *    -------
 	 *
-	 *    Path For messages related get
-	 *   - msg/:channelID
-	 *   - msg/after/:channelID/:timestamp
-	 *   - msg/before/:channelID/:timestamp
+	 *  . Path For messages related
+	 *    - msg/:channelID ------------------------ GET
+	 *    - msg/after/:channelID/:timestamp ------- GET
+	 *    - msg/before/:channelID/:timestamp ------ GET
 	 *
+	 *    -------
+	 *
+	 *  . Path For invite related Get and Put
+	 *    - invite/:channelID --------------------- GET
+	 *    - invite/add/:channelID/:userID --------- PUT
+	 *    - invite/remove/:inviteID --------------- PUT
 	 **/
 	@Put('admin/add/:channelID/:targetID')
 	@UseGuards(AuthGuard)
@@ -156,8 +166,7 @@ export class ChannelController {
 		}
 		const target = await this.usersService.findOne(targetID);
 		await this.channelService.banUser(target, channel, duration);
-		if (await this.channelService.userInChannel(target, channel))
-			await this.chatGateway.leaveChat(channel, target);
+		await this.chatGateway.ban(channel, target, duration, user);
 	}
 
 	@Put('pardon/:banID')
@@ -204,6 +213,7 @@ export class ChannelController {
 		}
 		const target = await this.usersService.findOne(targetID);
 		await this.channelService.muteUser(target, channel, duration);
+		await this.chatGateway.mute(channel, target, duration, user)
 	}
 
 	@Put('unmute/:muteID')
@@ -235,7 +245,7 @@ export class ChannelController {
 		const target = await this.usersService.findOne(targetID);
 		if (!(await this.channelService.userInChannel(target, channel)))
 			throw new BadRequestException('This user isn\'t part of this channel')
-		await this.chatGateway.leaveChat(channel, target);
+		await this.chatGateway.kick(channel, target);
 	}
 
 	@Get('msg/before/:channelID/:timestamp')
@@ -279,4 +289,54 @@ export class ChannelController {
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterRecent(channel.messages);
 	}
+
+	@Get('invite/:channelID')
+	@UseGuards(AuthGuard)
+	async getInvite(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+	) {
+		const channel = await this.channelService.findOne(channelID);
+		if (!await this.channelService.userInChannel(user, channel))
+			throw new BadRequestException('You aren\'t part of that channel')
+		return await this.inviteService.findAllChannel(channel);
+	}
+
+	@Put('invite/add/:channelID/:userID')
+	@UseGuards(AuthGuard)
+	async addInvite(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Param('userID', ParseIntPipe) targetID: number,
+	) {
+		const channel = await this.channelService.findOne(channelID, ['userList']);
+		const target = await this.usersService.findOne(targetID);
+		if (!await this.channelService.userInChannel(user, channel))
+			throw new BadRequestException('You aren\'t part of that channel');
+		if (await this.channelService.userInChannel(target, channel))
+			throw new BadRequestException('This user is already on that channel');
+		if (await this.channelService.userIsBan(channel, target))
+			throw new BadRequestException('This user is Banned for this channel');
+		if (await this.inviteService.userIsInvite(channel, target))
+			throw new BadRequestException('This user has already an invite to this channel');
+		const invite = await this.inviteService.create(target, channel, user);
+		await this.chatGateway.receivedInvite(invite);
+		return invite;
+	}
+
+	@Put('invite/remove/:inviteID')
+	@UseGuards(AuthGuard)
+	async removeInvite(
+		@CurrentUser() user: UserEntity,
+		@Param('inviteID', ParseIntPipe) inviteID: number,
+	) {
+		const invite = await this.inviteService.findOne(inviteID);
+		if (invite == null)
+			throw new BadRequestException('This invite is not created or already accepted');
+		console.log(user);
+		if (invite.sender.UserID != user.UserID)
+			throw new BadRequestException('This invite is not created by you');
+		await this.inviteService.remove(invite);
+	}
+
 }
