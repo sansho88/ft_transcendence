@@ -10,6 +10,8 @@ import {EStatus, IUser} from "@/shared/types";
 import {getUserFromId} from "@/app/auth/Auth";
 import { SocketContextGame} from "@/context/globalContext";
 import {wsGameRoutes} from "@/shared/routesApi";
+import {IGameSessionInfo} from "@/shared/typesGame";
+import {log} from "util";
 
 
 const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, login, status, UserID, isEditable})=>{
@@ -31,10 +33,24 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
     }, [userStatus]);
 
 
-    socketGameRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
+    /*socketGameRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
         console.log('new status = ' + newStatus);
        setUserStatus(newStatus);
         setStatusColor(getEnumNameByIndex(Colors, userStatus));
+    });*/
+
+    socketGameRef.current?.on("infoGameSession", (data: IGameSessionInfo) => {
+        if ((data.player1 && data.player1.login == login) || data.player2.login == login)
+        {
+            setUserStatus(EStatus.InGame);
+            setStatusColor(getEnumNameByIndex(Colors, userStatus));
+
+            socketGameRef.current?.on("endgame", () => {
+                    setUserStatus(EStatus.Online);
+                    setStatusColor(getEnumNameByIndex(Colors, userStatus));
+            });
+        }
+
     });
 
     const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => { //updated for each character
