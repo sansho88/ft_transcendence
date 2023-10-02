@@ -27,9 +27,15 @@ export class UsersService {
 		newInvite: boolean,
 		newCredential: UserCredentialEntity,
 	) {
+		let nickname: string;
+		nickname = newLogin;
+		if (newInvite)
+			nickname = this.generateNickname();
+		while (await this.nicknameUsed(nickname))
+			nickname = this.generateNickname();
 		const user = this.usersRepository.create({
 			login: newLogin,
-			nickname: newLogin,
+			nickname: nickname,
 			visit: newInvite,
 		});
 		user.credential = newCredential;
@@ -59,11 +65,12 @@ export class UsersService {
 	}
 
 	async update(user: UserEntity, updateUser: UpdateUserDto) {
-		if (updateUser.nickname !== undefined) user.nickname = updateUser.nickname;
+		if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
 		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
 		if (updateUser.status !== undefined) user.status = updateUser.status;
 		await user.save();
+		console.log(user);
 		return user;
 	}
 
@@ -80,14 +87,24 @@ export class UsersService {
 		await user.save();
 	}
 
-	// async getFriend(target: string) {
-	// 	return await this.usersRepository.find({
-	// 		relations: {
-	// 			friend_list: true,
-	// 		},
-	// 		where: {
-	// 			login: target,
-	// 		},
-	// 	});
-	// }
+	private generateNickname() {
+		let result = '';
+		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		const charactersLength = characters.length;
+		let counter = 0;
+		while (counter < 12) {
+			result += characters.charAt(Math.floor(Math.random() * charactersLength));
+			counter += 1;
+		}
+		return result;
+	}
+
+	/**
+	 * return false if nickname is not used
+	 */
+	private async nicknameUsed(nickname: string) {
+		const test = !!await this.usersRepository.findOneBy({nickname: nickname});
+		console.log('checkNick', test);
+		return test;
+	}
 }

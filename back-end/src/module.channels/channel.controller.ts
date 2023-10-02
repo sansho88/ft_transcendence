@@ -16,11 +16,14 @@ import {UsersService} from '../module.users/users.service';
 import {ChatGateway} from './chat.ws';
 import {BannedService} from "./banned.service";
 import {MutedService} from "./muted.service";
+import {MessageService} from "./message.service";
+import {ChannelEntity} from "../entities/channel.entity";
 
 @Controller('channel')
 export class ChannelController {
 	constructor(
 		private readonly channelService: ChannelService,
+		private readonly messageService: MessageService,
 		private readonly bannedService: BannedService,
 		private readonly mutedService: MutedService,
 		private readonly usersService: UsersService,
@@ -46,18 +49,43 @@ export class ChannelController {
 		return this.channelService.findOne(channelID);
 	}
 
-	@Get('msg/:channelID/:timestamp')
+
+	@Get('msg/:channelID')
 	@UseGuards(AuthGuard)
-	async getMessages(
+	async getAllMessages(
 		@Param('channelID', ParseIntPipe) channelID: number,
-		@Param('timestamp', ParseIntPipe) timestamp: number,
 	) {
-		const minTime = new Date(timestamp * 1000);
-		minTime.setUTCHours(minTime.getHours() + 2);
 		const channel = await this.channelService.findOne(channelID);
-		return this.channelService.getMessages(channel, minTime);
+		return this.channelService.getAllMessages(channel);
 	}
 
+	/**
+	 *
+	 *  ## Path for admin in Channel
+	 *  . Admin
+	 *  	-  admin/add/:channelID/:targetID
+	 *  	-  admin/remove/:channelID/:targetID
+	 *
+	 *  . Ban
+	 *  	- get/ban/:channelID
+	 *  	- ban/:channelID/:targetID/:banDuration
+	 *  	- pardon/:banID
+	 *
+	 *  . Mute
+	 *   	- get/mute/:channelID
+	 *   	- mute/:channelID/:userID/:duration
+	 *   	- unmute/:muteID
+	 *
+	 *  . Kick
+	 *   	- kick/:channelID/:userID
+	 *    -------
+	 *
+	 *    Path For messages related get
+	 *   - msg/:channelID
+	 *   - msg/after/:channelID/:timestamp
+	 *   - msg/before/:channelID/:timestamp
+	 *
+	 **/
 	@Put('admin/add/:channelID/:targetID')
 	@UseGuards(AuthGuard)
 	async addAdmin(
@@ -202,11 +230,53 @@ export class ChannelController {
 	) {
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList'])
 		if (!(this.channelService.userIsAdmin(user, channel))) {
-			throw new BadRequestException("You aren't administrator on this channel");
+			throw new BadRequestException('You aren\'t administrator on this channel');
 		}
 		const target = await this.usersService.findOne(targetID);
 		if (!(await this.channelService.userInChannel(target, channel)))
 			throw new BadRequestException('This user isn\'t part of this channel')
 		await this.chatGateway.leaveChat(channel, target);
+	}
+
+	@Get('msg/before/:channelID/:timestamp')
+	@UseGuards(AuthGuard)
+	async beforeMsg(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Param('timestamp', ParseIntPipe) timestamp: number,
+	) {
+		const minTime = new Date(timestamp);
+		minTime.setUTCHours(minTime.getHours() + 2);
+		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'])
+		if (!(await this.channelService.userInChannel(user, channel)))
+			throw new BadRequestException('You aren\'t part of that channel')
+		return this.messageService.filterBefore(channel.messages, minTime);
+	}
+
+	@Get('msg/after/:channelID/:timestamp')
+	@UseGuards(AuthGuard)
+	async afterMsg(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Param('timestamp', ParseIntPipe) timestamp: number,
+	) {
+		const maxTime = new Date(timestamp);
+		maxTime.setUTCHours(maxTime.getHours() + 2);
+		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'])
+		if (!(await this.channelService.userInChannel(user, channel)))
+			throw new BadRequestException('You aren\'t part of that channel')
+		return this.messageService.filterAfter(channel.messages, maxTime);
+	}
+
+	@Get('msg/:channelID')
+	@UseGuards(AuthGuard)
+	async recentMsg(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+	) {
+		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'])
+		if (!(await this.channelService.userInChannel(user, channel)))
+			throw new BadRequestException('You aren\'t part of that channel')
+		return this.messageService.filterRecent(channel.messages);
 	}
 }

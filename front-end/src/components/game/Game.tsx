@@ -59,7 +59,8 @@ export default function Game({className}: {className: string}) {
   const [scoreP1, setScoreP1]           = useState<number>(0);
   const [scoreP2, setScoreP2]           = useState<number>(0);
   
-  const [infoMessage, setInfoMessage]   = useState<string>('PLAY');
+  const titleGame: string = 'PONG-POD'
+  const [infoMessage, setInfoMessage]   = useState<string>(titleGame);
   
   const coefTableServer                 = useRef<PODGAME.IVector2D>({x: 1, y: 1});
 
@@ -103,7 +104,7 @@ export default function Game({className}: {className: string}) {
       setStepCurrentSession(EStatusFrontGame.idle);
       console.log(`WS RESET`);
       resetPositionPaddle();
-      setInfoMessage('PLAY');
+      setInfoMessage(titleGame);
       setScoreP1(0);
       setScoreP2(0);
       setUserP1({});
@@ -402,7 +403,7 @@ export default function Game({className}: {className: string}) {
     if (nickname === undefined)
       nickname = userLogged.userContext?.nickname
     if (stepCurrentSession === EStatusFrontGame.modChoice) {
-      setInfoMessage('PLAY');
+      setInfoMessage(titleGame);
       if (gameMod.current === PODGAME.EGameMod.classic) {
         socketRef.current?.emit(
           `${apiRoutes.wsGameRoutes.addPlayerToMatchmaking()}`,

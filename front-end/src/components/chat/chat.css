@@ -189,6 +189,22 @@
   -ms-overflow-style: none;
 }
 
+.chat_message_list_goToEndButton {
+  color: #ffffff;
+  font-size: 0.75rem;
+  background: #ff00a6; /* Oo' */
+  font-weight: bold;
+}
+
+/* pour differencier si nouveau messaage recu */
+.chat_message_list_goToEndButton_newMessage {
+  background: #00b5cd; /* Oo' */
+}
+
+
+
+
+
 
 /* englobe nickname + content pour un message*/
 .chat_message_list_block {
