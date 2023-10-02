@@ -592,6 +592,8 @@ export class GameSession {
     setTimeout(() => {
       this.serverSocket.to(this.gameRoomEvent).emit('reset'); 
       console.log('reset');
+      this.player1.socket.emit(wsGameRoutes.statusUpdate(), POD.EStatus.Online);
+      this.player2.socket.emit(wsGameRoutes.statusUpdate(), POD.EStatus.Online); 
       this.player1.socket.leave(this.gameRoomEvent);
       this.player2.socket.leave(this.gameRoomEvent);
     }
