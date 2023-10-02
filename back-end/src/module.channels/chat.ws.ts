@@ -30,7 +30,7 @@ import {
 import {
 	SendMessageDTOPipe,
 } from '../dto.pipe/message.dto';
-import { getToken } from '../module.auth/auth.guard';
+import {getToken} from '../module.auth/auth.guard';
 import {
 	BannedEventDTO,
 	JoinEventDTO,
@@ -58,7 +58,7 @@ export class ChatGateway
 
 
 	constructor(
-		private messageService: MessageService, 
+		private messageService: MessageService,
 		private channelService: ChannelService,
 		private usersService: UsersService,
 		private bannedService: BannedService,
@@ -72,23 +72,23 @@ export class ChatGateway
 	// Todo: Maybe Give Bearer Token to auth when 1st connection then keep userID and client.ID in a map-like structure
 	// Or We could also use a 'Auth' event to identify the user post connection
 
-		async handleConnection(client: Socket) {
-			
-			const tokenInfo = getToken(client);
-			
-			const type = tokenInfo.type;
-			const token = tokenInfo.token;
+	async handleConnection(client: Socket) {
 
-			if (type !== 'Bearer') return client.disconnect();
-			if (!token) return client.disconnect();
-			let userID: number;
-			try {
-				const payloadToken: accessToken = await this.jwtService.verifyAsync(
+		const tokenInfo = getToken(client);
+
+		const type = tokenInfo.type;
+		const token = tokenInfo.token;
+
+		if (type !== 'Bearer') return client.disconnect();
+		if (!token) return client.disconnect();
+		let userID: number;
+		try {
+			const payloadToken: accessToken = await this.jwtService.verifyAsync(
 				token,
 				{
 					secret: process.env.SECRET_KEY,
 				},
-				);
+			);
 			userID = payloadToken.id;
 		} catch {
 
@@ -113,8 +113,7 @@ export class ChatGateway
 		console.log('NEW CONNEXION WS CLIENT CHAT v2, id = ' + client.id + ` | userID: ${userID}`);
 	}
 
-	//Todo: leave room + offline
-	async handleDisconnect(client: Socket) { 
+	async handleDisconnect(client: Socket) {
 		const tokenInfo = getToken(client);
 
 		const type = tokenInfo.type;
@@ -134,9 +133,11 @@ export class ChatGateway
 			.catch(() => null);
 		if (!user) return client.disconnect();
 		await this.usersService.userStatus(user, UserStatus.OFFLINE);
-		// const index = this.socketUserList.indexOf()
-		// this.socketUserList = this.socketUserList.slice()
+		const index = this.socketUserList
+			.findIndex(socket => socket.userID == user.UserID)
+		this.socketUserList.splice(index, 1);
 		console.log(`CLIENT ${client.id} left CHAT WS`);
+		return client.disconnect();
 	}
 
 	@SubscribeMessage('createRoom')
