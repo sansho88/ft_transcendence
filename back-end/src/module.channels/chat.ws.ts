@@ -149,7 +149,7 @@ export class ChatGateway
 		@MessageBody(new ValidationPipe()) data: JoinChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
-	) { // Todo: Need to check for invite
+	) {
 		await this.bannedService.update();
 		const channel = await this.channelService
 			.findOne(data.channelID, ['userList'])
@@ -164,10 +164,13 @@ export class ChatGateway
 			return client.emit(`joinRoom`, {
 				message: `You cannot Join that channel`,
 			});
-		if (!(await this.channelService.checkCredential(data)) || await this.inviteService.userIsInvite(channel, user))
+		const invite = await this.inviteService.userIsInvite(channel, user);
+		if (!(await this.channelService.checkCredential(data)) && !invite)
 			return client.emit(`joinRoom`, {
 				message: `You cannot Join that channel`,
 			});
+		if (invite)
+			await this.inviteService.remove(invite);
 		await this.channelService.joinChannel(user, channel);
 		client.join(`${channel.channelID}`);
 		const content: JoinEventDTOPipe = {user: user, channelID: channel.channelID}
