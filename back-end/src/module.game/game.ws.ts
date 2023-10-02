@@ -13,6 +13,10 @@ import { ServerGame } from 'src/module.game/server/ServerGame';
 import { wsGameRoutes } from 'shared/routesApi';
 import { userInfoSocket } from 'shared/typesGame';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import {UsersService} from '../module.users/users.service';
+import {UserEntity, UserStatus} from '../entities/user.entity';
+import {CurrentUser} from '../module.auth/indentify.user';
+
 
 @WebSocketGateway({
 	namespace: '/game',
@@ -28,14 +32,20 @@ export class WebsocketGatewayGame
 
 	handleConnection(@ConnectedSocket() client: Socket) {
 		console.log('NEW CONNEXION WS CLIENT THEGAME, id = ' + client.id);
+
+		client.emit(wsGameRoutes.statusUpdate(), UserStatus.ONLINE);
+
 		this.server.to(client.id).emit('welcome', 'Bienvenue sur TheGame');
 		client.emit('welcome', 'Bienvenue sur TheGame');
+
 	}
 
 	handleDisconnect(client: Socket) {
 		// client.disconnect();
 		// Code pour gérer les déconnexions client
-		console.log('CLIENT ' + client.id + ' left GAME WS');
+		console.log('CLIENT ' + client.id + ' left');
+		client.emit(wsGameRoutes.statusUpdate(), UserStatus.OFFLINE);
+
 	}
 
   emitToGameRoom(room: string, payload: any) {

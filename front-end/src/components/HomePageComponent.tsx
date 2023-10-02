@@ -4,18 +4,17 @@ import Button from "@/components/CustomButtonComponent";
 import UserList from "@/components/UserListComponent";
 import Game from "@/components/game/Game";
 import React, {useContext, useEffect, useRef} from "react";
-import {LoggedContext, UserContext} from "@/context/globalContext";
-import {EStatus, IUser} from "@/shared/types";
+import {LoggedContext, SocketContextGame, UserContext} from "@/context/globalContext";
+import {EStatus} from "@/shared/types";
 import * as apiReq from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
 import {authManager} from "@/components/api/ApiReq";
-import {NotificationManager} from 'react-notifications';
 import NotifComponent from "@/components/notif/NotificationComponent";
-import {getEnumNameByIndex} from "@/utils/usefulFuncs";
 import Button2FA from "@/components/2FA/2FAComponent";
 import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
+import {wsGameRoutes} from "@/shared/routesApi";
 
 interface HomePageProps {
     className: unknown
@@ -26,6 +25,8 @@ const HomePage = ({className}: HomePageProps) => {
     const {setLogged} = useContext(LoggedContext);
     const router = useRouter();
     const tokenRef = useRef<string>('');
+    const socket      = useContext(SocketContextGame);
+    const socketRef   = useRef(socket);
 
 
     useEffect(() => {
@@ -46,29 +47,22 @@ const HomePage = ({className}: HomePageProps) => {
                 });
         }
         localStorage.setItem('userContext', JSON.stringify(userContext));
+
     })
-    async function updateStatusUser(id_user, status) { //to remove when the player status will be updated directly from the Back
 
-        let updateUser: Partial<IUser> = userContext;
-        updateUser.status = status;
 
-        await apiReq.putApi.putUser(updateUser)
-            .then(() => {
-                setUserContext(updateUser);
-            })
-            .catch((e) => {
-                console.error(e)
-            })
-    }
-
-    function switchOnlineIngame() {
-        const tmpStatus = userContext?.status == EStatus.Online ? EStatus.InGame : EStatus.Online;
-        NotificationManager.info(userContext.nickname + ' is actually ' + getEnumNameByIndex(EStatus, userContext.status));
-
-        updateStatusUser(userContext?.UserID, tmpStatus)
-            .catch((e) => console.error(e));
-
-    }
+    socketRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
+        let updateUser = userContext;
+        if (updateUser && (newStatus != updateUser.status))
+        {
+            updateUser.status = newStatus;
+            apiReq.putApi.putUser(updateUser)
+                .catch((e) => {
+                    setUserContext(updateUser);
+                     console.error(e)
+                })
+        }
+    });
 
     return (
         <>
@@ -94,7 +88,7 @@ const HomePage = ({className}: HomePageProps) => {
                     }
                 } alt={"Logout button"}/>
 
-                <div className={"game"} onClick={switchOnlineIngame}>
+                <div className={"game"}>
                     <Game className={"game"}/>
                 </div>
                <ChatMaster className={'chat_master'} token={tokenRef.current}/>
