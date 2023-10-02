@@ -1,4 +1,4 @@
-import React, { useEffect, useState} from "react";
+import React, {useContext, useEffect, useRef, useState} from "react";
 import Button from "./CustomButtonComponent"
 import Avatar from "@/components/AvatarComponent";
 import * as apiReq from '@/components/api/ApiReq'
@@ -8,6 +8,10 @@ import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
 import {EStatus, IUser} from "@/shared/types";
 import {getUserFromId} from "@/app/auth/Auth";
+import { SocketContextGame} from "@/context/globalContext";
+import {wsGameRoutes} from "@/shared/routesApi";
+import {IGameSessionInfo} from "@/shared/typesGame";
+import {log} from "util";
 
 
 const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, login, status, UserID, isEditable})=>{
@@ -16,13 +20,38 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
     const [editMode, setEditMode] = useState(false);
     const [nickErrorMsg, setNickErrMsg] = useState("");
     const [statusColor, setStatusColor] = useState("grey");
+    const [userStatus, setUserStatus] = useState(status);
+    const socketGame      = useContext(SocketContextGame);
+    const socketGameRef   = useRef(socketGame);
 
-    if (status == undefined)
-        status = 0;
+    if (userStatus == undefined)
+       setUserStatus(EStatus.Offline);
+
     useEffect(() => {
-        setStatusColor(getEnumNameByIndex(Colors, status ? status : 0));
-    }, [status]);
+        setStatusColor(getEnumNameByIndex(Colors, userStatus ? userStatus : 0));
+        console.log("[PROFILE] STATUS UPDATED: " + userStatus);
+    }, [userStatus]);
 
+
+    /*socketGameRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
+        console.log('new status = ' + newStatus);
+       setUserStatus(newStatus);
+        setStatusColor(getEnumNameByIndex(Colors, userStatus));
+    });*/
+
+    socketGameRef.current?.on("infoGameSession", (data: IGameSessionInfo) => {
+        if ((data.player1 && data.player1.login == login) || data.player2.login == login)
+        {
+            setUserStatus(EStatus.InGame);
+            setStatusColor(getEnumNameByIndex(Colors, userStatus));
+
+            socketGameRef.current?.on("endgame", () => {
+                    setUserStatus(EStatus.Online);
+                    setStatusColor(getEnumNameByIndex(Colors, userStatus));
+            });
+        }
+
+    });
 
     const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => { //updated for each character
 
@@ -89,7 +118,7 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
     return (
         <>
             <div className={className}>
-                <Avatar path={avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={status}/>
+                <Avatar path={avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus}/>
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
                     color: "#07C3FF",
@@ -108,7 +137,7 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
                     <p id={"status"} style={{
                         color:statusColor,
                         transition:"1000ms"}}>
-                        {getEnumNameByIndex(EStatus, status)}
+                        {getEnumNameByIndex(EStatus, userStatus)}
                     </p>
                 </div>
                 <div id={"children"} style={{marginLeft: "4px"}}>{children}</div>
