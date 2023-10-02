@@ -13,6 +13,8 @@ import {BannedEntity} from "../entities/banned.entity";
 import {MuteEntity} from "../entities/mute.entity";
 import {BannedService} from "./banned.service";
 import {MutedService} from "./muted.service";
+import {InviteService} from "./invite.service";
+import {InviteEntity} from "../entities/invite.entity";
 
 @Module({
 	controllers: [ChannelController],
@@ -21,6 +23,7 @@ import {MutedService} from "./muted.service";
 			ChannelCredentialEntity,
 			ChannelEntity,
 			MessageEntity,
+			InviteEntity,
 			BannedEntity,
 			MuteEntity,
 		]),
@@ -30,6 +33,7 @@ import {MutedService} from "./muted.service";
 		ChannelCredentialService,
 		ChannelService,
 		MessageService,
+		InviteService,
 		BannedService,
 		MutedService,
 		ChatGateway,

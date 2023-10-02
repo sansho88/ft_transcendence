@@ -33,6 +33,7 @@ import {
 	ReceivedMessageDTOPipe,
 	SendMessageDTOPipe,
 } from '../dto.pipe/message.dto';
+import {InviteService} from "./invite.service";
 
 class SocketUserList {
 	userID: number;
@@ -54,6 +55,7 @@ export class ChatGateway
 		private bannedService: BannedService,
 		private channelCredentialService: ChannelCredentialService,
 		private jwtService: JwtService,
+		private inviteService: InviteService,
 	) {
 		super();
 	}
@@ -113,7 +115,7 @@ export class ChatGateway
 			.findOne(payloadToken.id)
 			.catch(() => null);
 		if (!user) return client.disconnect();
-		this.usersService.userStatus(user, UserStatus.OFFLINE).then();
+		await this.usersService.userStatus(user, UserStatus.OFFLINE);
 		// const index = this.socketUserList.indexOf()
 		// this.socketUserList = this.socketUserList.slice()
 		console.log(`DisConnection ${client.id}`);
@@ -158,7 +160,11 @@ export class ChatGateway
 			return client.emit(`joinRoom`, {
 				message: `You are already on that channel`,
 			});
-		if (!(await this.channelService.checkCredential(data)) || await this.channelService.userIsBan(channel, user))
+		if (await this.channelService.userIsBan(channel, user))
+			return client.emit(`joinRoom`, {
+				message: `You cannot Join that channel`,
+			});
+		if (!(await this.channelService.checkCredential(data)) || await this.inviteService.userIsInvite(channel, user))
 			return client.emit(`joinRoom`, {
 				message: `You cannot Join that channel`,
 			});
