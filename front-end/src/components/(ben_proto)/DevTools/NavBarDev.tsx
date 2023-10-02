@@ -87,12 +87,12 @@ function toggleAuthRequired() {
 
 		return (
 			<>
-				<Link href="/home">HOME</Link>
-				<Link href="/chat">CHAT v2</Link>
+				{/* <Link href="/home">HOME</Link> */}
+				{/* <Link href="/chat">CHAT v2</Link> */}
 				{/* <Link href="/proto/chat">CHATROOM</Link> */}
 				{/* <Link href={`/profile/${userContext?.login}`}>PROFILE</Link> */}
-				<Link href="/auth">AUTH</Link>
-        <Dropdown/>
+				{/* <Link href="/auth">AUTH</Link> */}
+        {/* <Dropdown/> */}
 				{infoUser}
 				{/* <button onClick={() => {setLogged(false);localStorage.removeItem("login");}}> DISCONNECT </button> */}
 			</>
