@@ -7,15 +7,20 @@ import {
 	UseGuards,
 	ParseIntPipe,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UpdateUserDto } from '../dto/user/update-user.dto';
-import { AuthGuard } from '../module.auth/auth.guard';
-import { UserEntity } from "../entities/user.entity";
-import { CurrentUser } from '../module.auth/indentify.user';
+import {UsersService} from './users.service';
+import {UpdateUserDto} from '../dto/user/update-user.dto';
+import {AuthGuard} from '../module.auth/auth.guard';
+import {UserEntity} from "../entities/user.entity";
+import {CurrentUser} from '../module.auth/indentify.user';
+import {InviteService} from "../module.channels/invite.service";
 
 @Controller('users')
 export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
+	constructor(
+		private readonly usersService: UsersService,
+		private readonly inviteService: InviteService,
+	) {
+	}
 
 	/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ***/
 
@@ -46,5 +51,21 @@ export class UsersController {
 		@Body() update: UpdateUserDto,
 	) {
 		return this.usersService.update(user, update);
+	}
+
+	@Get('invite/received')
+	@UseGuards(AuthGuard)
+	getInviteReceived(
+		@CurrentUser() user: UserEntity,
+	) {
+		return this.inviteService.findAllReceivedUser(user);
+	}
+
+	@Get('invite/send')
+	@UseGuards(AuthGuard)
+	getInviteSend(
+		@CurrentUser() user: UserEntity,
+	) {
+		return this.inviteService.findAllSendUser(user);
 	}
 }

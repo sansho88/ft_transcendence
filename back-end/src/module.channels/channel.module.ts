@@ -38,6 +38,9 @@ import {InviteEntity} from "../entities/invite.entity";
 		MutedService,
 		ChatGateway,
 	],
+	exports: [
+		InviteService,
+	]
 })
 export class ChannelModule {
 }

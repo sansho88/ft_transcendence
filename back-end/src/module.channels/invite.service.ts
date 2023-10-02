@@ -30,15 +30,22 @@ export class InviteService {
 		)
 	}
 
-	async findAllUser(user: UserEntity) {
+	async findAllReceivedUser(user: UserEntity) {
 		const lst = await this.findAll();
 		return lst.filter(invite =>
 			invite.user.UserID == user.UserID
 		)
 	}
 
+	async findAllSendUser(user: UserEntity) {
+		const lst = await this.findAll();
+		return lst.filter(invite =>
+			invite.sender.UserID == user.UserID
+		)
+	}
+
 	findAll() {
-		return this.inviteRepository.find({relations: ['channel', 'user']});
+		return this.inviteRepository.find({relations: ['channel', 'user', 'sender']});
 	}
 
 	findOne(inviteID: number) {
