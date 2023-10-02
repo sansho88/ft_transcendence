@@ -32,7 +32,12 @@ export class WebsocketGatewayGame
 
 	handleConnection(@ConnectedSocket() client: Socket) {
 		console.log('NEW CONNEXION WS CLIENT THEGAME, id = ' + client.id);
+
 		client.emit(wsGameRoutes.statusUpdate(), UserStatus.ONLINE);
+
+		this.server.to(client.id).emit('welcome', 'Bienvenue sur TheGame');
+		client.emit('welcome', 'Bienvenue sur TheGame');
+
 	}
 
 	handleDisconnect(client: Socket) {
@@ -40,6 +45,7 @@ export class WebsocketGatewayGame
 		// Code pour gérer les déconnexions client
 		console.log('CLIENT ' + client.id + ' left');
 		client.emit(wsGameRoutes.statusUpdate(), UserStatus.OFFLINE);
+
 	}
 
   emitToGameRoom(room: string, payload: any) {

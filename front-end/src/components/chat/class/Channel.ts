@@ -19,7 +19,7 @@ export class Channel {
 
   constructor(chanInfo: IChannel, userSocket: Socket) {
     this.chanInfo = chanInfo;
-    this.adminUserID.push(this.chanInfo.ownerUserID)        // owner is first admin
+    this.adminUserID.push(this.chanInfo.owner.UserID)        // owner is first admin
     
     if (this.chanInfo.type === 2)                           // 0 = public / 1 = private / 2 = protected
       this.hasPassword = true;
@@ -49,7 +49,7 @@ export class Channel {
 
 
   public getOldMessages(targetDate: Date) {}    //demander 10 messages plus ancien a partir de <targetDate> // pour smooth loading on scrolling up
-  public setOwnerUser(userID: number, userLogin: string) { this.chanInfo.ownerUserID = userID, this.chanInfo.ownerLogin = userLogin}
+  public setOwnerUser(userID: number, userLogin: string) { this.chanInfo.owner.UserID = userID, this.chanInfo.owner.login = userLogin}
   public getChannelID(): number {return this.chanInfo.channelID};
 
 }

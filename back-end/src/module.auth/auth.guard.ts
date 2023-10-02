@@ -80,8 +80,22 @@ export class WSAuthGuard implements CanActivate {
 		return await this.usersService.findOne(payloadToken.id).catch(() => null);
 	}
 	private extractTokenFromHeaderWS(client: Socket): string | undefined {
-		const [type, token] =
-			client.handshake.headers.authorization?.split(' ') ?? [];
+		const tokenInfo = getToken(client);
+		const type = tokenInfo.type;
+		const token = tokenInfo.token;
+		console.log('token=' + token)
 		return type === 'Bearer' ? token : undefined;
 	}
 }
+
+//compromis pour utiliser a la fois auth via header pour POSTMAN et handshake.auth pour le front
+export function getToken(client: Socket):{type: string, token: string} {
+  if (client.handshake.auth.type === 'Bearer'){
+      return {type: client.handshake.auth.type, token: client.handshake.auth.token}
+    }
+    else {
+      const [type, token] =
+      client.handshake.headers.authorization?.split(' ') ?? [];
+      return type === 'Bearer' ? {type: type, token: token } : {type: 'none', token: 'none' };
+    }
+  }

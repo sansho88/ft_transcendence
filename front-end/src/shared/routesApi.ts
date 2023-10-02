@@ -14,28 +14,29 @@
 	
 // definition des routes root 🫠
 	const routeUsers = 					'users'
-	const routeChannels = 			'channels'
+	const routeChannels = 			'channel'
 	const routeMessages = 			'messages'
 	const routeGame = 					'game';
 	const routeMatchmaking = 		'matchmaking';
 	const routeBanned = 				'banned';
-	const routeChannelInvite = 	'channel-invite';
-	const routeMute = 					'mute';
-	const routeChallenge = 			'challenge';
-	const routeFollow = 				'follow';
-	const routeSubscribe = 			'subscribe';
-	const routeBlock = 					'block';
-	const routeJoined = 				'joined';
-	const routeAdministrate = 	'administrate';
-	const routePlay = 					'play';
+	// const routeChannelInvite = 	'channel-invite';
+	// const routeMute = 					'mute';
+	// const routeChallenge = 			'challenge';
+	// const routeFollow = 				'follow';
+	// const routeSubscribe = 			'subscribe';
+	// const routeBlock = 					'block';
+	// const routeJoined = 				'joined';
+	// const routeAdministrate = 	'administrate';
+	// const routePlay = 					'play';
 	
   const routeWsGame =          'game';
-  // const wsRouteChat =         'chat'
+  const routeWsChat =          'chat'
 
 
 // +---------------------------------------------------------------------+
 // |                       		EVENTS GAME WS              	             |
 // +---------------------------------------------------------------------+
+
   export namespace wsGameRoutes {
     export const addNewPlayerToServer=()           => {return `${routeWsGame}_addPlayerToServer`}
     export const addPlayerToMatchmaking=()         => {return `${routeWsGame}_addPlayerToMatchmaking`}
@@ -47,8 +48,24 @@
     export const serverGameInfo=()                 => {return `${routeWsGame}_serverGameInfo`} //retour message concernant le process de matchmaking 
     export const serverGameCurrentSession=()       => {return `${routeWsGame}_serverGameCurrentSession`} //list des games en cours
     export const statusUpdate=()       						 => {return `statusUpdate`} //Update Status en temps reel
-  }
+	
+}
 
+// +---------------------------------------------------------------------+
+// |                       		EVENTS CHAT WS              	             |
+// +---------------------------------------------------------------------+
+export namespace wsChatRoutesBack {
+	export const createRoom=()      						  	=> {return `createRoom`} //retour message concernant le process de matchmaking 
+	export const joinRoom=()      						   		=> {return `joinRoom`} //retour message concernant le process de matchmaking 
+	export const leaveRoom=()      						   		=> {return `leaveRoom`} //retour message concernant le process de matchmaking 
+	export const sendMsg=()      						   			=> {return `sendMsg`} //retour message concernant le process de matchmaking 
+
+}
+export namespace wsChatRoutesClient {
+	export const updateChannel=()      						  	=> {return `createRoom`} //retour message concernant le process de matchmaking 
+
+
+}
 
 //bible des routes
 	export namespace strRoutes {
@@ -96,16 +113,14 @@
 // +---------------------------------------------------------------------+
 // |                             CHANNELS                                |
 // +---------------------------------------------------------------------+
+export namespace channel {
+	export const postCreateChannel = () 																					=> {return `${serverApi}/${routeChannels}/create`}
+	export const getAll = () 																											=> {return `${serverApi}/${routeChannels}/get`};
+	export const getUsersChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
+	export const getMsgsChannel = (channelID: number, timestamp: number)					=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
 
-	export const getChannelsAll = () 				=> {return `${serverApi}/${routeChannels}`};								//list de tous les channels
-	export const getChannelsAllPublic = ()	=> {return `${serverApi}/${routeChannels}/public`};	//list de tous les channels public
-	export const getChannelById = () 				=> {return `${serverApi}/${routeChannels}/`};							//params: :Channel_Id
-	
-	export const postChannel = () 					=> {return `${serverApi}/${routeChannels}`};									
-	
-	export const putChannelById = () 				=> {return `${serverApi}/${routeChannels}/`};
-	
-	export const deleteChannelById = () 		=> {return `${serverApi}/${routeChannels}/`};
+
+}
 
 // +---------------------------------------------------------------------+
 // |                             MESSAGES                                |
@@ -128,8 +143,8 @@
 		/* route ban et unban un user dun channel */
 	// export const getBannedByChannelId = () => {return `${serverApi}/${routeBanned}/`}; // params :channelId
 	// export const getBannedByUserId = () => {return `${serverApi}/${routeBanned}/`};		// params :userId			| return: Array de tous les chan ou user est ban
-	export const postBannedById= () => {return `${serverApi}/${routeBanned}/`}; 					// params :{channel_Id, userId}
-	export const deleteBannedById = () => {return `${serverApi}/${routeBanned}/`};				// params :{channel_Id, userId}
+	// export const postBannedById= () => {return `${serverApi}/${routeBanned}/`}; 					// params :{channel_Id, userId}
+	// export const deleteBannedById = () => {return `${serverApi}/${routeBanned}/`};				// params :{channel_Id, userId}
 
 // +---------------------------------------------------------------------+
 // |                         CHANNEL INVITE                              |
