@@ -96,6 +96,6 @@ export function getToken(client: Socket):{type: string, token: string} {
     else {
       const [type, token] =
       client.handshake.headers.authorization?.split(' ') ?? [];
-      return type === 'Bearer' ? {type: type, token: token } : undefined;
+      return type === 'Bearer' ? {type: type, token: token } : {type: 'none', token: 'none' };
     }
   }

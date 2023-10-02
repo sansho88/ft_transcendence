@@ -3,14 +3,14 @@ import {
 	Entity,
 	JoinColumn,
 	ManyToOne,
-	PrimaryColumn,
+	PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity';
-import { ChannelEntity } from './channel.entity';
+import {UserEntity} from './user.entity';
+import {ChannelEntity} from './channel.entity';
 
 @Entity('TestInvites')
 export class InviteEntity extends BaseEntity {
-	@PrimaryColumn()
+	@PrimaryGeneratedColumn()
 	inviteID: number;
 
 	@ManyToOne(() => UserEntity)
@@ -20,4 +20,8 @@ export class InviteEntity extends BaseEntity {
 	@ManyToOne(() => ChannelEntity)
 	@JoinColumn()
 	channel: ChannelEntity;
+
+	@ManyToOne(() => UserEntity)
+	@JoinColumn()
+	sender: UserEntity;
 }

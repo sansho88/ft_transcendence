@@ -13,7 +13,6 @@ export const axiosInstance = axios.create({
 	validateStatus: function (status) {
 		return status >= 200 && status < 204;
 	},
-	responseType: 'json'
 });
 
 function updateAxiosInstance() {
