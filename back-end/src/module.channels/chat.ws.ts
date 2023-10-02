@@ -6,6 +6,7 @@ import {
 	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer,
+	WsResponse
 } from '@nestjs/websockets';
 import {IoAdapter} from '@nestjs/platform-socket.io';
 import {Server, Socket} from 'socket.io';
@@ -249,6 +250,7 @@ export class ChatGateway
 		});
 	}
 
+
 	@SubscribeMessage('debug')
 	@UseGuards(WSAuthGuard)
 	async handelDebug(
@@ -260,6 +262,7 @@ export class ChatGateway
 		console.log(user);
 		await this.ban(await this.channelService.findOne(id), await this.usersService.findOne(id));
 	}
+
 
 	async leaveChat(channel: ChannelEntity, user: UserEntity) {
 		if (this.channelService.userIsAdmin(user, channel))
@@ -279,5 +282,19 @@ export class ChatGateway
 		if (!socket)
 			return;
 		return await this.leaveChat(channel, user);
+	}
+	
+	@SubscribeMessage('NicknameUsed')
+	@UseGuards(WSAuthGuard)
+	async handleUpdateNickname(
+		@ConnectedSocket() client: Socket,
+		@MessageBody(new ValidationPipe()) data: {nickname: string},
+		callback: (res: boolean) => void) {
+			console.log(data);
+			console.log(data.nickname);
+			const res = await this.usersService.nicknameUsed(data.nickname);
+			console.log(`ret NicknameUsed= ${data.nickname} | ${res}`);
+			callback(res); //si callback ne fonctionne pas, remplacer par le client emit ci dessous
+		// client.emit('NicknameUsed', res);
 	}
 }
