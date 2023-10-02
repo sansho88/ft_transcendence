@@ -5,18 +5,16 @@ import UserList from "@/components/UserListComponent";
 import Game from "@/components/game/Game";
 import React, {useContext, useEffect, useRef} from "react";
 import {LoggedContext, SocketContextGame, UserContext} from "@/context/globalContext";
-import {EStatus, IUser} from "@/shared/types";
+import {EStatus} from "@/shared/types";
 import * as apiReq from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
 import {authManager} from "@/components/api/ApiReq";
-import {NotificationManager} from 'react-notifications';
 import NotifComponent from "@/components/notif/NotificationComponent";
-import {getEnumNameByIndex} from "@/utils/usefulFuncs";
 import Button2FA from "@/components/2FA/2FAComponent";
 import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
-import * as PODGAME from "@/shared/typesGame";
+import {wsGameRoutes} from "@/shared/routesApi";
 
 interface HomePageProps {
     className: unknown
@@ -29,7 +27,6 @@ const HomePage = ({className}: HomePageProps) => {
     const tokenRef = useRef<string>('');
     const socket      = useContext(SocketContextGame);
     const socketRef   = useRef(socket);
-
 
 
     useEffect(() => {
@@ -54,38 +51,17 @@ const HomePage = ({className}: HomePageProps) => {
     })
 
 
-    socketRef.current?.on('gameFind', (data) => {
-
-        updateStatusUser(userContext?.UserID, EStatus.InGame)
-            .catch((e) => console.error(e));
-    });
-
-    socketRef.current?.on('endgame', (data) => {
-
-        updateStatusUser(userContext?.UserID, EStatus.Online)
-            .catch((e) => console.error(e));
-    });
-
-    async function updateStatusUser(id_user, status) { //to remove when the player status will be updated directly from the Back
-
+    socketRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
         let updateUser = userContext;
-        if (updateUser)
+        if (updateUser && (newStatus != updateUser.status))
         {
-            updateUser.status = status;
-            //console.warn(JSON.stringify(updateUser));
-
-            await apiReq.putApi.putUser(updateUser)
-                .then(() => {
-                    setUserContext(updateUser);
-                    console.warn("updateUser status: " + updateUser.status);
-                })
+            updateUser.status = newStatus;
+            apiReq.putApi.putUser(updateUser)
                 .catch((e) => {
-                   // console.error(e)
+                     console.error(e)
                 })
         }
-
-    }
-
+    });
 
     return (
         <>
