@@ -18,10 +18,7 @@ import { ChannelModule } from './module.channels/channel.module';
 import { InviteEntity } from './entities/invite.entity';
 import { MuteEntity } from './entities/mute.entity';
 import { BannedEntity } from './entities/banned.entity';
-import { WebsocketGatewayChat } from './module.game/websocket/wsChatProto.gateway';
-import { WebsocketGatewayGame } from './module.game/game.ws';
-import { ServerGame } from './module.game/server/ServerGame';
-import { GameSession } from './module.game/server/GameSession';
+import { WebsocketGatewayGlobal } from './websocket/websocket.gateway';
 import { GameController } from './module.game/game.controller';
 import { GameModule } from './module.game/game.module';
 
@@ -57,10 +54,6 @@ import { GameModule } from './module.game/game.module';
 		GameModule,
 	],
 	controllers: [AppController, GameController],
-	providers: [AppService,
-    WebsocketGatewayChat,
-		WebsocketGatewayGame,
-		ServerGame
-  ],
+	providers: [AppService, WebsocketGatewayGlobal],
 })
 export class AppModule {}

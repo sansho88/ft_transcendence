@@ -1,7 +1,6 @@
 'use client';
 import React, {useContext, useEffect} from "react";
 
-import {preloadFont} from "next/dist/server/app-render/rsc/preloads";
 import {LoggedContext} from '@/context/globalContext';
 import {useRouter} from 'next/navigation';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
@@ -21,6 +20,7 @@ export default function Home() {
 
     useEffect(() => {
         const tmpToken = localStorage.getItem('token');
+        authManager.setToken(tmpToken);
         if (!logged && !tmpToken)
         {
             console.log("Redirect to auth page");
@@ -29,7 +29,9 @@ export default function Home() {
         else
         {
             try{
-               getUserMe().then((testUser) => {
+                let user: IUser;
+               getUserMe(user)
+                   .then((testUser) => {
                         if (testUser && testUser.UserID >= 0)
                         {
                             console.log("Redirect to Home page");
@@ -37,23 +39,22 @@ export default function Home() {
                         }
                         else
                         {
-                            console.log("testUser id= " + testUser.UserID);
+                            if ("UserID" in testUser) {
+                                console.log("testUser id= " + testUser.UserID);
+                            }
                             alert("An invalid token was saved in the browser." +
                                 "\nPlease, log in again or create a new account.");
-                            localStorage.clear();
-                            router.push('/auth');
                         }
                     })
-                        .catch((error) => {
-                            console.error("[redirect useEffect error]" + error);
-                        });
+                    .catch((error) => {
+                        console.error("[redirect useEffect error]" + error);
+                        console.log("authManager baseURL: " + authManager.getBaseURL());
+                    });
 
             }
             catch (e) {
                 alert("An invalid token was saved in the browser." +
                 "\nPlease, log in again or create a new account.");
-                localStorage.clear();
-                router.push('/auth');
             }
         }
 

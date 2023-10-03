@@ -1,39 +1,41 @@
 import {
-	Controller,
-	Delete,
-	Param,
 	Body,
-	Post,
+	Controller,
 	Get,
+	Param,
 	Put,
 	UseGuards,
 	ParseIntPipe,
-	BadRequestException,
+	Query,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UpdateUserDto } from '../dto/user/update-user.dto';
-import { CurrentUser } from '../module.auth/indentify.user';
-import { AuthGuard } from '../module.auth/auth.guard';
+import {UsersService} from './users.service';
+import {UpdateUserDto} from '../dto/user/update-user.dto';
+import {AuthGuard} from '../module.auth/auth.guard';
+import {UserEntity} from "../entities/user.entity";
+import {CurrentUser} from '../module.auth/indentify.user';
+import {InviteService} from "../module.channels/invite.service";
 
 @Controller('users')
 export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
-
-	@Post()
-	create() {
-		return 'USE `/auth/sign` to create a new user';
-	}
-	@Delete(':id')
-	remove(@Param('id') id: number) {
-		return 'WIP';
+	constructor(
+		private readonly usersService: UsersService,
+		private readonly inviteService: InviteService,
+	) {
 	}
 
 	/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ***/
 
 	@Get('me')
 	@UseGuards(AuthGuard)
-	me(@CurrentUser('id', ParseIntPipe) id: number) {
-		return this.usersService.findOne(id);
+	me(@CurrentUser() user: UserEntity) {
+		return user;
+	}
+
+	@Get('/get/nicknameUsed/:nick')
+	// @UseGuards(AuthGuard)
+	nickNameUsed(@Param('nick') nick: string) {
+		console.log('nick?: ' + nick) 
+		return this.usersService.nicknameUsed(nick);
 	}
 
 	@Get('/get')
@@ -45,9 +47,7 @@ export class UsersController {
 	@Get('/get/:id')
 	@UseGuards(AuthGuard)
 	async findOneID(@Param('id', ParseIntPipe) id: number) {
-		const user = await this.usersService.findOne(id);
-		if (user == null) throw new BadRequestException();
-		return user;
+		return await this.usersService.findOne(id);
 	}
 
 	/*************************************************/
@@ -55,9 +55,25 @@ export class UsersController {
 	@Put('update')
 	@UseGuards(AuthGuard)
 	updateNickname(
-		@CurrentUser('id', ParseIntPipe) id: number,
+		@CurrentUser() user: UserEntity,
 		@Body() update: UpdateUserDto,
 	) {
-		return this.usersService.update(id, update);
+		return this.usersService.update(user, update);
+	}
+
+	@Get('invite/received')
+	@UseGuards(AuthGuard)
+	getInviteReceived(
+		@CurrentUser() user: UserEntity,
+	) {
+		return this.inviteService.findAllReceivedUser(user);
+	}
+
+	@Get('invite/send')
+	@UseGuards(AuthGuard)
+	getInviteSend(
+		@CurrentUser() user: UserEntity,
+	) {
+		return this.inviteService.findAllSendUser(user);
 	}
 }

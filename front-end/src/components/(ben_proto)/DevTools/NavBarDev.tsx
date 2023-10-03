@@ -28,7 +28,6 @@ export function NavBar({className}: {className: string}) {
   }, [userContext])
 
 
-
   const handleMouseEnter = () => {
       setIsHovered(true);
   }
@@ -88,13 +87,14 @@ function toggleAuthRequired() {
 
 		return (
 			<>
-				<Link href="/">HOME</Link>
-				<Link href="/proto/game">GAME</Link>
-				<Link href="/proto/chat">CHATROOM</Link>
-				<Link href={`/profile/${userContext?.login}`}>PROFILE</Link>
-        <Dropdown/>
+				{/* <Link href="/home">HOME</Link> */}
+				{/* <Link href="/chat">CHAT v2</Link> */}
+				{/* <Link href="/proto/chat">CHATROOM</Link> */}
+				{/* <Link href={`/profile/${userContext?.login}`}>PROFILE</Link> */}
+				{/* <Link href="/auth">AUTH</Link> */}
+        {/* <Dropdown/> */}
 				{infoUser}
-				<button onClick={() => {setLogged(false);localStorage.removeItem("login");}}> DISCONNECT </button>
+				{/* <button onClick={() => {setLogged(false);localStorage.removeItem("login");}}> DISCONNECT </button> */}
 			</>
 		)
 	}
@@ -131,8 +131,10 @@ function toggleAuthRequired() {
 				<div className={className}>
 					<div className=" text-white h-10 flex justify-center items-center space-x-10">
 						<div className=" text-red-600 absolute left-5">Navbar Dev </div>
-						{logged ? <SubNav /> : <SubNavNotLog />}
-						
+						{logged ? <SubNav /> : 
+            // <SubNavNotLog />
+            <SubNav />
+            }
 						<button onClick={() => setIsHovered(false)}> ❌ </button>
 					</div>
 				</div>

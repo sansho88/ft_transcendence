@@ -13,21 +13,21 @@ export interface IUser {
   visit?: boolean;
 }
 
-export interface IChannel {
-  Id_CHANNEL?: number;
-  type: number;
-  password?: string;
-  name: string;
-  id_user: number;
-}
+// export interface IChannel {
+//   Id_CHANNEL?: number;
+//   type: number;
+//   password?: string;
+//   name: string;
+//   id_user: number;
+// }
 
-export interface IMessage {
-  Id_CHANNEL: number;
-  id_user: number;
-  Id_Message?: number;
-  date_msg: Date;
-  content: string;
-}
+// export interface IMessage {
+//   Id_CHANNEL: number;
+//   id_user: number;
+//   Id_Message?: number;
+//   date_msg: Date;
+//   content: string;
+// }
 
 export interface IBanned {
   Id_CHANNEL: number;

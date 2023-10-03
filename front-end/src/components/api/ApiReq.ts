@@ -13,7 +13,6 @@ export const axiosInstance = axios.create({
 	validateStatus: function (status) {
 		return status >= 200 && status < 204;
 	},
-	responseType: 'json'
 });
 
 function updateAxiosInstance() {
@@ -32,15 +31,24 @@ export namespace getApi {
 		const tqt = time;
 		return axiosInstance.get(`${strRoutes.getUsersAll()}`, updateAxiosInstance());}
 	export const getUserByLoginPromise= (login: string) =>{
-		
-		return axiosInstance.get(`users/get/${login}`, );}
+		return axiosInstance.get(`users/get/${login}`, );
+	}
+
 	export const getUserByIdPromise = (id: number) =>{return axiosInstance.get(`${strRoutes.getUserById()}${id}`, {
 		headers: {
 			'Authorization': `Bearer ${authManager.getToken()}`
 		}
 	});}
-    export const getMePromise = () => {
+
+	export const getMePromise = () => {
 		return axiosInstance.get(`users/me`, updateAxiosInstance())}
+
+	export const getIsNicknameUsed = (nick: string) =>{return axiosInstance.get(`${strRoutes.getIsNicknameIsUsed()}${nick}`, {
+			headers: {
+				'Authorization': `Bearer ${authManager.getToken()}`
+			}
+		});}
+
 }
 
 export namespace postApi {

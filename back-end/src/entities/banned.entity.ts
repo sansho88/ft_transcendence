@@ -1,23 +1,30 @@
 import {
 	BaseEntity,
+	Column,
 	Entity,
 	JoinTable,
 	ManyToOne,
-	PrimaryColumn,
+	PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity';
-import { ChannelEntity } from './channel.entity';
+import {UserEntity} from './user.entity';
+import {ChannelEntity} from './channel.entity';
 
 @Entity('TestBanned')
 export class BannedEntity extends BaseEntity {
-	@PrimaryColumn()
+	@PrimaryGeneratedColumn()
 	bannedID: number;
 
-	@ManyToOne(() => UserEntity, (UserEntity) => UserEntity.banned)
+	@ManyToOne(() => UserEntity, (UserEntity) => UserEntity.banned, {eager: true})
 	@JoinTable()
 	user: UserEntity;
 
-	@ManyToOne(() => ChannelEntity, (ChannelEntity) => ChannelEntity.bannedList)
+	@ManyToOne(() => ChannelEntity, (ChannelEntity) => ChannelEntity.bannedList, {eager: true})
 	@JoinTable()
 	channel: ChannelEntity;
+
+	@Column({
+		nullable: true,
+		type: `timestamp`,
+	})
+	endTime: Date;
 }

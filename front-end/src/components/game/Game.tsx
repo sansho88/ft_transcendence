@@ -7,6 +7,7 @@ import * as PODGAME from '@/shared/typesGame'
 import * as apiRoutes from '@/shared/routesApi'
 import * as ClipLoader from 'react-spinners'
 import SwitcherTheme from '@/components/game/SwitcherTheme'
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 
 enum EStatusFrontGame {
   idle,
@@ -58,7 +59,8 @@ export default function Game({className}: {className: string}) {
   const [scoreP1, setScoreP1]           = useState<number>(0);
   const [scoreP2, setScoreP2]           = useState<number>(0);
   
-  const [infoMessage, setInfoMessage]   = useState<string>('PLAY');
+  const titleGame: string = 'PONG-POD'
+  const [infoMessage, setInfoMessage]   = useState<string>(titleGame);
   
   const coefTableServer                 = useRef<PODGAME.IVector2D>({x: 1, y: 1});
 
@@ -102,7 +104,7 @@ export default function Game({className}: {className: string}) {
       setStepCurrentSession(EStatusFrontGame.idle);
       console.log(`WS RESET`);
       resetPositionPaddle();
-      setInfoMessage('PLAY');
+      setInfoMessage(titleGame);
       setScoreP1(0);
       setScoreP2(0);
       setUserP1({});
@@ -142,6 +144,12 @@ export default function Game({className}: {className: string}) {
           }
           setRemoteEvent(data.remoteEvent)
           console.log(`WS gameFind recu: ${JSON.stringify(data)}`);
+            let player2;
+            if (!data.player2 || data.player1 == data.player2)
+                player2 = "yourself";
+            else
+                player2 = data.player2.nickname;
+            NotificationManager.info(`You'll play against ${player2}`, "GAME FOUND");
         })
   
   
@@ -180,6 +188,7 @@ export default function Game({className}: {className: string}) {
           }
           setInfoMessage(data);
           console.log(`WS endgame: ${JSON.stringify(data)}`);
+            NotificationManager.success(JSON.stringify(data), "GAME OVER");
         })
         
         socketRef.current?.on('reset', () => {
@@ -238,12 +247,12 @@ export default function Game({className}: {className: string}) {
 			const keyDownHandler = (e) => {
 				if (e.key === 'ArrowUp' && !arrowUp.current) {
 					arrowUp.current = true;
-					console.log(`${remoteEvent.slice(-7)}: UP pressed`);
+					// console.log(`${remoteEvent.slice(-7)}: UP pressed`);
 					socketRef.current?.emit(remoteEvent, PODGAME.EKeyEvent.arrowUpPressed);
         }
 				if (e.key === 'ArrowDown' && !arrowDown.current) {
 					arrowDown.current = true;
-					console.log(`${remoteEvent.slice(-7)}: DOWN pressed`);
+					// console.log(`${remoteEvent.slice(-7)}: DOWN pressed`);
 					socketRef.current?.emit(
 						remoteEvent,
 						PODGAME.EKeyEvent.arrowDownPressed,
@@ -254,7 +263,7 @@ export default function Game({className}: {className: string}) {
 			const keyUpHandler = (e) => {
 				if (e.key === 'ArrowUp') {
 					arrowUp.current = false;
-					console.log(`${remoteEvent.slice(-7)}: UP release`);
+					// console.log(`${remoteEvent.slice(-7)}: UP release`);
 					socketRef.current?.emit(
 						remoteEvent,
 						PODGAME.EKeyEvent.arrowUpRelease,
@@ -262,7 +271,7 @@ export default function Game({className}: {className: string}) {
 				}
 				if (e.key === 'ArrowDown') {
 					arrowDown.current = false;
-					console.log(`${remoteEvent.slice(-7)}: DOWN release`);
+					// console.log(`${remoteEvent.slice(-7)}: DOWN release`);
 					socketRef.current?.emit(
 						remoteEvent,
 						PODGAME.EKeyEvent.arrowDownRelease,
@@ -389,12 +398,12 @@ export default function Game({className}: {className: string}) {
 
   function handleSearchGame() {
     const login     = userLogged.userContext?.login
-    let nickname    = userLogged.userContext?.login;
+    let nickname    = userLogged.userContext?.nickname;
     let id_user     = userLogged.userContext?.UserID;
     if (nickname === undefined)
       nickname = userLogged.userContext?.nickname
     if (stepCurrentSession === EStatusFrontGame.modChoice) {
-      setInfoMessage('PLAY');
+      setInfoMessage(titleGame);
       if (gameMod.current === PODGAME.EGameMod.classic) {
         socketRef.current?.emit(
           `${apiRoutes.wsGameRoutes.addPlayerToMatchmaking()}`,
@@ -504,7 +513,7 @@ export default function Game({className}: {className: string}) {
   return (
     <div className={`${className} ${currentGameTheme} rounded-xl`}> 
     <>
-      {console.log('DIV GAME MONTER')}
+      {/* {console.log('DIV GAME MONTER')} */}
     </>
       <Table tableRef={tableRef} className='table w-full h-full relative font-vt323'> 
         {/* <Scoreboard/> // bugger*/}
