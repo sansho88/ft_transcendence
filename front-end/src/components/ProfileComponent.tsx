@@ -34,23 +34,8 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
         }
 
         console.log(socketChatRef.current?.disconnected);
-
-        socketChatRef.current?.on("NicknameUsed", (res) => {
-            setIsNicknameUsed(res);
-            console.log("res: " + res);
-        });
-        return (() => {
-            socketChatRef.current?.off("NicknameUsed", (res) => {
-                setIsNicknameUsed(res);
-                console.log("res: " + res);
-            })
-        });
     }, [login]);
 
-
-
-   /* if (userStatus == undefined)
-       setUserStatus(EStatus.Offline);*/
 
     useEffect(() => {
         setStatusColor(getEnumNameByIndex(Colors, userStatus ? userStatus : 0));
@@ -64,9 +49,9 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
         setStatusColor(getEnumNameByIndex(Colors, userStatus));
     });*/
 
-    socketGameRef.current?.on("connect", () => {
+   /* socketGameRef.current?.on("connect", () => {
         setUserStatus(EStatus.Online);
-    })
+    })*/
 
     socketGameRef.current?.on("infoGameSession", (data: IGameSessionInfo) => {
         if ((data.player1 && data.player1.login == login) || data.player2.login == login)
@@ -103,33 +88,26 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
             setNickErrMsg("Alphanumerics only");
         }
         else {
-            await apiReq.getApi.getIsNicknameUsed(value).then((res) => {
-                const ret: boolean = res.data;
-                console.log('res = ' + ret); 
-                if (ret == true)
-                { 
-                    console.log('coucou '); 
-                    setIsNicknameUsed(true);
-                    setNickErrMsg("Unavailable"); 
-                }
-                else
-                { setIsNicknameUsed(false); 
-                    setNickErrMsg("");
-                
-                }
+            console.log(`value= ${value}, nickname=${nickname} `)
+            if (value != nickname)
+                await apiReq.getApi.getIsNicknameUsed(value).then((res) => {
+                    const ret: boolean = res.data;
+                    console.log('res = ' + ret);
+                    if (ret == true)
+                    {
+                        console.log('coucou ');
+                        setIsNicknameUsed(true);
+                        setNickErrMsg("Unavailable");
+                    }
+                    else
+                    { setIsNicknameUsed(false);
+                        setNickErrMsg("");
 
-                
+                    }
+
             });
-
-            // if (isNicknameUsed && modifiedNick != nickname) {
-            //     setNickErrMsg("Unavailable");
-            //     console.log("Abanon");
-            // }
-            // else {
-            //     setNickErrMsg("");
-            // }
         }
-    };
+    }
 
     const turnOnEditMode = () => {
         setEditMode(true);
