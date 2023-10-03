@@ -8,7 +8,7 @@ import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
 import {EStatus, IUser} from "@/shared/types";
 import {getUserFromId} from "@/app/auth/Auth";
-import { SocketContextGame} from "@/context/globalContext";
+import {SocketContextChat, SocketContextGame} from "@/context/globalContext";
 import {wsGameRoutes} from "@/shared/routesApi";
 import {IGameSessionInfo} from "@/shared/typesGame";
 import {log} from "util";
@@ -23,9 +23,19 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
     const [userStatus, setUserStatus] = useState(status);
     const socketGame      = useContext(SocketContextGame);
     const socketGameRef   = useRef(socketGame);
+    const socketChat      = useContext(SocketContextChat);
+    const socketChatRef   = useRef(socketChat);
+    const [isNicknameUsed, setIsNicknameUsed] = useState(false);
 
-    if (userStatus == undefined)
-       setUserStatus(EStatus.Offline);
+    useEffect(() => {
+        if (socketChatRef.current?.disconnected)
+        {
+            socketChatRef.current?.connect();
+        }
+
+        console.log(socketChatRef.current?.disconnected);
+    }, [login]);
+
 
     useEffect(() => {
         setStatusColor(getEnumNameByIndex(Colors, userStatus ? userStatus : 0));
@@ -38,6 +48,10 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
        setUserStatus(newStatus);
         setStatusColor(getEnumNameByIndex(Colors, userStatus));
     });*/
+
+   /* socketGameRef.current?.on("connect", () => {
+        setUserStatus(EStatus.Online);
+    })*/
 
     socketGameRef.current?.on("infoGameSession", (data: IGameSessionInfo) => {
         if ((data.player1 && data.player1.login == login) || data.player2.login == login)
@@ -53,17 +67,47 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
 
     });
 
-    const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => { //updated for each character
 
-            const value = event.target.value;
-            setNickText(event.target.value);
-
-        if (value.length < 2 || value.length > 12 || !/^[A-Za-z0-9_]+$/.test(value)) {
-            setNickErrMsg("Length: 2 => 12 & Alphanumerics only");
-        } else {
-            setNickErrMsg("");
+    useEffect(() => {
+        if (isNicknameUsed && modifiedNick !== nickname) {
+          setNickErrMsg("Unavailable");
+          console.log("Abandon");
         }
-    };
+      }, [isNicknameUsed, modifiedNick, nickname]);
+
+    async function handleTextChange  (event: React.ChangeEvent<HTMLInputElement>)  { //updated for each character
+        setIsNicknameUsed(false);
+
+        const value = event.target.value;
+        setNickText(value);
+        // socketChatRef.current?.emit("NicknameUsed", {nickname:value});
+        if (value.length < 2 || value.length > 12) {
+            setNickErrMsg("Length: 2 => 12");
+        }
+        else if (!/^[A-Za-z0-9_]+$/.test(value)) {
+            setNickErrMsg("Alphanumerics only");
+        }
+        else {
+            console.log(`value= ${value}, nickname=${nickname} `)
+            if (value != nickname)
+                await apiReq.getApi.getIsNicknameUsed(value).then((res) => {
+                    const ret: boolean = res.data;
+                    console.log('res = ' + ret);
+                    if (ret == true)
+                    {
+                        console.log('coucou ');
+                        setIsNicknameUsed(true);
+                        setNickErrMsg("Unavailable");
+                    }
+                    else
+                    { setIsNicknameUsed(false);
+                        setNickErrMsg("");
+
+                    }
+
+            });
+        }
+    }
 
     const turnOnEditMode = () => {
         setEditMode(true);
