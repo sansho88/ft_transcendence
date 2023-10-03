@@ -39,7 +39,9 @@ export default function Home() {
                         }
                         else
                         {
-                            console.log("testUser id= " + testUser.UserID);
+                            if ("UserID" in testUser) {
+                                console.log("testUser id= " + testUser.UserID);
+                            }
                             alert("An invalid token was saved in the browser." +
                                 "\nPlease, log in again or create a new account.");
                         }

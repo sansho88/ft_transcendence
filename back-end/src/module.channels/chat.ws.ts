@@ -12,7 +12,7 @@ import {IoAdapter} from '@nestjs/platform-socket.io';
 import {Server, Socket} from 'socket.io';
 import {MessageService} from './message.service';
 import {WSAuthGuard} from '../module.auth/auth.guard';
-import {ParseIntPipe, UseGuards, ValidationPipe} from '@nestjs/common';
+import {UseGuards, ValidationPipe} from '@nestjs/common';
 import {CurrentUser} from '../module.auth/indentify.user';
 import {ChannelService} from './channel.service';
 import {BannedService} from "./banned.service";
@@ -29,12 +29,20 @@ import {
 	LeaveChannelDTOPipe,
 } from '../dto.pipe/channel.dto';
 import {
-	JoinEventDTOPipe,
-	LeaveEventDTOPipe,
-	ReceivedMessageDTOPipe,
 	SendMessageDTOPipe,
 } from '../dto.pipe/message.dto';
-import { getToken } from '../module.auth/auth.guard';
+import {getToken} from '../module.auth/auth.guard';
+import {
+	BannedEventDTO,
+	JoinEventDTO,
+	KickedEventDTO,
+	LeaveEventDTO,
+	MutedEventDTO,
+	ReceivedInviteEventDTO,
+	ReceivedMessageEventDTO,
+} from '../dto/event.dto'
+import {InviteService} from "./invite.service";
+import {InviteEntity} from "../entities/invite.entity";
 
 class SocketUserList {
 	userID: number;
@@ -46,16 +54,18 @@ export class ChatGateway
 	extends IoAdapter
 	implements OnGatewayConnection, OnGatewayDisconnect {
 	@WebSocketServer()
-	server: Server;
-	private socketUserList: SocketUserList[] = [] = [];
+	private server: Server;
+	private socketUserList: SocketUserList[] = [];
+
 
 	constructor(
-		private messageService: MessageService, 
+		private messageService: MessageService,
 		private channelService: ChannelService,
 		private usersService: UsersService,
 		private bannedService: BannedService,
 		private channelCredentialService: ChannelCredentialService,
 		private jwtService: JwtService,
+		private inviteService: InviteService,
 	) {
 		super();
 	}
@@ -63,23 +73,23 @@ export class ChatGateway
 	// Todo: Maybe Give Bearer Token to auth when 1st connection then keep userID and client.ID in a map-like structure
 	// Or We could also use a 'Auth' event to identify the user post connection
 
-		async handleConnection(client: Socket) {
-			
-			const tokenInfo = getToken(client);
-			
-			const type = tokenInfo.type;
-			const token = tokenInfo.token;
+	async handleConnection(client: Socket) {
 
-			if (type !== 'Bearer') return client.disconnect();
-			if (!token) return client.disconnect();
-			let userID: number;
-			try {
-				const payloadToken: accessToken = await this.jwtService.verifyAsync(
+		const tokenInfo = getToken(client);
+
+		const type = tokenInfo.type;
+		const token = tokenInfo.token;
+
+		if (type !== 'Bearer') return client.disconnect();
+		if (!token) return client.disconnect();
+		let userID: number;
+		try {
+			const payloadToken: accessToken = await this.jwtService.verifyAsync(
 				token,
 				{
 					secret: process.env.SECRET_KEY,
 				},
-				);
+			);
 			userID = payloadToken.id;
 		} catch {
 
@@ -104,8 +114,7 @@ export class ChatGateway
 		console.log('NEW CONNEXION WS CLIENT CHAT v2, id = ' + client.id + ` | userID: ${userID}`);
 	}
 
-	//Todo: leave room + offline
-	async handleDisconnect(client: Socket) { 
+	async handleDisconnect(client: Socket) {
 		const tokenInfo = getToken(client);
 
 		const type = tokenInfo.type;
@@ -124,10 +133,12 @@ export class ChatGateway
 			.findOne(payloadToken.id)
 			.catch(() => null);
 		if (!user) return client.disconnect();
-		this.usersService.userStatus(user, UserStatus.OFFLINE).then();
-		// const index = this.socketUserList.indexOf()
-		// this.socketUserList = this.socketUserList.slice()
+		await this.usersService.userStatus(user, UserStatus.OFFLINE);
+		const index = this.socketUserList
+			.findIndex(socket => socket.userID == user.UserID)
+		this.socketUserList.splice(index, 1);
 		console.log(`CLIENT ${client.id} left CHAT WS`);
+		return client.disconnect();
 	}
 
 	@SubscribeMessage('createRoom')
@@ -158,7 +169,7 @@ export class ChatGateway
 		@MessageBody(new ValidationPipe()) data: JoinChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
-	) { // Todo: Need to check for invite
+	) {
 		await this.bannedService.update();
 		const channel = await this.channelService
 			.findOne(data.channelID, ['userList'])
@@ -169,13 +180,20 @@ export class ChatGateway
 			return client.emit(`joinRoom`, {
 				message: `You are already on that channel`,
 			});
-		if (!(await this.channelService.checkCredential(data)) || await this.channelService.userIsBan(channel, user))
+		if (await this.channelService.userIsBan(channel, user))
 			return client.emit(`joinRoom`, {
 				message: `You cannot Join that channel`,
 			});
+		const invite = await this.inviteService.userIsInvite(channel, user);
+		if (!(await this.channelService.checkCredential(data)) && !invite)
+			return client.emit(`joinRoom`, {
+				message: `You cannot Join that channel`,
+			});
+		if (invite)
+			await this.inviteService.remove(invite);
 		await this.channelService.joinChannel(user, channel);
 		client.join(`${channel.channelID}`);
-		const content: JoinEventDTOPipe = {user: user, channelID: channel.channelID}
+		const content: JoinEventDTO = {user: user, channelID: channel.channelID}
 		this.server.to(`${channel.channelID}`).emit(`joinRoom`, content);
 		console.log(`JOIN Room ${data.channelID} By ${user.UserID}`);
 	}
@@ -229,7 +247,7 @@ export class ChatGateway
 		user: UserEntity,
 		content: string,
 	) {
-		const msg: ReceivedMessageDTOPipe = {
+		const msg: ReceivedMessageEventDTO = {
 			author: user,
 			channelID: channel.channelID,
 			content: content,
@@ -255,12 +273,8 @@ export class ChatGateway
 	@UseGuards(WSAuthGuard)
 	async handelDebug(
 		@ConnectedSocket() client: Socket,
-		@MessageBody(ParseIntPipe) id: number,
 		@CurrentUser() user: UserEntity,
 	) {
-		console.log(' ==== debug !');
-		console.log(user);
-		await this.ban(await this.channelService.findOne(id), await this.usersService.findOne(id));
 	}
 
 
@@ -269,18 +283,43 @@ export class ChatGateway
 			channel = await this.channelService.removeAdmin(user, channel);
 		channel = await this.channelService.leaveChannel(channel, user);
 		const socketTarget = await this.getSocket(user.UserID);
-		const content: LeaveEventDTOPipe = {user: user, channelID: channel.channelID};
-		this.server.to(`${channel.channelID}`).emit(`leaveRoom`, content);
 		if (typeof socketTarget !== 'undefined')
 			socketTarget.leave(`${channel.channelID}`)
+		const content: LeaveEventDTO = {user: user, channelID: channel.channelID};
+		this.server.to(`${channel.channelID}`).emit(`leaveRoom`, content);
 		return channel;
 	}
 
-	async ban(channel: ChannelEntity, user: UserEntity) {
-		console.log(user);
-		const socket = await this.getSocket(user.UserID);
-		if (!socket)
-			return;
+	async ban(channel: ChannelEntity, target: UserEntity, duration: number, user: UserEntity) {
+		const event: BannedEventDTO = {
+			channel,
+			user,
+			type: BannedEventDTO.name,
+			duration,
+		}
+		await this.sendEvent(target, event);
+		if (await this.channelService.userInChannel(target, channel))
+			await this.leaveChat(channel, target);
+	}
+
+	async mute(channel: ChannelEntity, target: UserEntity, duration: number, user: UserEntity) {
+		const event: MutedEventDTO = {
+			channel,
+			user,
+			type: BannedEventDTO.name,
+			duration,
+		}
+		await this.sendEvent(target, event);
+		return;
+	}
+
+	async kick(channel: ChannelEntity, user: UserEntity) {
+		const event: KickedEventDTO = {
+			channel,
+			user,
+			type: KickedEventDTO.name,
+		}
+		await this.sendEvent(user, event);
 		return await this.leaveChat(channel, user);
 	}
 	
@@ -296,5 +335,27 @@ export class ChatGateway
 			console.log(`ret NicknameUsed= ${data.nickname} | ${res}`);
 			callback(res); //si callback ne fonctionne pas, remplacer par le client emit ci dessous
 		// client.emit('NicknameUsed', res);
+	}
+}
+
+	async receivedInvite(invite: InviteEntity) {
+		const event: ReceivedInviteEventDTO = {
+			invite,
+			type: ReceivedInviteEventDTO.name,
+		}
+		await this.sendEvent(invite.user, event);
+	}
+
+	async sendEvent(
+		user: UserEntity,
+		event:
+			ReceivedInviteEventDTO |
+			BannedEventDTO |
+			KickedEventDTO |
+			MutedEventDTO,
+	) {
+		const socketTarget = await this.getSocket(user.UserID);
+		if (!socketTarget) return;
+		socketTarget.emit('notifyEvent', event);
 	}
 }
