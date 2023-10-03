@@ -111,10 +111,6 @@ export class AuthService {
 			return await this.jwtService.signAsync(payloadToken);
 		}
 		// else login
-		if (!user) {
-			console.log('failed');
-			throw new UnauthorizedException();
-		}
 		const credential = await this.usersService.getCredential(login);
 		if (!(await this.credentialsService.compare("", credential))) {
 			console.log('failed');
