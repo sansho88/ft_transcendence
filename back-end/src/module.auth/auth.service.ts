@@ -54,7 +54,7 @@ export class AuthService {
 
 	/** * * * * * * * * * * * * * * **/
 
-	getClientID(req: Request) {
+	getIntraURL(req: Request) {
 		if (!process.env.PORT_SERVER)
 			throw new HttpException('server port error', HttpStatus.BAD_REQUEST);
 		const params = {
@@ -75,7 +75,6 @@ export class AuthService {
 			code: token,
 			redirect_uri: `${req.protocol}://${req.hostname.replace(process.env.PORT_SERVER, "")}:${process.env.PORT_CLIENT}/callback`,
 		};
-		console.log("######################### " + JSON.stringify(tokenRequestData, null, 8));
 		let request = await axios.post('https://api.intra.42.fr/oauth/token', tokenRequestData)
 			.then(async (response) => {
 				if (response.status !== 200)
@@ -87,16 +86,20 @@ export class AuthService {
 					return await axios.get('https://api.intra.42.fr/v2/me', { headers, });
 				}
 				catch (error) {
-					console.log(error);
 					throw new HttpException(error.message + " / ERROR INTRA TOKEN (/me)", response.status);
 				}
 			})
 			.catch(async (error) => {
-				console.log(error);
 				throw new HttpException(error.message + " / ERROR INTRA TOKEN", HttpStatus.UNAUTHORIZED);
 			});
 		const login = request.data.login;
-		const user = await this.usersService.findOne((login));
+		const user = await this.usersService
+			.findAll()
+			.then((users) => users[users.findIndex((usr) => usr.login === login)]);
+		if (!user) {
+			console.log(`Login failed :\`${login}' is not used`);
+			throw new UnauthorizedException();
+		}
 		// null = sign in
 		if (user === null) {
 			const userCredential = await this.credentialsService.create("");

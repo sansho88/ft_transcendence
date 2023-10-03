@@ -48,7 +48,7 @@ export namespace postApi {
 	export const postUser= (newUser: Partial<IUser>)		=>{return axiosInstance.post(`${strRoutes.postUser()}`, newUser);}
 	export const postTryLogin= (loginTest:Partial<IUser>)	=>{return axiosInstance.post(`${strRoutes.postUserCheckLogin()}`, loginTest);}
 	export const postTryLogin42= (code: string)	=>{return axiosInstance.post(`${strRoutes.postUser42()}`, code);}
-	export const postTryGetClientID= ()	=>{return axiosInstance.post(`${strRoutes.getClientID()}`);}
+	export const postTryGetIntraURL= ()	=>{return axiosInstance.post(`${strRoutes.getIntraURL()}`);}
 
 }
 

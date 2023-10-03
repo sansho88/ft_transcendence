@@ -466,7 +466,7 @@ export default function Auth({className}: { className?: string }) {
 
         async function goto42auth(){
             const generateOAuthURI = async (): Promise<string> => {
-							const req = await apiReq.postApi.postTryGetClientID();
+							const req = await apiReq.postApi.postTryGetIntraURL();
 							return req.data;
             };
             console.log(await generateOAuthURI()); // Affiche l'URI générée

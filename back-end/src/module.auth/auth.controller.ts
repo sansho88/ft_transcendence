@@ -31,14 +31,14 @@ export class AuthController {
 	// /**************************************/
 
 	@HttpCode(HttpStatus.OK)
-	@Post('42/getClientID')
+	@Post('42/getIntraURL')
 	getIntraUrl(@Req() req: Request) {
-		return this.authService.getClientID(req);
+		return this.authService.getIntraURL(req);
 	}
 
 	@HttpCode(HttpStatus.OK)
 	@Post('42/connect')
-	connect42(/*@Body(new ValidationPipe()) signDto: connect42DTO*/@Body()body, @Req() req: Request) {
+	connect42(@Body()body : string, @Req() req: Request) {
 		return this.authService.connect42(Object.keys(body)[0], req);
 	}
 }
