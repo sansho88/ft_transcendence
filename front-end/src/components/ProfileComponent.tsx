@@ -2,12 +2,16 @@ import React, {useContext, useEffect, useRef, useState} from "react";
 import Button from "./CustomButtonComponent"
 import Avatar from "@/components/AvatarComponent";
 import * as apiReq from '@/components/api/ApiReq'
+
+
 import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
 import {EStatus, IUser} from "@/shared/types";
 import {getUserFromId} from "@/app/auth/Auth";
 import {SocketContextChat, SocketContextGame} from "@/context/globalContext";
+import {wsGameRoutes} from "@/shared/routesApi";
 import {IGameSessionInfo} from "@/shared/typesGame";
+import {log} from "util";
 
 
 const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, login, status, UserID, isEditable})=>{
@@ -23,14 +27,24 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
     const socketChatRef   = useRef(socketChat);
     const [isNicknameUsed, setIsNicknameUsed] = useState(false);
 
-
     useEffect(() => {
         if (socketChatRef.current?.disconnected)
         {
             socketChatRef.current?.connect();
         }
 
+        console.log(socketChatRef.current?.disconnected);
 
+        socketChatRef.current?.on("NicknameUsed", (res) => {
+            setIsNicknameUsed(res);
+            console.log("res: " + res);
+        });
+        return (() => {
+            socketChatRef.current?.off("NicknameUsed", (res) => {
+                setIsNicknameUsed(res);
+                console.log("res: " + res);
+            })
+        });
     }, [login]);
 
 
@@ -68,59 +82,59 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
 
     });
 
-    const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => { //updated for each character
 
-        let typingTimer;
+    useEffect(() => {
+        if (isNicknameUsed && modifiedNick !== nickname) {
+          setNickErrMsg("Unavailable");
+          console.log("Abandon");
+        }
+      }, [isNicknameUsed, modifiedNick, nickname]);
+
+    async function handleTextChange  (event: React.ChangeEvent<HTMLInputElement>)  { //updated for each character
+        setIsNicknameUsed(false);
+
         const value = event.target.value;
         setNickText(value);
-        clearTimeout(typingTimer);
-
-        typingTimer = setTimeout(() => {
-            socketChatRef.current?.emit("NicknameUsed", {nickname: value});
-            console.log(`isNicknameUsed= ${isNicknameUsed}`);
-        }, 300);
-
+        // socketChatRef.current?.emit("NicknameUsed", {nickname:value});
         if (value.length < 2 || value.length > 12) {
             setNickErrMsg("Length: 2 => 12");
         }
-        else if (!/^[A-Za-z0-9_]+$/.test(value))
-        {
+        else if (!/^[A-Za-z0-9_]+$/.test(value)) {
             setNickErrMsg("Alphanumerics only");
         }
-        else if ((isNicknameUsed && modifiedNick != nickname))
-        {
-            setNickErrMsg("Unavailable");
-            console.log("Abanon");
-        }
         else {
-            setNickErrMsg("");
+            await apiReq.getApi.getIsNicknameUsed(value).then((res) => {
+                const ret: boolean = res.data;
+                console.log('res = ' + ret); 
+                if (ret == true)
+                { 
+                    console.log('coucou '); 
+                    setIsNicknameUsed(true);
+                    setNickErrMsg("Unavailable"); 
+                }
+                else
+                { setIsNicknameUsed(false); 
+                    setNickErrMsg("");
+                
+                }
+
+                
+            });
+
+            // if (isNicknameUsed && modifiedNick != nickname) {
+            //     setNickErrMsg("Unavailable");
+            //     console.log("Abanon");
+            // }
+            // else {
+            //     setNickErrMsg("");
+            // }
         }
     };
-
-
-    useEffect(() => {
-
-
-
-        socketChatRef.current?.on("NicknameUsed", (res) => {
-            setIsNicknameUsed(res);
-            console.log("res: " + res);
-
-
-        });
-        return (() => {
-            socketChatRef.current?.off("NicknameUsed");
-        });
-    }, []);
 
     const turnOnEditMode = () => {
         setEditMode(true);
     }
     const turnOffEditMode = async () => {
-        if ((isNicknameUsed && modifiedNick != nickname))
-        {
-            setNickErrMsg("Unavailable");
-        }
 
         if (!nickErrorMsg.length) {
 
@@ -129,6 +143,7 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
             userGet.nickname = modifiedNick;
             apiReq.putApi.putUser(userGet);
             });
+
             setEditMode(false);
 
         }

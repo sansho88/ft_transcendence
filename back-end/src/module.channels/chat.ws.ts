@@ -333,10 +333,9 @@ export class ChatGateway
 			console.log(data.nickname);
 			const res = await this.usersService.nicknameUsed(data.nickname);
 			console.log(`ret NicknameUsed= ${data.nickname} | ${res}`);
-			//callback(res); //si callback ne fonctionne pas, remplacer par le client emit ci dessous
-			 client.emit('NicknameUsed', res);
+			// callback(res); //si callback ne fonctionne pas, remplacer par le client emit ci dessous
+		client.emit('NicknameUsed', res);
 	}
-
 
 	async receivedInvite(invite: InviteEntity) {
 		const event: ReceivedInviteEventDTO = {

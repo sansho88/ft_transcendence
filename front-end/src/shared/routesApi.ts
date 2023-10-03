@@ -74,6 +74,9 @@ export namespace wsChatRoutesClient {
 // |                              USERS                                  |
 // +---------------------------------------------------------------------+
 
+	export const getIsNicknameIsUsed = () 	=>{return `${serverApi}/${routeUsers}/get/nicknameUsed/`}
+
+
 	export const getUsersAll=()							=>{return `${serverApi}/${routeUsers}/get/`}
 	export const getUserById = () 					=>{return `${serverApi}/${routeUsers}/get/`}
 	export const getUserByLogin=()					=>{return `${serverApi}/${routeUsers}/get/`}

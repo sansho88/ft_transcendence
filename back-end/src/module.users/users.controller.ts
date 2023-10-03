@@ -6,6 +6,7 @@ import {
 	Put,
 	UseGuards,
 	ParseIntPipe,
+	Query,
 } from '@nestjs/common';
 import {UsersService} from './users.service';
 import {UpdateUserDto} from '../dto/user/update-user.dto';
@@ -28,6 +29,13 @@ export class UsersController {
 	@UseGuards(AuthGuard)
 	me(@CurrentUser() user: UserEntity) {
 		return user;
+	}
+
+	@Get('/get/nicknameUsed/:nick')
+	// @UseGuards(AuthGuard)
+	nickNameUsed(@Param('nick') nick: string) {
+		console.log('nick?: ' + nick) 
+		return this.usersService.nicknameUsed(nick);
 	}
 
 	@Get('/get')
