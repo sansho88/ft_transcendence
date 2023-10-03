@@ -150,16 +150,15 @@ export class ChatGateway
 		const credential = await this.channelCredentialService.create(
 			data.password,
 		);
-		const channel = await this.channelService.create(
+		const channel: ChannelEntity = await this.channelService.create(
 			data.name,
 			credential,
 			data.privacy,
 			user,
 		);
 		client.join(`${channel.channelID}`);
-		client.emit(`createRoom`, {
-			message: `Channel Created with id ${channel.channelID}`,
-		});
+		client.emit(`infoRoom`, {	message: `Channel Created with id ${channel.channelID}`});
+		client.emit(`createRoom`, {channel: channel	});
 	}
 
 	@SubscribeMessage('joinRoom')

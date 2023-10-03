@@ -34,11 +34,18 @@ export interface IChannel {
 }
 
 export interface IChannelMessage {
-  channelID     : number;
-  content       : string;
-  ownerUser     : IUser;
+	id: number;
+	author: IUser;
+	sendTime: Date;
+	channel: IChannel;
+	content: string;
 }
 
+//DTO recup
 
-
+export class CreateChannelDTOPipe {
+	name: string;
+	privacy: boolean;
+	password?: string;
+}
 

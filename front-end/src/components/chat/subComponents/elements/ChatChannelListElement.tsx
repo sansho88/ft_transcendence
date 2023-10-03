@@ -8,6 +8,6 @@ export default function ChatChannelListElement({channelID, channelName, f}: {cha
 
   return (
     <button key={`button_channel_${uuidv4()}`} 
-    className='chat_channel_list_element' onClick={() => f(channelID)}>{channelName}</button>
+    className='chat_channel_list_element' onClick={() => f(channelID)}> {channelName}</button>
   )
 }

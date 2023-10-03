@@ -38,9 +38,37 @@ export namespace getApi {
 			'Authorization': `Bearer ${authManager.getToken()}`
 		}
 	});}
+	
+	export const getChannels = () =>{return axiosInstance.get(`${strRoutes.channel.getAll()}`, {
+		headers: {
+			'Authorization': `Bearer ${authManager.getToken()}`
+		}
+	});}
+
     export const getMePromise = () => {
 		return axiosInstance.get(`users/me`, updateAxiosInstance())}
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export namespace postApi {
 

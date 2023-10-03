@@ -55,14 +55,15 @@
 // |                       		EVENTS CHAT WS              	             |
 // +---------------------------------------------------------------------+
 export namespace wsChatRoutesBack {
-	export const createRoom=()      						  	=> {return `createRoom`} //retour message concernant le process de matchmaking 
-	export const joinRoom=()      						   		=> {return `joinRoom`} //retour message concernant le process de matchmaking 
-	export const leaveRoom=()      						   		=> {return `leaveRoom`} //retour message concernant le process de matchmaking 
-	export const sendMsg=()      						   			=> {return `sendMsg`} //retour message concernant le process de matchmaking 
+	export const infoRoom=()      						  	=> {return `infoRoom`} //retour message concernant les channel
+	export const createRoom=()      						  	=> {return `createRoom`} 
+	export const joinRoom=()      						   		=> {return `joinRoom`} 
+	export const leaveRoom=()      						   		=> {return `leaveRoom`} 
+	export const sendMsg=()      						   			=> {return `sendMsg`} 
 
 }
 export namespace wsChatRoutesClient {
-	export const updateChannel=()      						  	=> {return `createRoom`} //retour message concernant le process de matchmaking 
+	export const updateChannel=()      						  	=> {return `createRoom`} 
 
 
 }
@@ -114,7 +115,7 @@ export namespace wsChatRoutesClient {
 // |                             CHANNELS                                |
 // +---------------------------------------------------------------------+
 export namespace channel {
-	export const postCreateChannel = () 																					=> {return `${serverApi}/${routeChannels}/create`}
+	// export const postCreateChannel = () 																					=> {return `${serverApi}/${routeChannels}/create`} use WS event
 	export const getAll = () 																											=> {return `${serverApi}/${routeChannels}/get`};
 	export const getUsersChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
 	export const getMsgsChannel = (channelID: number, timestamp: number)					=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
