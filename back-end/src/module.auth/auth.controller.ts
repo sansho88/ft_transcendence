@@ -32,13 +32,13 @@ export class AuthController {
 
 	@HttpCode(HttpStatus.OK)
 	@Post('42/getClientID')
-	getIntraUrl() {
-		return this.authService.getClientID();
+	getIntraUrl(@Req() req: Request) {
+		return this.authService.getClientID(req);
 	}
 
 	@HttpCode(HttpStatus.OK)
 	@Post('42/connect')
-	connect42(/*@Body(new ValidationPipe()) signDto: connect42DTO*/@Body()body) {
-		return this.authService.connect42(Object.keys(body)[0]);
+	connect42(/*@Body(new ValidationPipe()) signDto: connect42DTO*/@Body()body, @Req() req: Request) {
+		return this.authService.connect42(Object.keys(body)[0], req);
 	}
 }

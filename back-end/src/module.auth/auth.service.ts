@@ -54,11 +54,18 @@ export class AuthService {
 
 	/** * * * * * * * * * * * * * * **/
 
-	getClientID() {
-		return process.env.CLIENT_ID;
+	getClientID(req: Request) {
+		if (!process.env.PORT_SERVER)
+			throw new HttpException('server port error', HttpStatus.BAD_REQUEST);
+		const params = {
+			client_id: process.env.CLIENT_ID,
+			redirect_uri: encodeURIComponent(`${req.protocol}://${req.hostname.replace(process.env.PORT_SERVER, "")}:${process.env.PORT_CLIENT}/callback`),
+			response_type: 'code',
+		}
+		return `https://api.intra.42.fr/oauth/authorize?client_id=${params.client_id}&redirect_uri=${params.redirect_uri}&response_type=${params.response_type}`;
 	}
 
-	async connect42(token: string) {
+	async connect42(token: string, req: Request) {
 		const axios = require('axios');
 
 		const tokenRequestData = {
@@ -66,8 +73,9 @@ export class AuthService {
 			client_id: process.env.CLIENT_ID,
 			client_secret: process.env.CLIENT_SECRET,
 			code: token,
-			redirect_uri: "http://localhost:3000/callback",
+			redirect_uri: `${req.protocol}://${req.hostname.replace(process.env.PORT_SERVER, "")}:${process.env.PORT_CLIENT}/callback`,
 		};
+		console.log("######################### " + JSON.stringify(tokenRequestData, null, 8));
 		let request = await axios.post('https://api.intra.42.fr/oauth/token', tokenRequestData)
 			.then(async (response) => {
 				if (response.status !== 200)
@@ -93,11 +101,9 @@ export class AuthService {
 		if (user === null) {
 			const userCredential = await this.credentialsService.create("");
 			let newUser = await this.usersService.create(login, true, userCredential);
-			if (request.data.image.link)
-			{
-				newUser.avatar_path = request.data.image.link;
-				await newUser.save();
-			}
+			newUser.avatar_path = request.data.image.link ? request.data.image.link : null;
+			newUser.visit = false;
+			await newUser.save();
 			const payloadToken: accessToken = { id: newUser.UserID };
 			return await this.jwtService.signAsync(payloadToken);
 		}

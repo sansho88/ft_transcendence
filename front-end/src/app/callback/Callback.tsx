@@ -81,6 +81,7 @@ export default function Callback() {
 		const code = recupURL.get('code');
 
 		console.log('code = <' + code + '>');
+		if (!code) router.push('/auth');
 		//FAIRE LA REQUETE API pour obtenir le token
 		if( code !== null)
 		{ 
