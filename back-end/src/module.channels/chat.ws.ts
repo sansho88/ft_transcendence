@@ -132,10 +132,11 @@ export class ChatGateway
 			.findOne(payloadToken.id)
 			.catch(() => null);
 		if (!user) return client.disconnect();
-		await this.usersService.userStatus(user, UserStatus.OFFLINE);
 		const index = this.socketUserList
-			.findIndex(socket => socket.userID == user.UserID)
+			.findIndex(socket => socket.socketID == socket.socketID)
 		this.socketUserList.splice(index, 1);
+		if (this.socketUserList.findIndex(socket => socket.socketID == client.id) == -1)
+			await this.usersService.userStatus(user, UserStatus.OFFLINE);
 		console.log(`CLIENT ${client.id} left CHAT WS`);
 		return client.disconnect();
 	}
