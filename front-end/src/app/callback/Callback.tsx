@@ -94,9 +94,6 @@ export default function Callback() {
 		//si success routrer vers home
 	}, [])
 	return (
-		<div>TRY LOGIN 42.... PLEASE WAITING<br/> TOM fou moi un petit loader ici dans /src/app/callback/Callback.tsx MERCI XD)
-
-			{/* <br/>le code est {code} */}
-		</div>
+			<LoadingComponent/>
 	)
 }
