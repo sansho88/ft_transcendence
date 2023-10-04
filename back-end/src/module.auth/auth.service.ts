@@ -5,12 +5,12 @@ import {
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { UsersService } from '../module.users/users.service';
-import { JwtService } from '@nestjs/jwt';
-import { accessToken } from '../dto/payload';
-import { UserCredentialService } from './credential.service';
-import { UserEntity } from 'src/entities/user.entity';
+import {Request} from 'express';
+import {UsersService} from '../module.users/users.service';
+import {JwtService} from '@nestjs/jwt';
+import {accessToken} from '../dto/payload';
+import {UserCredentialService} from './credential.service';
+import {UserEntity} from 'src/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +18,8 @@ export class AuthService {
 		private readonly usersService: UsersService,
 		private jwtService: JwtService,
 		private credentialsService: UserCredentialService,
-	) { }
+	) {
+	}
 
 	/** * * * * * * * * * * * * * * **/
 
@@ -85,9 +86,8 @@ export class AuthService {
 					Authorization: `${response.data.token_type} ${response.data.access_token}`,
 				}
 				try {
-					return await axios.get('https://api.intra.42.fr/v2/me', { headers, });
-				}
-				catch (error) {
+					return await axios.get('https://api.intra.42.fr/v2/me', {headers,});
+				} catch (error) {
 					throw new HttpException(error.message + " / ERROR INTRA TOKEN (/me)", response.status);
 				}
 			})
@@ -98,28 +98,23 @@ export class AuthService {
 		const user = await this.usersService
 			.findAll()
 			.then((users) => users[users.findIndex((usr) => usr.login === login)]);
+		// undefined = new user -> sign in
 		if (!user) {
-			console.log(`Login failed :\`${login}' is not used`);
-			throw new UnauthorizedException();
-		}
-		// null = sign in
-		if (user === null) {
 			const userCredential = await this.credentialsService.create("");
-			let newUser = await this.usersService.create(login, true, userCredential);
+			let newUser = await this.usersService.create(login, false, userCredential);
 			newUser.avatar_path = request.data.image.link ? request.data.image.link : null;
-			newUser.visit = false;
 			await newUser.save();
-			const payloadToken: accessToken = { id: newUser.UserID };
+			const payloadToken: accessToken = {id: newUser.UserID};
 			return await this.jwtService.signAsync(payloadToken);
 		}
-		// else login
-		const credential = await this.usersService.getCredential(login);
+		// else log in
+		const credential = await this.usersService.getCredential(user.UserID);
 		if (!(await this.credentialsService.compare("", credential))) {
 			console.log('failed');
 			throw new UnauthorizedException();
 		}
 		console.log('success');
-		const payloadToken: accessToken = { id: user.UserID };
+		const payloadToken: accessToken = {id: user.UserID};
 		return await this.jwtService.signAsync(payloadToken);
 	}
 }
