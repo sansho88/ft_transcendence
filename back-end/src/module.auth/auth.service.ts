@@ -1,5 +1,4 @@
 import {
-	BadRequestException,
 	HttpException,
 	HttpStatus,
 	Injectable,
@@ -10,7 +9,7 @@ import {UsersService} from '../module.users/users.service';
 import {JwtService} from '@nestjs/jwt';
 import {accessToken} from '../dto/payload';
 import {UserCredentialService} from './credential.service';
-import {UserEntity} from 'src/entities/user.entity';
+import * as process from "process";
 
 @Injectable()
 export class AuthService {
