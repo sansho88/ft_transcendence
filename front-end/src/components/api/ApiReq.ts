@@ -31,8 +31,9 @@ export namespace getApi {
 		const tqt = time;
 		return axiosInstance.get(`${strRoutes.getUsersAll()}`, updateAxiosInstance());}
 	export const getUserByLoginPromise= (login: string) =>{
-		
-		return axiosInstance.get(`users/get/${login}`, );}
+		return axiosInstance.get(`users/get/${login}`, );
+	}
+
 	export const getUserByIdPromise = (id: number) =>{return axiosInstance.get(`${strRoutes.getUserById()}${id}`, {
 		headers: {
 			'Authorization': `Bearer ${authManager.getToken()}`
@@ -45,9 +46,14 @@ export namespace getApi {
 		}
 	});}
 
-    export const getMePromise = () => {
+	export const getMePromise = () => {
 		return axiosInstance.get(`users/me`, updateAxiosInstance())}
 
+	export const getIsNicknameUsed = (nick: string) =>{return axiosInstance.get(`${strRoutes.getIsNicknameIsUsed()}${nick}`, {
+			headers: {
+				'Authorization': `Bearer ${authManager.getToken()}`
+			}
+		});}
 
 }
 
@@ -74,6 +80,8 @@ export namespace postApi {
 
 	export const postUser= (newUser: Partial<IUser>)		=>{return axiosInstance.post(`${strRoutes.postUser()}`, newUser);}
 	export const postTryLogin= (loginTest:Partial<IUser>)	=>{return axiosInstance.post(`${strRoutes.postUserCheckLogin()}`, loginTest);}
+	export const postTryLogin42= (code: string)	=>{return axiosInstance.post(`${strRoutes.postUser42()}`, code);}
+	export const postTryGetIntraURL= ()	=>{return axiosInstance.post(`${strRoutes.getIntraURL()}`);}
 
 }
 

@@ -102,7 +102,7 @@ export class UsersService {
 	/**
 	 * return false if nickname is not used
 	 */
-	private async nicknameUsed(nickname: string) {
+	async nicknameUsed(nickname: string) {
 		const test = !!await this.usersRepository.findOneBy({nickname: nickname});
 		console.log('checkNick', test);
 		return test;

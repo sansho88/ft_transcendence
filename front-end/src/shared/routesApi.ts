@@ -72,8 +72,18 @@ export namespace wsChatRoutesClient {
 	export namespace strRoutes {
 
 // +---------------------------------------------------------------------+
+// |                            USERS 42                                 |
+// +---------------------------------------------------------------------+
+	export const postUser42=()							=>{return `${serverApi}/auth/42/connect/`}
+	export const getIntraURL=()							=>{return `${serverApi}/auth/42/getIntraURL/`}
+
+
+// +---------------------------------------------------------------------+
 // |                              USERS                                  |
 // +---------------------------------------------------------------------+
+
+	export const getIsNicknameIsUsed = () 	=>{return `${serverApi}/${routeUsers}/get/nicknameUsed/`}
+
 
 	export const getUsersAll=()							=>{return `${serverApi}/${routeUsers}/get/`}
 	export const getUserById = () 					=>{return `${serverApi}/${routeUsers}/get/`}
