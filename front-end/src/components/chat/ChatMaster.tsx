@@ -30,10 +30,6 @@ export default function ChatMaster({className, token}: {className: string, token
     console.log('helloSetter')
     setCurrentChannel(newIdChannel);
   }
-  // function setterCurrentChannel(newIdChannel: number) {
-  //   console.log('helloSetter')
-  //   setCurrentChannel(newIdChannel);
-  // }
 
   if(socketChat?.disconnected) 
   { 
@@ -42,28 +38,17 @@ export default function ChatMaster({className, token}: {className: string, token
     socketChat.connect();
   }
 
-
   useEffect(() => {
     console.log('Vraiment pas modif ?')
   }, [currentChannel])
 
-
-  useEffect(( ) => {
-    if (logged === true)
-      socketChat?.connect();
-    else
-      socketChat?.disconnect();
-  }, [logged])
-
-
   useEffect(() => {
-    if (socketChat?.connect)
-    {
-      //subscribe all event channel
-      wsChatListen.infoRoom(socketChat); //DBG
-      wsChatListen.createRoomListen(socketChat, setChannels);
-    }
 
+      if (socketChat){
+        wsChatListen.infoRoom(socketChat); //DBG
+        wsChatListen.createRoomListen(socketChat, setChannels);
+      }
+  
     return (() => {
       socketChat?.disconnect();
     })
