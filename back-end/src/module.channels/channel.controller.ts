@@ -51,14 +51,13 @@ export class ChannelController {
 		return this.channelService.findOne(channelID);
 	}
 
-
-	@Get('msg/:channelID')
+	@Get('mychannel')
 	@UseGuards(AuthGuard)
-	async getAllMessages(
-		@Param('channelID', ParseIntPipe) channelID: number,
-	) {
-		const channel = await this.channelService.findOne(channelID);
-		return this.channelService.getAllMessages(channel);
+	findMy(@CurrentUser() user: UserEntity) {
+		return this.channelService.findAll(['userList'])
+			.then(lstchan => lstchan
+				.filter(channel => channel.userList
+					.find(usr => usr.UserID == user.UserID)))
 	}
 
 	/**
@@ -257,7 +256,7 @@ export class ChannelController {
 	) {
 		const minTime = new Date(timestamp);
 		minTime.setUTCHours(minTime.getHours() + 2);
-		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'])
+		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterBefore(channel.messages, minTime);
@@ -272,7 +271,7 @@ export class ChannelController {
 	) {
 		const maxTime = new Date(timestamp);
 		maxTime.setUTCHours(maxTime.getHours() + 2);
-		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'])
+		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterAfter(channel.messages, maxTime);
@@ -284,7 +283,7 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('channelID', ParseIntPipe) channelID: number,
 	) {
-		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'])
+		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterRecent(channel.messages);

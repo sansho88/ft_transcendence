@@ -43,27 +43,32 @@ export class ChannelService {
 			type: privacy,
 			userList: [owner],
 			adminList: [owner],
+			mp: false,
 		});
 		chan.credential = credential;
 		await chan.save();
 		return chan;
 	}
 
-	async findAll() {
-		return this.channelRepository.find();
+	async findAll(relations?: string[]) {
+		return this.channelRepository.find({relations});
 	}
 
-	async findOne(id: number, relations?: string[]) {
+	async findOne(id: number, relations?: string[], canBeMP?: boolean) {
 		let channel;
-		if (!relations)
-			channel = await this.channelRepository.findOneBy({channelID: id});
+		if (canBeMP != true)
+			channel = await this.channelRepository.findOne({
+				where: {channelID: id, mp: false},
+				relations,
+			});
 		else
 			channel = await this.channelRepository.findOne({
 				where: {channelID: id},
 				relations,
 			});
+		console.log('Channel = ', channel, canBeMP);
 		if (channel == null)
-			throw new BadRequestException('this channel doesn\'t exist');
+			throw new BadRequestException('This channel doesn\'t exist');
 		return channel;
 	}
 
@@ -127,7 +132,7 @@ export class ChannelService {
 
 	async checkCredential(data: JoinChannelDTOPipe) {
 		const channel = await this.channelRepository.findOne({
-			where: {channelID: data.channelID},
+			where: {channelID: data.channelID, mp: false},
 			relations: ['credential'],
 		});
 		const credential = channel.credential;
@@ -152,7 +157,7 @@ export class ChannelService {
 		if (!(await this.userInChannel(target, channel)))
 			throw new BadRequestException('The target isn\'t part of this Channel');
 		channel = await this.channelRepository.findOne({
-			where: {channelID: channel.channelID},
+			where: {channelID: channel.channelID, mp: false},
 			relations: ['adminList'],
 		});
 		channel.adminList.push(target);
@@ -201,5 +206,31 @@ export class ChannelService {
 		return !!(await this.mutedService.findAll(channel).then(mutes => {
 			return mutes.findIndex(mute => mute.user.UserID == usr.UserID)
 		}) + 1)
+	}
+
+	async createMP(user1: UserEntity, user2: UserEntity) {
+		const id1: number = Math.min(user1.UserID, user2.UserID);
+		const id2: number = Math.max(user1.UserID, user2.UserID);
+		const mp = this.channelRepository.create({
+			name: `mp.${id1}.${id2}`,
+			userList: [user1, user2],
+			type: ChannelType.DIRECT,
+			mp: true,
+		})
+		await mp.save();
+		return mp;
+	}
+
+	async getmp(user1: UserEntity, user2: UserEntity) {
+		// const chanlst = await this.findAll([]
+		const id1: number = Math.min(user1.UserID, user2.UserID);
+		const id2: number = Math.max(user1.UserID, user2.UserID);
+		const channel = await this.channelRepository.findOne({
+			where: {mp: true, name: `mp.${id1}.${id2}`},
+			relations: ['userList'],
+		});
+		if (!channel)
+			throw new BadRequestException('this channel doesn\'t exist')
+		return channel;
 	}
 }

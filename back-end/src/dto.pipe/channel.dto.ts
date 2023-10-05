@@ -37,3 +37,9 @@ export class LeaveChannelDTOPipe {
 	@IsNotEmpty()
 	channelID: number;
 }
+
+export class CreateMpDTOPPipe {
+	@IsNotEmpty()
+	@IsNumber()
+	targetID: number
+}
