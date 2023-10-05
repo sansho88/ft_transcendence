@@ -81,7 +81,6 @@ export default function ChatMaster({className, token}: {className: string, token
       <div className='chat_block_main'>
         <ChatMessagesList className='chat_message_list' messages={mockMsg} />
         <ChatInput className={'chat_block_messages_input'} />
-        <ChatNewChannelPopup className={"chat_new_channel_popup"}/>
       </div>
 
     </div>
