@@ -121,13 +121,12 @@ export class ChannelService {
 	}
 
 	async getAllMessages(target: ChannelEntity) {
-		const msg = await this.channelRepository
+		return await this.channelRepository
 			.findOne({
 				where: {channelID: target.channelID},
 				relations: ['messages', 'messages.author'],
 			})
 			.then((chan) => chan.messages);
-		return msg;
 	}
 
 	async checkCredential(data: JoinChannelDTOPipe) {
