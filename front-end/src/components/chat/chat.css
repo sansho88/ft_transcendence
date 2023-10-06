@@ -9,7 +9,7 @@
   display: flex;
   position: absolute;
   width: 21%;
-  height: 42%;
+  height: 42vh;
   align-items: flex-end;
   bottom: 2rem;
   right: 0.25rem;
@@ -26,10 +26,11 @@
 /*main parent channel component*/
 .chat_channel_block {
   background: rgba(0, 0, 0, 0.27);
+
   flex-grow: 1;
   min-width: 15%;
-  height: 100%;
-  border-top-left-radius: 1rem;
+  height: 90%;
+
   border-bottom-left-radius: 1rem;
 }
 
@@ -39,8 +40,8 @@
 /*main parent channel component*/
 .chat_channel_list {
   overflow-y: auto;
-  height: 90%;
-
+  height: 95%;
+  bottom: 0;
 }
 /* Pour Chrome, Safari et Opera */
 .chat_channel_list::-webkit-scrollbar {
@@ -64,16 +65,19 @@
 .chat_channel_buttons {
   text-align: center;
   align-items: flex-end;
-  position: relative;
-  height: 4.2vh;
-  padding: 0.25rem 0 0 0;
-  margin-top: 0;
-  bottom: 0.1rem;
+  position: absolute;
+  height: 10%;
+  width: 30%;
+  padding-top: 0.4rem;
+
+  top: 0;
+
   font-weight: bold;
   font-size: 0.85rem;
-  background-color: rgba(152, 150, 150, 0.08);
-  border-radius: 0 0 0 8px;
-  border-top: solid 0.4rem rgba(0, 0, 0, 0.22);
+  background: rgba(0, 0, 0, 0.27);
+  border-radius: 8px 0 0 0;
+  border-bottom: rgba(0, 0, 0, 0.27) solid 2px;
+
 
 }
 
@@ -84,6 +88,7 @@
   margin-left: 1rem;
   display: flex;
   align-items: center;
+  color: #d8d8d8
 }
 
 
@@ -263,4 +268,76 @@
   font-size: 0.8rem;
   padding-top: 0.1rem;
   padding-bottom: 0.1rem;
+}
+
+/* +---------------------------------------------------------------------+
+/* |                            NEW CHANNEL POPUP                        |
+/* +---------------------------------------------------------------------+
+*/
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.chat_new_channel_popup{
+  color: darkgrey;
+  background: rgba(0, 0, 0, 0.27);
+  border: 0.2rem rgba(0, 0, 0, 0.15);
+  border-style: inherit ;
+  box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.5);
+  border-radius: 1rem;
+  display: inline-block;
+  position: absolute;
+  width: 9vw;
+  height: auto;
+
+  bottom: 5vh;
+  left: 0;
+
+
+  margin-right: 0.5vw;
+  text-align: left;
+  padding-left: 1em;
+
+  animation: fadeIn 500ms;
+}
+
+#channelNameInput{
+  color:darkgrey;
+  width: 80%;
+  border-radius: 4px;
+  border-bottom: 3px solid #07C3FF ;
+  border-inline: 1px solid #07C3FF ;
+  background: none;
+  padding-left: 1ch;
+}
+
+#channelPasswordInput{
+  display: inline-block;
+  color:darkgrey;
+  width: 80%;
+  border-radius: 4px;
+  border-bottom: 3px solid #07C3FF ;
+  border-inline: 1px solid #07C3FF ;
+  background: none;
+  padding-left: 1ch;
+}
+
+#visibility_block{
+  display: block;
+  margin: 1em 0.2em;
+}
+
+#popup_title{
+  padding: 0.5em 1ch;
+  color:#07C3FF ;
+}
+
+#button_showPassword{
+  display: inline-block;
+  margin: 0.2rem;
+  padding-left: 0.2rem;
+  position: relative;
+  top:0.42rem;
 }

@@ -1,15 +1,20 @@
 'use client'
 
-import React from 'react'
+import React, {useState} from 'react'
 import ChatChannelListElement from './elements/ChatChannelListElement'
 import Image from "next/image";
+import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelPopup";
 
 export default function ChatChannelList({className, setChannel}: {className: string, setChannel: Function}) {
 
   const addChannel = () => {
-    return (
+    const [isPopupVisible, setPopupVisible] = useState(false);
 
-        <button onClick={() => console.log('ADD CHANNEL POPUP')}>
+
+    return (
+      <>
+        <button onClick={() => setPopupVisible(!isPopupVisible)}>
+
           <Image
               src="/channel-add.svg"
               alt="ADD CHANNEL BUTTON"
@@ -17,6 +22,8 @@ export default function ChatChannelList({className, setChannel}: {className: str
               height={22}
           />
         </button>
+    { isPopupVisible && <ChatNewChannelPopup className={"chat_new_channel_popup"}/>}
+      </>
     )
   }
   const paramChannel = () => {

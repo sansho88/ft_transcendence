@@ -10,6 +10,7 @@ import ChatMessagesList from './subComponents/ChatMessagesList'
 import { Socket } from 'socket.io-client'
 import { ChannelsServerManager } from './class/ChannelsServerManager'
 import { IUser } from '@/shared/types'
+import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelPopup";
 
 
 export default function ChatMaster({className, token}: {className: string, token: string}) {
