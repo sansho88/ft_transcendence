@@ -59,11 +59,18 @@ const HomePage = ({className}: HomePageProps) => {
             updateUser.status = newStatus;
             apiReq.putApi.putUser(updateUser)
                 .catch((e) => {
-                    setUserContext(updateUser);
+
                      console.error(e)
                 })
+            setUserContext(updateUser);
         }
     });
+    /*
+    socketRef.current?.on("connect", () =>{
+        let updateUser = userContext;
+        updateUser.status = EStatus.Online;
+
+    })*/
 
     return (
         <>

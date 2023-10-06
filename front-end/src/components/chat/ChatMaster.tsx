@@ -14,6 +14,7 @@ import { wsChatEvents, wsChatListen } from '../api/WsReq'
 import { IChannelEntity } from '@/shared/entities/IChannel.entity'
 import { channel } from 'diagnostics_channel'
 
+import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelPopup";
 
 
 export default function ChatMaster({className, token}: {className: string, token: string}) {

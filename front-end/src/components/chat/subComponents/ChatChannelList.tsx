@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import ChatChannelListElement from './elements/ChatChannelListElement'
 import Image from "next/image";
 import { wsChatEvents, wsChatListen } from '@/components/api/WsReq';
 import { Socket } from 'socket.io-client';
 import { IChannel } from '@/shared/typesChannel';
 import { channel } from 'diagnostics_channel';
+import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelPopup";
 
 
 export default function ChatChannelList({className, socket, channels, setCurrentChannel}: {className: string, socket: Socket, channels: IChannel[], setCurrentChannel: Function}) {
@@ -20,9 +21,14 @@ export default function ChatChannelList({className, socket, channels, setCurrent
     wsChatEvents.createRoom(socket, {name: `chan${counterDBG.current}`, privacy: false});
     }
 
-    return (
+    const [isPopupVisible, setPopupVisible] = useState(false);
 
-        <button onClick={() => action()}>
+
+
+    return (
+      <>
+        <button onClick={() => setPopupVisible(!isPopupVisible)}>
+
           <Image
               src="/channel-add.svg"
               alt="ADD CHANNEL BUTTON"
@@ -30,6 +36,8 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               height={22}
           />
         </button>
+    { isPopupVisible && <ChatNewChannelPopup className={"chat_new_channel_popup"}/>}
+      </>
     )
   }
   const paramChannel = () => {
