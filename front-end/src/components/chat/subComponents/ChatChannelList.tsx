@@ -3,10 +3,11 @@
 import React, { useEffect, useRef } from 'react'
 import ChatChannelListElement from './elements/ChatChannelListElement'
 import Image from "next/image";
-import { wsChatEvents } from '@/components/api/WsReq';
+import { wsChatEvents, wsChatListen } from '@/components/api/WsReq';
 import { Socket } from 'socket.io-client';
 import { IChannel } from '@/shared/typesChannel';
 import { channel } from 'diagnostics_channel';
+
 
 export default function ChatChannelList({className, socket, channels, setCurrentChannel}: {className: string, socket: Socket, channels: IChannel[], setCurrentChannel: Function}) {
 
@@ -62,7 +63,10 @@ export default function ChatChannelList({className, socket, channels, setCurrent
             key={channel.channelID} 
             channelID={channel.channelID} 
             channelName={channel.name} 
-            f={setCurrentChannel} 
+            f={() => {
+              socket.emit(wsChatEvents.)
+              setCurrentChannel(channel.channelID);
+            }} 
           />
         ))
       }

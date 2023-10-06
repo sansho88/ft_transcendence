@@ -12,6 +12,11 @@ export namespace wsChatEvents {
     socket.emit(wsChatRoutesBack.createRoom(), newChannel);
 
   }
+  export function joinRoom(socket: Socket, newChannel: CreateChannelDTOPipe) {
+
+    socket.emit(wsChatRoutesBack.joinRoom(), newChannel);
+
+  }
 
 
 

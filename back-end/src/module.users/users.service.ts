@@ -104,7 +104,7 @@ export class UsersService {
 	 */
 	async nicknameUsed(nickname: string) {
 		const test = !!await this.usersRepository.findOneBy({nickname: nickname});
-		console.log('checkNick', test);
+		// console.log('checkNick', test);
 		return test;
 	}
 }
