@@ -6,7 +6,7 @@ export namespace messages {
 	}
 }
 
-export namespace channels {
+export namespace channelsDTO {
 
 	export interface ICreateChannelDTOPipe {
 		name: string;
@@ -19,7 +19,7 @@ export namespace channels {
 		password?: string;
 	}
 
-	export interface LeaveChannelDTOPipe {
+	export interface ILeaveChannelDTOPipe {
 		channelID: number;
 	}
 }

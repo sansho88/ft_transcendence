@@ -41,11 +41,11 @@ export interface IChannelMessage {
 	content: string;
 }
 
-//DTO recup
+// //DTO recup
 
-export class CreateChannelDTOPipe {
-	name: string;
-	privacy: boolean;
-	password?: string;
-}
+// export interface ICreateChannelDTOPipe {
+// 	name: string;
+// 	privacy: boolean;
+// 	password?: string;
+// }
 

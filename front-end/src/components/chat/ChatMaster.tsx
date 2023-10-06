@@ -2,7 +2,7 @@
 
 import React, { useContext, useEffect, useState, useRef, createContext } from 'react'
 import { LoggedContext, SocketContextChat } from '@/context/globalContext'
-import { CreateChannelDTOPipe, IChannel, IChannelMessage } from '@/shared/typesChannel'
+import { IChannel } from '@/shared/typesChannel'
 import { Channel } from './class/Channel'
 import ChatInput from './subComponents/ChatInput'
 import ChatChannelList from './subComponents/ChatChannelList'

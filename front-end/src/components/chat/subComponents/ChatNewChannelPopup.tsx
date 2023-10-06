@@ -2,8 +2,12 @@ import {input} from "zod";
 import React, {useEffect, useState} from "react";
 import Image from "next/image";
 import Button from "@/components/CustomButtonComponent";
+import { wsChatEvents } from "@/components/api/WsReq";
+import { Socket } from "socket.io-client";
+import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
 
-const ChatNewChannelPopup = ({className}) => {
+
+const ChatNewChannelPopup = ({className, socket} : {className: string, socket: Socket}) => {
     const [channelName, setChannelName] = useState("");
     const [channelPassword, setChannelPassword] = useState("");
     const [channelType, setChannelType] = useState("");
@@ -67,6 +71,14 @@ const ChatNewChannelPopup = ({className}) => {
         {
             console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
             setIsChannelCreated(true);
+                
+                
+            const newChannel: channelsDTO.ICreateChannelDTOPipe = {
+              name: channelName,
+              privacy: false,
+              password: channelType === "Protected" ? channelPassword : undefined
+            }
+            wsChatEvents.createRoom(socket, newChannel);
         }
     }
 
