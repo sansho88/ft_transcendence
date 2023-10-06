@@ -1,91 +1,128 @@
 import {input} from "zod";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Image from "next/image";
+import Button from "@/components/CustomButtonComponent";
 
 const ChatNewChannelPopup = ({className}) => {
     const [channelName, setChannelName] = useState("");
     const [channelPassword, setChannelPassword] = useState("");
     const [channelType, setChannelType] = useState("");
     const [areSettingsValids, setSettingsValid] = useState(false);
+    const [showPassword, setPasswordVisible] = useState("password");
+    const [nameErrorMsg, setNameErrMsg] = useState("");
+    const [passwordErrorMsg, setPasswordErrMsg] = useState("");
+    const [isChannelCreated, setIsChannelCreated] = useState(false);
+
+    useEffect(() => {
+        if (channelName.length < 3)
+            setSettingsValid(false);
+        else if (channelType.length > 0 && channelType != "Protected") {
+            setSettingsValid(true);
+        } else if (channelType == "Protected" && channelPassword.length > 2) {
+            setSettingsValid(true);
+        } else {
+            setSettingsValid(false);
+        }
+
+        if (channelType != "Protected")
+            setChannelPassword("");
+
+    }, [channelName, channelType, channelPassword]);
 
     const handleOnChange = (event) => {
-        setChannelType( event.target.value);
-        setChannelPassword("");
-        if (channelType.length > 0 && channelType != "Protected" && channelName.length > 2)
-        {
-            setSettingsValid(true);
-            console.log("case A");
-        }
-        else if (channelType != "Protected")
-        {
-            setChannelPassword("");
-            console.log("case B");
-        }
-        else if (channelType == "Protected" && channelPassword.length < 3)
-        {
-            setSettingsValid(false);
-            console.log("case C");
-        }
-        console.log(`channel type: ${channelType}`);
-       /* else
-        {
-            setSettingsValid(false);
-            console.log("case D");
-        }*/
+        setChannelType(event.target.value);
     };
 
-    function handleOnNameChange(event: React.ChangeEvent<HTMLInputElement>){
+    function handleOnNameChange(event: React.ChangeEvent<HTMLInputElement>) {
         const value = event.target.value;
         setChannelName(value);
-        if (value.length > 2 && channelType != "Protected")
-        {
-            setSettingsValid(true);
-            console.log("case E");
+
+        if (value.length < 3 || value.length > 12) {
+            setNameErrMsg("Length: 3 => 12");
         }
-        else if (channelType == "Protected" && channelPassword.length < 3)
-        {
-            setSettingsValid(false);
-            console.log("case F");
+        else if (!/^[A-Za-z0-9_]+$/.test(value)) {
+            setNameErrMsg("Alphanumerics only");
         }
         else
-        {
-            setSettingsValid(false);
-            console.log("case G");
-        }
-
+            setNameErrMsg("");
     }
-    function handleOnPasswordChange(event: React.ChangeEvent<HTMLInputElement>){
-            const value = event.target.value;
-            setChannelPassword(value);
-            setSettingsValid(value.length > 2 && channelName.length > 2);
+
+    function handleOnPasswordChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const value = event.target.value;
+        setChannelPassword(value);
+
+        if (value.length < 3 || value.length > 12) {
+            setPasswordErrMsg("min. 3 characters");
+        }
+        else if (!/^[A-Za-z0-9_]+$/.test(value)) {
+            setPasswordErrMsg("Alphanumerics only");
+        }
+        else
+            setPasswordErrMsg("");
     }
 
     function handleSubmit(event) {
         event.preventDefault();
         if (areSettingsValids)
-            console.log(`${channelType} channel ${channelName} created ${channelType == "Protected"? `password: ${channelPassword}` : ""}`);
+        {
+            console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
+            setIsChannelCreated(true);
+        }
     }
+
+    function handleShowPassword(event){
+        event.preventDefault();
+        setPasswordVisible(showPassword == "text" ? "password" : "text");
+    }
+
 //todo: afficher uniquement en cas de clique sur le bouton d ajout + deplacer les boutons de settings vers le haut
     return (
-        <div className={className}>
-            <h1>CREATE NEW CHANNEL</h1>
+        <>
+            {!isChannelCreated && <div className={className}>
+            <h1 id={"popup_title"}>NEW CHANNEL</h1>
             <form>
                 <label>
-                    <input id={"channelNameInput"} type={"text"} autoFocus={true}
-                           inputMode={"text"} minLength={3} maxLength={12} placeholder={"Channel Name"}
-                           value={channelName} onChange={handleOnNameChange}/>
+                    <input id={"channelNameInput"}
+                           type={"text"}
+                           autoFocus={true}
+                           inputMode={"text"}
+                           minLength={3}
+                           maxLength={12}
+                           placeholder={" Name"}
+                           value={channelName}
+                           onChange={handleOnNameChange}/>
+                    <p style={{fontSize: "12px", color: "red"}}>{nameErrorMsg}</p>
                 </label>
-                <label id={"visibility_block"}>Visibility: ({channelType})
-                    <ul >
-                        <li><label> <input type="radio" name="visibility" value="Public" onChange={handleOnChange} /> Public</label></li>
-                        <li><label> <input type="radio" name="visibility" value="Protected" onChange={handleOnChange} /> Protected</label></li>
+                <label id={"visibility_block"}>Visibility:
+                    <ul>
+                        <li><label> <input type="radio"
+                                           name="visibility"
+                                           value="Public"
+                                           onChange={handleOnChange}/> Public</label></li>
+
+                        <li><label> <input type="radio"
+                                           name="visibility"
+                                           value="Protected"
+                                           onChange={handleOnChange}/> Protected</label></li>
                         {channelType == "Protected" &&
                             <li><label>
-                                <input id={"channelPasswordInput"} type={"text"} inputMode={"text"}
-                                       minLength={3} maxLength={12} value={channelPassword}
-                                       placeholder={"Password"} autoFocus={true} onChange={handleOnPasswordChange}/>
-                        </label></li>}
-                        <li><label> <input type="radio" name="visibility" value="Private" onChange={handleOnChange} /> Private</label> </li>
+                                <input id={"channelPasswordInput"}
+                                       type={showPassword}
+                                       inputMode={"text"}
+                                       minLength={3}
+                                       maxLength={12}
+                                       value={channelPassword}
+                                       placeholder={" Password"}
+                                       autoFocus={true}
+                                       onChange={handleOnPasswordChange}/>
+                                <Button id={"button_showPassword"} image={showPassword == "password" ? "/eye-off.svg" : "/eye-show.svg"}
+                                                                                   onClick={handleShowPassword}
+                                                                                   alt={"Show password button"}/>
+                                <p style={{fontSize: "12px", color: "red"}}>{passwordErrorMsg}</p>
+                            </label></li>}
+
+                        <li><label> <input type="radio" name="visibility" value="Private"
+                                           onChange={handleOnChange}/> Private</label></li>
                     </ul>
 
                 </label>
@@ -99,7 +136,8 @@ const ChatNewChannelPopup = ({className}) => {
                     />}
                 </button>
             </form>
-        </div>
+        </div>}
+        </>
     )
 }
 
