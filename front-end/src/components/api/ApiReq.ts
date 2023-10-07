@@ -3,6 +3,7 @@
 import Axios from "./AxiosConfig";
 import { strRoutes } from "@/shared/routesApi";
 import { IUser } from "@/shared/types";
+import { IChannel } from "@/shared/typesChannel";
 import axios from "axios";
 
 const AuthManager = require('./AuthManager');
@@ -54,6 +55,19 @@ export namespace getApi {
 				'Authorization': `Bearer ${authManager.getToken()}`
 			}
 		});}
+
+
+	interface IUserChan extends IUser {	channelJoined: IChannel[];	}
+	export const getChannelJoined = (): any => {
+		let user: IUserChan;
+		const chanListJoined = async () => {
+			user = await axiosInstance.get(`${strRoutes.channel.getChannelJoined()}`, {
+				headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
+			});
+			chanListJoined();
+			return user.channelJoined;
+		}
+	}
 
 }
 

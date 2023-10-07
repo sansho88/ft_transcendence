@@ -60,10 +60,11 @@ export namespace wsChatRoutesBack {
 	export const joinRoom=()      						   		=> {return `joinRoom`} 
 	export const leaveRoom=()      						   		=> {return `leaveRoom`} 
 	export const sendMsg=()      						   			=> {return `sendMsg`} 
-
+	
 }
 export namespace wsChatRoutesClient {
 	export const updateChannel=()      						  	=> {return `createRoom`} 
+	export const updateChannelsJoined=()    					=> {return `updateChannelsJoined`} 
 
 
 }
@@ -129,6 +130,7 @@ export namespace channel {
 	export const getAll = () 																											=> {return `${serverApi}/${routeChannels}/get`};
 	export const getUsersChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
 	export const getMsgsChannel = (channelID: number, timestamp: number)					=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
+	export const getChannelJoined = ()																						=> {return `${serverApi}/${routeChannels}/channelJoined`};
 
 
 }

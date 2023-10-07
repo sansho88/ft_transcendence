@@ -43,6 +43,7 @@ import {
 } from '../dto/event.dto'
 import {InviteService} from "./invite.service";
 import {InviteEntity} from "../entities/invite.entity";
+import { wsChatRoutesClient } from 'shared/routesApi';
 
 class SocketUserList {
 	userID: number;
@@ -214,6 +215,21 @@ export class ChatGateway
 		return this.leaveChat(channel, user);
 	}
 
+	/**
+	 * Ping cette route ws update la liste des channels JOIN de ce meme client
+	 * @param user 
+	 * @param client 
+	 * @returns 
+	 */
+	@SubscribeMessage(wsChatRoutesClient.updateChannelsJoined())
+	@UseGuards(WSAuthGuard)
+	async updateClientChannelsJoined( 
+		@CurrentUser() user: UserEntity,
+		@ConnectedSocket() client: Socket,) {
+		return client.emit(wsChatRoutesClient.updateChannelsJoined(), await this.channelService.getJoinedChannelList(user));
+	}
+
+
 	@SubscribeMessage('sendMsg')
 	@UseGuards(WSAuthGuard)
 	async handelMessages(
@@ -233,8 +249,9 @@ export class ChatGateway
 			return await this.SendMessage(channel, user, data.content);
 		}
 		return client.emit('sendMsg', {
-			error: 'You are not part of this channel',
+			error: 'You are not part of this channel', //TODO: il faudra changer pour emit sur invent Info notif, (a definir)
 		});
+
 	}
 
 	/**

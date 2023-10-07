@@ -1,4 +1,4 @@
-export namespace messages {
+export namespace messageDTO {
 	
 	export interface ISendMessageDTOPipe {
 		channelID: number;

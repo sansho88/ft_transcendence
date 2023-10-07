@@ -1,7 +1,7 @@
 import { Socket } from "socket.io-client";
 import { wsChatRoutesBack, wsChatRoutesClient } from "@/shared/routesApi";
 import { IChannel, IChannelMessage } from "@/shared/typesChannel";
-import { channelsDTO } from "@/shared/DTO/InterfaceDTO"
+import { channelsDTO, messageDTO} from "@/shared/DTO/InterfaceDTO"
 import { IChannelEntity } from "@/shared/entities/IChannel.entity";
 import { channel } from "diagnostics_channel";
 
@@ -15,6 +15,13 @@ export namespace wsChatEvents {
 
   export function leaveRoom(socket: Socket, leaveChannel: channelsDTO.ILeaveChannelDTOPipe) {
     socket.emit(wsChatRoutesBack.joinRoom(), leaveChannel);}
+
+  export function sendMsg(socket: Socket, newMessage: messageDTO.ISendMessageDTOPipe) {
+    socket.emit(wsChatRoutesBack.sendMsg(), newMessage);}
+
+  export function pingUpdateChannelsJoined(socket: Socket) {
+    socket.emit(wsChatRoutesClient.updateChannelsJoined())
+  }
 
 }
 
@@ -32,9 +39,13 @@ export namespace wsChatListen {
 
   export function createRoomListen(socket: Socket, setter: Function) {
     socket.on(wsChatRoutesBack.createRoom(), (data: {channel: IChannelEntity}) => {
-      console.log('CREATE ROOM: ' + data.channel.name);
       setter(prevChannels => [...prevChannels, data.channel]);
-      console.log('ROOM TAB: ' + JSON.stringify(data.channel));
+    })
+  }
+
+  export function updateChannelsJoined(socket: Socket, setChannelsJoined: Function) {
+    socket.on(wsChatRoutesClient.updateChannelsJoined(), (data: IChannelEntity[]) => { //TODO:
+      setChannelsJoined(prevChannels => [...prevChannels, ...data]);
     })
   }
 

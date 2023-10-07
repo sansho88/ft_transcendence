@@ -202,4 +202,9 @@ export class ChannelService {
 			return mutes.findIndex(mute => mute.user.UserID == usr.UserID)
 		}) + 1)
 	}
+
+	async getJoinedChannelList(user: UserEntity): Promise<ChannelEntity[]> {
+		const ret: UserEntity =  await this.userService.findOne(user.UserID, ['channelJoined']);
+			return ret.channelJoined;
+	}
 }
