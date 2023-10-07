@@ -18,24 +18,42 @@ export default function ChatMessagesList({className, messages, currentChannel, u
   const [newMessageNoRead, setNewMessageNoRead] = useState<boolean>(false);
 
 
-  const goToEndMessage = () => {
-    refDivEndMessage.current?.scrollIntoView({behavior: "smooth"});
+  const goToEndMessage = (typeScroll: "auto" | "smooth") => {
+    refDivEndMessage.current?.scrollIntoView({behavior: typeScroll});
   }
   useEffect(() => {
-    goToEndMessage();
+    goToEndMessage('auto');
+    
     
   }, []) //TODO: dependence new message... OU PAS ?
 
   useEffect(() => {
-    setTimeout(() => {
-      console.log('ChatMessageList je go to end ***********************')
-      goToEndMessage();
 
+    setTimeout(() => {
+      goToEndMessage('auto');
     }, 50)
     
-  }, [currentChannel]) //TODO: dependence new message
+  }, [currentChannel])
 
 
+//si nouveau message check la position de la scrollbar, va en bas si proche du bas sinon ne fait rien
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = refDivParent.current?.scrollTop;
+      if (refDivParent && scrollPosition)
+      {
+        const maxHeight = refDivParent.current?.scrollHeight - refDivParent.current?.clientHeight;
+        console.log(`scollPos=${scrollPosition} || maxHeigh=${maxHeight - 50}`)
+        if (scrollPosition > (maxHeight - 400))
+        {
+          setTimeout(() => {
+            goToEndMessage('smooth');
+          }, 50)
+        }
+      }
+    };
+      handleScroll();
+  }, [messages]);
 
   //afficher une vignnette / bouton pour redescendre au tout dernier messages
   useEffect(() => {
@@ -69,7 +87,7 @@ export default function ChatMessagesList({className, messages, currentChannel, u
   
   const btnGoToEnd = (message: string, className?: string) => {
     return (
-      <button className={`pointer-events-auto z-10 ${className}`} onClick={goToEndMessage}>{message}</button>
+      <button className={`pointer-events-auto z-10 ${className}`} onClick={() => goToEndMessage('smooth')}>{message}</button>
     )
   }
 

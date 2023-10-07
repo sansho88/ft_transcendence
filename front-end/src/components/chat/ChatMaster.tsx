@@ -70,7 +70,8 @@ export default function ChatMaster({className, token, userID}: {className: strin
     updateMessages(currentChannel);
     
     const messageHandler = (message: messageDTO.IReceivedMessageEventDTO) => {
-      newMessageHandler(socketChat, setMessagesChannel, currentChannel, message);
+      if (socketChat?.connected)
+        newMessageHandler(socketChat, setMessagesChannel, currentChannel, message);
     };
   
     if (socketChat) {
@@ -104,31 +105,10 @@ export default function ChatMaster({className, token, userID}: {className: strin
   }, [])
 
 
-
-  useEffect(() => {
-    console.log(`currentChannel =  ${currentChannel}`);
-    //TODO Charger les messages du channel correspondant
-  }, [currentChannel])
-
   useEffect(() => {
     console.log(`CHANNELS UPDATED =  ${JSON.stringify(channels)}`);
 
-
   }, [channels])
-
-  useEffect(() => {
-    if (socketChat?.connected)
-    {
-      // var user1 : IUser = {has_2fa: false, login: "ben", status: 0,     UserID: 1, nickname: 'BenNick'};
-      // const chan0: CreateChannelDTOPipe = {name: "chan1", privacy: false}; 
-
-      // setChannels([...Channels, chan0, chan1, chan2, chan3] )
-      // manager.current.addChannel(chan0);
-      // manager.current.addChannel(chan1);
-      // manager.current.addChannel(chan2);
-      // manager.current.addChannel(chan3);
-    }
-  }, [socketChat?.connected])
   
   return (
     <div className={`${className}`}>
