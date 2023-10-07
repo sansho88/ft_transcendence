@@ -4,6 +4,7 @@ import { IChannel, IChannelMessage } from "@/shared/typesChannel";
 import { channelsDTO, messageDTO} from "@/shared/DTO/InterfaceDTO"
 import { IChannelEntity } from "@/shared/entities/IChannel.entity";
 import { channel } from "diagnostics_channel";
+import { IMessageEntity } from "@/shared/entities/IMessage.entity";
 
 export namespace wsChatEvents { 
 
@@ -44,9 +45,45 @@ export namespace wsChatListen {
   }
 
   export function updateChannelsJoined(socket: Socket, setChannelsJoined: Function) {
+    
     socket.on(wsChatRoutesClient.updateChannelsJoined(), (data: IChannelEntity[]) => { //TODO:
       setChannelsJoined(prevChannels => [...prevChannels, ...data]);
     })
   }
+
+
+
+  /*---------------------------------------------- NEW MESSAGE MANAGE WS ------------------------------------------------ */
+  const newMessageHandler = ( socket: Socket, 
+                              setMessages: React.Dispatch<React.SetStateAction<messageDTO.IReceivedMessageEventDTO[]>>, 
+                              currentChannel: number,
+                              message: messageDTO.IReceivedMessageEventDTO) => {
+    if (message.channelID === currentChannel)
+        setMessages(prevMessages => [...prevMessages, message]);
+  }
+
+  export function newMessageListen(
+    socket: Socket, 
+    setMessages: React.Dispatch<React.SetStateAction<messageDTO.IReceivedMessageEventDTO[]>>, 
+    currentChannel: number) {
+    socket.off(wsChatRoutesBack.sendMsg(), (message: messageDTO.IReceivedMessageEventDTO) => {
+      newMessageHandler(socket, setMessages, currentChannel, message);
+    });
+
+    socket.on(wsChatRoutesBack.sendMsg(), (message: messageDTO.IReceivedMessageEventDTO) => {
+      newMessageHandler(socket, setMessages, currentChannel, message);
+    })
+  }
+  
+  export function newMessageListenOFF(
+    socket: Socket, 
+    setMessages: React.Dispatch<React.SetStateAction<messageDTO.IReceivedMessageEventDTO[]>>, 
+    currentChannel: number) {
+    socket.off(wsChatRoutesBack.sendMsg(), (message: messageDTO.IReceivedMessageEventDTO) => {
+      newMessageHandler(socket, setMessages, currentChannel, message);
+    })
+  }
+
+
 
 }

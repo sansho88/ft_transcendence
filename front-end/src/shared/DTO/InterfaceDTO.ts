@@ -1,7 +1,15 @@
+import { IUser } from "../types";
+
 export namespace messageDTO {
 	
 	export interface ISendMessageDTOPipe {
 		channelID: number;
+		content: string;
+	}
+
+	export interface IReceivedMessageEventDTO {
+		channelID: number;
+		author: IUser;
 		content: string;
 	}
 }

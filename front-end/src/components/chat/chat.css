@@ -88,6 +88,11 @@
   border: 1px solid black;
   border-radius: 4px;
 }
+
+.channel_selected{
+  background-color: rgba(58, 118, 114, 0.869);
+}
+
 /* element channel (button channel.name) */
 .chat_channel_list_element {
   height: auto;
@@ -96,6 +101,16 @@
   align-items: center;
   color: #d8d8d8;
   cursor: pointer;
+}
+
+.chat_channel_list_element_selected {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.chat_channel_list_element_mp {
+  color: #00ffff;
+  font-style: italic;
 }
 
 #invite_options{

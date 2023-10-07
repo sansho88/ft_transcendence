@@ -129,8 +129,9 @@ export namespace channel {
 	// export const postCreateChannel = () 																					=> {return `${serverApi}/${routeChannels}/create`} use WS event
 	export const getAll = () 																											=> {return `${serverApi}/${routeChannels}/get`};
 	export const getUsersChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
-	export const getMsgsChannel = (channelID: number, timestamp: number)					=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
+	// export const getMsgsChannel = (channelID: number, timestamp: number)					=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
 	export const getChannelJoined = ()																						=> {return `${serverApi}/${routeChannels}/channelJoined`};
+	export const getAllMessagesChannel = (channelID: number)											=> {return `${serverApi}/${routeChannels}/msg/${channelID}`};
 
 
 }

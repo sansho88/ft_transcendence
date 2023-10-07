@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useContext, useEffect, useState, useRef, createContext } from 'react'
-import { LoggedContext, SocketContextChat } from '@/context/globalContext'
+import { LoggedContext, SocketContextChat, UserContext } from '@/context/globalContext'
 import { IChannel } from '@/shared/typesChannel'
 import { Channel } from './class/Channel'
 import ChatInput from './subComponents/ChatInput'
@@ -16,13 +16,16 @@ import { channel } from 'diagnostics_channel'
 import * as apiReq from '../api/ApiReq'
 
 import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelPopup";
+import { IMessageEntity } from '@/shared/entities/IMessage.entity'
+import { messageDTO } from '@/shared/DTO/InterfaceDTO'
+import { wsChatRoutesBack } from '@/shared/routesApi'
 
 
-export default function ChatMaster({className, token}: {className: string, token: string}) {
+export default function ChatMaster({className, token, userID}: {className: string, token: string, userID: number}) {
 
   const [channelsServer, setChannelsServer] = useState<IChannel[]>([]) //recuperer tous les channels server
   const [channels, setChannels] = useState<IChannel[]>([]) //list des channels JOINED
-  const [messagesChannel, setMessagesChannel] = useState<IChannel[]>() //les messages actuellement load du channel
+  const [messagesChannel, setMessagesChannel] = useState<messageDTO.IReceivedMessageEventDTO[]>([]) //les messages actuellement load du channel //TODO: faire route ws avec ping et update
   const [currentChannel, setCurrentChannel] = useState<number>(-1); // definir le channel en cours by ID
 
 
@@ -36,14 +39,50 @@ export default function ChatMaster({className, token}: {className: string, token
 
   if(socketChat?.disconnected) 
   { 
-    console.log(`token = ${token}`);
+    console.log(`Chat WS is connected in ChatMaster`);
     socketChat.auth = { type: `Bearer`, token: `${token}` };
     socketChat.connect();
   }
 
+  async function updateMessages(channelID: number) {
+    try {
+      if (currentChannel != -1)
+      {
+        const messages = await apiReq.getApi.getAllMessagesChannel(channelID);
+        setMessagesChannel(messages.data);
+        console.log('update messages? ' + JSON.stringify(messages.data))
+      }
+    }
+    catch (error){}
+
+  }
+
+  const newMessageHandler = (socket: Socket,
+    setMessages: React.Dispatch<React.SetStateAction<messageDTO.IReceivedMessageEventDTO[]>>,
+    currentChannel: number,
+    message: messageDTO.IReceivedMessageEventDTO) => {
+    if (message.channelID === currentChannel)
+      setMessages(prevMessages => [...prevMessages, message]);
+  }
+
+
   useEffect(() => {
-    console.log('Vraiment pas modif ?')
-  }, [currentChannel])
+    updateMessages(currentChannel);
+    
+    const messageHandler = (message: messageDTO.IReceivedMessageEventDTO) => {
+      newMessageHandler(socketChat, setMessagesChannel, currentChannel, message);
+    };
+  
+    if (socketChat) {
+      socketChat.on(wsChatRoutesBack.sendMsg(), messageHandler);
+    }
+    
+    return () => {
+      if (socketChat) {
+        socketChat.off(wsChatRoutesBack.sendMsg(), messageHandler);
+      }
+    };
+  }, [currentChannel]);
 
 
   useEffect(() => {
@@ -53,10 +92,13 @@ export default function ChatMaster({className, token}: {className: string, token
         wsChatListen.createRoomListen(socketChat, setChannels);
         wsChatListen.updateChannelsJoined(socketChat, setChannels);
         wsChatEvents.pingUpdateChannelsJoined(socketChat);
-        //TODO: listen all channel por udpate temps reel liste join et channel total
+      }
+      else {
+
       }
   
     return (() => {
+      socketChat?.off();
       socketChat?.disconnect();
     })
   }, [])
@@ -91,10 +133,10 @@ export default function ChatMaster({className, token}: {className: string, token
   return (
     <div className={`${className}`}>
       {socketChat?.active ? 
-        <ChatChannelList className={'chat_channel_block'} socket={socketChat} channels={channels} setCurrentChannel={setterCurrentChannel} /> : <></> }
+        <ChatChannelList className={'chat_channel_block'} socket={socketChat} channels={channels} setCurrentChannel={setterCurrentChannel} currentChannel={currentChannel} isServerList={false} /> : <></> }
       
       <div className='chat_block_main'>
-        <ChatMessagesList className='chat_message_list' messages={[]} /> {/* TODO: charger ref liste message channel en cours*/}
+        <ChatMessagesList className='chat_message_list' messages={messagesChannel} currentChannel={currentChannel} userCurrentID={userID}/> {/* TODO: charger ref liste message channel en cours*/}
         {socketChat?.active ? 
         <ChatInput className={'chat_block_messages_input'} socket={socketChat} channelID={currentChannel} /> : <></>}
       </div>

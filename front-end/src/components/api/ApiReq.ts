@@ -1,5 +1,6 @@
 'use client'
 
+import { IMessageEntity } from "@/shared/entities/IMessage.entity";
 import Axios from "./AxiosConfig";
 import { strRoutes } from "@/shared/routesApi";
 import { IUser } from "@/shared/types";
@@ -69,25 +70,13 @@ export namespace getApi {
 		}
 	}
 
+	export const getAllMessagesChannel = (channelID: number): Promise<IMessageEntity[]> => {
+			// console.warn('DEBUG: getAllMessagesChannel');
+			return axiosInstance.get(`${strRoutes.channel.getAllMessagesChannel(channelID)}`, {
+				headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
+			});
+		}	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 export namespace postApi {

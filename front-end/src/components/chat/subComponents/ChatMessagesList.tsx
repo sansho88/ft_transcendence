@@ -4,9 +4,13 @@ import React, {useRef, useEffect, useState} from 'react'
 import ChatMessage from './elements/ChatMessageListElement'
 import { v4 as uuidv4 } from "uuid";
 import { IChannelMessage } from '@/shared/typesChannel';
+import { IChannelEntity } from '@/shared/entities/IChannel.entity';
+import { IMessageEntity } from '@/shared/entities/IMessage.entity';
+import { messageDTO } from '@/shared/DTO/InterfaceDTO'
 
 
-export default function ChatMessagesList({className, messages}: {className: string, messages: IChannelMessage[]}) {
+export default function ChatMessagesList({className, messages, currentChannel, userCurrentID}
+  : {className: string, messages: messageDTO.IReceivedMessageEventDTO[], currentChannel: number, userCurrentID: number}) {
 
   const refDivEndMessage = useRef<HTMLDivElement>(null);
   const refDivParent = useRef<HTMLDivElement>(null);
@@ -20,7 +24,17 @@ export default function ChatMessagesList({className, messages}: {className: stri
   useEffect(() => {
     goToEndMessage();
     
-  }, []) //TODO: dependence new message
+  }, []) //TODO: dependence new message... OU PAS ?
+
+  useEffect(() => {
+    setTimeout(() => {
+      console.log('ChatMessageList je go to end ***********************')
+      goToEndMessage();
+
+    }, 50)
+    
+  }, [currentChannel]) //TODO: dependence new message
+
 
 
   //afficher une vignnette / bouton pour redescendre au tout dernier messages
@@ -44,8 +58,8 @@ export default function ChatMessagesList({className, messages}: {className: stri
       refDivParent.current?.removeEventListener('scroll', handleScroll);
     };
   }, [refDivParent.current]);
-  
 
+  
   useEffect(() => {
     if (refDivParent.current !== null)
     {  const maxHeight = refDivParent.current?.scrollHeight - refDivParent.current?.clientHeight;
@@ -63,17 +77,17 @@ export default function ChatMessagesList({className, messages}: {className: stri
     <div className={`${className} `} >
       <div className={`chat_message_list_sub`} ref={refDivParent} >
         {/* {buttonGoToEnd && btnGoToEnd()} */}
-        {messages.map((obj, index) => (
+        {Array.isArray(messages) &&  messages.map((obj, index) => (
           <div key={'div' + index}>
-            {obj.ownerUser.UserID > 0 ?
+            {obj.author.UserID > 0 ?
               <div key={'blocMessage_' + index} className='chat_message_list_block'>
                 <li key={'nickname_' + index}
-                  className={`chat_message_list_nickname ${obj.ownerUser.UserID === 2 ?
+                  className={`chat_message_list_nickname ${obj.author.UserID === userCurrentID ?
                     'chat_message_list_nickname_right' : 'chat_message_list_nickname_left'}`}>
-                  {obj.ownerUser.nickname} ({obj.ownerUser.login})
+                  {obj.author.nickname} ({obj.author.login})
                 </li>
                 <li key={'messageContent_' + index}
-                  className={`chat_message_list_content ${obj.ownerUser.UserID === 2 ?
+                  className={`chat_message_list_content ${obj.author.UserID === userCurrentID ?
                     'chat_message_list_content_right' : 'chat_message_list_content_left'}`}>
                   {obj.content}
                 </li>

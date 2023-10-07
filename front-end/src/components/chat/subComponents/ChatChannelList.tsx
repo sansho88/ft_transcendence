@@ -10,8 +10,8 @@ import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
 import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelPopup";
 
 
-export default function ChatChannelList({className, socket, channels, setCurrentChannel}
-  : {className: string, socket: Socket, channels: IChannel[], setCurrentChannel: Function}) {
+export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList}
+  : {className: string, socket: Socket, channels: IChannel[], setCurrentChannel: Function, currentChannel: number, isServerList: boolean}) {
 
   const counterDBG = useRef<number>(0);
 
@@ -39,6 +39,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               alt="ADD CHANNEL BUTTON"
               width={26}
               height={22}
+              style={{ height: "auto", width: "auto"}}
           />
         </button>
     { isPopupVisible && <ChatNewChannelPopup className={"chat_new_channel_popup"} socket={socket}/>}
@@ -76,11 +77,14 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               key={channel.channelID}
               channelID={channel.channelID}
               channelName={channel.name}
-              isInvite={false}
+              isInvite={false} //TODO:
+              isMp={false} //TODO:
               f={() => {
-                wsChatEvents.joinRoom(socket, channel) //FIXME: IST JUST FOR DEV
+                if (isServerList)
+                  wsChatEvents.joinRoom(socket, channel) //FIXME: differencier de la liste des channels dispo en serveur
                 setCurrentChannel(channel.channelID);
               }}
+              currentChannel={currentChannel}
             />
           ))
         }

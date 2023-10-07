@@ -100,7 +100,7 @@ const HomePage = ({className}: HomePageProps) => {
                 <div className={"game"}>
                     <Game className={"game"}/>
                 </div>
-               <ChatMaster className={'chat_master'} token={tokenRef.current}/>
+               <ChatMaster className={'chat_master'} token={tokenRef.current} userID={userContext.UserID}/>
                 <div className={"absolute bottom-0 left-0"}><NotifComponent /></div>
 
             </main>
