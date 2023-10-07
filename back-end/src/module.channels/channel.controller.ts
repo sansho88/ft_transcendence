@@ -1,12 +1,12 @@
 import {
-	BadRequestException,
+	BadRequestException, Body,
 	Controller,
 	Get,
 	Param,
 	ParseIntPipe,
 	Post,
 	Put,
-	UseGuards,
+	UseGuards, ValidationPipe,
 } from '@nestjs/common';
 import {ChannelService} from './channel.service';
 import {AuthGuard} from '../module.auth/auth.guard';
@@ -19,6 +19,8 @@ import {MutedService} from "./muted.service";
 import {MessageService} from "./message.service";
 import {ChannelEntity} from "../entities/channel.entity";
 import {InviteService} from "./invite.service";
+import {ChangeChannelDTOPipe} from "../dto.pipe/channel.dto";
+import {ChannelCredentialService} from "./credential.service";
 
 @Controller('channel')
 export class ChannelController {
@@ -30,6 +32,7 @@ export class ChannelController {
 		private readonly usersService: UsersService,
 		private readonly chatGateway: ChatGateway,
 		private readonly inviteService: InviteService,
+		private readonly credentialService: ChannelCredentialService
 	) {
 	}
 
@@ -338,4 +341,18 @@ export class ChannelController {
 		await this.inviteService.remove(invite);
 	}
 
+	@Put('modif/:channelID')
+	@UseGuards(AuthGuard)
+	async modifyChannel(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Body(new ValidationPipe()) data: ChangeChannelDTOPipe,
+	) {
+		const channel = await this.channelService.findOne(channelID);
+		console.log(channel);
+		if (channel.owner.UserID !== user.UserID)
+			throw new BadRequestException('You need to be the channel Owner to change it');
+		const credential = await this.credentialService.create(data.password);
+		return this.channelService.modifyChannel(channel, credential, data);
+	}
 }

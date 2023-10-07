@@ -11,7 +11,7 @@ import {IoAdapter} from '@nestjs/platform-socket.io';
 import {Server, Socket} from 'socket.io';
 import {MessageService} from './message.service';
 import {WSAuthGuard} from '../module.auth/auth.guard';
-import {BadRequestException, UseGuards, ValidationPipe} from '@nestjs/common';
+import {UseGuards, ValidationPipe} from '@nestjs/common';
 import {CurrentUser} from '../module.auth/indentify.user';
 import {ChannelService} from './channel.service';
 import {BannedService} from "./banned.service";
@@ -250,11 +250,12 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
-		const user2 = await this.usersService.findOne(data.targetID);
-		if (!user2) throw new BadRequestException('This user doesn\'t exist')
+		const user2: UserEntity = await this.usersService.findOne(data.targetID);
+		if (!user2) return client.emit('createMP', {messages: 'This user doesn\'t exist'});
+		if (user2.UserID == user.UserID) return client.emit('createMP', {messages: 'You cannot create a mp with yourself, Find a friend :D'});
 		const channel = await this.channelService.getmp(user, user2).catch(() => null);
 		if (channel)
-			throw new BadRequestException('You already have a direct channel with this user');
+			return client.emit('createMP', {messages: 'You already have a direct channel with this user'});
 		// if (user blocked)
 		// 	throw new BadRequestException('You cannot create a direct channel with them');
 		const mp = await this.channelService.createMP(user, user2);

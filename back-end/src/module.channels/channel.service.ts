@@ -6,7 +6,7 @@ import {UsersService} from '../module.users/users.service';
 import {UserEntity} from '../entities/user.entity';
 import {ChannelCredentialEntity} from '../entities/credential.entity';
 import {ChannelCredentialService} from './credential.service';
-import {JoinChannelDTOPipe} from '../dto.pipe/channel.dto';
+import {ChangeChannelDTOPipe, JoinChannelDTOPipe} from '../dto.pipe/channel.dto';
 import {BannedService} from "./banned.service";
 import {MutedService} from "./muted.service";
 
@@ -66,7 +66,6 @@ export class ChannelService {
 				where: {channelID: id},
 				relations,
 			});
-		console.log('Channel = ', channel, canBeMP);
 		if (channel == null)
 			throw new BadRequestException('This channel doesn\'t exist');
 		return channel;
@@ -211,7 +210,7 @@ export class ChannelService {
 		const id1: number = Math.min(user1.UserID, user2.UserID);
 		const id2: number = Math.max(user1.UserID, user2.UserID);
 		const mp = this.channelRepository.create({
-			name: `mp.${id1}.${id2}`,
+			name: `.mp${id1}.${id2}`,
 			userList: [user1, user2],
 			type: ChannelType.DIRECT,
 			mp: true,
@@ -231,5 +230,20 @@ export class ChannelService {
 		if (!channel)
 			throw new BadRequestException('this channel doesn\'t exist')
 		return channel;
+	}
+
+	async modifyChannel(channel: ChannelEntity, credential: ChannelCredentialEntity, data: ChangeChannelDTOPipe) {
+		let privacy: ChannelType = channel.type;
+		if (typeof data.privacy !== 'undefined') {
+			if (data.privacy == true)
+				privacy = ChannelType.PRIVATE;
+			else if (credential.password != null) privacy = ChannelType.PROTECTED;
+			else privacy = ChannelType.PUBLIC;
+		}
+		channel.type = privacy;
+		if (data.name)
+			channel.name = data.name;
+		channel.credential = credential;
+		return channel.save();
 	}
 }

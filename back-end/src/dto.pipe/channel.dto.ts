@@ -43,3 +43,17 @@ export class CreateMpDTOPPipe {
 	@IsNumber()
 	targetID: number
 }
+
+export class ChangeChannelDTOPipe {
+	@IsOptional()
+	@IsString()
+	name: string;
+
+	@IsOptional()
+	@IsString()
+	password: string;
+
+	@IsOptional()
+	@IsBoolean()
+	privacy: boolean;
+}
