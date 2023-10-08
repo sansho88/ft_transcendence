@@ -11,7 +11,7 @@ import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelP
 
 
 export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList}
-  : {className: string, socket: Socket, channels: IChannel[], setCurrentChannel: Function, currentChannel: number, isServerList: boolean}) {
+  : {className: string, socket: Socket, channels: IChannel[], channelsServer: IChannel[], setCurrentChannel: Function, currentChannel: number, isServerList: boolean}) {
 
   const counterDBG = useRef<number>(0);
 

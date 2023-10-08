@@ -92,6 +92,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
         wsChatListen.infoRoom(socketChat); //DBG
         wsChatListen.createRoomListen(socketChat, setChannels);
         wsChatListen.updateChannelsJoined(socketChat, setChannels);
+        //TODO: update channelsServer
         wsChatEvents.pingUpdateChannelsJoined(socketChat);
       }
       else {

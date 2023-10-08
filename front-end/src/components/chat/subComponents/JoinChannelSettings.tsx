@@ -45,7 +45,7 @@ const JoinChannelSettings = ({className}) => {
         <>
             {!isChannelJoined && <div className={className}>
                 <h1 id={"popup_title"}>JOIN A CHANNEL</h1>
-                <form>
+                {/* <form>
                     <label>
                         <input id={"channelNameInput"}
                                type={"text"}
@@ -81,7 +81,7 @@ const JoinChannelSettings = ({className}) => {
                             height={32}
                         />}
                     </button>
-                </form>
+                </form> */}
             </div>}
         </>
     )
