@@ -10,8 +10,15 @@ import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
 import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelPopup";
 
 
-export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList}
-  : {className: string, socket: Socket, channels: IChannel[], channelsServer: IChannel[], setCurrentChannel: Function, currentChannel: number, isServerList: boolean}) {
+export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList, channelsServer}
+  : { className: string, 
+      socket: Socket, 
+      channels: IChannel[], 
+      channelsServer: IChannel[],
+      setCurrentChannel: Function, 
+      currentChannel: number, 
+      isServerList: boolean, 
+    }) {
 
   const counterDBG = useRef<number>(0);
 
@@ -71,7 +78,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
       <div className={`chat_channel_list`}>
         {/* <ChatChannelListElement channelID={1} channelName='#Channel 1' f={setChannels(channel)} /> */}
         {/* <button onClick={() => setCurrentChannel(2)}> AHHH </button> */}
-        {channels &&
+        {channels && isServerList === false &&
           channels.map((channel) => (
             <ChatChannelListElement
               key={channel.channelID}
@@ -80,9 +87,25 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               isInvite={false} //TODO:
               isMp={false} //TODO:
               f={() => {
-                if (isServerList)
-                  wsChatEvents.joinRoom(socket, channel) //FIXME: differencier de la liste des channels dispo en serveur
                 setCurrentChannel(channel.channelID);
+              }}
+              currentChannel={currentChannel}
+            />
+          ))
+        }
+        {channels && isServerList === true && channelsServer &&
+          channels.map((channel) => (
+            channel.type <= EChannelType.PROTECTED && channelsServer.includes(channel) === false &&
+            <ChatChannelListElement
+              key={channel.channelID}
+              channelID={channel.channelID}
+              channelName={channel.name}
+              isInvite={false} //TODO:
+              isMp={false} //TODO:
+              f={() => {
+                wsChatEvents.joinRoom(socket, channel) //FIXME: differencier de la liste des channels dispo en serveur
+                // setCurrentChannel(channel.channelID); //TODO: ajouter new Channel 
+
               }}
               currentChannel={currentChannel}
             />

@@ -2,13 +2,36 @@ import {input} from "zod";
 import React, {useEffect, useState} from "react";
 import Image from "next/image";
 import Button from "@/components/CustomButtonComponent";
+import ChatChannelList from "./ChatChannelList";
+import { IChannel } from "@/shared/typesChannel";
+import { Socket } from "socket.io-client";
+import * as apiReq from "@/components/api/ApiReq"
+import { IChannelEntity } from "@/shared/entities/IChannel.entity";
 
-const JoinChannelSettings = ({className}) => {
+const JoinChannelSettings = ({className, channels, channelsServer, socketChat, setterCurrentChannel, currentChannel}
+    :{
+        className: string,
+        channels: IChannel[],
+        channelsServer: IChannel[],
+        socketChat: Socket,
+        setterCurrentChannel: Function,
+        currentChannel: number, 
+    }) => {
     const [channelName, setChannelName] = useState("");
     const [channelPassword, setChannelPassword] = useState("");
     const [areSettingsValids, setSettingsValid] = useState(false);
     const [showPassword, setPasswordVisible] = useState("password");
     const [isChannelJoined, setIsChannelJoined] = useState(false);
+
+    const channelsServer2: IChannelEntity[] = async () => {
+    
+        return await apiReq.getApi.getChannels();
+    }
+
+
+        useEffect(() => {
+            console.log('channel serv = ' + JSON.stringify(channelsServer2));
+        }, [])
 
     useEffect(() => {
         if (channelName.length < 3)
@@ -45,6 +68,14 @@ const JoinChannelSettings = ({className}) => {
         <>
             {!isChannelJoined && <div className={className}>
                 <h1 id={"popup_title"}>JOIN A CHANNEL</h1>
+                <ChatChannelList  className={'chat_channel_block'}
+                          socket={socketChat}
+                          channels={channels}
+                          setCurrentChannel={setterCurrentChannel}
+                          currentChannel={currentChannel}
+                          channelsServer={channelsServer2}
+                          isServerList={true} />
+                {/* <ChatChannelList  */}
                 {/* <form>
                     <label>
                         <input id={"channelNameInput"}

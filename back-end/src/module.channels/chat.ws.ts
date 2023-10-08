@@ -160,8 +160,8 @@ export class ChatGateway
 		);
 		client.join(`${channel.channelID}`);
 		client.emit(`infoRoom`, {	message: `Channel Created with id ${channel.channelID}`});
-		// client.emit(`createRoom`, {channel: channel	}); //FIXME: garder cette ligne , delete celle dessous
-		this.server.emit(`createRoom`, {channel: channel	}) //just pour DBG tous les clients recoivent le channel dans leur liste
+		client.emit(`createRoom`, {channel: channel	}); //FIXME: garder cette ligne , delete celle dessous
+		// this.server.emit(`createRoom`, {channel: channel	}) //just pour DBG tous les clients recoivent le channel dans leur liste
 	}
 
 	@SubscribeMessage('joinRoom')

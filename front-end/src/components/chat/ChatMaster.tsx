@@ -114,14 +114,19 @@ export default function ChatMaster({className, token, userID}: {className: strin
   return (
     <div className={`${className}`}>
       {socketChat?.active ? 
-        <ChatChannelList className={'chat_channel_block'} socket={socketChat} channels={channels} setCurrentChannel={setterCurrentChannel} currentChannel={currentChannel} isServerList={false} /> : <></> }
+        <ChatChannelList  className={'chat_channel_block'}
+                          socket={socketChat}
+                          channels={channels}
+                          setCurrentChannel={setterCurrentChannel}
+                          currentChannel={currentChannel}
+                          channelsServer={channelsServer}
+                          isServerList={false} /> : <></> }
       
       <div className='chat_block_main'>
         <ChatMessagesList className='chat_message_list' messages={messagesChannel} currentChannel={currentChannel} userCurrentID={userID}/> {/* TODO: charger ref liste message channel en cours*/}
         {socketChat?.active ? 
         <ChatInput className={'chat_block_messages_input'} socket={socketChat} channelID={currentChannel} /> : <></>}
       </div>
-
     </div>
   )
 }

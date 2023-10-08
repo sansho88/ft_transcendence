@@ -6,6 +6,7 @@ import { strRoutes } from "@/shared/routesApi";
 import { IUser } from "@/shared/types";
 import { IChannel } from "@/shared/typesChannel";
 import axios from "axios";
+import { IChannelEntity } from "@/shared/entities/IChannel.entity";
 
 const AuthManager = require('./AuthManager');
 export const authManager = new AuthManager();
@@ -42,7 +43,7 @@ export namespace getApi {
 		}
 	});}
 	
-	export const getChannels = () =>{return axiosInstance.get(`${strRoutes.channel.getAll()}`, {
+	export const getChannels = (): Promise<IChannelEntity[]> =>{return axiosInstance.get(`${strRoutes.channel.getAll()}`, {
 		headers: {
 			'Authorization': `Bearer ${authManager.getToken()}`
 		}
