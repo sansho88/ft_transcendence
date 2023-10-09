@@ -43,8 +43,11 @@ export namespace getApi {
 		}
 	});}
 	
-	export const getChannels = (): Promise<IChannelEntity[]> =>{return axiosInstance.get(`${strRoutes.channel.getAll()}`, {
-		headers: {
+	export const getChannels = (): Promise<IChannelEntity[]> =>{
+		
+		return axiosInstance.get(`${strRoutes.channel.getAll()}`, 
+		
+		{ headers: {
 			'Authorization': `Bearer ${authManager.getToken()}`
 		}
 	});}

@@ -196,6 +196,7 @@ export class ChatGateway
 		client.join(`${channel.channelID}`);
 		const content: JoinEventDTO = {user: user, channelID: channel.channelID}
 		this.server.to(`${channel.channelID}`).emit(`joinRoom`, content);
+		client.emit(`createRoom`, {channel: channel	})
 		console.log(`JOIN Room ${data.channelID} By ${user.UserID}`);
 	}
 

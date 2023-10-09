@@ -24,18 +24,6 @@ export default function ChatChannelList({className, socket, channels, setCurrent
 
   const [isPopupVisible, setPopupVisible] = useState(false); 
   const addChannel = () => {
-
-    // const action = () => { 
-    //   counterDBG.current++;
-    //   const newChannel: channelsDTO.ICreateChannelDTOPipe = {
-    //     name: `chan${counterDBG.current}`,
-    //     privacy: false,
-    //     // password: ''
-    //   }
-    //   wsChatEvents.createRoom(socket, newChannel);
-    // }
-
-
     return (
       <>
         <button onClick={() => setPopupVisible(!isPopupVisible)}>
@@ -47,25 +35,37 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               width={26}
               height={22}
               style={{ height: "auto", width: "auto"}}
-          />
+              />
         </button>
-    { isPopupVisible && <ChatNewChannelPopup className={"chat_new_channel_popup"} socket={socket}/>}
+    { isPopupVisible && <ChatNewChannelPopup 
+                                      className={"chat_new_channel_popup"}
+                                      socket={socket}
+                                      channels={channels}
+                                      currentChannel={currentChannel}
+                                      setterCurrentChannel={setCurrentChannel}
+
+                                      />}
       </>
     )
   }
   const paramChannel = () => {
     return (
-
-        <button onClick={() => console.log('OPEN PARAM CURRENT CHANNEL POPUP')}>
+      
+      <button onClick={() => console.log('OPEN PARAM CURRENT CHANNEL POPUP')}>
           <Image
               src="/settings.svg"
               alt="OPEN PARAMS BUTTON"
               width={18}
               height={18}
-          />
+              />
         </button>
     )
   }
+  
+  useEffect(() => {
+    console.log('HEY **************************' + JSON.stringify(channelsServer))
+    console.log('HEY **************************' + JSON.stringify(channels))
+  }, [])
 
   useEffect(() => {
     console.log('chatChannelList: channels useEffect!')
@@ -93,9 +93,11 @@ export default function ChatChannelList({className, socket, channels, setCurrent
             />
           ))
         }
-        {channels && isServerList === true && channelsServer &&
-          channels.map((channel) => (
-            channel.type <= EChannelType.PROTECTED && channelsServer.includes(channel) === false &&
+        {channelsServer && isServerList === true &&
+          channelsServer
+          .filter(channel => channel.type <= EChannelType.PROTECTED)//FIXME: et bah ca marche po !
+          .filter(channel => channels && !channels.some(existingChannel => existingChannel.channelID === channel.channelID)) 
+          .map((channel) => (
             <ChatChannelListElement
               key={channel.channelID}
               channelID={channel.channelID}
@@ -104,17 +106,19 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               isMp={false} //TODO:
               f={() => {
                 wsChatEvents.joinRoom(socket, channel) //FIXME: differencier de la liste des channels dispo en serveur
-                // setCurrentChannel(channel.channelID); //TODO: ajouter new Channel 
-
+                setCurrentChannel(channel.channelID); //TODO: ajouter new Channel
+                setPopupVisible(false);
               }}
               currentChannel={currentChannel}
             />
+
           ))
         }
       </div>
+     {isServerList === false && 
       <div className='chat_channel_buttons'>
         {addChannel()} &nbsp; &nbsp; | &nbsp; &nbsp; {paramChannel()}
-      </div>
+      </div>}
     </div>
   )
 }

@@ -22,16 +22,30 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
     const [areSettingsValids, setSettingsValid] = useState(false);
     const [showPassword, setPasswordVisible] = useState("password");
     const [isChannelJoined, setIsChannelJoined] = useState(false);
+    const [channelServer3, setChannelServer3] = useState<IChannelEntity[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const channelsServer2: IChannelEntity[] = async () => {
+    const channelsServer2 = async () => {
     
-        return await apiReq.getApi.getChannels();
+        return apiReq.getApi.getChannels();
     }
 
 
+    useEffect(() => {
+        const channelsServer2 = async () => {
+            const channel = await apiReq.getApi.getChannels();
+            setChannelServer3(channel);
+            setIsLoading(true)
+        }
+        channelsServer2()
+        console.log('channel serv 2= ' + JSON.stringify(channelServer3.data));
+        console.log('channels ******= ' + JSON.stringify(channels));
+    }, [])
+
+
         useEffect(() => {
-            console.log('channel serv = ' + JSON.stringify(channelsServer2));
-        }, [])
+            console.log('channelServer3 a changé : ', JSON.stringify(channelServer3.data));
+        }, [channelServer3]);
 
     useEffect(() => {
         if (channelName.length < 3)
@@ -66,15 +80,17 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
 
     return (
         <>
-            {!isChannelJoined && <div className={className}>
+            {!isChannelJoined && isLoading && 
+            <div className={className}>
                 <h1 id={"popup_title"}>JOIN A CHANNEL</h1>
                 <ChatChannelList  className={'chat_channel_block'}
                           socket={socketChat}
                           channels={channels}
                           setCurrentChannel={setterCurrentChannel}
                           currentChannel={currentChannel}
-                          channelsServer={channelsServer2}
-                          isServerList={true} />
+                          channelsServer={channelServer3.data}
+                          isServerList={true} 
+                          />
                 {/* <ChatChannelList  */}
                 {/* <form>
                     <label>
