@@ -87,9 +87,7 @@ export class UsersController {
 			throw new BadRequestException('You already following that user');
 		user.subscribed.push(target);
 		await user.save();
-		user.subscribed = undefined;
-		const event: FollowEventDTO = {user, type: FollowEventDTO.name};
-		await this.chatWsService.sendEvent(target, event);
+		await this.chatWsService.sendEvent(target, `The User ${user.login} started Followed you`);
 	}
 
 	@Put('unfollow/:userID')
@@ -105,12 +103,9 @@ export class UsersController {
 			throw new BadRequestException('You aren\'t following that user');
 		user.subscribed = user.subscribed.filter(usr => usr.UserID !== target.UserID);
 		await user.save();
-		user.subscribed = undefined;
-		const event: FollowEventDTO = {user, type: UnFollowEventDTO.name};
-		await this.chatWsService.sendEvent(target, event);
+		await this.chatWsService.sendEvent(target, `The User ${user.login} stopped Unfollowed you`);
 	}
 
-	@Get('mysubs')
 	@Get('mysubs')
 	@UseGuards(AuthGuard)
 	async getSubscription(

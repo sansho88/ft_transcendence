@@ -338,52 +338,31 @@ export class ChatGateway
 			type: BannedEventDTO.name,
 			duration,
 		}
-		await this.sendEvent(target, event);
+		await this.sendEvent(target, `You got banned for the channel ${channel.name} by a moderator`);
 		if (await this.channelService.userInChannel(target, channel))
 			await this.leaveChat(channel, target);
 	}
 
 	async mute(channel: ChannelEntity, target: UserEntity, duration: number, user: UserEntity) {
-		const event: MutedEventDTO = {
-			channel,
-			user,
-			type: BannedEventDTO.name,
-			duration,
-		}
-		await this.sendEvent(target, event);
+		await this.sendEvent(target, `You got muted by for the channel ${channel.name} by a moderator for ${duration}`);
 		return;
 	}
 
 	async kick(channel: ChannelEntity, user: UserEntity) {
-		const event: KickedEventDTO = {
-			channel,
-			user,
-			type: KickedEventDTO.name,
-		}
-		await this.sendEvent(user, event);
+		await this.sendEvent(user, `You got kicked for the channel ${channel.name} by a moderator`);
 		return await this.leaveChat(channel, user);
 	}
 
 	async receivedInvite(invite: InviteEntity) {
-		const event: ReceivedInviteEventDTO = {
-			invite,
-			type: ReceivedInviteEventDTO.name,
-		}
-		await this.sendEvent(invite.user, event);
+		await this.sendEvent(invite.user, `You received an Invite for a channel`);
 	}
 
 	async sendEvent(
 		user: UserEntity,
-		event:
-			ReceivedInviteEventDTO |
-			BannedEventDTO |
-			KickedEventDTO |
-			MutedEventDTO |
-			FollowEventDTO |
-			UnFollowEventDTO,
+		messages: string
 	) {
 		const socketTarget = await this.getSocket(user.UserID);
 		if (!socketTarget) return;
-		socketTarget.emit('notifyEvent', event);
+		socketTarget.emit('notifyEvent', {messages});
 	}
 }
