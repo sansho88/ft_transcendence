@@ -24,7 +24,7 @@ import {accessToken} from '../dto/payload';
 import * as process from 'process';
 import {JwtService} from '@nestjs/jwt';
 import {
-	CreateChannelDTOPipe,
+	CreateChannelDTOPipe, CreateMpDTOPPipe,
 	JoinChannelDTOPipe,
 	LeaveChannelDTOPipe,
 } from '../dto.pipe/channel.dto';
@@ -71,8 +71,6 @@ export class ChatGateway
 		super();
 	}
 
-	// Todo: Maybe Give Bearer Token to auth when 1st connection then keep userID and client.ID in a map-like structure
-	// Or We could also use a 'Auth' event to identify the user post connection
 
 	async handleConnection(client: Socket) {
 
@@ -134,10 +132,11 @@ export class ChatGateway
 			.findOne(payloadToken.id)
 			.catch(() => null);
 		if (!user) return client.disconnect();
-		await this.usersService.userStatus(user, UserStatus.OFFLINE);
 		const index = this.socketUserList
-			.findIndex(socket => socket.userID == user.UserID)
+			.findIndex(socket => socket.socketID == socket.socketID)
 		this.socketUserList.splice(index, 1);
+		if (this.socketUserList.findIndex(socket => socket.socketID == client.id) == -1)
+			await this.usersService.userStatus(user, UserStatus.OFFLINE);
 		console.log(`CLIENT ${client.id} left CHAT WS`);
 		return client.disconnect();
 	}
@@ -172,8 +171,8 @@ export class ChatGateway
 		@ConnectedSocket() client: Socket,
 	) {
 		await this.bannedService.update();
-		const channel = await this.channelService
-			.findOne(data.channelID, ['userList'])
+		let channel = await this.channelService
+			.findOne(data.channelID, ['userList'], false)
 			.catch(() => null);
 		if (channel == null)
 			return client.emit('joinRoom', {error: 'There is no such Channel'});
@@ -239,7 +238,7 @@ export class ChatGateway
 		@ConnectedSocket() client: Socket,
 	) {
 		const channel = await this.channelService
-			.findOne(data.channelID)
+			.findOne(data.channelID, [], true)
 			.catch(() => null);
 		if (channel == null)
 			return client.emit('sendMsg', {error: 'There is no such Channel'});
@@ -255,9 +254,52 @@ export class ChatGateway
 
 	}
 
+
+	/********************************/
+	/*********       MP       *******/
+	/********************************/
+
+	//  todo: Cannot create mp with Blocked User
+	//	todo: Cannot send messages if User get block
+
+	@SubscribeMessage('createMP')
+	@UseGuards(WSAuthGuard)
+	async handelCreateMP(
+		@MessageBody(new ValidationPipe()) data: CreateMpDTOPPipe,
+		@CurrentUser() user: UserEntity,
+		@ConnectedSocket() client: Socket,
+	) {
+		const user2: UserEntity = await this.usersService.findOne(data.targetID);
+		if (!user2) return client.emit('createMP', {messages: 'This user doesn\'t exist'});
+		if (user2.UserID == user.UserID) return client.emit('createMP', {messages: 'You cannot create a mp with yourself, Find a friend :D'});
+		const channel = await this.channelService.getmp(user, user2).catch(() => null);
+		if (channel)
+			return client.emit('createMP', {messages: 'You already have a direct channel with this user'});
+		// if (user blocked)
+		// 	throw new BadRequestException('You cannot create a direct channel with them');
+		const mp = await this.channelService.createMP(user, user2);
+		client.join(`${mp.channelID}`);
+		const client2 = await this.getSocket(user2.UserID);
+		if (client2)
+			client2.join(`${mp.channelID}`);
+		console.log(mp);
+	}
+
+	// @SubscribeMessage('getMP')
+	// @UseGuards(WSAuthGuard)
+	// async handelGetMP(
+	// 	@MessageBody(new ValidationPipe()) data: CreateMpDTOPPipe,
+	// 	@CurrentUser() user: UserEntity,
+	// 	@ConnectedSocket() client: Socket,
+	// ) {
+	// 	const user2 = await this.usersService.findOne(data.targetID);
+	// 	const channel = await this.channelService.getmp(user, user2);
+	// 	console.log('return getmp ', channel);
+	// }
+
 	/**
 	 * @param channel
-	 * @param user If 0-> Meant to be the system !
+	 * @param user
 	 * @param content
 	 */
 	async SendMessage(

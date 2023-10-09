@@ -48,6 +48,11 @@ export class ChannelEntity extends BaseEntity {
 	})
 	type: ChannelType;
 
+	@Column({
+		type: 'boolean',
+	})
+	mp: boolean;
+
 	@OneToOne(() => ChannelCredentialEntity, {cascade: true})
 	@JoinColumn({name: 'TestCredential'})
 	credential: ChannelCredentialEntity;
