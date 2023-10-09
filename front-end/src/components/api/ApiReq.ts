@@ -1,9 +1,12 @@
 'use client'
 
+import { IMessageEntity } from "@/shared/entities/IMessage.entity";
 import Axios from "./AxiosConfig";
 import { strRoutes } from "@/shared/routesApi";
 import { IUser } from "@/shared/types";
+import { IChannel } from "@/shared/typesChannel";
 import axios from "axios";
+import { IChannelEntity } from "@/shared/entities/IChannel.entity";
 
 const AuthManager = require('./AuthManager');
 export const authManager = new AuthManager();
@@ -39,6 +42,15 @@ export namespace getApi {
 			'Authorization': `Bearer ${authManager.getToken()}`
 		}
 	});}
+	
+	export const getChannels = (): Promise<IChannelEntity[]> =>{
+		
+		return axiosInstance.get(`${strRoutes.channel.getAll()}`, 
+		
+		{ headers: {
+			'Authorization': `Bearer ${authManager.getToken()}`
+		}
+	});}
 
 	export const getMePromise = () => {
 		return axiosInstance.get(`users/me`, updateAxiosInstance())}
@@ -49,7 +61,27 @@ export namespace getApi {
 			}
 		});}
 
+
+	interface IUserChan extends IUser {	channelJoined: IChannel[];	}
+	export const getChannelJoined = (): any => {
+		let user: IUserChan;
+		const chanListJoined = async () => {
+			user = await axiosInstance.get(`${strRoutes.channel.getChannelJoined()}`, {
+				headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
+			});
+			chanListJoined();
+			return user.channelJoined;
+		}
+	}
+
+	export const getAllMessagesChannel = (channelID: number): Promise<IMessageEntity[]> => {
+			// console.warn('DEBUG: getAllMessagesChannel');
+			return axiosInstance.get(`${strRoutes.channel.getAllMessagesChannel(channelID)}`, {
+				headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
+			});
+		}	
 }
+
 
 export namespace postApi {
 

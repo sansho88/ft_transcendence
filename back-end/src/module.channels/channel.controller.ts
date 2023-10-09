@@ -45,12 +45,18 @@ export class ChannelController {
 		return this.channelService.findAll();
 	}
 
-	@Get('get/users/:channelID')
+
+	@Get('get/:channelID')
 	@UseGuards(AuthGuard)
 	findOne(@Param('channelID', ParseIntPipe) channelID: number) {
 		return this.channelService.findOne(channelID);
 	}
 
+	@Get('get/users/:channelID')
+	@UseGuards(AuthGuard)
+	findUserList(@Param('channelID', ParseIntPipe) channelID: number) {
+			return this.channelService.findOne(channelID, ['userList']);
+	}
 
 	@Get('msg/:channelID')
 	@UseGuards(AuthGuard)

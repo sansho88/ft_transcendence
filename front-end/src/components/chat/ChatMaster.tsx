@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useContext, useEffect, useState, useRef } from 'react'
-import { LoggedContext, SocketContextChat } from '@/context/globalContext'
-import { IChannel, IChannelMessage } from '@/shared/typesChannel'
+import React, { useContext, useEffect, useState, useRef, createContext } from 'react'
+import { LoggedContext, SocketContextChat, UserContext } from '@/context/globalContext'
+import { IChannel } from '@/shared/typesChannel'
 import { Channel } from './class/Channel'
 import ChatInput from './subComponents/ChatInput'
 import ChatChannelList from './subComponents/ChatChannelList'
@@ -10,79 +10,123 @@ import ChatMessagesList from './subComponents/ChatMessagesList'
 import { Socket } from 'socket.io-client'
 import { ChannelsServerManager } from './class/ChannelsServerManager'
 import { IUser } from '@/shared/types'
+import { wsChatEvents, wsChatListen } from '../api/WsReq'
+import { IChannelEntity } from '@/shared/entities/IChannel.entity'
+import { channel } from 'diagnostics_channel'
+import * as apiReq from '../api/ApiReq'
+
 import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelPopup";
+import { IMessageEntity } from '@/shared/entities/IMessage.entity'
+import { messageDTO } from '@/shared/DTO/InterfaceDTO'
+import { wsChatRoutesBack } from '@/shared/routesApi'
 
 
-export default function ChatMaster({className, token}: {className: string, token: string}) {
+export default function ChatMaster({className, token, userID}: {className: string, token: string, userID: number}) {
 
-  const [Channels, setChannels] = useState<IChannel[]>([])
-  const [messagesChannel, setMessagesChannel] = useState<IChannel[]>()
-  const [currentChannel, setCurrentChannel] = useState<number>(-1);
+  const [channelsServer, setChannelsServer] = useState<IChannel[]>([]) //recuperer tous les channels server
+  const [channels, setChannels] = useState<IChannel[]>([]) //list des channels JOINED
+  const [messagesChannel, setMessagesChannel] = useState<messageDTO.IReceivedMessageEventDTO[]>([]) //les messages actuellement load du channel //TODO: faire route ws avec ping et update
+  const [currentChannel, setCurrentChannel] = useState<number>(-1); // definir le channel en cours by ID
 
-  // const manager = useRef<ChannelsServerManager>(new ChannelsServerManager());
 
   const socketChat = useContext(SocketContextChat);
   const {logged, setLogged} = useContext(LoggedContext);
 
+  const setterCurrentChannel = (newIdChannel: number) => {
+    console.log('helloSetter')
+    setCurrentChannel(newIdChannel);
+  }
+
   if(socketChat?.disconnected) 
   { 
-    console.log(`token = ${token}`);
+    console.log(`Chat WS is connected in ChatMaster`);
     socketChat.auth = { type: `Bearer`, token: `${token}` };
     socketChat.connect();
   }
 
-  useEffect(( ) => {
-    if (logged === true)
-      socketChat?.connect();
-    else
-      socketChat?.disconnect();
-  }, [logged])
+  async function updateMessages(channelID: number) {
+    try {
+      if (currentChannel != -1)
+      {
+        const messages = await apiReq.getApi.getAllMessagesChannel(channelID);
+        setMessagesChannel(messages.data);
+        console.log('update messages? ' + JSON.stringify(messages.data))
+      }
+    }
+    catch (error){}
+
+  }
+
+  const newMessageHandler = (socket: Socket,
+    setMessages: React.Dispatch<React.SetStateAction<messageDTO.IReceivedMessageEventDTO[]>>,
+    currentChannel: number,
+    message: messageDTO.IReceivedMessageEventDTO) => {
+    if (message.channelID === currentChannel)
+      setMessages(prevMessages => [...prevMessages, message]);
+  }
+
+
+  useEffect(() => {
+    updateMessages(currentChannel);
+    
+    const messageHandler = (message: messageDTO.IReceivedMessageEventDTO) => {
+      if (socketChat?.connected)
+        newMessageHandler(socketChat, setMessagesChannel, currentChannel, message);
+    };
+  
+    if (socketChat) {
+      socketChat.on(wsChatRoutesBack.sendMsg(), messageHandler);
+    }
+    
+    return () => {
+      if (socketChat) {
+        socketChat.off(wsChatRoutesBack.sendMsg(), messageHandler);
+      }
+    };
+  }, [currentChannel]);
+
 
   useEffect(() => {
 
+      if (socketChat){
+        wsChatListen.infoRoom(socketChat); //DBG
+        wsChatListen.createRoomListen(socketChat, setChannels);
+        wsChatListen.updateChannelsJoined(socketChat, setChannels);
+        //TODO: update channelsServer
+        wsChatEvents.pingUpdateChannelsJoined(socketChat);
+      }
+      else {
+
+      }
+  
     return (() => {
+      socketChat?.off();
       socketChat?.disconnect();
     })
   }, [])
 
-  useEffect(() => {
-    console.log(`currentChannel =  ${currentChannel}`);
-    //TODO Charger les messages du channel correspondant
-  }, [currentChannel])
 
   useEffect(() => {
-    if (socketChat?.connected)
-    {
-      var user1 : IUser = {has_2fa: false, login: "ben", status: 0,     UserID: 1, nickname: 'BenNick'};
-      const chan0 = new Channel({ channelID: 0, name: 'chan0', owner: user1, type: 0 }, socketChat)
+    console.log(`CHANNELS UPDATED =  ${JSON.stringify(channels)}`);
 
-      // setChannels([...Channels, chan0, chan1, chan2, chan3] )
-      // manager.current.addChannel(chan0);
-      // manager.current.addChannel(chan1);
-      // manager.current.addChannel(chan2);
-      // manager.current.addChannel(chan3);
-    }
-  }, [socketChat?.connected])
+  }, [channels])
   
-  const sys0: IChannelMessage = {channelID: 0, content: 'ben has created this channel', ownerUser:                      {has_2fa: false, login: "system", status: 0,  UserID: 0, nickname: 'Benj3D'}}
-  const mess1: IChannelMessage = {channelID: 0, content: 'Hello, ceci est un message de test code en dur', ownerUser:   {has_2fa: false, login: "ben", status: 0,     UserID: 1, nickname: 'BenNick'}}
-  const mess2: IChannelMessage = {channelID: 0, content: 'c\'est la deuxieme ligne du message de test', ownerUser:      {has_2fa: false, login: "ben", status: 0,     UserID: 1, nickname: 'BenNick'}}
-  const mess3: IChannelMessage = {channelID: 0, content: 'et ca la troisieme ligne', ownerUser:                         {has_2fa: false, login: "ben", status: 0,     UserID: 1, nickname: 'BenNick'}}
-  const sys1: IChannelMessage = {channelID: 0, content: 'bducrocq has join this channel', ownerUser:                    {has_2fa: false, login: "system", status: 0,  UserID: 0, nickname: 'none'}}
-  const mess4: IChannelMessage = {channelID: 0, content: 'Hello et moi je suis un autre user', ownerUser:               {has_2fa: false, login: "bducrocq", status: 2,UserID: 2, nickname: 'Benj3D'}}
-  
-  // const testChan: Channel = new Channel({channelID: 0, name: '#chan0', ownerUserID: 0, ownerLogin: 'user1', type: 0})
-  const mockMsg: IChannelMessage[] = [sys0, mess1, mess2, mess3, sys1, mess4, sys0, mess1, mess2, mess3, sys1, mess4, sys0, mess1, mess2, mess3, sys1, mess4, sys0, mess1, mess2, mess3, sys1, mess4, sys0, mess1, mess2, mess3, sys1, mess4, sys0, mess1, mess2, mess3, sys1, mess4]
-
   return (
     <div className={`${className}`}>
-      <ChatChannelList className={'chat_channel_block'} setChannel={console.log} />
-
+      {socketChat?.active ? 
+        <ChatChannelList  className={'chat_channel_block'}
+                          socket={socketChat}
+                          channels={channels}
+                          setCurrentChannel={setterCurrentChannel}
+                          currentChannel={currentChannel}
+                          channelsServer={channelsServer}
+                          isServerList={false} /> : <></> }
+      
       <div className='chat_block_main'>
-        <ChatMessagesList className='chat_message_list' messages={mockMsg} />
-        <ChatInput className={'chat_block_messages_input'} />
+        <ChatMessagesList className='chat_message_list' messages={messagesChannel} currentChannel={currentChannel} userCurrentID={userID}/> {/* TODO: charger ref liste message channel en cours*/}
+        {socketChat?.active ? 
+        <ChatInput className={'chat_block_messages_input'} socket={socketChat} channelID={currentChannel} /> : <></>}
       </div>
-
     </div>
   )
 }

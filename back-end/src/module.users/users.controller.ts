@@ -14,12 +14,14 @@ import {AuthGuard} from '../module.auth/auth.guard';
 import {UserEntity} from "../entities/user.entity";
 import {CurrentUser} from '../module.auth/indentify.user';
 import {InviteService} from "../module.channels/invite.service";
+import { ChannelService } from 'src/module.channels/channel.service';
 
 @Controller('users')
 export class UsersController {
 	constructor(
 		private readonly usersService: UsersService,
 		private readonly inviteService: InviteService,
+		private readonly channelService: ChannelService,
 	) {
 	}
 
@@ -48,6 +50,17 @@ export class UsersController {
 	@UseGuards(AuthGuard)
 	async findOneID(@Param('id', ParseIntPipe) id: number) {
 		return await this.usersService.findOne(id);
+	}
+
+	/**
+	 * retourne la liste des channels join par le user
+	 * @param user 
+	 * @returns 
+	 */
+	@Get('channelJoined')
+	@UseGuards(AuthGuard)
+	async channelJoined(@CurrentUser() user: UserEntity) {
+		return await this.channelService.getJoinedChannelList(user);
 	}
 
 	/*************************************************/

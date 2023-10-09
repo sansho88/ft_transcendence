@@ -1,83 +1,124 @@
 'use client'
 
-import React, {useState} from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import ChatChannelListElement from './elements/ChatChannelListElement'
 import Image from "next/image";
+import { wsChatEvents, wsChatListen } from '@/components/api/WsReq';
+import { Socket } from 'socket.io-client';
+import { EChannelType, IChannel } from '@/shared/typesChannel';
+import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
 import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelPopup";
 
-export default function ChatChannelList({className, setChannel}: {className: string, setChannel: Function}) {
 
+export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList, channelsServer}
+  : { className: string, 
+      socket: Socket, 
+      channels: IChannel[], 
+      channelsServer: IChannel[],
+      setCurrentChannel: Function, 
+      currentChannel: number, 
+      isServerList: boolean, 
+    }) {
+
+  const counterDBG = useRef<number>(0);
+
+  const [isPopupVisible, setPopupVisible] = useState(false); 
   const addChannel = () => {
-    const [isPopupVisible, setPopupVisible] = useState(false);
-
-
     return (
       <>
         <button onClick={() => setPopupVisible(!isPopupVisible)}>
+        {/* <button onClick={() => action()}> for DBG action */}
 
           <Image
               src="/channel-add.svg"
               alt="ADD CHANNEL BUTTON"
               width={26}
               height={22}
-          />
+              style={{ height: "auto", width: "auto"}}
+              />
         </button>
-    { isPopupVisible && <ChatNewChannelPopup className={"chat_new_channel_popup"}/>}
+    { isPopupVisible && <ChatNewChannelPopup 
+                                      className={"chat_new_channel_popup"}
+                                      socket={socket}
+                                      channels={channels}
+                                      currentChannel={currentChannel}
+                                      setterCurrentChannel={setCurrentChannel}
+
+                                      />}
       </>
     )
   }
   const paramChannel = () => {
     return (
-
-        <button onClick={() => console.log('OPEN PARAM CURRENT CHANNEL POPUP')}>
+      
+      <button onClick={() => console.log('OPEN PARAM CURRENT CHANNEL POPUP')}>
           <Image
               src="/settings.svg"
               alt="OPEN PARAMS BUTTON"
               width={18}
               height={18}
-          />
+              />
         </button>
     )
   }
+  
+  useEffect(() => {
+    console.log('HEY **************************' + JSON.stringify(channelsServer))
+    console.log('HEY **************************' + JSON.stringify(channels))
+  }, [])
+
+  useEffect(() => {
+    console.log('chatChannelList: channels useEffect!')
+
+  }, [channels])
+
   return (
 
     <div className={`${className}`}>
       <div className={`chat_channel_list`}>
-        <ChatChannelListElement channelID={1} channelName='#Channel 1' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={2} channelName='#Channel 2' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={3} channelName='#Channel 3' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={4} channelName='#Channel 4' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={5} channelName='#Channel 5' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={6} channelName='#Channel 6' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={7} channelName='#Channel 7' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={8} channelName='#Channel 8' f={setChannel} isInvite={true}/>
-        <ChatChannelListElement channelID={9} channelName='#Channel 9' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={10} channelName='#Channel 10' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={11} channelName='#Channel 11' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={12} channelName='#Channel 12' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={13} channelName='#Channel 13' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={14} channelName='#Channel 14' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={15} channelName='#Channel 15' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={16} channelName='#Channel 16' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={17} channelName='#Channel 17' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={18} channelName='#Channel 18' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={19} channelName='#Channel 19' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={20} channelName='#Channel 20' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={21} channelName='#Channel 21' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={22} channelName='#Channel 22' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={23} channelName='#Channel 23' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={24} channelName='#Channel 24' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={25} channelName='#Channel 25' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={26} channelName='#Channel 26' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={27} channelName='#Channel 27' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={28} channelName='#Channel 28' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={29} channelName='#Channel 29' f={setChannel} isInvite={false}/>
-        <ChatChannelListElement channelID={30} channelName='#Channel 30' f={setChannel} isInvite={false}/>
+        {/* <ChatChannelListElement channelID={1} channelName='#Channel 1' f={setChannels(channel)} /> */}
+        {/* <button onClick={() => setCurrentChannel(2)}> AHHH </button> */}
+        {channels && isServerList === false &&
+          channels.map((channel) => (
+            <ChatChannelListElement
+              key={channel.channelID}
+              channelID={channel.channelID}
+              channelName={channel.name}
+              isInvite={false} //TODO:
+              isMp={false} //TODO:
+              f={() => {
+                setCurrentChannel(channel.channelID);
+              }}
+              currentChannel={currentChannel}
+            />
+          ))
+        }
+        {channelsServer && isServerList === true &&
+          channelsServer
+          .filter(channel => channel.type <= EChannelType.PROTECTED)//FIXME: et bah ca marche po !
+          .filter(channel => channels && !channels.some(existingChannel => existingChannel.channelID === channel.channelID)) 
+          .map((channel) => (
+            <ChatChannelListElement
+              key={channel.channelID}
+              channelID={channel.channelID}
+              channelName={channel.name}
+              isInvite={false} //TODO:
+              isMp={false} //TODO:
+              f={() => {
+                wsChatEvents.joinRoom(socket, channel) //FIXME: differencier de la liste des channels dispo en serveur
+                setCurrentChannel(channel.channelID); //TODO: ajouter new Channel
+                setPopupVisible(false);
+              }}
+              currentChannel={currentChannel}
+            />
 
+          ))
+        }
       </div>
+     {isServerList === false && 
       <div className='chat_channel_buttons'>
         {addChannel()} &nbsp; &nbsp; | &nbsp; &nbsp; {paramChannel()}
-      </div>
+      </div>}
     </div>
   )
 }

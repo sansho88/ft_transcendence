@@ -5,7 +5,7 @@
 import { Socket } from "socket.io";
 import { IUser } from "./types";
 
-export enum ChannelType {
+export enum EChannelType {
 	PUBLIC, //No password No Privacy
 	PROTECTED, //Yes Password No Privacy
 	PRIVATE, //Maybe password Yes Privacy
@@ -24,7 +24,7 @@ export interface IChannel {
   channelID: number;
   owner: IUser;
   name: string;
-  type: ChannelType;
+  type: EChannelType;
   // adminList: User[];
   // userList: User[];
   // messages: Message[];
@@ -34,11 +34,18 @@ export interface IChannel {
 }
 
 export interface IChannelMessage {
-  channelID     : number;
-  content       : string;
-  ownerUser     : IUser;
+	id: number;
+	author: IUser;
+	sendTime: Date;
+	channel: IChannel;
+	content: string;
 }
 
+// //DTO recup
 
-
+// export interface ICreateChannelDTOPipe {
+// 	name: string;
+// 	privacy: boolean;
+// 	password?: string;
+// }
 
