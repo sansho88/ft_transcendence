@@ -569,7 +569,7 @@ export class GameSession {
     }
     const endMessage = () => {
       if (this.gameMod === PODGAME.EGameMod.trainning){
-        if (this.table.maxTrainningHit <= 0)
+        if (this.table.maxTrainningHit <= 3)
           return `${this.table.maxTrainningHit}: Did you really play?`;
         else if (this.table.maxTrainningHit >= 4 && this.table.maxTrainningHit <= 8)
           return `${this.table.maxTrainningHit}: It's a good start, courage!`;
@@ -579,8 +579,8 @@ export class GameSession {
           return `${this.table.maxTrainningHit}: Wow, well done that's great!`;
         else if (this.table.maxTrainningHit > 20 && this.table.maxTrainningHit < 42)
           return `${this.table.maxTrainningHit}: You have become a god, but.. return worked!`;
-        else
-          return `${this.table.maxTrainningHit}: 542 Internal Server Error: It's impossible ! Otherwise: Incredible!`
+        else if (this.table.maxTrainningHit >= 42)
+          return `${this.table.maxTrainningHit}: It's impossible ! Otherwise: Incredible!`
       }
       else if (this.rageQuit === true)
         return `${this.looser.user.nickname} has rage quit! ${this.winner.user.nickname} won this game\n${this.table.scoreP1} - ${this.table.scoreP2}`

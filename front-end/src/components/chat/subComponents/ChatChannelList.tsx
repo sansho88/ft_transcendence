@@ -43,7 +43,6 @@ export default function ChatChannelList({className, socket, channels, setCurrent
                                       channels={channels}
                                       currentChannel={currentChannel}
                                       setterCurrentChannel={setCurrentChannel}
-
                                       />}
       </>
     )
@@ -65,12 +64,23 @@ export default function ChatChannelList({className, socket, channels, setCurrent
   useEffect(() => {
     console.log('HEY **************************' + JSON.stringify(channelsServer))
     console.log('HEY **************************' + JSON.stringify(channels))
+    
   }, [])
 
   useEffect(() => {
     console.log('chatChannelList: channels useEffect!')
 
   }, [channels])
+
+  useEffect(() => {
+    console.log('ENFANNNNNNT ****** channelServer3 a changé : ', JSON.stringify(channelsServer));
+    const newList = channelsServer.filter((channel) => channel.type === 2)
+    console.log('ENFANNNNNNT HEY 3**************************' + JSON.stringify(newList))
+
+
+
+
+}, [channelsServer]);
 
   return (
 
@@ -96,7 +106,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
         {channelsServer && isServerList === true &&
           channelsServer
           .filter(channel => channel.type <= EChannelType.PROTECTED)//FIXME: et bah ca marche po !
-          .filter(channel => channels && !channels.some(existingChannel => existingChannel.channelID === channel.channelID)) 
+          // .filter(channel => channels && !channels.some(existingChannel => existingChannel.channelID === channel.channelID)) 
           .map((channel) => (
             <ChatChannelListElement
               key={channel.channelID}
@@ -111,7 +121,6 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               }}
               currentChannel={currentChannel}
             />
-
           ))
         }
       </div>
