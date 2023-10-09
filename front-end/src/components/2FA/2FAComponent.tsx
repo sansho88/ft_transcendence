@@ -33,9 +33,11 @@ const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) =
 
 	const generateQRCode = async () => {
 		try {
-		  const res = await apiReq.postApi.postGen2FA();
-		  setQrCodeData(res.data.img);
-		  setQrCodeGenerated(true);
+		  await apiReq.postApi.postGen2FA().then((res) => {
+		    setQrCodeData(res.data.img);
+		    setQrCodeGenerated(true);
+            console.log(res.data.img);
+          });
 		} catch (err) {
 		  console.log(err);
 		}
@@ -43,8 +45,9 @@ const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) =
 
 	useEffect(() => {
 		if (!isActivated && !qrCodeGenerated) {
-		  // Appel de l'API seulement si le QR code n'a pas encore été généré
+		//   Appel de l'API seulement si le QR code n'a pas encore été généré
 		  generateQRCode();
+            setQrCodeGenerated(true);
 		}
 	  }, [isActivated, qrCodeGenerated]);
 
@@ -92,7 +95,7 @@ const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) =
         inputCode = e.target.value;
         setDeactivationCode2FA(inputCode);
     }
-    const settings2FA = async () => {
+    const settings2FA = () => {
       if (!isActivated)
       {
 		  return (
