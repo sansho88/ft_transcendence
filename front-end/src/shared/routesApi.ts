@@ -55,14 +55,16 @@
 // |                       		EVENTS CHAT WS              	             |
 // +---------------------------------------------------------------------+
 export namespace wsChatRoutesBack {
-	export const createRoom=()      						  	=> {return `createRoom`} //retour message concernant le process de matchmaking 
-	export const joinRoom=()      						   		=> {return `joinRoom`} //retour message concernant le process de matchmaking 
-	export const leaveRoom=()      						   		=> {return `leaveRoom`} //retour message concernant le process de matchmaking 
-	export const sendMsg=()      						   			=> {return `sendMsg`} //retour message concernant le process de matchmaking 
-
+	export const infoRoom=()      						  	=> {return `infoRoom`} //retour message concernant les channel
+	export const createRoom=()      						  	=> {return `createRoom`} 
+	export const joinRoom=()      						   		=> {return `joinRoom`} 
+	export const leaveRoom=()      						   		=> {return `leaveRoom`} 
+	export const sendMsg=()      						   			=> {return `sendMsg`} 
+	
 }
 export namespace wsChatRoutesClient {
-	export const updateChannel=()      						  	=> {return `createRoom`} //retour message concernant le process de matchmaking 
+	export const updateChannel=()      						  	=> {return `createRoom`} 
+	export const updateChannelsJoined=()    					=> {return `updateChannelsJoined`} 
 
 
 }
@@ -71,8 +73,18 @@ export namespace wsChatRoutesClient {
 	export namespace strRoutes {
 
 // +---------------------------------------------------------------------+
+// |                            USERS 42                                 |
+// +---------------------------------------------------------------------+
+	export const postUser42=()							=>{return `${serverApi}/auth/42/connect/`}
+	export const getIntraURL=()							=>{return `${serverApi}/auth/42/getIntraURL/`}
+
+
+// +---------------------------------------------------------------------+
 // |                              USERS                                  |
 // +---------------------------------------------------------------------+
+
+	export const getIsNicknameIsUsed = () 	=>{return `${serverApi}/${routeUsers}/get/nicknameUsed/`}
+
 
 	export const getUsersAll=()							=>{return `${serverApi}/${routeUsers}/get/`}
 	export const getUserById = () 					=>{return `${serverApi}/${routeUsers}/get/`}
@@ -114,10 +126,12 @@ export namespace wsChatRoutesClient {
 // |                             CHANNELS                                |
 // +---------------------------------------------------------------------+
 export namespace channel {
-	export const postCreateChannel = () 																					=> {return `${serverApi}/${routeChannels}/create`}
+	// export const postCreateChannel = () 																					=> {return `${serverApi}/${routeChannels}/create`} use WS event
 	export const getAll = () 																											=> {return `${serverApi}/${routeChannels}/get`};
 	export const getUsersChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
-	export const getMsgsChannel = (channelID: number, timestamp: number)					=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
+	// export const getMsgsChannel = (channelID: number, timestamp: number)					=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
+	export const getChannelJoined = ()																						=> {return `${serverApi}/${routeChannels}/channelJoined`};
+	export const getAllMessagesChannel = (channelID: number)											=> {return `${serverApi}/${routeChannels}/msg/${channelID}`};
 
 
 }

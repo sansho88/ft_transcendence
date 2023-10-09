@@ -15,6 +15,7 @@ import Button2FA from "@/components/2FA/2FAComponent";
 import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
 import {wsGameRoutes} from "@/shared/routesApi";
+import LoadingComponent from "@/components/waiting/LoadingComponent";
 
 interface HomePageProps {
     className: unknown
@@ -58,16 +59,24 @@ const HomePage = ({className}: HomePageProps) => {
             updateUser.status = newStatus;
             apiReq.putApi.putUser(updateUser)
                 .catch((e) => {
-                    setUserContext(updateUser);
+
                      console.error(e)
                 })
+            setUserContext(updateUser);
         }
     });
+    /*
+    socketRef.current?.on("connect", () =>{
+        let updateUser = userContext;
+        updateUser.status = EStatus.Online;
+
+    })*/
 
     return (
         <>
+        { userContext ?
             <main className="main-background">
-                { userContext &&
+
                     <Profile className={"main-user-profile"}
                              nickname={userContext.nickname}
                              login={userContext.login} status={userContext.status }
@@ -79,7 +88,7 @@ const HomePage = ({className}: HomePageProps) => {
                         <Button image={"/history-list.svg"} onClick={() => console.log("history list button")} alt={"Match History button"}/>
                         <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
                     </Profile>
-                }
+
                 <UserList className={"friends"}/>
                 <Button className={"logout"} image={"/logout.svg"} onClick={() => {
                     localStorage.clear();
@@ -91,10 +100,11 @@ const HomePage = ({className}: HomePageProps) => {
                 <div className={"game"}>
                     <Game className={"game"}/>
                 </div>
-               <ChatMaster className={'chat_master'} token={tokenRef.current}/>
+               <ChatMaster className={'chat_master'} token={tokenRef.current} userID={userContext.UserID}/>
                 <div className={"absolute bottom-0 left-0"}><NotifComponent /></div>
 
             </main>
+        : <LoadingComponent/>}
         </>
     )
 }

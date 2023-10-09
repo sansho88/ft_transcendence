@@ -6,6 +6,7 @@ import {
 	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer,
+	WsResponse
 } from '@nestjs/websockets';
 import {IoAdapter} from '@nestjs/platform-socket.io';
 import {Server, Socket} from 'socket.io';
@@ -42,6 +43,7 @@ import {
 } from '../dto/event.dto'
 import {InviteService} from "./invite.service";
 import {InviteEntity} from "../entities/invite.entity";
+import { wsChatRoutesClient } from 'shared/routesApi';
 
 class SocketUserList {
 	userID: number;
@@ -149,16 +151,16 @@ export class ChatGateway
 		const credential = await this.channelCredentialService.create(
 			data.password,
 		);
-		const channel = await this.channelService.create(
+		const channel: ChannelEntity = await this.channelService.create(
 			data.name,
 			credential,
 			data.privacy,
 			user,
 		);
 		client.join(`${channel.channelID}`);
-		client.emit(`createRoom`, {
-			message: `Channel Created with id ${channel.channelID}`,
-		});
+		client.emit(`infoRoom`, {	message: `Channel Created with id ${channel.channelID}`});
+		client.emit(`createRoom`, {channel: channel	}); //FIXME: garder cette ligne , delete celle dessous
+		// this.server.emit(`createRoom`, {channel: channel	}) //just pour DBG tous les clients recoivent le channel dans leur liste
 	}
 
 	@SubscribeMessage('joinRoom')
@@ -193,6 +195,7 @@ export class ChatGateway
 		client.join(`${channel.channelID}`);
 		const content: JoinEventDTO = {user: user, channelID: channel.channelID}
 		this.server.to(`${channel.channelID}`).emit(`joinRoom`, content);
+		client.emit(`createRoom`, {channel: channel	})
 		console.log(`JOIN Room ${data.channelID} By ${user.UserID}`);
 	}
 
@@ -211,6 +214,21 @@ export class ChatGateway
 			return client.emit('leaveRoom', {error: 'You are not part of this channel'});
 		return this.leaveChat(channel, user);
 	}
+
+	/**
+	 * Ping cette route ws update la liste des channels JOIN de ce meme client
+	 * @param user 
+	 * @param client 
+	 * @returns 
+	 */
+	@SubscribeMessage(wsChatRoutesClient.updateChannelsJoined())
+	@UseGuards(WSAuthGuard)
+	async updateClientChannelsJoined( 
+		@CurrentUser() user: UserEntity,
+		@ConnectedSocket() client: Socket,) {
+		return client.emit(wsChatRoutesClient.updateChannelsJoined(), await this.channelService.getJoinedChannelList(user));
+	}
+
 
 	@SubscribeMessage('sendMsg')
 	@UseGuards(WSAuthGuard)
@@ -231,8 +249,9 @@ export class ChatGateway
 			return await this.SendMessage(channel, user, data.content);
 		}
 		return client.emit('sendMsg', {
-			error: 'You are not part of this channel',
+			error: 'You are not part of this channel', //TODO: il faudra changer pour emit sur invent Info notif, (a definir)
 		});
+
 	}
 
 
@@ -309,6 +328,7 @@ export class ChatGateway
 		});
 	}
 
+
 	@SubscribeMessage('debug')
 	@UseGuards(WSAuthGuard)
 	async handelDebug(
@@ -316,6 +336,7 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 	) {
 	}
+
 
 	async leaveChat(channel: ChannelEntity, user: UserEntity) {
 		if (this.channelService.userIsAdmin(user, channel))
@@ -360,6 +381,20 @@ export class ChatGateway
 		}
 		await this.sendEvent(user, event);
 		return await this.leaveChat(channel, user);
+	}
+	
+	@SubscribeMessage('NicknameUsed')
+	@UseGuards(WSAuthGuard)
+	async handleUpdateNickname(
+		@ConnectedSocket() client: Socket,
+		@MessageBody(new ValidationPipe()) data: {nickname: string},
+		callback: (res: boolean) => void) {
+			console.log(data);
+			console.log(data.nickname);
+			const res = await this.usersService.nicknameUsed(data.nickname);
+			console.log(`ret NicknameUsed= ${data.nickname} | ${res}`);
+			// callback(res); //si callback ne fonctionne pas, remplacer par le client emit ci dessous
+		client.emit('NicknameUsed', res);
 	}
 
 	async receivedInvite(invite: InviteEntity) {

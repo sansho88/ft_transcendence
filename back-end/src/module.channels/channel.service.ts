@@ -206,6 +206,7 @@ export class ChannelService {
 		}) + 1)
 	}
 
+
 	async createMP(user1: UserEntity, user2: UserEntity) {
 		const id1: number = Math.min(user1.UserID, user2.UserID);
 		const id2: number = Math.max(user1.UserID, user2.UserID);
@@ -245,5 +246,9 @@ export class ChannelService {
 			channel.name = data.name;
 		channel.credential = credential;
 		return channel.save();
+
+	async getJoinefdChannelList(user: UserEntity): Promise<ChannelEntity[]> {
+		const ret: UserEntity =  await this.userService.findOne(user.UserID, ['channelJoined']);
+			return ret.channelJoined;
 	}
 }

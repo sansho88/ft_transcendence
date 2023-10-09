@@ -1,9 +1,12 @@
 'use client'
 
+import { IMessageEntity } from "@/shared/entities/IMessage.entity";
 import Axios from "./AxiosConfig";
 import { strRoutes } from "@/shared/routesApi";
 import { IUser } from "@/shared/types";
+import { IChannel } from "@/shared/typesChannel";
 import axios from "axios";
+import { IChannelEntity } from "@/shared/entities/IChannel.entity";
 
 const AuthManager = require('./AuthManager');
 export const authManager = new AuthManager();
@@ -31,21 +34,61 @@ export namespace getApi {
 		const tqt = time;
 		return axiosInstance.get(`${strRoutes.getUsersAll()}`, updateAxiosInstance());}
 	export const getUserByLoginPromise= (login: string) =>{
-		
-		return axiosInstance.get(`users/get/${login}`, );}
+		return axiosInstance.get(`users/get/${login}`, );
+	}
+
 	export const getUserByIdPromise = (id: number) =>{return axiosInstance.get(`${strRoutes.getUserById()}${id}`, {
 		headers: {
 			'Authorization': `Bearer ${authManager.getToken()}`
 		}
 	});}
-    export const getMePromise = () => {
+	
+	export const getChannels = (): Promise<IChannelEntity[]> =>{
+		
+		return axiosInstance.get(`${strRoutes.channel.getAll()}`, 
+		
+		{ headers: {
+			'Authorization': `Bearer ${authManager.getToken()}`
+		}
+	});}
+
+	export const getMePromise = () => {
 		return axiosInstance.get(`users/me`, updateAxiosInstance())}
+
+	export const getIsNicknameUsed = (nick: string) =>{return axiosInstance.get(`${strRoutes.getIsNicknameIsUsed()}${nick}`, {
+			headers: {
+				'Authorization': `Bearer ${authManager.getToken()}`
+			}
+		});}
+
+
+	interface IUserChan extends IUser {	channelJoined: IChannel[];	}
+	export const getChannelJoined = (): any => {
+		let user: IUserChan;
+		const chanListJoined = async () => {
+			user = await axiosInstance.get(`${strRoutes.channel.getChannelJoined()}`, {
+				headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
+			});
+			chanListJoined();
+			return user.channelJoined;
+		}
+	}
+
+	export const getAllMessagesChannel = (channelID: number): Promise<IMessageEntity[]> => {
+			// console.warn('DEBUG: getAllMessagesChannel');
+			return axiosInstance.get(`${strRoutes.channel.getAllMessagesChannel(channelID)}`, {
+				headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
+			});
+		}	
 }
+
 
 export namespace postApi {
 
 	export const postUser= (newUser: Partial<IUser>)		=>{return axiosInstance.post(`${strRoutes.postUser()}`, newUser);}
 	export const postTryLogin= (loginTest:Partial<IUser>)	=>{return axiosInstance.post(`${strRoutes.postUserCheckLogin()}`, loginTest);}
+	export const postTryLogin42= (code: string)	=>{return axiosInstance.post(`${strRoutes.postUser42()}`, code);}
+	export const postTryGetIntraURL= ()	=>{return axiosInstance.post(`${strRoutes.getIntraURL()}`);}
 
 }
 
