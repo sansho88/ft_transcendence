@@ -81,16 +81,29 @@
 
 }
 
-
+.channel{
+  padding: 0.2rem 0;
+  background-color: rgba(66, 66, 66, 0.36);
+  margin: 0.2rem 0;
+  border: 1px solid black;
+  border-radius: 4px;
+}
 /* element channel (button channel.name) */
 .chat_channel_list_element {
-  height: 2rem;
-  margin-left: 1rem;
+  height: auto;
+  margin-left: 0.2rem;
   display: flex;
   align-items: center;
-  color: #d8d8d8
+  color: #d8d8d8;
+  cursor: pointer;
 }
 
+#invite_options{
+  display: block;
+  cursor: pointer;
+  color: green;
+  margin-left: 0.42rem;
+}
 
 
 
@@ -282,7 +295,7 @@
 
 .chat_new_channel_popup{
   color: darkgrey;
-  background: rgba(0, 0, 0, 0.27);
+  background: rgba(0, 0, 0, 0.52);
   border: 0.2rem rgba(0, 0, 0, 0.15);
   border-style: inherit ;
   box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.5);
@@ -290,6 +303,7 @@
   display: inline-block;
   position: absolute;
   width: 9vw;
+  min-width: 12ch;
   height: auto;
 
   bottom: 5vh;
@@ -340,4 +354,13 @@
   padding-left: 0.2rem;
   position: relative;
   top:0.42rem;
+}
+
+#button_select_channel_mode{
+  padding: 0.32rem 0.59rem;
+  margin: 0.3rem;
+
+  background-color: rgba(66, 66, 66, 0.36);
+  border: 1px solid black;
+  border-radius: 4px;
 }
