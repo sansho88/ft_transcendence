@@ -81,6 +81,9 @@ export class UsersService {
 		return target.credential;
 	}
 
+	/**
+	 * Need to call a emit to notify other User (Followers) that they change status on 'user.${user.userID}`
+	 */
 	async userStatus(user: UserEntity, newStatus: UserStatus) {
 		user.status = newStatus;
 		await user.save();

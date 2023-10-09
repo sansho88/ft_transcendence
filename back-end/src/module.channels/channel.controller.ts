@@ -48,6 +48,10 @@ export class ChannelController {
 		return this.channelService.findAll();
 	}
 
+	/**
+	 * Used to get a specified channel (Need the 'user` To avoid conflict with other get)
+	 * @param channelID
+	 */
 	@Get('get/users/:channelID')
 	@UseGuards(AuthGuard)
 	findOne(@Param('channelID', ParseIntPipe) channelID: number) {

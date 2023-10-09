@@ -15,7 +15,6 @@ import {UserEntity} from "../entities/user.entity";
 import {CurrentUser} from '../module.auth/indentify.user';
 import {InviteService} from "../module.channels/invite.service";
 import {ChatGateway} from "../module.channels/chat.ws";
-import {FollowEventDTO, UnFollowEventDTO} from "../dto/event.dto";
 
 @Controller('users')
 export class UsersController {
