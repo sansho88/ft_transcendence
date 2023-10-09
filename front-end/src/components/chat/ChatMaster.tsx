@@ -67,7 +67,10 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
 
   useEffect(() => {
-    updateMessages(currentChannel);
+    setTimeout(() => 
+    {
+      updateMessages(currentChannel);
+    }, 10)
     
     const messageHandler = (message: messageDTO.IReceivedMessageEventDTO) => {
       if (socketChat?.connected)

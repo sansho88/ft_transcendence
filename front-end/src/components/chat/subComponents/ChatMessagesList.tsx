@@ -22,7 +22,9 @@ export default function ChatMessagesList({className, messages, currentChannel, u
     refDivEndMessage.current?.scrollIntoView({behavior: typeScroll});
   }
   useEffect(() => {
-    goToEndMessage('auto');
+    setTimeout(() => {
+      goToEndMessage('auto');
+    }, 100)
     
     
   }, []) //TODO: dependence new message... OU PAS ?
@@ -31,7 +33,7 @@ export default function ChatMessagesList({className, messages, currentChannel, u
 
     setTimeout(() => {
       goToEndMessage('auto');
-    }, 50)
+    }, 100)
     
   }, [currentChannel])
 
@@ -48,7 +50,7 @@ export default function ChatMessagesList({className, messages, currentChannel, u
         {
           setTimeout(() => {
             goToEndMessage('smooth');
-          }, 50)
+          }, 100)
         }
       }
     };
