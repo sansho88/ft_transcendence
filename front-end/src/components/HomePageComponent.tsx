@@ -78,18 +78,15 @@ const HomePage = ({className}: HomePageProps) => {
             <main className="main-background">
 
                     <Profile className={"main-user-profile"}
-                             nickname={userContext.nickname}
-                             login={userContext.login} status={userContext.status }
-                             avatar_path={userContext.avatar_path}
-                             UserID={userContext.UserID }
-                             isEditable={true} has_2fa={false}>
+                             user={userContext}
+                             isEditable={true} avatarSize={"big"}>
 
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
                         <Button image={"/history-list.svg"} onClick={() => console.log("history list button")} alt={"Match History button"}/>
                         <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
                     </Profile>
 
-                <UserList className={"friends"}/>
+                <UserList className={"friends"} avatarSize={"medium"}/>
                 <Button className={"logout"} image={"/logout.svg"} onClick={() => {
                     localStorage.clear();
                     router.push("/auth");

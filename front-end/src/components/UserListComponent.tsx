@@ -21,7 +21,7 @@ async function getAllUsers(): Promise<IUser[]>  {
     }
 
 }
-const UserList : React.FC = ({className={className}}) => {
+const UserList : React.FC = ({className, id, userListId, avatarSize}) => {
 
     const [userElements, setUserElements] = useState<React.JSX.Element[]>([]);
     const [isHidden, setIsHidden] = useState(userElements.length == 0);
@@ -33,12 +33,7 @@ const UserList : React.FC = ({className={className}}) => {
                 for (const user of res) {
                     allDiv.push(
                             <li key={user.login + "List" + uuidv4()}>
-                                <Profile login={user.login}
-                                         nickname={user.nickname}
-                                         avatar_path={user.avatar_path}
-                                         UserID={user.UserID}
-                                         status={user.status} //fixme: pas actualisé
-                                         has_2fa={user.has_2fa}/>
+                                <Profile user={user} avatarSize={avatarSize}/>
                             </li>
                     )
                 }
@@ -55,8 +50,8 @@ const UserList : React.FC = ({className={className}}) => {
     }
     return (
         <>
-            <Button className={className} image={"friends.svg"} onClick={handleClick} alt={"Online Users button"}/>
-            {!isHidden && <div className={"userList"}>
+            <Button className={className} id={id} image={"friends.svg"} onClick={handleClick} alt={"Online Users button"}/>
+            {!isHidden && <div className={"userList"} id={userListId} >
                     <ul>
                     { userElements}
                     </ul>
