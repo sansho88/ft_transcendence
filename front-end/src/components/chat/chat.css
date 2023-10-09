@@ -14,6 +14,7 @@
   bottom: 2rem;
   right: 0.25rem;
   margin-right: 0.5vw;
+  z-index: 0;
 
 }
 
@@ -78,7 +79,7 @@
   border-radius: 8px 0 0 0;
   border-bottom: rgba(0, 0, 0, 0.27) solid 2px;
 
-
+  z-index: 1;
 }
 
 .channel{
@@ -330,6 +331,7 @@
   padding-left: 1em;
 
   animation: fadeIn 500ms;
+  z-index: 1;
 }
 
 #channelNameInput{
@@ -378,4 +380,16 @@
   background-color: rgba(66, 66, 66, 0.36);
   border: 1px solid black;
   border-radius: 4px;
+}
+
+#make_popup_disappear{
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(239, 171, 0, 0);
+  z-index: -2;
 }

@@ -38,3 +38,4 @@ export const UserContext = createContext<UserContextType>({ userContext: <IUser>
 export const LoggedContext = createContext<LoggedContextType>({logged: false, setLogged: ()=> {}});
 
 export const TokenContext = createContext<TokenContextType>({token: "", setToken: () => {}});
+export const CurrentChannelContext = createContext<number>(-1);
