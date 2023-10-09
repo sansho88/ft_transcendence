@@ -37,7 +37,7 @@ const HomePage = ({className}: HomePageProps) => {
             router.push("/auth");
         else
             tokenRef.current = token;
-        if (!userContext)
+        if (!userContext || userContext.UserID == -1)
         {
             let user;
             authManager.setToken(token);
