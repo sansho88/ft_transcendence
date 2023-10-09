@@ -39,6 +39,8 @@ import {
 	MutedEventDTO,
 	ReceivedInviteEventDTO,
 	ReceivedMessageEventDTO,
+	UnFollowEventDTO,
+	FollowEventDTO,
 } from '../dto/event.dto'
 import {InviteService} from "./invite.service";
 import {InviteEntity} from "../entities/invite.entity";
@@ -376,7 +378,9 @@ export class ChatGateway
 			ReceivedInviteEventDTO |
 			BannedEventDTO |
 			KickedEventDTO |
-			MutedEventDTO,
+			MutedEventDTO |
+			FollowEventDTO |
+			UnFollowEventDTO,
 	) {
 		const socketTarget = await this.getSocket(user.UserID);
 		if (!socketTarget) return;

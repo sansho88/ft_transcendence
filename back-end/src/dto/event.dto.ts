@@ -61,3 +61,11 @@ export class MutedEventDTO extends EventNotif {
 	duration: number;
 	channel: ChannelEntity;
 }
+
+export class FollowEventDTO extends EventNotif {
+	user: UserEntity;
+}
+
+export class UnFollowEventDTO extends EventNotif {
+	user: UserEntity;
+}

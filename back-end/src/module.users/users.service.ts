@@ -52,7 +52,7 @@ export class UsersService {
 	 * @return UserEntity Or Undefined if user not in db
 	 */
 	async findOne(userID: number, relations?: string[]) {
-		let user;
+		let user: UserEntity;
 		if (!relations)
 			user = await this.usersRepository.findOneBy({UserID: userID});
 		else
