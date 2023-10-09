@@ -9,7 +9,7 @@ import {authManager} from '@/components/api/ApiReq'
 import * as ClipLoader from 'react-spinners'
 import './auth.css'
 import {useRouter} from 'next/navigation';
-import {LoggedContext, SocketContextChat, SocketContextGame, UserContext} from '@/context/globalContext';
+import {LoggedContext, UserContext} from '@/context/globalContext';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
 import {NotificationManager, NotificationContainer} from 'react-notifications';
 
@@ -96,9 +96,6 @@ export default function Auth({className}: { className?: string }) {
         }
     })
 
-    useEffect(() => {
-        setUserContext({login:"", nickname:"", UserID:-1, avatar_path:undefined, visit:undefined, status:0, token_2fa:""});
-    }, [isSignInMode]);
 
     const [currentStepLogin, setCurrentStepLogin] = useState<EStepLogin>(EStepLogin.start);
 
@@ -521,13 +518,21 @@ export default function Auth({className}: { className?: string }) {
     } else
         defaultClassName = className;
 
+        async function goto42auth(){
+            const generateOAuthURI = async (): Promise<string> => {
+							const req = await apiReq.postApi.postTryGetIntraURL();
+							return req.data;
+            };
+            console.log(await generateOAuthURI()); // Affiche l'URI générée
+            router.push(await generateOAuthURI())
+        }
 
     return (
         <div className={defaultClassName}>
             <NotificationContainer/>
             {welcomeTitle()}
             {currentStepLogin === EStepLogin.start &&
-                <button onClick={() => console.log('Not implemented')} className='button-login h-14 opacity-30'>LOGIN
+                <button onClick={() => goto42auth()} className='button-login h-14'>LOGIN
                     42</button>}
             {currentStepLogin < EStepLogin.tryLoginAsInvite &&
                 <button onClick={() => nextStepCheck()} className='button-login'><span>{inviteButtonText}</span>
@@ -547,4 +552,3 @@ export default function Auth({className}: { className?: string }) {
 
     )
 }
-

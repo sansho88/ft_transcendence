@@ -1,12 +1,15 @@
 import {
-	BadRequestException,
+	HttpException,
+	HttpStatus,
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
+import {Request} from 'express';
 import {UsersService} from '../module.users/users.service';
 import {JwtService} from '@nestjs/jwt';
 import {accessToken} from '../dto/payload';
 import {UserCredentialService} from './credential.service';
+import * as process from "process";
 
 @Injectable()
 export class AuthService {
@@ -53,11 +56,64 @@ export class AuthService {
 
 	/** * * * * * * * * * * * * * * **/
 
-	async signIn42(login: string, password: string) {
-		throw new BadRequestException('WIP');
+	getIntraURL(req: Request) {
+		if (!process.env.PORT_SERVER)
+			throw new HttpException('server port error', HttpStatus.BAD_REQUEST);
+		const params = {
+			client_id: process.env.CLIENT_ID,
+			redirect_uri: encodeURIComponent(`${req.protocol}://${req.hostname.replace(process.env.PORT_SERVER, "")}:${process.env.PORT_CLIENT}/callback`),
+			response_type: 'code',
+		}
+		return `https://api.intra.42.fr/oauth/authorize?client_id=${params.client_id}&redirect_uri=${params.redirect_uri}&response_type=${params.response_type}`;
 	}
 
-	logIn42(login: string, password: string) {
-		throw new BadRequestException('WIP');
+	async connect42(token: string, req: Request) {
+		const axios = require('axios');
+
+		const tokenRequestData = {
+			grant_type: 'authorization_code',
+			client_id: process.env.CLIENT_ID,
+			client_secret: process.env.CLIENT_SECRET,
+			code: token,
+			redirect_uri: `${req.protocol}://${req.hostname.replace(process.env.PORT_SERVER, "")}:${process.env.PORT_CLIENT}/callback`,
+		};
+		let request = await axios.post('https://api.intra.42.fr/oauth/token', tokenRequestData)
+			.then(async (response) => {
+				if (response.status !== 200)
+					throw new HttpException(response.data.error + " / ERROR INTRA TOKEN", response.status);
+				const headers = {
+					Authorization: `${response.data.token_type} ${response.data.access_token}`,
+				}
+				try {
+					return await axios.get('https://api.intra.42.fr/v2/me', {headers,});
+				} catch (error) {
+					throw new HttpException(error.message + " / ERROR INTRA TOKEN (/me)", response.status);
+				}
+			})
+			.catch(async (error) => {
+				throw new HttpException(error.message + " / ERROR INTRA TOKEN", HttpStatus.UNAUTHORIZED);
+			});
+		const login = request.data.login;
+		const user = await this.usersService
+			.findAll()
+			.then((users) => users[users.findIndex((usr) => usr.login === login)]);
+		// undefined = new user -> sign in
+		if (!user) {
+			const userCredential = await this.credentialsService.create("");
+			let newUser = await this.usersService.create(login, false, userCredential);
+			newUser.avatar_path = request.data.image.link ? request.data.image.link : null;
+			await newUser.save();
+			const payloadToken: accessToken = {id: newUser.UserID};
+			return await this.jwtService.signAsync(payloadToken);
+		}
+		// else log in
+		const credential = await this.usersService.getCredential(user.UserID);
+		if (!(await this.credentialsService.compare("", credential))) {
+			console.log('failed');
+			throw new UnauthorizedException();
+		}
+		console.log('success');
+		const payloadToken: accessToken = {id: user.UserID};
+		return await this.jwtService.signAsync(payloadToken);
 	}
 }

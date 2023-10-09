@@ -6,6 +6,7 @@ import {
 	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer,
+	WsResponse
 } from '@nestjs/websockets';
 import {IoAdapter} from '@nestjs/platform-socket.io';
 import {Server, Socket} from 'socket.io';
@@ -23,14 +24,14 @@ import {accessToken} from '../dto/payload';
 import * as process from 'process';
 import {JwtService} from '@nestjs/jwt';
 import {
-	CreateChannelDTOPipe,
+	CreateChannelDTOPipe, CreateMpDTOPPipe,
 	JoinChannelDTOPipe,
 	LeaveChannelDTOPipe,
 } from '../dto.pipe/channel.dto';
 import {
 	SendMessageDTOPipe,
 } from '../dto.pipe/message.dto';
-import { getToken } from '../module.auth/auth.guard';
+import {getToken} from '../module.auth/auth.guard';
 import {
 	BannedEventDTO,
 	JoinEventDTO,
@@ -42,6 +43,7 @@ import {
 } from '../dto/event.dto'
 import {InviteService} from "./invite.service";
 import {InviteEntity} from "../entities/invite.entity";
+import { wsChatRoutesClient } from 'shared/routesApi';
 
 class SocketUserList {
 	userID: number;
@@ -58,7 +60,7 @@ export class ChatGateway
 
 
 	constructor(
-		private messageService: MessageService, 
+		private messageService: MessageService,
 		private channelService: ChannelService,
 		private usersService: UsersService,
 		private bannedService: BannedService,
@@ -69,26 +71,24 @@ export class ChatGateway
 		super();
 	}
 
-	// Todo: Maybe Give Bearer Token to auth when 1st connection then keep userID and client.ID in a map-like structure
-	// Or We could also use a 'Auth' event to identify the user post connection
 
-		async handleConnection(client: Socket) {
-			
-			const tokenInfo = getToken(client);
-			
-			const type = tokenInfo.type;
-			const token = tokenInfo.token;
+	async handleConnection(client: Socket) {
 
-			if (type !== 'Bearer') return client.disconnect();
-			if (!token) return client.disconnect();
-			let userID: number;
-			try {
-				const payloadToken: accessToken = await this.jwtService.verifyAsync(
+		const tokenInfo = getToken(client);
+
+		const type = tokenInfo.type;
+		const token = tokenInfo.token;
+
+		if (type !== 'Bearer') return client.disconnect();
+		if (!token) return client.disconnect();
+		let userID: number;
+		try {
+			const payloadToken: accessToken = await this.jwtService.verifyAsync(
 				token,
 				{
 					secret: process.env.SECRET_KEY,
 				},
-				);
+			);
 			userID = payloadToken.id;
 		} catch {
 
@@ -113,8 +113,7 @@ export class ChatGateway
 		console.log('NEW CONNEXION WS CLIENT CHAT v2, id = ' + client.id + ` | userID: ${userID}`);
 	}
 
-	//Todo: leave room + offline
-	async handleDisconnect(client: Socket) { 
+	async handleDisconnect(client: Socket) {
 		const tokenInfo = getToken(client);
 
 		const type = tokenInfo.type;
@@ -133,10 +132,13 @@ export class ChatGateway
 			.findOne(payloadToken.id)
 			.catch(() => null);
 		if (!user) return client.disconnect();
-		await this.usersService.userStatus(user, UserStatus.OFFLINE);
-		// const index = this.socketUserList.indexOf()
-		// this.socketUserList = this.socketUserList.slice()
+		const index = this.socketUserList
+			.findIndex(socket => socket.socketID == socket.socketID)
+		this.socketUserList.splice(index, 1);
+		if (this.socketUserList.findIndex(socket => socket.socketID == client.id) == -1)
+			await this.usersService.userStatus(user, UserStatus.OFFLINE);
 		console.log(`CLIENT ${client.id} left CHAT WS`);
+		return client.disconnect();
 	}
 
 	@SubscribeMessage('createRoom')
@@ -149,16 +151,16 @@ export class ChatGateway
 		const credential = await this.channelCredentialService.create(
 			data.password,
 		);
-		const channel = await this.channelService.create(
+		const channel: ChannelEntity = await this.channelService.create(
 			data.name,
 			credential,
 			data.privacy,
 			user,
 		);
 		client.join(`${channel.channelID}`);
-		client.emit(`createRoom`, {
-			message: `Channel Created with id ${channel.channelID}`,
-		});
+		client.emit(`infoRoom`, {	message: `Channel Created with id ${channel.channelID}`});
+		client.emit(`createRoom`, {channel: channel	}); //FIXME: garder cette ligne , delete celle dessous
+		// this.server.emit(`createRoom`, {channel: channel	}) //just pour DBG tous les clients recoivent le channel dans leur liste
 	}
 
 	@SubscribeMessage('joinRoom')
@@ -169,8 +171,8 @@ export class ChatGateway
 		@ConnectedSocket() client: Socket,
 	) {
 		await this.bannedService.update();
-		const channel = await this.channelService
-			.findOne(data.channelID, ['userList'])
+		let channel = await this.channelService
+			.findOne(data.channelID, ['userList'], false)
 			.catch(() => null);
 		if (channel == null)
 			return client.emit('joinRoom', {error: 'There is no such Channel'});
@@ -193,6 +195,7 @@ export class ChatGateway
 		client.join(`${channel.channelID}`);
 		const content: JoinEventDTO = {user: user, channelID: channel.channelID}
 		this.server.to(`${channel.channelID}`).emit(`joinRoom`, content);
+		client.emit(`createRoom`, {channel: channel	})
 		console.log(`JOIN Room ${data.channelID} By ${user.UserID}`);
 	}
 
@@ -212,6 +215,21 @@ export class ChatGateway
 		return this.leaveChat(channel, user);
 	}
 
+	/**
+	 * Ping cette route ws update la liste des channels JOIN de ce meme client
+	 * @param user 
+	 * @param client 
+	 * @returns 
+	 */
+	@SubscribeMessage(wsChatRoutesClient.updateChannelsJoined())
+	@UseGuards(WSAuthGuard)
+	async updateClientChannelsJoined( 
+		@CurrentUser() user: UserEntity,
+		@ConnectedSocket() client: Socket,) {
+		return client.emit(wsChatRoutesClient.updateChannelsJoined(), await this.channelService.getJoinedChannelList(user));
+	}
+
+
 	@SubscribeMessage('sendMsg')
 	@UseGuards(WSAuthGuard)
 	async handelMessages(
@@ -220,7 +238,7 @@ export class ChatGateway
 		@ConnectedSocket() client: Socket,
 	) {
 		const channel = await this.channelService
-			.findOne(data.channelID)
+			.findOne(data.channelID, [], true)
 			.catch(() => null);
 		if (channel == null)
 			return client.emit('sendMsg', {error: 'There is no such Channel'});
@@ -231,13 +249,57 @@ export class ChatGateway
 			return await this.SendMessage(channel, user, data.content);
 		}
 		return client.emit('sendMsg', {
-			error: 'You are not part of this channel',
+			error: 'You are not part of this channel', //TODO: il faudra changer pour emit sur invent Info notif, (a definir)
 		});
+
 	}
+
+
+	/********************************/
+	/*********       MP       *******/
+	/********************************/
+
+	//  todo: Cannot create mp with Blocked User
+	//	todo: Cannot send messages if User get block
+
+	@SubscribeMessage('createMP')
+	@UseGuards(WSAuthGuard)
+	async handelCreateMP(
+		@MessageBody(new ValidationPipe()) data: CreateMpDTOPPipe,
+		@CurrentUser() user: UserEntity,
+		@ConnectedSocket() client: Socket,
+	) {
+		const user2: UserEntity = await this.usersService.findOne(data.targetID);
+		if (!user2) return client.emit('createMP', {messages: 'This user doesn\'t exist'});
+		if (user2.UserID == user.UserID) return client.emit('createMP', {messages: 'You cannot create a mp with yourself, Find a friend :D'});
+		const channel = await this.channelService.getmp(user, user2).catch(() => null);
+		if (channel)
+			return client.emit('createMP', {messages: 'You already have a direct channel with this user'});
+		// if (user blocked)
+		// 	throw new BadRequestException('You cannot create a direct channel with them');
+		const mp = await this.channelService.createMP(user, user2);
+		client.join(`${mp.channelID}`);
+		const client2 = await this.getSocket(user2.UserID);
+		if (client2)
+			client2.join(`${mp.channelID}`);
+		console.log(mp);
+	}
+
+	// @SubscribeMessage('getMP')
+	// @UseGuards(WSAuthGuard)
+	// async handelGetMP(
+	// 	@MessageBody(new ValidationPipe()) data: CreateMpDTOPPipe,
+	// 	@CurrentUser() user: UserEntity,
+	// 	@ConnectedSocket() client: Socket,
+	// ) {
+	// 	const user2 = await this.usersService.findOne(data.targetID);
+	// 	const channel = await this.channelService.getmp(user, user2);
+	// 	console.log('return getmp ', channel);
+	// }
 
 	/**
 	 * @param channel
-	 * @param user If 0-> Meant to be the system !
+	 * @param user
 	 * @param content
 	 */
 	async SendMessage(
@@ -266,6 +328,7 @@ export class ChatGateway
 		});
 	}
 
+
 	@SubscribeMessage('debug')
 	@UseGuards(WSAuthGuard)
 	async handelDebug(
@@ -273,6 +336,7 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 	) {
 	}
+
 
 	async leaveChat(channel: ChannelEntity, user: UserEntity) {
 		if (this.channelService.userIsAdmin(user, channel))
@@ -317,6 +381,20 @@ export class ChatGateway
 		}
 		await this.sendEvent(user, event);
 		return await this.leaveChat(channel, user);
+	}
+	
+	@SubscribeMessage('NicknameUsed')
+	@UseGuards(WSAuthGuard)
+	async handleUpdateNickname(
+		@ConnectedSocket() client: Socket,
+		@MessageBody(new ValidationPipe()) data: {nickname: string},
+		callback: (res: boolean) => void) {
+			console.log(data);
+			console.log(data.nickname);
+			const res = await this.usersService.nicknameUsed(data.nickname);
+			console.log(`ret NicknameUsed= ${data.nickname} | ${res}`);
+			// callback(res); //si callback ne fonctionne pas, remplacer par le client emit ci dessous
+		client.emit('NicknameUsed', res);
 	}
 
 	async receivedInvite(invite: InviteEntity) {

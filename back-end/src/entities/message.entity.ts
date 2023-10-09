@@ -13,7 +13,7 @@ export class MessageEntity extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@ManyToOne(() => UserEntity, (UserEntity) => UserEntity.message)
+	@ManyToOne(() => UserEntity, (UserEntity) => UserEntity.message, {eager: true})
 	author: UserEntity;
 
 	@Column({

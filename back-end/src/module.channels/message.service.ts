@@ -53,7 +53,8 @@ export class MessageService {
 	filterRecent(messages: MessageEntity[]) {
 		let i = 30;
 		return messages
-			.sort((a, b) => b.sendTime.getTime() - a.sendTime.getTime())
-			.filter(() => i-- > 0)
+			// .sort((a, b) => b.sendTime.getTime() - a.sendTime.getTime())
+			// .filter(() => i-- > 0)
+			.sort((a, b) => a.sendTime.getTime() - b.sendTime.getTime())
 	}
 }

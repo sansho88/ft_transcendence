@@ -1,12 +1,12 @@
 import {
-	BadRequestException,
+	BadRequestException, Body,
 	Controller,
 	Get,
 	Param,
 	ParseIntPipe,
 	Post,
 	Put,
-	UseGuards,
+	UseGuards, ValidationPipe,
 } from '@nestjs/common';
 import {ChannelService} from './channel.service';
 import {AuthGuard} from '../module.auth/auth.guard';
@@ -19,6 +19,8 @@ import {MutedService} from "./muted.service";
 import {MessageService} from "./message.service";
 import {ChannelEntity} from "../entities/channel.entity";
 import {InviteService} from "./invite.service";
+import {ChangeChannelDTOPipe} from "../dto.pipe/channel.dto";
+import {ChannelCredentialService} from "./credential.service";
 
 @Controller('channel')
 export class ChannelController {
@@ -30,6 +32,7 @@ export class ChannelController {
 		private readonly usersService: UsersService,
 		private readonly chatGateway: ChatGateway,
 		private readonly inviteService: InviteService,
+		private readonly credentialService: ChannelCredentialService
 	) {
 	}
 
@@ -45,20 +48,26 @@ export class ChannelController {
 		return this.channelService.findAll();
 	}
 
-	@Get('get/users/:channelID')
+
+	@Get('get/:channelID')
 	@UseGuards(AuthGuard)
 	findOne(@Param('channelID', ParseIntPipe) channelID: number) {
 		return this.channelService.findOne(channelID);
 	}
 
-
-	@Get('msg/:channelID')
+  @Get('get/users/:channelID')
 	@UseGuards(AuthGuard)
-	async getAllMessages(
-		@Param('channelID', ParseIntPipe) channelID: number,
-	) {
-		const channel = await this.channelService.findOne(channelID);
-		return this.channelService.getAllMessages(channel);
+	findUserList(@Param('channelID', ParseIntPipe) channelID: number) {
+			return this.channelService.findOne(channelID, ['userList']);
+	}
+
+	@Get('mychannel')
+	@UseGuards(AuthGuard)
+	findMy(@CurrentUser() user: UserEntity) {
+		return this.channelService.findAll(['userList'])
+			.then(lstchan => lstchan
+				.filter(channel => channel.userList
+					.find(usr => usr.UserID == user.UserID)))
 	}
 
 	/**
@@ -257,7 +266,7 @@ export class ChannelController {
 	) {
 		const minTime = new Date(timestamp);
 		minTime.setUTCHours(minTime.getHours() + 2);
-		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'])
+		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterBefore(channel.messages, minTime);
@@ -272,7 +281,7 @@ export class ChannelController {
 	) {
 		const maxTime = new Date(timestamp);
 		maxTime.setUTCHours(maxTime.getHours() + 2);
-		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'])
+		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterAfter(channel.messages, maxTime);
@@ -284,7 +293,7 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('channelID', ParseIntPipe) channelID: number,
 	) {
-		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'])
+		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterRecent(channel.messages);
@@ -339,4 +348,18 @@ export class ChannelController {
 		await this.inviteService.remove(invite);
 	}
 
+	@Put('modif/:channelID')
+	@UseGuards(AuthGuard)
+	async modifyChannel(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+		@Body(new ValidationPipe()) data: ChangeChannelDTOPipe,
+	) {
+		const channel = await this.channelService.findOne(channelID);
+		console.log(channel);
+		if (channel.owner.UserID !== user.UserID)
+			throw new BadRequestException('You need to be the channel Owner to change it');
+		const credential = await this.credentialService.create(data.password);
+		return this.channelService.modifyChannel(channel, credential, data);
+	}
 }

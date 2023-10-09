@@ -22,4 +22,6 @@ export class ChannelsServerManager {
     this.channels = this.channels.filter(channel => channel.getChannelID() !== removeChannelID);  }
 
   public getChannelById(channelID: number) : Channel | undefined {
-    return this.channels.find(channel => channel.getChannelID() === channelID);}  
+    return this.channels.find(channel => channel.getChannelID() === channelID);} 
+  
+  } 
