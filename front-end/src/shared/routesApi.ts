@@ -71,8 +71,17 @@ export namespace wsChatRoutesClient {
 	export namespace strRoutes {
 
 // +---------------------------------------------------------------------+
+// |                               2FA                                   |
+// +---------------------------------------------------------------------+
+
+		export const postGenerate2FA=() 					=>{return `${serverApi}/auth/2fa/generate`};
+		export const postCheck2FA=(token: string) =>{return `${serverApi}/auth/2fa/check/${token}}`};
+		export const postDisable2FA=() 						=>{return `${serverApi}/auth/2fa/disable`};
+
+// +---------------------------------------------------------------------+
 // |                            USERS 42                                 |
 // +---------------------------------------------------------------------+
+
 	export const postUser42=()							=>{return `${serverApi}/auth/42/connect/`}
 	export const getIntraURL=()							=>{return `${serverApi}/auth/42/getIntraURL/`}
 

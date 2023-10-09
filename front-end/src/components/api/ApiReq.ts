@@ -58,6 +58,10 @@ export namespace postApi {
 	export const postTryLogin42= (code: string)	=>{return axiosInstance.post(`${strRoutes.postUser42()}`, code);}
 	export const postTryGetIntraURL= ()	=>{return axiosInstance.post(`${strRoutes.getIntraURL()}`);}
 
+	export const postGen2FA= ()	=>{return axiosInstance.post(`${strRoutes.postGenerate2FA()}`, {}, updateAxiosInstance());}
+	export const postCheck2FA= (token: string)	=>{return axiosInstance.post(`${strRoutes.postCheck2FA(token)}`, {}, updateAxiosInstance());}
+	export const postDisable2FA= ()	=>{return axiosInstance.post(`${strRoutes.postDisable2FA()}`, {}, updateAxiosInstance());}
+
 }
 
 

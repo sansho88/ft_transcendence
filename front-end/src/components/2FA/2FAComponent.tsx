@@ -6,12 +6,18 @@ import * as apiReq from "@/components/api/ApiReq";
 import DraggableComponent from "@/components/draggableComponent";
 import QRCode from 'qrcode.react';
 import {UserContext} from "@/context/globalContext";
+import { Router } from "next/router";
+import { getUserMe } from "@/app/auth/Auth";
 
 
 interface userData2Fa {
     hasActive2FA: boolean
 }
 const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) => {
+
+	const [qrCodeData, setQrCodeData] = useState(""); // État pour stocker les données du QR code
+  	const [qrCodeGenerated, setQrCodeGenerated] = useState(false); // État pour suivre si le QR code a déjà été généré
+
     const [isActivated, setIsActivated] = useState(hasActive2FA);
     const [code2FA, setCode2FA] = useState("");
     const [deactivationCode2FA, setDeactivationCode2FA] = useState("");
@@ -25,65 +31,58 @@ const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) =
                 setIsChecked(user.has_2fa);
     }, [user]);
 
+	const generateQRCode = async () => {
+		try {
+		  const res = await apiReq.postApi.postGen2FA();
+		  setQrCodeData(res.data.img);
+		  setQrCodeGenerated(true);
+		} catch (err) {
+		  console.log(err);
+		}
+	};
+
+	useEffect(() => {
+		if (!isActivated && !qrCodeGenerated) {
+		  // Appel de l'API seulement si le QR code n'a pas encore été généré
+		  generateQRCode();
+		}
+	  }, [isActivated, qrCodeGenerated]);
+
     const handleSubmitActivationCode = async (event) => {
         event.preventDefault();
-        let updatedUser = JSON.parse(localStorage.getItem("userContext"));
-        updatedUser.has_2fa = true;
-        if (code2FA == '424242')
-        {
-            apiReq.putApi.putUser(updatedUser)
-                .then(() => {
-                    setUserContext(updatedUser);
-                    setIsChecked(true);
-                    setIsActivated(true);
-                    setOnProcess(false);
-                    NotificationManager.success(`2FA activated on ${updatedUser.login}`);
-                });
-        }
-        else
-        {
+        
+        await apiReq.postApi.postCheck2FA(code2FA).then((res) => {
+            getUserMe(undefined).then((res) => {
+                if (res) {
+                    setUserContext(res);
+                    NotificationManager.success(`2FA activated on ${res.login}`);
+                } 
+            });
+            setIsChecked(true);
+            setIsActivated(true);
+            setOnProcess(false);
+        }).catch((err) => {
             NotificationManager.error("Wrong 2FA code");
             setIsChecked(false);
-        }
-
-       /* try{ //todo: activer ce bloc de code quand le back sera prêt
-           const res = await fetch('/api/verify', {
-              method: 'POST',
-              body: JSON.stringify({ token: code }),
-            });
-        }
-        catch (e) {
-
-        }*/
+        });
     }
-    const handleSubmitDeactivationCode = async (event) => {
-            event.preventDefault();
-            let updatedUser = JSON.parse(localStorage.getItem("userContext"));
-            updatedUser.has_2fa = false;
-            if (deactivationCode2FA == '848484')
-            {
-                apiReq.putApi.putUser(updatedUser)
-                    .then(() => {
-                        setUserContext(updatedUser);
-                        setIsChecked(false);
-                        setIsActivated(false);
-                        setOnProcess(false);
-                    });
-            }
-            else
-                NotificationManager.error(`Wrong Deactivation 2FA code.
-This is not ${deactivationCode2FA}`);
+	const handleSubmitDeactivationCode = async (event) => {
+		event.preventDefault();
 
-           /* try{ //todo: activer ce bloc de code quand le back sera prêt
-               const res = await fetch('/api/verify', {
-                  method: 'POST',
-                  body: JSON.stringify({ token: code }),
-                });
-            }
-            catch (e) {
-
-            }*/
-        }
+		await apiReq.postApi.postDisable2FA().then((res) => {
+			getUserMe(undefined).then((res) => {
+				if (res) {
+					setUserContext(res);
+					NotificationManager.success(`2FA activated on ${res.login}`);
+				}
+			});
+			setIsChecked(false);
+			setIsActivated(false);
+			setOnProcess(false);
+		}).catch((err) => {
+			NotificationManager.error(`Wrong Deactivation 2FA code.\nThis is not ${deactivationCode2FA}`);
+		});
+	}
 
     const handleInput2FAChange = (e) => {
         inputCode = e.target.value;
@@ -93,26 +92,26 @@ This is not ${deactivationCode2FA}`);
         inputCode = e.target.value;
         setDeactivationCode2FA(inputCode);
     }
-    const settings2FA = () => {
+    const settings2FA = async () => {
       if (!isActivated)
       {
-          return (
-              <div className={"settings"}>
-                  <h1>SCAN THIS QR CODE</h1>
-                  <QRCode value={"https://42lyon.fr"} style={{margin: "auto"}}/>
-                  <h1>OR ENTER YOUR CODE:</h1>
-                  <form onSubmit={handleSubmitActivationCode}>
-                      <input className={"codeInput"}
-                             type={"text"} inputMode={"numeric"}
-                             id={"code2FA"}
-                             name={"validationCode"}
-                             value={inputCode}
-                             onChange={handleInput2FAChange}
-                             min={0} minLength={6} maxLength={6}/>
-                      <input type={"image"} value={"OK"} className={"submitCode"} src={"/confirm.svg"}/>
-                  </form>
-              </div>
-          )
+		  return (
+			  <div className={"settings"}>
+				  <h1>SCAN THIS QR CODE</h1>
+				  <QRCode value={qrCodeData} style={{ margin: "auto" }} />
+				  <h1>AND ENTER YOUR CODE:</h1>
+				  <form onSubmit={handleSubmitActivationCode}>
+					  <input className={"codeInput"}
+						  type={"text"} inputMode={"numeric"}
+						  id={"code2FA"}
+						  name={"validationCode"}
+						  value={inputCode}
+						  onChange={handleInput2FAChange}
+						  min={0} minLength={6} maxLength={6} />
+					  <input type={"image"} value={"OK"} className={"submitCode"} src={"/confirm.svg"} />
+				  </form>
+			  </div>
+		  )
       }
       else
       {

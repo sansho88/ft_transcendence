@@ -6,10 +6,15 @@ import {
 	Post,
 	ValidationPipe,
 	Req,
+	UseGuards,
+	Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LogVisitDTOPipe, SignVisitDTOPipe } from '../dto.pipe/auth/visit';
 import { Request } from 'express';
+import { UserEntity } from 'src/entities/user.entity';
+import { AuthGuard } from './auth.guard';
+import { CurrentUser } from './indentify.user';
 
 @Controller('auth')
 export class AuthController {
@@ -38,7 +43,32 @@ export class AuthController {
 
 	@HttpCode(HttpStatus.OK)
 	@Post('42/connect')
-	connect42(@Body()body : string, @Req() req: Request) {
+	connect42(
+		@Body()body : string, 
+		@Req() req: Request) {
 		return this.authService.connect42(Object.keys(body)[0], req);
+	}
+
+	@HttpCode(HttpStatus.OK)
+	@UseGuards(AuthGuard)
+	@Post('2fa/generate')
+	generate2FA(@CurrentUser() user: UserEntity) {
+		return this.authService.generate2FA(user);
+	}
+
+	@HttpCode(HttpStatus.OK)
+	@UseGuards(AuthGuard)
+	@Post('2fa/check/:2faToken')
+	check2FA(
+		@CurrentUser() user: UserEntity, 
+		@Param('2faToken') token: string) {
+		return this.authService.check2FA(token, user);
+	}
+
+	@HttpCode(HttpStatus.OK)
+	@UseGuards(AuthGuard)
+	@Post('2fa/disable')
+	disable2FA(@CurrentUser() user: UserEntity) {
+		return this.authService.disable2FA(user);
 	}
 }
