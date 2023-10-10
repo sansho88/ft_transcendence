@@ -11,6 +11,7 @@ import SettingsChannel from "@/components/chat/subComponents/SettingsChannel";
 import UserList from "@/components/UserListComponent";
 import * as apiReq from "@/components/api/ApiReq"
 import {IUser} from "@/shared/types";
+import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
 
 
 export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList, channelsServer}
@@ -184,13 +185,13 @@ export default function ChatChannelList({className, socket, channels, setCurrent
                     wsChatEvents.joinRoom(socket, joinChan)
                     
                     // setCurrentChannel(channel.channelID);
-                    setPopupVisible(false);
+                    setPopupChannelVisible(false);
                   }
                 }
                 else {
                   wsChatEvents.joinRoom(socket, channel)
                   setCurrentChannel(channel.channelID);
-                  setPopupVisible(false);
+                  setPopupChannelVisible(false);
                 }
               }}
               currentChannel={currentChannel}
