@@ -80,11 +80,11 @@ export class UserEntity extends BaseEntity {
 
 	//	Friends
 	@ManyToMany(() => UserEntity, (user) => user.subscribed)
-	@JoinTable()
+		// @JoinTable()
 	followers: UserEntity[];
 
 	@ManyToMany(() => UserEntity, (user) => user.followers)
-	@JoinTable()
+	@JoinTable({name: 'TestSubscriber'})
 	subscribed: UserEntity[];
 
 	@OneToMany(() => InviteEntity, (invite) => invite.user)
