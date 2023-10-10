@@ -74,9 +74,9 @@ export namespace wsChatRoutesClient {
 // |                               2FA                                   |
 // +---------------------------------------------------------------------+
 
-		export const postGenerate2FA=() 					=>{return `${serverApi}/auth/2fa/generate`};
-		export const postCheck2FA=(token: string) =>{return `${serverApi}/auth/2fa/check/${token}}`};
-		export const postDisable2FA=() 						=>{return `${serverApi}/auth/2fa/disable`};
+		export const postGenerate2FA=() 						=>{return `${serverApi}/auth/2fa/generate`};
+		export const postCheck2FA=(token: string) 	=>{return `${serverApi}/auth/2fa/check/${token}`};
+		export const postDisable2FA=(token: string) =>{return `${serverApi}/auth/2fa/disable/${token}`};
 
 // +---------------------------------------------------------------------+
 // |                            USERS 42                                 |

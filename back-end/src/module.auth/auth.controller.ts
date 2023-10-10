@@ -67,8 +67,10 @@ export class AuthController {
 
 	@HttpCode(HttpStatus.OK)
 	@UseGuards(AuthGuard)
-	@Post('2fa/disable')
-	disable2FA(@CurrentUser() user: UserEntity) {
-		return this.authService.disable2FA(user);
+	@Post('2fa/disable/:2faToken')
+	disable2FA(
+		@CurrentUser() user: UserEntity,
+		@Param('2faToken') token: string) {
+		return this.authService.disable2FA(token, user);
 	}
 }

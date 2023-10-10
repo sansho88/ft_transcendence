@@ -128,11 +128,15 @@ export class AuthService {
 	 */
 	async generate2FA(user: UserEntity) {
 		console.log("generate2FA");
+		if (user.has_2fa) throw new HttpException("2fa already enabled.", HttpStatus.BAD_REQUEST)
+
 		const cred = await this.usersService.getCredential(user.UserID);
 		const speakeasy = require('speakeasy');
-		const secret = speakeasy.generateSecret({length: 20});
+		const secret = speakeasy.generateSecret({length: 20, name: "tester c'est douter"});
+		
 		cred.token_2fa = secret.base32;
 		cred.save();
+		
 		return { img: secret.otpauth_url };
 	}
 
@@ -144,9 +148,10 @@ export class AuthService {
 	 */
 	async check2FA(token: string, user: UserEntity) {
 		const cred = await this.usersService.getCredential(user.UserID);
-
 		if (cred.token_2fa === null) throw new HttpException("No 2fa Generated.", HttpStatus.BAD_REQUEST)
-
+		
+		token = token.substring(0, 6);
+		
 		const speakeasy = require('speakeasy');
 		if (!speakeasy.totp.verify({ 
 			secret: cred.token_2fa, 
@@ -154,11 +159,9 @@ export class AuthService {
 			token 
 		})) return false;
 
-		if (!user.has_2fa) {
-			user.has_2fa = true;
-			user.save();
-		}
-		return false;
+		user.has_2fa = true;
+		user.save();
+		return true;
 	}
 
 	/**
@@ -166,14 +169,37 @@ export class AuthService {
 	 * @param user the user to update
 	 * @returns {boolean}
 	 */
-	async disable2FA(user: UserEntity) {
+	async disable2FA(token: string, user: UserEntity) {
 		const cred = await this.usersService.getCredential(user.UserID);
 
 		if (!user.has_2fa) throw new HttpException("2fa already disabled.", HttpStatus.BAD_REQUEST)
 		if (!cred.token_2fa) throw new HttpException("No 2fa Generated.", HttpStatus.BAD_REQUEST)
 
+		token = token.substring(0, 6);
+		console.log(token);
+		const speakeasy = require('speakeasy');
+		
+		
+		const bool = speakeasy.totp.verify({ 
+			secret: cred.token_2fa, 
+			encoding: 'base32', 
+			token 
+		});
+
+		console.log("bool: " + bool);
+		
+		
+		if (!speakeasy.totp.verify({ 
+			secret: cred.token_2fa, 
+			encoding: 'base32', 
+			token 
+		})) return false;
+		console.log("2fa disabled");
+		
 		cred.token_2fa = null;
 		cred.save();
+		user.has_2fa = false;
+		user.save();
 
 		return true;
 	}

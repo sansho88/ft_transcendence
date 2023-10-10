@@ -15,12 +15,12 @@ interface userData2Fa {
 }
 const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) => {
 
-	const [qrCodeData, setQrCodeData] = useState(""); // État pour stocker les données du QR code
-  	const [qrCodeGenerated, setQrCodeGenerated] = useState(false); // État pour suivre si le QR code a déjà été généré
+	const [qrCodeData, setQrCodeData] = useState("");
+  	const [qrCodeGenerated, setQrCodeGenerated] = useState(false);
 
     const [isActivated, setIsActivated] = useState(hasActive2FA);
     const [code2FA, setCode2FA] = useState("");
-    const [deactivationCode2FA, setDeactivationCode2FA] = useState("");
+    const [turnOffCode2FA, setDeactivationCode2FA] = useState("");
     const [isChecked, setIsChecked] = useState(hasActive2FA ? hasActive2FA : false);
     const [onProcess, setOnProcess] = useState(false);
     const {user, setUserContext} = useContext(UserContext);
@@ -45,7 +45,6 @@ const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) =
 
 	useEffect(() => {
 		if (!isActivated && !qrCodeGenerated) {
-		//   Appel de l'API seulement si le QR code n'a pas encore été généré
 		  generateQRCode();
             setQrCodeGenerated(true);
 		}
@@ -54,16 +53,22 @@ const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) =
     const handleSubmitActivationCode = async (event) => {
         event.preventDefault();
         
-        await apiReq.postApi.postCheck2FA(code2FA).then((res) => {
-            getUserMe(undefined).then((res) => {
-                if (res) {
-                    setUserContext(res);
-                    NotificationManager.success(`2FA activated on ${res.login}`);
-                } 
-            });
-            setIsChecked(true);
-            setIsActivated(true);
-            setOnProcess(false);
+        await apiReq.postApi.postCheck2FA(code2FA).then((has_2fa) => {
+            if (has_2fa.data === true) {
+                getUserMe(undefined).then((res) => {
+                    if (res) {
+                        setUserContext(res);
+                        NotificationManager.success(`2FA activated on ${res.login}`);
+                    } 
+                });
+                setIsChecked(true);
+                setIsActivated(true);
+                setOnProcess(false);
+            }
+            else {
+                NotificationManager.error("Wrong 2FA code");
+                setIsChecked(false);
+            }
         }).catch((err) => {
             NotificationManager.error("Wrong 2FA code");
             setIsChecked(false);
@@ -72,18 +77,26 @@ const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) =
 	const handleSubmitDeactivationCode = async (event) => {
 		event.preventDefault();
 
-		await apiReq.postApi.postDisable2FA().then((res) => {
-			getUserMe(undefined).then((res) => {
-				if (res) {
-					setUserContext(res);
-					NotificationManager.success(`2FA activated on ${res.login}`);
-				}
-			});
-			setIsChecked(false);
-			setIsActivated(false);
-			setOnProcess(false);
+        console.log(turnOffCode2FA);
+		await apiReq.postApi.postDisable2FA(turnOffCode2FA).then((res) => {
+            if (res.data === true) {
+                getUserMe(undefined).then((res) => {
+                    if (res) {
+                        res.has_2fa = false;
+                        setUserContext(res);
+                        NotificationManager.success(`2FA activated on ${res.login}`);
+                    }
+                });
+                setQrCodeGenerated(false);
+                setIsChecked(false);
+                setIsActivated(false);
+                setOnProcess(false);
+            }
+            else {
+                NotificationManager.error(`Wrong Deactivation 2FA code.`);
+            }
 		}).catch((err) => {
-			NotificationManager.error(`Wrong Deactivation 2FA code.\nThis is not ${deactivationCode2FA}`);
+			NotificationManager.error(`Wrong Deactivation 2FA code.`);
 		});
 	}
 
