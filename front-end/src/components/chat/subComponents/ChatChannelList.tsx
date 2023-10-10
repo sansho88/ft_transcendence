@@ -9,6 +9,8 @@ import { EChannelType, IChannel } from '@/shared/typesChannel';
 import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelPopup";
 import SettingsChannel from "@/components/chat/subComponents/SettingsChannel";
 import UserList from "@/components/UserListComponent";
+import * as apiReq from "@/components/api/ApiReq"
+import {IUser} from "@/shared/types";
 
 
 export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList, channelsServer}
@@ -27,6 +29,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
   const [isPopupSettingsVisible, setPopupSettingsVisible] = useState(false);
   const [isPopupUsersVisible, setPopupUsersVisible] = useState(false);
   const actualChannel = channels.find(channel => channel.channelID === currentChannel);
+  const [usersList, setUsersList] = useState<IUser[]>([]);
 
   const addChannel = () => {
     return (
@@ -82,18 +85,34 @@ export default function ChatChannelList({className, socket, channels, setCurrent
     )
   }
 
-    const showUsersInChannel = () => {
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                await apiReq.getApi.getAllUsersFromChannel(currentChannel).then((res) => {
+                    setUsersList(res.data);
+                    console.log("userList size: " + res.data.length);
+                });
+
+            } catch (error) {
+                console.error("Erreur lors de la récupération des utilisateurs :", error);
+            }
+        };
+        fetchData();
+    }, [currentChannel]);
+
+    const showUsersInChannel =  () => {
+
 
         return (
             <>
                 {isPopupUsersVisible && <div id={"make_popup_disappear"} onClick={() => setPopupUsersVisible(false)}></div>}
                 <button  onClick={() => {
                     setPopupUsersVisible(!isPopupUsersVisible);
-
+                    console.log("POPUP userList size: " + usersList.length);
                 }}>
 
                 </button>
-                { actualChannel  &&  <UserList id={"chat_users_button"} userListId={"chat_users_list"} avatarSize={"medium"}/> }
+                { actualChannel  && <UserList id={"chat_users_button"} userListIdProperty={"chat_users_list"} avatarSize={"medium"} usersList={usersList}/> }
 
             </>
         )

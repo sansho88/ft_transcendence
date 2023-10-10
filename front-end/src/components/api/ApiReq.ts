@@ -2,7 +2,7 @@
 
 import { IMessageEntity } from "@/shared/entities/IMessage.entity";
 import Axios from "./AxiosConfig";
-import { strRoutes } from "@/shared/routesApi";
+import {strRoutes} from "@/shared/routesApi";
 import { IUser } from "@/shared/types";
 import { IChannel } from "@/shared/typesChannel";
 import axios from "axios";
@@ -51,6 +51,10 @@ export namespace getApi {
 			'Authorization': `Bearer ${authManager.getToken()}`
 		}
 	});}
+
+	export const getAllUsersFromChannel = (channelID: number): Promise<IUser[]> => {
+		return axiosInstance.get(`${strRoutes.channel.getUsersChannel(channelID)}`, updateAxiosInstance());
+	}
 
 	export const getMePromise = () => {
 		return axiosInstance.get(`users/me`, updateAxiosInstance())}

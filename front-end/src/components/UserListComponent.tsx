@@ -4,9 +4,14 @@ import * as apiReq from '@/components/api/ApiReq';
 import Profile from "@/components/ProfileComponent";
 import Button from "@/components/CustomButtonComponent";
 import {v4 as uuidv4} from "uuid";
-import {NotificationContainer, NotificationManager} from 'react-notifications';
-import NotifComponent from "@/components/notif/NotificationComponent";
+import {NotificationManager} from 'react-notifications';
 
+
+
+interface UserListProps{
+    avatarSize?: string | undefined;
+    usersList?: IUser[] | undefined;
+}
 
 async function getAllUsers(): Promise<IUser[]>  {
     try {
@@ -21,27 +26,41 @@ async function getAllUsers(): Promise<IUser[]>  {
     }
 
 }
-const UserList : React.FC = ({className, id, userListId, avatarSize}) => {
+const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, usersList}) => {
 
     const [userElements, setUserElements] = useState<React.JSX.Element[]>([]);
     const [isHidden, setIsHidden] = useState(userElements.length == 0);
+    const [isPopupUsersVisible, setPopupUsersVisible] = useState(false);
     function handleClick(){
+        console.log(`isHidden;${isHidden}, isPopupVisible"${isPopupUsersVisible}`);
         if (isHidden)
         {
-            getAllUsers().then((res) => {
-                let allDiv : React.JSX.Element[] = [];
-                for (const user of res) {
-                    allDiv.push(
+            setPopupUsersVisible(isHidden);
+            let allDiv : React.JSX.Element[] = [];
+            if (!usersList)
+            {
+                getAllUsers().then((res) => {
+                    for (const user of res) {
+                        allDiv.push(
                             <li key={user.login + "List" + uuidv4()}>
                                 <Profile user={user} avatarSize={avatarSize}/>
                             </li>
+                        )
+                    }
+                    setUserElements(allDiv);
+                })
+            }
+            else {
+                for (const user of usersList) {
+                    allDiv.push(
+                        <li key={user.login + "List" + uuidv4()}>
+                            <Profile user={user} avatarSize={avatarSize}/>
+                        </li>
                     )
                 }
                 setUserElements(allDiv);
-
+            }
                 NotificationManager.info(`${allDiv.length} users loaded`);
-
-            })
         }
         else
             setUserElements([]);
@@ -50,12 +69,20 @@ const UserList : React.FC = ({className, id, userListId, avatarSize}) => {
     }
     return (
         <>
+            {isPopupUsersVisible && <div id={"make_popup_disappear"} onClick={() => {
+                setPopupUsersVisible(false)
+                setIsHidden(true);
+                setUserElements([]);
+            }}></div>}
             <Button className={className} id={id} image={"friends.svg"} onClick={handleClick} alt={"Online Users button"}/>
-            {!isHidden && <div className={"userList"} id={userListId} >
+            {isPopupUsersVisible && !isHidden && <div id={"make_popup_disappear"} onClick={() => setIsHidden(true)}></div> &&
+                <div className={"userList"} id={userListIdProperty} >
                     <ul>
                     { userElements}
                     </ul>
-            </div>}
+                </div>
+
+            }
 
         </>
     )
