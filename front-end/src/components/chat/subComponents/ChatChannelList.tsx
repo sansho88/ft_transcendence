@@ -8,6 +8,9 @@ import { Socket } from 'socket.io-client';
 import { EChannelType, IChannel } from '@/shared/typesChannel';
 import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelPopup";
 import SettingsChannel from "@/components/chat/subComponents/SettingsChannel";
+import UserList from "@/components/UserListComponent";
+import * as apiReq from "@/components/api/ApiReq"
+import {IUser} from "@/shared/types";
 
 
 export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList, channelsServer}
@@ -24,6 +27,9 @@ export default function ChatChannelList({className, socket, channels, setCurrent
 
   const [isPopupChannelsVisible, setPopupChannelVisible] = useState(false);
   const [isPopupSettingsVisible, setPopupSettingsVisible] = useState(false);
+  const [isPopupUsersVisible, setPopupUsersVisible] = useState(false);
+  const actualChannel = channels.find(channel => channel.channelID === currentChannel);
+  const [usersList, setUsersList] = useState<IUser[]>([]);
 
   const addChannel = () => {
     return (
@@ -54,7 +60,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
     )
   }
   const paramChannel = () => {
-      const actualChannel = channels.find(channel => channel.channelID === currentChannel);
+
 
     return (
       <>
@@ -78,6 +84,39 @@ export default function ChatChannelList({className, socket, channels, setCurrent
       </>
     )
   }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                await apiReq.getApi.getAllUsersFromChannel(currentChannel).then((res) => {
+                    setUsersList(res.data);
+                    console.log("userList size: " + res.data.length);
+                });
+
+            } catch (error) {
+                console.error("Erreur lors de la récupération des utilisateurs :", error);
+            }
+        };
+        fetchData();
+    }, [currentChannel]);
+
+    const showUsersInChannel =  () => {
+
+
+        return (
+            <>
+                {isPopupUsersVisible && <div id={"make_popup_disappear"} onClick={() => setPopupUsersVisible(false)}></div>}
+                <button  onClick={() => {
+                    setPopupUsersVisible(!isPopupUsersVisible);
+                    console.log("POPUP userList size: " + usersList.length);
+                }}>
+
+                </button>
+                { actualChannel  && <UserList id={"chat_users_button"} userListIdProperty={"chat_users_list"} avatarSize={"medium"} usersList={usersList}/> }
+
+            </>
+        )
+    }
   
   useEffect(() => {
     console.log('HEY **************************' + JSON.stringify(channelsServer))
@@ -132,7 +171,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
       </div>
      {!isServerList &&
       <div className='chat_channel_buttons'>
-          <span>{addChannel()}</span>&nbsp; &nbsp; | &nbsp; &nbsp; <span>{paramChannel()}</span>
+          <span>{addChannel()}</span>&nbsp; &nbsp; | &nbsp; &nbsp; <span>{paramChannel()}</span> &nbsp; &nbsp; | &nbsp; &nbsp; <span>{showUsersInChannel()}</span>
       </div>}
     </div>
   )
