@@ -7,15 +7,14 @@ import {
 	ConnectedSocket,
 } from '@nestjs/websockets';
 
-import { IUser } from 'shared/types';
-import { Server, Socket } from 'socket.io';
-import { ServerGame } from 'src/module.game/server/ServerGame';
-import { wsGameRoutes } from 'shared/routesApi';
-import { userInfoSocket } from 'shared/typesGame';
-import { HttpException, HttpStatus } from '@nestjs/common';
-import {UsersService} from '../module.users/users.service';
+import {Server, Socket} from 'socket.io';
+import {ServerGame} from 'src/module.game/server/ServerGame';
+import {wsGameRoutes} from 'shared/routesApi';
+import {userInfoSocket} from 'shared/typesGame';
+import {UseGuards} from '@nestjs/common';
 import {UserEntity, UserStatus} from '../entities/user.entity';
 import {CurrentUser} from '../module.auth/indentify.user';
+import {WSAuthGuard} from "../module.auth/auth.guard";
 
 
 @WebSocketGateway({
@@ -23,9 +22,9 @@ import {CurrentUser} from '../module.auth/indentify.user';
 })
 
 export class WebsocketGatewayGame
-	implements OnGatewayConnection, OnGatewayDisconnect
-{
-	constructor(private serverGame: ServerGame) {}
+	implements OnGatewayConnection, OnGatewayDisconnect {
+	constructor(private serverGame: ServerGame) {
+	}
 
 	@WebSocketServer()
 	public server: Server;
@@ -48,72 +47,84 @@ export class WebsocketGatewayGame
 
 	}
 
-  emitToGameRoom(room: string, payload: any) {
-    this.server.emit(room, payload)
-  }
+	emitToGameRoom(room: string, payload: any) {
+		this.server.emit(room, payload)
+	}
 
 	@SubscribeMessage(wsGameRoutes.addNewPlayerToServer())
-	welcomeToGameServer(client: Socket, payload: Partial<IUser>) {
-    if (payload.login)
-		  console.log(client.id + '= ' + payload.login + 'is connected to serverGame instance');
-    //TODO: save user in list user ? useless ? yes i thinks better with sql request for check online user
+	@UseGuards(WSAuthGuard)
+	welcomeToGameServer(
+		@ConnectedSocket() client: Socket,
+		@CurrentUser() user: UserEntity
+	) {
+		console.log(client.id + '= ' + user.login + 'is connected to serverGame instance');
+		//TODO: save user in list user ? useless ? yes i thinks better with sql request for check online user
 		client.emit('welcome', 'Bienvenue sur le game server'); //message dacceuil connection websocket
 	}
 
 	@SubscribeMessage(wsGameRoutes.addPlayerToMatchmaking())
-	addPlayerToMatchmaking(client: Socket, payload: Partial<IUser>) {
+	@UseGuards(WSAuthGuard)
+	addPlayerToMatchmaking(
+		@ConnectedSocket() client: Socket,
+		@CurrentUser() user: UserEntity
+	) {
 		// console.log(client.id + ': ' + payload.nickname);
 		// console.log('json user: ' + JSON.stringify(payload));
-    if (!payload.nickname)
-      return console.error('ws/GameServer: Bad client or user');  
-    
-    const player: userInfoSocket = {socket: client, user: payload};
-    this.serverGame.addPlayerToMatchmaking(player, this.server);
+
+		const player: userInfoSocket = {socket: client, user};
+		this.serverGame.addPlayerToMatchmaking(player, this.server);
 		client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
 	}
 
 	@SubscribeMessage(wsGameRoutes.addPlayerToMatchmakingGhost())
-	addPlayerToMatchmakingGhost(client: Socket, payload: Partial<IUser>) {
+	@UseGuards(WSAuthGuard)
+	addPlayerToMatchmakingGhost(
+		@ConnectedSocket() client: Socket,
+		@CurrentUser() user: UserEntity
+	) {
 		// console.log(client.id + ': ' + payload.nickname);
 		// console.log('json user: ' + JSON.stringify(payload));
-    if (!payload.nickname)
-      return console.error('ws/GameServer: Bad client or user');  
-    
-    const player: userInfoSocket = {socket: client, user: payload};
-    this.serverGame.addPlayerToMatchmakingGhost(player, this.server);
+
+		const player: userInfoSocket = {socket: client, user};
+		this.serverGame.addPlayerToMatchmakingGhost(player, this.server);
 		client.emit('info', `MatchmakingGhost: attente d\'autres joueurs...`);
 	}
-  
+
 	@SubscribeMessage(wsGameRoutes.removePlayerToMatchmaking())
-	RemoveUserToMatchmaking(client: Socket, payload: Partial<IUser>) {
-    // console.log(`TRY removePlayerToMatchnaking:  ${payload.nickname}`); 
-    if (!payload.nickname)
-    	return console.error('ws/GameServer: Bad client or user');  
-  	const player: userInfoSocket = {socket: client, user: payload};
-  	this.serverGame.removePlayerToMatchmaking(player);
-  	// client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
+	@UseGuards(WSAuthGuard)
+	RemoveUserToMatchmaking(
+		@ConnectedSocket() client: Socket,
+		@CurrentUser() user: UserEntity
+	) {
+		// console.log(`TRY removePlayerToMatchnaking:  ${payload.nickname}`);
+		const player: userInfoSocket = {socket: client, user};
+		this.serverGame.removePlayerToMatchmaking(player);
+		// client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
 	}
 
 	@SubscribeMessage(wsGameRoutes.removePlayerToMatchmakingGhost())
-	RemoveUserToMatchmakingGhost(client: Socket, payload: Partial<IUser>) {
-    // console.log(`TRY removePlayerToMatchnaking:  ${payload.nickname}`); 
-    if (!payload.nickname)
-    	return console.error('ws/GameServer: Bad client or user');  
-  	const player: userInfoSocket = {socket: client, user: payload};
-  	this.serverGame.removePlayerToMatchmakingGhost(player);
-  	// client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
+	@UseGuards(WSAuthGuard)
+	RemoveUserToMatchmakingGhost(
+		@ConnectedSocket() client: Socket,
+		@CurrentUser() user: UserEntity
+	) {
+		// console.log(`TRY removePlayerToMatchnaking:  ${payload.nickname}`);
+		const player: userInfoSocket = {socket: client, user};
+		this.serverGame.removePlayerToMatchmakingGhost(player);
+		// client.emit('info', `Matchmaking: attente d\'autres joueurs...`);
 	}
 
 
-  @SubscribeMessage(wsGameRoutes.createTrainningGame())
-  createTrainningGame(client: Socket, payload: Partial<IUser>) {
-    // console.log(client.id + ': ' + payload.nickname);
-    // console.log('json user: ' + JSON.stringify(payload));
-    if (!payload.nickname)
-      return console.error('ws: Bad client or user');  
-    
-    const player: userInfoSocket = {socket: client, user: payload};
-    this.serverGame.addPlayerInTrainningSession(player, this.server);
-    client.emit('info', `Trainning game loading...`);
-  }
+	@SubscribeMessage(wsGameRoutes.createTrainningGame())
+	@UseGuards(WSAuthGuard)
+	createTrainningGame(
+		@ConnectedSocket() client: Socket,
+		@CurrentUser() user: UserEntity
+	) {
+		// console.log(client.id + ': ' + payload.nickname);
+		// console.log('json user: ' + JSON.stringify(payload));
+		const player: userInfoSocket = {socket: client, user};
+		this.serverGame.addPlayerInTrainningSession(player, this.server);
+		client.emit('info', `Trainning game loading...`);
+	}
 }
