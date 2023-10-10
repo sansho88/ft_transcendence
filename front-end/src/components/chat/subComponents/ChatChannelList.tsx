@@ -62,8 +62,8 @@ export default function ChatChannelList({className, socket, channels, setCurrent
   }
   
   useEffect(() => {
-    console.log('HEY **************************' + JSON.stringify(channelsServer))
-    console.log('HEY **************************' + JSON.stringify(channels))
+    // console.log('HEY **************************' + JSON.stringify(channelsServer))
+    // console.log('HEY **************************' + JSON.stringify(channels))
     
   }, [])
 
@@ -73,9 +73,9 @@ export default function ChatChannelList({className, socket, channels, setCurrent
   }, [channels])
 
   useEffect(() => {
-    console.log('ENFANNNNNNT ****** channelServer3 a changé : ', JSON.stringify(channelsServer));
+    // console.log('ENFANNNNNNT ****** channelServer3 a changé : ', JSON.stringify(channelsServer));
     const newList = channelsServer.filter((channel) => channel.type === 2)
-    console.log('ENFANNNNNNT HEY 3**************************' + JSON.stringify(newList))
+    // console.log('ENFANNNNNNT HEY 3**************************' + JSON.stringify(newList))
 
 
 
@@ -86,7 +86,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
 
     <div className={`${className}`}>
       <div className={`chat_channel_list`}>
-        {/* <ChatChannelListElement channelID={1} channelName='#Channel 1' f={setChannels(channel)} /> */}
+        {/* <ChatChannelListElement channelID={1} channelName='#Channel 1' onClickFunction={setChannels(channel)} /> */}
         {/* <button onClick={() => setCurrentChannel(2)}> AHHH </button> */}
         {channels && isServerList === false &&
           channels.map((channel) => (
@@ -96,16 +96,18 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               channelName={channel.name}
               isInvite={false} //TODO:
               isMp={false} //TODO:
-              f={() => {
+              onClickFunction={() => {
                 setCurrentChannel(channel.channelID);
               }}
               currentChannel={currentChannel}
+              isProtected={false}
             />
           ))
         }
+        {/** Cas utilisation en tant que list pour JOIN un chan: */}
         {channelsServer && isServerList === true &&
           channelsServer
-          .filter(channel => channel.type <= EChannelType.PROTECTED)//FIXME: et bah ca marche po !
+          .filter(channel => channel.type <= EChannelType.PROTECTED)
           .filter(channel => channels && !channels.some(existingChannel => existingChannel.channelID === channel.channelID)) 
           .map((channel) => (
             <ChatChannelListElement
@@ -114,12 +116,29 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               channelName={channel.name}
               isInvite={false} //TODO:
               isMp={false} //TODO:
-              f={() => {
-                wsChatEvents.joinRoom(socket, channel) //FIXME: differencier de la liste des channels dispo en serveur
-                setCurrentChannel(channel.channelID); //TODO: ajouter new Channel
-                setPopupVisible(false);
+              onClickFunction={(password?: string) => {
+                if (password != undefined && password != null){
+                  if(channel.type === EChannelType.PROTECTED)
+                  {
+                    const joinChan: channelsDTO.IJoinChannelDTOPipe = {
+                      channelID: channel.channelID,
+                      password: password
+                    }
+                    console.log('OUI CEST MOI : ' + JSON.stringify(password))
+                    wsChatEvents.joinRoom(socket, joinChan)
+                    
+                    // setCurrentChannel(channel.channelID);
+                    setPopupVisible(false);
+                  }
+                }
+                else {
+                  wsChatEvents.joinRoom(socket, channel)
+                  setCurrentChannel(channel.channelID);
+                  setPopupVisible(false);
+                }
               }}
               currentChannel={currentChannel}
+              isProtected={channel.type === EChannelType.PROTECTED}
             />
           ))
         }
