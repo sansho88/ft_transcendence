@@ -15,6 +15,7 @@ import {UserEntity} from "../entities/user.entity";
 import {CurrentUser} from '../module.auth/indentify.user';
 import {InviteService} from "../module.channels/invite.service";
 import {ChatGateway} from "../module.channels/chat.ws";
+import {ChannelService} from "../module.channels/channel.service";
 
 @Controller('users')
 export class UsersController {
@@ -22,6 +23,7 @@ export class UsersController {
 		private readonly usersService: UsersService,
 		private readonly inviteService: InviteService,
 		private readonly chatWsService: ChatGateway,
+		private readonly channelService: ChannelService,
 	) {
 	}
 
@@ -36,7 +38,7 @@ export class UsersController {
 	@Get('/get/nicknameUsed/:nick')
 	// @UseGuards(AuthGuard)
 	nickNameUsed(@Param('nick') nick: string) {
-		console.log('nick?: ' + nick) 
+		console.log('nick?: ' + nick)
 		return this.usersService.nicknameUsed(nick);
 	}
 
@@ -54,8 +56,8 @@ export class UsersController {
 
 	/**
 	 * retourne la liste des channels join par le user
-	 * @param user 
-	 * @returns 
+	 * @param user
+	 * @returns
 	 */
 	@Get('channelJoined')
 	@UseGuards(AuthGuard)
