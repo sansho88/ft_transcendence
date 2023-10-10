@@ -112,8 +112,16 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
 
   useEffect(() => {
-    console.log(`CHANNELS UPDATED =  ${JSON.stringify(channels)}`);
+    // console.log(`CHANNELS UPDATED =  ${JSON.stringify(channels)}`);
+    if (socketChat){
+      wsChatListen.channelHasChanged(socketChat, channels, setChannels)
+    }
 
+    return (() => {
+    if (socketChat){
+      wsChatListen.channelHasChangedOFF(socketChat, channels, setChannels)
+    }
+    })
   }, [channels])
   
   return (

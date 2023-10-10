@@ -58,6 +58,7 @@ export namespace wsChatRoutesBack {
 	export const infoRoom=()      						  	=> {return `infoRoom`} //retour message concernant les channel
 	export const createRoom=()      						  	=> {return `createRoom`} 
 	export const joinRoom=()      						   		=> {return `joinRoom`} 
+	export const updateRoom=()      						   		=> {return `updateRoom`} 
 	export const leaveRoom=()      						   		=> {return `leaveRoom`} 
 	export const sendMsg=()      						   			=> {return `sendMsg`} 
 	
@@ -65,6 +66,7 @@ export namespace wsChatRoutesBack {
 export namespace wsChatRoutesClient {
 	export const updateChannel=()      						  	=> {return `createRoom`} 
 	export const updateChannelsJoined=()    					=> {return `updateChannelsJoined`} 
+	export const nameChannelsHasChanged=()    					=> {return `nameChannelsHasChanged`} 
 
 
 }

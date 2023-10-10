@@ -5,9 +5,10 @@ import Button from "@/components/CustomButtonComponent";
 import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
 import { wsChatEvents } from "@/components/api/WsReq";
 import { Socket } from "socket.io-client";
-import {CurrentChannelContext} from "@/context/globalContext";
+import {CurrentChannelContext, SocketContextChat} from "@/context/globalContext";
 import {IChannel} from "@/shared/typesChannel";
 import * as apiReq from "@/components/api/ApiReq"
+import { channel } from "diagnostics_channel";
 
 const SettingsChannel = ({className, socket, channelToEdit}: {className: string, socket: Socket, channelToEdit: IChannel}) => {
     const [channelName, setChannelName] = useState(channelToEdit.name);
@@ -77,17 +78,18 @@ const SettingsChannel = ({className, socket, channelToEdit}: {className: string,
 
             // const newEditedChannel : IChannel = {
             const newEditedChannel : channelsDTO.IChangeChannelDTOPipe = {
+                channelID: channelToEdit.channelID,
                 name: channelName,
                 privacy: channelType == "Private",
                 password: channelPassword ? channelPassword : null
             }
-            //wsChatEvents.editRoom(socket, newEditedChannel); //todo: nouvelle route pour le Back ?
-            apiReq.putApi.putModifChannel(channelToEdit.channelID, newEditedChannel)//FIXME:
-            .then(() => {
-                console.log('tous va bien dans le meilleur des mondes')
-            })
-            .catch((e) => {
-            console.error(e)})
+            // apiReq.putApi.putModifChannel(channelToEdit.channelID, newEditedChannel)//FIXME:
+            // .then(() => {
+            //     console.log('tous va bien dans le meilleur des mondes')
+            // })
+            // .catch((e) => {
+            // console.error(e)})
+            wsChatEvents.updateChannel(socket, newEditedChannel); // utilisation ws pour update tous les clients ensuite
         }
 
     }
