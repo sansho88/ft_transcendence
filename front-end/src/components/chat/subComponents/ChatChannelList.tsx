@@ -79,7 +79,8 @@ export default function ChatChannelList({className, socket, channels, setCurrent
                 </button>
           { actualChannel && isPopupSettingsVisible &&  <SettingsChannel className={"chat_new_channel_popup"}
           socket={socket}
-          channelToEdit={actualChannel}/> }
+          channelToEdit={actualChannel}
+          /> }
 
       </>
     )
@@ -88,10 +89,12 @@ export default function ChatChannelList({className, socket, channels, setCurrent
     useEffect(() => {
         const fetchData = async () => {
             try {
-                await apiReq.getApi.getAllUsersFromChannel(currentChannel).then((res) => {
+                if(currentChannel != -1) {
+                  await apiReq.getApi.getAllUsersFromChannel(currentChannel).then((res) => {
                     setUsersList(res.data);
                     console.log("userList size: " + res.data.length);
-                });
+                  });
+                }
 
             } catch (error) {
                 console.error("Erreur lors de la récupération des utilisateurs :", error);

@@ -141,6 +141,7 @@ export namespace channel {
 	// export const getMsgsChannel = (channelID: number, timestamp: number)					=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
 	export const getChannelJoined = ()																						=> {return `${serverApi}/${routeChannels}/channelJoined`};
 	export const getAllMessagesChannel = (channelID: number)											=> {return `${serverApi}/${routeChannels}/msg/${channelID}`};
+	export const putModifChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/modif/${channelID}`};
 
 
 }

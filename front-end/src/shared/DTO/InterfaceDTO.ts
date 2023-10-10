@@ -33,7 +33,7 @@ export namespace channelsDTO {
 
 	export interface IChangeChannelDTOPipe {
 		name: string;
-		password: string;
+		password: string | null;
 		privacy: boolean;
 	}
 }

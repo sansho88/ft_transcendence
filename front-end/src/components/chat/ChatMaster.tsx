@@ -50,9 +50,9 @@ export default function ChatMaster({className, token, userID}: {className: strin
     try {
       if (currentChannel != -1)
       {
+        // console.log('***********try update messages?************')
         const messages = await apiReq.getApi.getAllMessagesChannel(channelID);
         setMessagesChannel(messages.data);
-        console.log('update messages? ' + JSON.stringify(messages.data))
       }
     }
     catch (error){}

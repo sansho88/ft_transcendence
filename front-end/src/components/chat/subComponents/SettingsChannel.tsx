@@ -7,6 +7,7 @@ import { wsChatEvents } from "@/components/api/WsReq";
 import { Socket } from "socket.io-client";
 import {CurrentChannelContext} from "@/context/globalContext";
 import {IChannel} from "@/shared/typesChannel";
+import * as apiReq from "@/components/api/ApiReq"
 
 const SettingsChannel = ({className, socket, channelToEdit}: {className: string, socket: Socket, channelToEdit: IChannel}) => {
     const [channelName, setChannelName] = useState(channelToEdit.name);
@@ -74,12 +75,19 @@ const SettingsChannel = ({className, socket, channelToEdit}: {className: string,
             console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
             setIsChannelEdited(true);
 
-            const newEditedChannel : IChannel = {
-                name: channelToEdit.name,
-                type: channelType == "Public" ? 0 : channelType == "Protected" ? 1 : 2,
-                password: channelPassword ? channelPassword : "", channelID: channelToEdit.channelID, owner: channelToEdit.owner
+            // const newEditedChannel : IChannel = {
+            const newEditedChannel : channelsDTO.IChangeChannelDTOPipe = {
+                name: channelName,
+                privacy: channelType == "Private",
+                password: channelPassword ? channelPassword : null
             }
             //wsChatEvents.editRoom(socket, newEditedChannel); //todo: nouvelle route pour le Back ?
+            apiReq.putApi.putModifChannel(channelToEdit.channelID, newEditedChannel)//FIXME:
+            .then(() => {
+                console.log('tous va bien dans le meilleur des mondes')
+            })
+            .catch((e) => {
+            console.error(e)})
         }
 
     }
