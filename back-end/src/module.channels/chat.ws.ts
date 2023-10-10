@@ -331,13 +331,13 @@ export class ChatGateway
 		return channel;
 	}
 
-	async ban(channel: ChannelEntity, target: UserEntity, duration: number, user: UserEntity) {
+	async ban(channel: ChannelEntity, target: UserEntity) {
 		await this.sendEvent(target, `You got banned for the channel ${channel.name} by a moderator`);
 		if (await this.channelService.userInChannel(target, channel))
 			await this.leaveChat(channel, target);
 	}
 
-	async mute(channel: ChannelEntity, target: UserEntity, duration: number, user: UserEntity) {
+	async mute(channel: ChannelEntity, target: UserEntity, duration: number) {
 		await this.sendEvent(target, `You got muted by for the channel ${channel.name} by a moderator for ${duration}`);
 		return;
 	}
