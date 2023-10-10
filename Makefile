@@ -13,7 +13,7 @@ dev: build
 	$(COMPOSE) up
 
 build:
-	$(COMPOSE) build --parallel --progress=plain
+	$(COMPOSE) build --parallel
 
 start:
 	$(COMPOSE) start

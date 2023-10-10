@@ -41,6 +41,7 @@ import {InviteEntity} from "../entities/invite.entity";
 	exports: [
 		InviteService,
 		ChatGateway,
+		ChannelService,
 	]
 })
 export class ChannelModule {

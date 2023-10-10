@@ -8,7 +8,7 @@ interface ButtonProps {
    height?: string;
    width?: string;
    radius?: string;
-   onClick: () => void;
+   onClick: (event: any | undefined) => void;
    alt: string;
 }
 const Button: React.FC<ButtonProps> = ({
@@ -19,10 +19,11 @@ const Button: React.FC<ButtonProps> = ({
     width,
     onClick,
     alt,
-    className
+    className,
+    id
 }) => {
    return (
-       <button className={className} onClick={onClick}
+       <button id={id} className={className} onClick={onClick}
        style={{
           backgroundColor: color,
           height: height,

@@ -1,4 +1,5 @@
 import { SocketContextChat } from "@/context/globalContext";
+import { IMessageEntity } from "@/shared/entities/IMessage.entity";
 import { IChannel, IChannelMessage } from "@/shared/typesChannel";
 import { Socket } from "socket.io-client";
 
@@ -9,7 +10,7 @@ export class Channel {
 
   private chanInfo        : IChannel;
 
-  private messages        : IChannelMessage[] = [];         // liste de tous les messages du chan
+  private messages        : IMessageEntity[] = [];         // liste de tous les messages du chan
   private banListUserID   : number[] = [];                  // liste des userID ban dans le channel
   private hasPassword     : boolean = false;                // password requis ?
   private isPrivate       : boolean = false;                // channel caché/private ?
@@ -32,24 +33,29 @@ export class Channel {
     this.getBanUsers();
     //EVENT WEBSOCKET SUBSCRIBE
     if (this.socketChat){
-      this.socketChat.on('newMessage', (newMessage: IChannelMessage) => {this.addMessage(newMessage)})        //subscrite event newMessage => ajouter chaque nouveau message en fin de list
+      this.socketChat.on('newMessage', (newMessage: IMessageEntity) => {this.addMessage(newMessage)})        //subscrite event newMessage => ajouter chaque nouveau message en fin de list
       this.socketChat.on('banList', (banListUserID: number) => {  })                                          //subscrite event banList => update banList in realtime
     }
   }
 
-  private apiGetMessages(): IChannelMessage[] { /* REQUETE API pour get 30? derniers messages */; return []}
+  private apiGetMessages(): IMessageEntity[] {
+    //TODO: get messages
+    
+     return []}
   private getBanUsers() { /* REQUETE API pour get les ban du channel */; }
 
-  private addMessagesBefore(messages: IChannelMessage[]) {  messages.forEach((message) => {this.messages = [message, ...this.messages]}) }
-  private addMessageBefore(message: IChannelMessage) {      this.messages = [message, ...this.messages] }
+  private addMessagesBefore(messages: IMessageEntity[]) {  messages.forEach((message) => {this.messages = [message, ...this.messages]}) }
+  private addMessageBefore(message: IMessageEntity) {      this.messages = [message, ...this.messages] }
 
-  private addMessages(messages: IChannelMessage[]) {        messages.forEach((message) => {this.messages.push(message)}) }
-  private addMessage(message: IChannelMessage) {            this.messages.push(message) }
+  private addMessages(messages: IMessageEntity[]) {        messages.forEach((message) => {this.messages.push(message)}) }
+  private addMessage(message: IMessageEntity) {            this.messages.push(message) }
 
 
 
   public getOldMessages(targetDate: Date) {}    //demander 10 messages plus ancien a partir de <targetDate> // pour smooth loading on scrolling up
   public setOwnerUser(userID: number, userLogin: string) { this.chanInfo.owner.UserID = userID, this.chanInfo.owner.login = userLogin}
   public getChannelID(): number {return this.chanInfo.channelID};
+
+  public getIsPrivate(): boolean {return this.isPrivate}
 
 }

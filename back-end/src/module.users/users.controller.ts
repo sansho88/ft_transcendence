@@ -33,6 +33,13 @@ export class UsersController {
 		return user;
 	}
 
+	@Get('/get/nicknameUsed/:nick')
+	// @UseGuards(AuthGuard)
+	nickNameUsed(@Param('nick') nick: string) {
+		console.log('nick?: ' + nick) 
+		return this.usersService.nicknameUsed(nick);
+	}
+
 	@Get('/get')
 	@UseGuards(AuthGuard)
 	findAll() {
@@ -43,6 +50,17 @@ export class UsersController {
 	@UseGuards(AuthGuard)
 	async findOneID(@Param('id', ParseIntPipe) id: number) {
 		return await this.usersService.findOne(id);
+	}
+
+	/**
+	 * retourne la liste des channels join par le user
+	 * @param user 
+	 * @returns 
+	 */
+	@Get('channelJoined')
+	@UseGuards(AuthGuard)
+	async channelJoined(@CurrentUser() user: UserEntity) {
+		return await this.channelService.getJoinedChannelList(user);
 	}
 
 	/*************************************************/

@@ -521,13 +521,21 @@ export default function Auth({className}: { className?: string }) {
     } else
         defaultClassName = className;
 
+        async function goto42auth(){
+            const generateOAuthURI = async (): Promise<string> => {
+							const req = await apiReq.postApi.postTryGetIntraURL();
+							return req.data;
+            };
+            console.log(await generateOAuthURI()); // Affiche l'URI générée
+            router.push(await generateOAuthURI())
+        }
 
     return (
         <div className={defaultClassName}>
             <NotificationContainer/>
             {welcomeTitle()}
             {currentStepLogin === EStepLogin.start &&
-                <button onClick={() => console.log('Not implemented')} className='button-login h-14 opacity-30'>LOGIN
+                <button onClick={() => goto42auth()} className='button-login h-14'>LOGIN
                     42</button>}
             {currentStepLogin < EStepLogin.tryLoginAsInvite &&
                 <button onClick={() => nextStepCheck()} className='button-login'><span>{inviteButtonText}</span>
@@ -547,4 +555,3 @@ export default function Auth({className}: { className?: string }) {
 
     )
 }
-
