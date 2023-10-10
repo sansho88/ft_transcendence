@@ -19,10 +19,10 @@
 	const routeGame = 					'game';
 	const routeMatchmaking = 		'matchmaking';
 	const routeBanned = 				'banned';
-	// const routeChannelInvite = 	'channel-invite';
-	// const routeMute = 					'mute';
-	// const routeChallenge = 			'challenge';
-	// const routeFollow = 				'follow';
+	const routeFollow = 				'follow';
+// const routeChannelInvite = 	'channel-invite';
+// const routeMute = 					'mute';
+// const routeChallenge = 			'challenge';
 	// const routeSubscribe = 			'subscribe';
 	// const routeBlock = 					'block';
 	// const routeJoined = 				'joined';
@@ -160,48 +160,51 @@ export namespace channel {
 	export const deleteMessageById = () 		=> {return `${serverApi}/${routeMessages}/`};		// feature ?	params: message_id
 
 // +---------------------------------------------------------------------+
+// |                             FOLLOW                                  |
+// +---------------------------------------------------------------------+
+export namespace followers{
+	export const getAllMyFollowers = () => {return `${serverApi}/${routeUsers}/myfollow/`};
+	export const followUser = (userID: number) => {return `${serverApi}/${routeUsers}/${routeFollow}/${userID}`};
+	export const unfollowUser = (userID: number) => {return `${serverApi}/${routeUsers}/unfollow/${userID}`};
+
+}
+
+	// +---------------------------------------------------------------------+
 // |                              BANNED                                 |
 // +---------------------------------------------------------------------+
 		/* services channels */
 		/* route ban et unban un user dun channel */
-	// export const getBannedByChannelId = () => {return `${serverApi}/${routeBanned}/`}; // params :channelId
-	// export const getBannedByUserId = () => {return `${serverApi}/${routeBanned}/`};		// params :userId			| return: Array de tous les chan ou user est ban
-	// export const postBannedById= () => {return `${serverApi}/${routeBanned}/`}; 					// params :{channel_Id, userId}
-	// export const deleteBannedById = () => {return `${serverApi}/${routeBanned}/`};				// params :{channel_Id, userId}
+		// export const getBannedByChannelId = () => {return `${serverApi}/${routeBanned}/`}; // params :channelId
+		// export const getBannedByUserId = () => {return `${serverApi}/${routeBanned}/`};		// params :userId			| return: Array de tous les chan ou user est ban
+		// export const postBannedById= () => {return `${serverApi}/${routeBanned}/`}; 					// params :{channel_Id, userId}
+		// export const deleteBannedById = () => {return `${serverApi}/${routeBanned}/`};				// params :{channel_Id, userId}
 
 // +---------------------------------------------------------------------+
 // |                         CHANNEL INVITE                              |
 // +---------------------------------------------------------------------+
 		/* services channels */
-	// export const getChannelInviteByChannelId = () => {return `${serverApi}/${routeChannelInvite}/channel/`};
-	// export const getChannelInviteByUserId = () => {return `${serverApi}/${routeChannelInvite}/user/`};
-	// export const postChannelInvite = () => {return `${serverApi}/${routeChannelInvite}`};
-	// export const deleteChannelInviteById = () => {return `${serverApi}/${routeChannelInvite}/`};
+		// export const getChannelInviteByChannelId = () => {return `${serverApi}/${routeChannelInvite}/channel/`};
+		// export const getChannelInviteByUserId = () => {return `${serverApi}/${routeChannelInvite}/user/`};
+		// export const postChannelInvite = () => {return `${serverApi}/${routeChannelInvite}`};
+		// export const deleteChannelInviteById = () => {return `${serverApi}/${routeChannelInvite}/`};
 
 // +---------------------------------------------------------------------+
 // |                               MUTE                                  |
 // +---------------------------------------------------------------------+
 
-	// export const getMuteByChannelId = () => {return `${serverApi}/${routeMute}/channel/`};
-	// export const getMuteByUserId = () => {return `${serverApi}/${routeMute}/user/`};
-	// export const postMute = () => {return `${serverApi}/${routeMute}`};
-	// export const deleteMuteById = () => {return `${serverApi}/${routeMute}/`};
+		// export const getMuteByChannelId = () => {return `${serverApi}/${routeMute}/channel/`};
+		// export const getMuteByUserId = () => {return `${serverApi}/${routeMute}/user/`};
+		// export const postMute = () => {return `${serverApi}/${routeMute}`};
+		// export const deleteMuteById = () => {return `${serverApi}/${routeMute}/`};
 
 // +---------------------------------------------------------------------+
 // |                            CHALLENGE                                |
 // +---------------------------------------------------------------------+
 
-	// export const getChallengeByUserId = () => {return `${serverApi}/${routeChallenge}/user/`};
-	// export const postChallenge = () => {return `${serverApi}/${routeChallenge}`};
-	// export const deleteChallengeById = () => {return `${serverApi}/${routeChallenge}/`};
+		// export const getChallengeByUserId = () => {return `${serverApi}/${routeChallenge}/user/`};
+		// export const postChallenge = () => {return `${serverApi}/${routeChallenge}`};
+		// export const deleteChallengeById = () => {return `${serverApi}/${routeChallenge}/`};
 
-// +---------------------------------------------------------------------+
-// |                             FOLLOW                                  |
-// +---------------------------------------------------------------------+
-
-	// export const getFollowByUserId = () => {return `${serverApi}/${routeFollow}/user/`};
-	// export const postFollow = () => {return `${serverApi}/${routeFollow}`};
-	// export const deleteFollowById = () => {return `${serverApi}/${routeFollow}/`};
 
 // +---------------------------------------------------------------------+
 // |                            SUBSCRIBE                                |

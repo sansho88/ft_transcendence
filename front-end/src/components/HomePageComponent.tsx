@@ -16,6 +16,7 @@ import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
 import {wsGameRoutes} from "@/shared/routesApi";
 import LoadingComponent from "@/components/waiting/LoadingComponent";
+import UserOptions from "@/components/UserOptions";
 
 interface HomePageProps {
     className: unknown
@@ -84,9 +85,10 @@ const HomePage = ({className}: HomePageProps) => {
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
                         <Button image={"/history-list.svg"} onClick={() => console.log("history list button")} alt={"Match History button"}/>
                         <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
+                        <UserOptions user={userContext}/>
                     </Profile>
 
-                <UserList className={"friends"} avatarSize={"medium"}/>
+                <UserList className={"friends"} avatarSize={"medium"} showUserProps={true}/>
                 <Button className={"logout"} image={"/logout.svg"} onClick={() => {
                     localStorage.clear();
                     router.push("/auth");

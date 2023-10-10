@@ -5,12 +5,14 @@ import Profile from "@/components/ProfileComponent";
 import Button from "@/components/CustomButtonComponent";
 import {v4 as uuidv4} from "uuid";
 import {NotificationManager} from 'react-notifications';
+import UserOptions from "@/components/UserOptions";
 
 
 
 interface UserListProps{
     avatarSize?: string | undefined;
     usersList?: IUser[] | undefined;
+    showUserProps?: boolean;
 }
 
 async function getAllUsers(): Promise<IUser[]>  {
@@ -26,7 +28,7 @@ async function getAllUsers(): Promise<IUser[]>  {
     }
 
 }
-const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, usersList}) => {
+const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, usersList, showUserProps}) => {
 
     const [userElements, setUserElements] = useState<React.JSX.Element[]>([]);
     const [isHidden, setIsHidden] = useState(userElements.length == 0);
@@ -43,7 +45,9 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                     for (const user of res) {
                         allDiv.push(
                             <li key={user.login + "List" + uuidv4()}>
-                                <Profile user={user} avatarSize={avatarSize}/>
+                                <Profile user={user} avatarSize={avatarSize}>
+                                    {showUserProps == true && <UserOptions user={user}/>}
+                                </Profile>
                             </li>
                         )
                     }

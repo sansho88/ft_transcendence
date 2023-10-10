@@ -83,7 +83,12 @@ export namespace getApi {
 			return axiosInstance.get(`${strRoutes.channel.getAllMessagesChannel(channelID)}`, {
 				headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
 			});
-		}	
+	}
+
+	export const getAllMyFollowers = (): Promise<IUser[]> => {
+		return axiosInstance.get(`${strRoutes.followers.getAllMyFollowers()}`, updateAxiosInstance());
+	}
+
 }
 
 
@@ -102,10 +107,13 @@ export namespace postApi {
 
 
 export namespace putApi {
-	export const putUser= (updateUser: Partial<IUser>)		=>{
-		console.log("[putApi/putUser] status sent: " + updateUser.status);
-
-		return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, updateAxiosInstance())}
+	export const putUser= (updateUser: Partial<IUser>)		=>{return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, updateAxiosInstance())}
+	export const followUser = (userID: number) => {
+		return axiosInstance.put(`${strRoutes.followers.followUser}`, userID, updateAxiosInstance());
+	}
+	export const unfollowUser = (userID: number) => {
+		return axiosInstance.put(`${strRoutes.followers.unfollowUser}`, userID, updateAxiosInstance());
+	}
 }
 
 export namespace deleteApi {

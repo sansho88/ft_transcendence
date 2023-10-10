@@ -11,6 +11,7 @@ import SettingsChannel from "@/components/chat/subComponents/SettingsChannel";
 import UserList from "@/components/UserListComponent";
 import * as apiReq from "@/components/api/ApiReq"
 import {IUser} from "@/shared/types";
+import UserOptions from "@/components/UserOptions";
 
 
 export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList, channelsServer}
@@ -112,7 +113,12 @@ export default function ChatChannelList({className, socket, channels, setCurrent
                 }}>
 
                 </button>
-                { actualChannel  && <UserList id={"chat_users_button"} userListIdProperty={"chat_users_list"} avatarSize={"medium"} usersList={usersList}/> }
+                { actualChannel  && <UserList id={"chat_users_button"}
+                                              userListIdProperty={"chat_users_list"}
+                                              avatarSize={"medium"}
+                                              usersList={usersList}
+                                              showUserProps={true}
+                /> }
 
             </>
         )
