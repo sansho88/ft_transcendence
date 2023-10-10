@@ -30,4 +30,10 @@ export namespace channelsDTO {
 	export interface ILeaveChannelDTOPipe {
 		channelID: number;
 	}
+
+	export interface IChangeChannelDTOPipe {
+		name: string;
+		password: string;
+		privacy: boolean;
+	}
 }

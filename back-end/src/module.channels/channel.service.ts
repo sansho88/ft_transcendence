@@ -249,7 +249,7 @@ export class ChannelService {
 	}
 
 	async getJoinedChannelList(user: UserEntity): Promise<ChannelEntity[]> {
-		const ret: UserEntity = await this.userService.findOne(user.UserID, ['channelJoined']);
-		return ret.channelJoined;
-	}
+		const ret: UserEntity =  await this.userService.findOne(user.UserID, ['channelJoined']);
+			return ret.channelJoined;
+  }
 }
