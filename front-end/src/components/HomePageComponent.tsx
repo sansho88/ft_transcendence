@@ -89,7 +89,9 @@ const HomePage = ({className}: HomePageProps) => {
                 } alt={"Logout button"}/>
 
                 <div className={"game"}>
+                    {tokenRef.current.length > 0 &&
                     <Game className={"game"} token={tokenRef.current}/>
+                    }
                 </div>
                <ChatMaster className={'chat_master'} token={tokenRef.current}/>
                 <div className={"absolute bottom-0 left-0"}><NotifComponent /></div>

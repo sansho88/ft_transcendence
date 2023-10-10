@@ -14,7 +14,7 @@ import {userInfoSocket} from 'shared/typesGame';
 import {UseGuards} from '@nestjs/common';
 import {UserEntity, UserStatus} from '../entities/user.entity';
 import {CurrentUser} from '../module.auth/indentify.user';
-import {WSAuthGuard} from "../module.auth/auth.guard";
+import {WSAuthGuard, getToken} from "../module.auth/auth.guard";
 
 
 @WebSocketGateway({
@@ -26,11 +26,17 @@ export class WebsocketGatewayGame
 	constructor(private serverGame: ServerGame) {
 	}
 
-	@WebSocketServer()
+	@WebSocketServer()  
 	public server: Server;
 
 	handleConnection(@ConnectedSocket() client: Socket) {
 		console.log('NEW CONNEXION WS CLIENT THEGAME, id = ' + client.id);
+		const tokenInfo = getToken(client);
+
+		const type = tokenInfo.type;
+		const token = tokenInfo.token;
+
+		// console.log('token game = ' + token)
 
 		client.emit(wsGameRoutes.statusUpdate(), UserStatus.ONLINE);
 

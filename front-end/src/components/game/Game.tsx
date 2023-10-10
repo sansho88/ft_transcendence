@@ -74,8 +74,11 @@ export default function Game({className, token}: {className: string, token: stri
 
   useEffect(( ) => {
     if (logged === true) {
-      socketRef.auth = { type: `Bearer`, token: `${token}` };
-      socketRef.current?.connect();
+      if(socketRef.current){
+        socketRef.current.auth = { type: `Bearer`, token: `${token}` };
+        console.log('token2 ' + token)
+        socketRef.current.connect();
+      }
     }
     else
       socketRef.current?.disconnect();
@@ -236,6 +239,7 @@ export default function Game({className, token}: {className: string, token: stri
       if (socketRef.current)
       {
         socketRef.current.auth = { type: `Bearer`, token: `${token}` };
+        console.log('token1 =' + token)
         socketRef.current?.connect();
       }
     }
