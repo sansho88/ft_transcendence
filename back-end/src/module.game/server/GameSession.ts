@@ -590,7 +590,7 @@ export class GameSession {
 	}
 
 	//Enclenche la fin du jeu
-	private endOfGame() { //Todo: There !!!
+	private endOfGame() {
 
 		if (this.table.scoreP1 > this.table.scoreP2) {
 			this.winner = this.player1;
