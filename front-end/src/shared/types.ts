@@ -7,7 +7,7 @@ export interface IUser {
   nickname?: string;
   password?: string;
   avatar_path?: string;
-  status?: number;
+  status: number;
   token_2fa?: string;
   has_2fa: boolean;
   visit?: boolean;

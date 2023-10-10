@@ -1,7 +1,5 @@
 import {IsNotEmpty, IsNumber, IsObject, IsString} from "class-validator";
 import {UserEntity} from "../entities/user.entity";
-import {InviteEntity} from "../entities/invite.entity";
-import {ChannelEntity} from "../entities/channel.entity";
 
 export class JoinEventDTO {
 	@IsNumber()
@@ -35,29 +33,4 @@ export class ReceivedMessageEventDTO {
 	@IsString()
 	@IsNotEmpty()
 	content: string;
-}
-
-class EventNotif {
-	type: string;
-}
-
-export class ReceivedInviteEventDTO extends EventNotif {
-	invite: InviteEntity;
-}
-
-export class BannedEventDTO extends EventNotif {
-	user: UserEntity;
-	duration: number;
-	channel: ChannelEntity;
-}
-
-export class KickedEventDTO extends EventNotif {
-	user: UserEntity;
-	channel: ChannelEntity;
-}
-
-export class MutedEventDTO extends EventNotif {
-	user: UserEntity;
-	duration: number;
-	channel: ChannelEntity;
 }

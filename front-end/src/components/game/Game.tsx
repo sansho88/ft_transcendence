@@ -20,7 +20,7 @@ enum EStatusFrontGame {
   endOfGame
 }
 
-export default function Game({className}: {className: string}) {
+export default function Game({className, token}: {className: string, token: string}) {
   const socket      = useContext(SocketContextGame);
   const socketRef   = useRef(socket);
   
@@ -73,8 +73,13 @@ export default function Game({className}: {className: string}) {
 
 
   useEffect(( ) => {
-    if (logged === true)
-      socketRef.current?.connect();
+    if (logged === true) {
+      if(socketRef.current){
+        socketRef.current.auth = { type: `Bearer`, token: `${token}` };
+        console.log('token2 ' + token)
+        socketRef.current.connect();
+      }
+    }
     else
       socketRef.current?.disconnect();
   }, [logged])
@@ -230,8 +235,13 @@ export default function Game({className}: {className: string}) {
           }
         })
       });
-  
-      socketRef.current?.connect();
+      
+      if (socketRef.current)
+      {
+        socketRef.current.auth = { type: `Bearer`, token: `${token}` };
+        console.log('token1 =' + token)
+        socketRef.current?.connect();
+      }
     }
     return () => {
       socketRef.current?.disconnect();
