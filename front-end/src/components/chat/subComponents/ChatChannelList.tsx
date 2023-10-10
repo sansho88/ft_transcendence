@@ -106,7 +106,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
         {channelsServer && isServerList === true &&
           channelsServer
           .filter(channel => channel.type <= EChannelType.PROTECTED)//FIXME: et bah ca marche po !
-          // .filter(channel => channels && !channels.some(existingChannel => existingChannel.channelID === channel.channelID)) 
+          .filter(channel => channels && !channels.some(existingChannel => existingChannel.channelID === channel.channelID)) 
           .map((channel) => (
             <ChatChannelListElement
               key={channel.channelID}

@@ -22,6 +22,8 @@ import { wsChatRoutesBack } from '@/shared/routesApi'
 
 
 export default function ChatMaster({className, token, userID}: {className: string, token: string, userID: number}) {
+  const timeoutRefreshMessage: number = 150; //ajoute un timeout pour laisser le temps au message de se charger
+ 
 
   const [channelsServer, setChannelsServer] = useState<IChannel[]>([]) //recuperer tous les channels server
   const [channels, setChannels] = useState<IChannel[]>([]) //list des channels JOINED
@@ -70,7 +72,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
     setTimeout(() => 
     {
       updateMessages(currentChannel);
-    }, 10)
+    }, timeoutRefreshMessage)
     
     const messageHandler = (message: messageDTO.IReceivedMessageEventDTO) => {
       if (socketChat?.connected)
