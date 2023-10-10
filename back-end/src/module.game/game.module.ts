@@ -4,6 +4,8 @@ import {GameService} from './game.service';
 import {WebsocketGatewayGame} from './game.ws';
 import {ServerGame} from './server/ServerGame';
 import {UsersModule} from "../module.users/users.module";
+import {GameEntity} from 'src/entities/game.entity';
+import {TypeOrmModule} from '@nestjs/typeorm';
 
 @Module({
 	controllers: [GameController],
@@ -12,7 +14,10 @@ import {UsersModule} from "../module.users/users.module";
 		WebsocketGatewayGame,
 		ServerGame,
 	],
-	imports: [forwardRef(() => UsersModule)]
+	imports: [
+		TypeOrmModule.forFeature([GameEntity]),
+		forwardRef(() => UsersModule)
+	]
 })
 export class GameModule {
 }
