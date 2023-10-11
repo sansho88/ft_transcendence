@@ -115,6 +115,10 @@
   font-style: italic;
 }
 
+.chat_channel_list_element_owner {
+  color: #ffc2a8;
+}
+
 #invite_options{
   display: block;
   cursor: pointer;

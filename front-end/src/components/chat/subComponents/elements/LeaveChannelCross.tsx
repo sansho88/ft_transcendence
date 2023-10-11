@@ -3,7 +3,7 @@ import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
 import React from 'react'
 import { Socket } from 'socket.io-client';
 
- export default function LeaveChannelCross({onClickFunction}:{onClickFunction: Function}) {
+ export default function LeaveChannelCross({onClickFunction, className}:{onClickFunction: Function, className: string}) {
 
 
 	// function leaveChan(channelLeaveID: number) {
@@ -13,7 +13,7 @@ import { Socket } from 'socket.io-client';
 
 
 	return (
-		<div className='text-red-800 font-bold z-0'
+		<div className={className}
 					onClick={(event) => {
 						event.stopPropagation();
 						onClickFunction();

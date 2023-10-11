@@ -13,7 +13,7 @@ import { Socket } from 'socket.io-client';
 
 
 
-export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected, isServList, itsOwner}: {
+export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected, isServList, itsOwner: isOwner}: {
     socket: Socket,
     channelID: number,
     channelName: string,
@@ -32,11 +32,14 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     const [areSettingsValids, setSettingsValid] = useState(false);
     const [showPassword, setPasswordVisible] = useState("password");
     const [passwordErrorMsg, setPasswordErrMsg] = useState("");
+    const [isHovered, setIsHovered] = useState<boolean>(false);
+    // const refDivGlobal = useRef(null);
 
 //   return (
 //     <button key={`button_channel_${uuidv4()}`} 
 //     className='chat_channel_list_element' onClick={() => onClickFunction(channelID)}> {channelName}</button>
 //   )
+
 useEffect(() => {
     if (channelPassword.length > 2) {
         setSettingsValid(true);
@@ -106,24 +109,34 @@ useEffect(() => {
 
     const defineClassName = useRef<string>('chat_channel_list_element')
     useEffect(() => {
-			if (!isMp) 
-            {
-				if (currentChannel === channelID)
-					defineClassName.current = ' chat_channel_list_element \
-                                                chat_channel_list_element_selected';
-				else 
-                    defineClassName.current = ' chat_channel_list_element';
-			} 
-            else
-            {
-                if (currentChannel === channelID)
-				defineClassName.current = ' chat_channel_list_element\
+        if (isMp)
+        {
+            if (currentChannel === channelID)
+                defineClassName.current = ' chat_channel_list_element\
                                             chat_channel_list_element_mp \
                                             chat_channel_list_element_selected';
-			    else 
-                    defineClassName.current = ' chat_channel_list_element \
-                                                chat_channel_list_element_mp';
-            } 
+            else 
+                defineClassName.current = ' chat_channel_list_element \
+                                            chat_channel_list_element_mp';
+        }
+        else if (isOwner)
+        {
+            if (currentChannel === channelID)
+                defineClassName.current = ' chat_channel_list_element\
+                                            chat_channel_list_element_owner \
+                                            chat_channel_list_element_selected';
+            else 
+                defineClassName.current = ' chat_channel_list_element \
+                                            chat_channel_list_element_owner' ;
+        }
+        else 
+        {
+            if (currentChannel === channelID)
+                defineClassName.current = ' chat_channel_list_element \
+                                            chat_channel_list_element_selected';
+            else 
+                defineClassName.current = ' chat_channel_list_element';
+        } 
 		}, [currentChannel]);
 
 
@@ -134,13 +147,27 @@ useEffect(() => {
             wsChatEvents.leaveRoom(socket, leavedChannel)
         }
     
+        const timerRef = useRef(null);
+        const handleMouseEnter = () => {
+        //   clearTimeout(timerRef.current); // Annule tout timer existant
+          setIsHovered(true);
+        };
+      
+        const handleMouseLeave = () => {
+          // Défini un timer pour retarder le changement d'état
+        //   timerRef.current = setTimeout(() => {
+            setIsHovered(false);
+        //   }, 300); // 100 ms de délai
+        };
 
     return (
-        <div className={currentChannel === channelID ? `channel channel_selected ` : `channel `}>
+        <div    onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                className={currentChannel === channelID ? `channel channel_selected ` : `channel `}>
             <div key={`button_channel_${uuidv4()}`}
-                 className={`${defineClassName.current} justify-between`} onClick={() => onClickSwitcher()}>
-                    <div>{channelName}</div>
-                    {!isServList && !itsOwner && <LeaveChannelCross onClickFunction={() => leaveChan(socket, channelID)} />}
+                 className={`${defineClassName.current} justify-between ${channelName.length <= 10 ? 'flex' : 'flex-col'}`} onClick={() => onClickSwitcher()}>
+                    <div className={`flex truncate ${channelName.length <= 10 ? '' : ' text-xs'}`} >{channelName}</div>
+                    {!isServList && !isOwner && isHovered && <LeaveChannelCross className={`flex-shrink-0 text-red-800 z-0`} onClickFunction={() => leaveChan(socket, channelID)} />}
             </div>
             {isPending && (<div id={"invite_options"}>
                 <span onClick={ handleAcceptInvite }>✅</span>
