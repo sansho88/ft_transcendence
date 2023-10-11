@@ -52,7 +52,7 @@ export namespace wsChatListen {
                             data: {channel: IChannelEntity}) 
   {
     console.log('channels.length=', channels.length)
-    if(channels.length > 0)
+    if(data.channel && channels.length > 0)
       setter(prevChannels => prevChannels.filter((channel) => channel.channelID != data.channel.channelID))
     setCurrentChannel(-1);
   }
