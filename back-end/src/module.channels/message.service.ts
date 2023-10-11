@@ -50,7 +50,7 @@ export class MessageService {
 			})
 	}
 
-	filterRecent(messages: MessageEntity[]) {
+	filterRecent(messages: MessageEntity[]) { // TODO : return recent not all
 		let i = 30;
 		return messages
 			// .sort((a, b) => b.sendTime.getTime() - a.sendTime.getTime())
