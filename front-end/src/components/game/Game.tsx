@@ -72,6 +72,8 @@ export default function Game({className, token}: {className: string, token: stri
 // }
 
 
+
+
   useEffect(( ) => {
     if (logged === true) {
       if(socketRef.current){
@@ -273,7 +275,6 @@ export default function Game({className, token}: {className: string, token: stri
 			const keyUpHandler = (e) => {
 				if (e.key === 'ArrowUp') {
 					arrowUp.current = false;
-					// console.log(`${remoteEvent.slice(-7)}: UP release`);
 					socketRef.current?.emit(
 						remoteEvent,
 						PODGAME.EKeyEvent.arrowUpRelease,
@@ -281,7 +282,6 @@ export default function Game({className, token}: {className: string, token: stri
 				}
 				if (e.key === 'ArrowDown') {
 					arrowDown.current = false;
-					// console.log(`${remoteEvent.slice(-7)}: DOWN release`);
 					socketRef.current?.emit(
 						remoteEvent,
 						PODGAME.EKeyEvent.arrowDownRelease,
@@ -289,12 +289,34 @@ export default function Game({className, token}: {className: string, token: stri
 				}
 			};
 
+      const handleWindowFocus = () => {
+        //si action specifique a faire a la reprise du focus..
+      };
+      const handleWindowBlur = () => {
+					arrowUp.current = false;
+					socketRef.current?.emit(
+						remoteEvent,
+						PODGAME.EKeyEvent.arrowUpRelease
+            );
+					arrowDown.current = false;
+					socketRef.current?.emit(
+						remoteEvent,
+						PODGAME.EKeyEvent.arrowDownRelease,
+					);
+      };
+
 			window.addEventListener('keydown', keyDownHandler);
 			window.addEventListener('keyup', keyUpHandler);
+
+      window.addEventListener('focus', handleWindowFocus);
+      window.addEventListener('blur', handleWindowBlur);
 
 			return () => {
 				window.removeEventListener('keydown', keyDownHandler);
 				window.removeEventListener('keyup', keyUpHandler);
+      
+        window.removeEventListener('focus', handleWindowFocus);
+        window.removeEventListener('blur', handleWindowBlur);
 			};
 		}
 	}, [remoteEvent]);
@@ -390,18 +412,15 @@ export default function Game({className, token}: {className: string, token: stri
   }
 
   function dbgAddPlayerGoal() {
-    console.log('GOALASOOOOO');
     socketRef.current?.emit(`${nameGameSession}GOAL`);
   }
 
   function stopGameAndLose() {
-    console.log('YOU LOSE');
     socketRef.current?.emit(`${nameGameSession}STOP`);
     // setStepCurrentSession(EStatusFrontGame.idle);
   }
 
   function cancelMatchmaking() {
-    console.log('CANCEL MATCHMAKING');
     socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchmaking(), userLogged.userContext);
     setStepCurrentSession(EStatusFrontGame.idle);
   }
@@ -424,7 +443,6 @@ export default function Game({className, token}: {className: string, token: stri
 					},
 				);
 				setStepCurrentSession(EStatusFrontGame.matchmakingRequest);
-				console.log('Cancel matchmaking not implemented for the moment');
 				return;
 			}
       else if (gameMod.current === PODGAME.EGameMod.ghost) {
@@ -437,7 +455,6 @@ export default function Game({className, token}: {className: string, token: stri
 					},
 				);
 				setStepCurrentSession(EStatusFrontGame.matchmakingRequest);
-				console.log('Cancel matchmaking not implemented for the moment');
 				return;
 			}
       else if (gameMod.current === PODGAME.EGameMod.trainning) {
@@ -453,19 +470,15 @@ export default function Game({className, token}: {className: string, token: stri
 		}
     else if (stepCurrentSession === EStatusFrontGame.matchmakingRequest) {
       setStepCurrentSession(EStatusFrontGame.gameSessionFind);
-			console.log("Match trouvé ! le jeu va bientot commencer, etes vous pret?");
       return;
 		}
     else if (stepCurrentSession === EStatusFrontGame.gameSessionFind) {
-      console.log(`GameSessionName = ${nameGameSession}`)
       socketRef.current?.emit(`${nameGameSession}ready`);
       setStepCurrentSession(EStatusFrontGame.waiting);
-      console.log("le jeu a commencer.. Bonne chance !");
       return;
 		}
     else if (stepCurrentSession === EStatusFrontGame.gameInProgress) {
       setStepCurrentSession(EStatusFrontGame.endOfGame);
-      console.log("le jeu est terminé !"); 
       return;
 		}
   }
@@ -488,8 +501,6 @@ export default function Game({className, token}: {className: string, token: stri
   }, []);
 
   useEffect(() => {
-    console.log(`CurrentStep = ${stepCurrentSession}`);
-    // handleSearchGame();
   }, [stepCurrentSession]);
 
   const [prevDimensions, setPrevDimensions] = useState({ width: 0, height: 0 });
