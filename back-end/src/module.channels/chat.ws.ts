@@ -5,13 +5,12 @@ import {
 	OnGatewayDisconnect,
 	SubscribeMessage,
 	WebSocketGateway,
-	WebSocketServer,
-	WsResponse
+	WebSocketServer
 } from '@nestjs/websockets';
 import {IoAdapter} from '@nestjs/platform-socket.io';
-import {Server, Socket} from 'socket.io';
+import {RemoteSocket, Server, Socket} from 'socket.io';
 import {MessageService} from './message.service';
-import {WSAuthGuard} from '../module.auth/auth.guard';
+import {getToken, WSAuthGuard} from '../module.auth/auth.guard';
 import {UseGuards, ValidationPipe} from '@nestjs/common';
 import {CurrentUser} from '../module.auth/indentify.user';
 import {ChannelService} from './channel.service';
@@ -24,14 +23,12 @@ import {accessToken} from '../dto/payload';
 import * as process from 'process';
 import {JwtService} from '@nestjs/jwt';
 import {
-	CreateChannelDTOPipe, CreateMpDTOPPipe,
+	CreateChannelDTOPipe,
+	CreateMpDTOPPipe,
 	JoinChannelDTOPipe,
 	LeaveChannelDTOPipe,
 } from '../dto.pipe/channel.dto';
-import {
-	SendMessageDTOPipe,
-} from '../dto.pipe/message.dto';
-import {getToken} from '../module.auth/auth.guard';
+import {SendMessageDTOPipe,} from '../dto.pipe/message.dto';
 import {
 	BannedEventDTO,
 	JoinEventDTO,
@@ -43,7 +40,8 @@ import {
 } from '../dto/event.dto'
 import {InviteService} from "./invite.service";
 import {InviteEntity} from "../entities/invite.entity";
-import { wsChatRoutesClient } from 'shared/routesApi';
+import {wsChatRoutesClient} from 'shared/routesApi';
+import {DefaultEventsMap} from "socket.io/dist/typed-events";
 
 class SocketUserList {
 	userID: number;
@@ -146,7 +144,6 @@ export class ChatGateway
 	async handelCreateRoom(
 		@MessageBody(new ValidationPipe()) data: CreateChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
-		@ConnectedSocket() client: Socket,
 	) {
 		const credential = await this.channelCredentialService.create(
 			data.password,
@@ -157,10 +154,12 @@ export class ChatGateway
 			data.privacy,
 			user,
 		);
-		client.join(`${channel.channelID}`);
-		client.emit(`infoRoom`, {	message: `Channel Created with id ${channel.channelID}`});
-		client.emit(`createRoom`, {channel: channel	}); //FIXME: garder cette ligne , delete celle dessous
-		// this.server.emit(`createRoom`, {channel: channel	}) //just pour DBG tous les clients recoivent le channel dans leur liste
+		const clientLst = await this.getSocket(user.UserID);
+		clientLst.map(socket => {
+			socket.join(`${channel.channelID}`);
+			socket.emit(`infoRoom`, {message: `Channel Created with id ${channel.channelID}`});
+			socket.emit(`createRoom`, {channel: channel});
+		});
 	}
 
 	@SubscribeMessage('joinRoom')
@@ -191,11 +190,13 @@ export class ChatGateway
 			});
 		if (invite)
 			await this.inviteService.remove(invite);
+
 		await this.channelService.joinChannel(user, channel);
-		client.join(`${channel.channelID}`);
+		const clientLst = await this.getSocket(user.UserID);
+		clientLst.map(socket => socket.join(`${channel.channelID}`));
 		const content: JoinEventDTO = {user: user, channelID: channel.channelID}
 		this.server.to(`${channel.channelID}`).emit(`joinRoom`, content);
-		client.emit(`createRoom`, {channel: channel	})
+		clientLst.map(socket => socket.emit(`createRoom`, {channel: channel}));
 		console.log(`JOIN Room ${data.channelID} By ${user.UserID}`);
 	}
 
@@ -205,27 +206,30 @@ export class ChatGateway
 		@MessageBody(new ValidationPipe()) data: LeaveChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,) {
-		const channel = await this.channelService
-			.findOne(data.channelID, ['adminList', 'userList'])
+		const channel: ChannelEntity = await this.channelService
+			.findOne(data.channelID, ['adminList', 'userList', 'owner'])
 			.catch(() => null);
 		if (channel == null)
 			return client.emit('leaveRoom', {error: 'There is no such Channel'});
 		if (!await this.channelService.isUserOnChan(channel, user))
 			return client.emit('leaveRoom', {error: 'You are not part of this channel'});
+		if (channel.owner.UserID == user.UserID)
+			return client.emit('leaveRoom', {error: 'You are the channel Owner, no you cannot quit that channel'});
 		return this.leaveChat(channel, user);
 	}
 
 	/**
 	 * Ping cette route ws update la liste des channels JOIN de ce meme client
-	 * @param user 
-	 * @param client 
-	 * @returns 
+	 * @param user
+	 * @param client
+	 * @returns
 	 */
 	@SubscribeMessage(wsChatRoutesClient.updateChannelsJoined())
 	@UseGuards(WSAuthGuard)
-	async updateClientChannelsJoined( 
+	async updateClientChannelsJoined(
 		@CurrentUser() user: UserEntity,
-		@ConnectedSocket() client: Socket,) {
+		@ConnectedSocket() client: Socket,
+	) {
 		return client.emit(wsChatRoutesClient.updateChannelsJoined(), await this.channelService.getJoinedChannelList(user));
 	}
 
@@ -278,10 +282,10 @@ export class ChatGateway
 		// if (user blocked)
 		// 	throw new BadRequestException('You cannot create a direct channel with them');
 		const mp = await this.channelService.createMP(user, user2);
-		client.join(`${mp.channelID}`);
-		const client2 = await this.getSocket(user2.UserID);
-		if (client2)
-			client2.join(`${mp.channelID}`);
+		const client1Lst = await this.getSocket(user.UserID);
+		client1Lst.map(socket => socket.join(`${mp.channelID}`));
+		const client2Lst = await this.getSocket(user2.UserID);
+		client2Lst.map(client2 => client2.join(`${mp.channelID}`))
 		console.log(mp);
 	}
 
@@ -316,25 +320,15 @@ export class ChatGateway
 		console.log(` Send Message on ${channel.name}, by ${user.UserID}`);
 	}
 
-	private async getSocket(userID: number) {
-		const index = this.socketUserList.findIndex(
-			(value) => userID == value.userID,
-		);
-		if (index == -1)
-			return undefined;
-		return this.server.fetchSockets().then((value) => {
-			return value.find(socket =>
-				socket.id == this.socketUserList[index].socketID)
-		});
-	}
-
-
 	@SubscribeMessage('debug')
 	@UseGuards(WSAuthGuard)
 	async handelDebug(
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity,
 	) {
+		const socketLST = await this.getSocket(user.UserID);
+		console.log('Socket lst ==== ', socketLST.length, '\n=====');
+
 	}
 
 
@@ -342,9 +336,12 @@ export class ChatGateway
 		if (this.channelService.userIsAdmin(user, channel))
 			channel = await this.channelService.removeAdmin(user, channel);
 		channel = await this.channelService.leaveChannel(channel, user);
-		const socketTarget = await this.getSocket(user.UserID);
-		if (typeof socketTarget !== 'undefined')
-			socketTarget.leave(`${channel.channelID}`)
+		const socketTargetLst = await this.getSocket(user.UserID);
+		if (typeof socketTargetLst !== 'undefined')
+			socketTargetLst.map(socketTarget => {
+				socketTarget.leave(`${channel.channelID}`)
+				socketTarget.emit('leaveRoom', {channel: channel});
+			});
 		const content: LeaveEventDTO = {user: user, channelID: channel.channelID};
 		this.server.to(`${channel.channelID}`).emit(`leaveRoom`, content);
 		return channel;
@@ -382,18 +379,18 @@ export class ChatGateway
 		await this.sendEvent(user, event);
 		return await this.leaveChat(channel, user);
 	}
-	
+
 	@SubscribeMessage('NicknameUsed')
 	@UseGuards(WSAuthGuard)
 	async handleUpdateNickname(
 		@ConnectedSocket() client: Socket,
-		@MessageBody(new ValidationPipe()) data: {nickname: string},
+		@MessageBody(new ValidationPipe()) data: { nickname: string },
 		callback: (res: boolean) => void) {
-			console.log(data);
-			console.log(data.nickname);
-			const res = await this.usersService.nicknameUsed(data.nickname);
-			console.log(`ret NicknameUsed= ${data.nickname} | ${res}`);
-			// callback(res); //si callback ne fonctionne pas, remplacer par le client emit ci dessous
+		console.log(data);
+		console.log(data.nickname);
+		const res = await this.usersService.nicknameUsed(data.nickname);
+		console.log(`ret NicknameUsed= ${data.nickname} | ${res}`);
+		// callback(res); //si callback ne fonctionne pas, remplacer par le client emit ci dessous
 		client.emit('NicknameUsed', res);
 	}
 
@@ -405,6 +402,26 @@ export class ChatGateway
 		await this.sendEvent(invite.user, event);
 	}
 
+	/**
+	 * Return a List of all the Socket used by the User
+	 * */
+	private async getSocket(userID: number) {
+		const indexes = this.socketUserList.map(
+			value => userID == value.userID
+		);
+		const socketIDLst = this.socketUserList.filter((value, index) => indexes[index]);
+		const socketLst = await this.server.fetchSockets();
+
+		return socketLst.filter(socket => {
+			for (const Id of socketIDLst) {
+				console.log('id = ', Id.socketID);
+				if (Id.socketID == socket.id)
+					return true;
+			}
+			return false;
+		})
+	}
+
 	async sendEvent(
 		user: UserEntity,
 		event:
@@ -413,8 +430,14 @@ export class ChatGateway
 			KickedEventDTO |
 			MutedEventDTO,
 	) {
-		const socketTarget = await this.getSocket(user.UserID);
-		if (!socketTarget) return;
-		socketTarget.emit('notifyEvent', event);
+		const socketTargetLst = await this.getSocket(user.UserID);
+		if (!socketTargetLst) return;
+		this.emitSocketLst(socketTargetLst, 'notifyEvent', event);
+	}
+
+	private emitSocketLst(socketTarget: RemoteSocket<DefaultEventsMap, any>[], notifyEvent: string, event: ReceivedInviteEventDTO | BannedEventDTO | KickedEventDTO | MutedEventDTO) {
+		socketTarget.map(socket =>
+			socket.emit(notifyEvent, event)
+		)
 	}
 }
