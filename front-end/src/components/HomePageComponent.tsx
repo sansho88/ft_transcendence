@@ -16,6 +16,7 @@ import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
 import {wsGameRoutes} from "@/shared/routesApi";
 import LoadingComponent from "@/components/waiting/LoadingComponent";
+import UserOptions from "@/components/UserOptions";
 
 interface HomePageProps {
     className: unknown
@@ -86,7 +87,7 @@ const HomePage = ({className}: HomePageProps) => {
                         <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
                     </Profile>
 
-                <UserList className={"friends"} avatarSize={"medium"}/>
+                <UserList className={"friends"} avatarSize={"medium"} showUserProps={true}/>
                 <Button className={"logout"} image={"/logout.svg"} onClick={() => {
                     localStorage.clear();
                     router.push("/auth");

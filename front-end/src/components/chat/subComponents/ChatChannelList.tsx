@@ -12,6 +12,7 @@ import UserList from "@/components/UserListComponent";
 import * as apiReq from "@/components/api/ApiReq"
 import {IUser} from "@/shared/types";
 import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
+import UserOptions from "@/components/UserOptions";
 
 
 export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList, channelsServer, userID}
@@ -80,8 +81,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
                 </button>
           { actualChannel && isPopupSettingsVisible &&  <SettingsChannel className={"chat_new_channel_popup"}
           socket={socket}
-          channelToEdit={actualChannel}
-          /> }
+          channelToEdit={actualChannel}/> }
 
       </>
     )
@@ -116,7 +116,12 @@ export default function ChatChannelList({className, socket, channels, setCurrent
                 }}>
 
                 </button>
-                { actualChannel  && <UserList id={"chat_users_button"} userListIdProperty={"chat_users_list"} avatarSize={"medium"} usersList={usersList}/> }
+                { actualChannel  && <UserList id={"chat_users_button"}
+                                              userListIdProperty={"chat_users_list"}
+                                              avatarSize={"medium"}
+                                              usersList={usersList}
+                                              showUserProps={true}
+                /> }
 
             </>
         )
@@ -125,7 +130,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
   useEffect(() => {
     // console.log('HEY **************************' + JSON.stringify(channelsServer))
     // console.log('HEY **************************' + JSON.stringify(channels))
-    
+
   }, [])
 
   useEffect(() => {
@@ -147,9 +152,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
 
     <div className={`${className}`}>
       <div className={`chat_channel_list`}>
-        {/* <ChatChannelListElement channelID={1} channelName='#Channel 1' onClickFunction={setChannels(channel)} /> */}
-        {/* <button onClick={() => setCurrentChannel(2)}> AHHH </button> */}
-        {channels && isServerList === false &&
+        {channels && !isServerList &&
           channels.map((channel) => (
             <ChatChannelListElement
               key={channel.channelID}
@@ -168,8 +171,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
             />
           ))
         }
-        {/** Cas utilisation en tant que list pour JOIN un chan: */}
-        {channelsServer && isServerList === true &&
+        {channelsServer && isServerList &&
           channelsServer
           .filter(channel => channel.type <= EChannelType.PROTECTED)
           .filter(channel => channels && !channels.some(existingChannel => existingChannel.channelID === channel.channelID)) 
@@ -193,7 +195,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
                     }
                     console.log('OUI CEST MOI : ' + JSON.stringify(password))
                     wsChatEvents.joinRoom(socket, joinChan)
-                    
+
                     // setCurrentChannel(channel.channelID);
                     setPopupChannelVisible(false);
                   }
