@@ -58,7 +58,9 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                 for (const user of usersList) {
                     allDiv.push(
                         <li key={user.login + "List" + uuidv4()}>
-                            <Profile user={user} avatarSize={avatarSize}/>
+                            <Profile user={user} avatarSize={avatarSize}>
+                                {showUserProps == true && <UserOptions user={user}/>}
+                            </Profile>
                         </li>
                     )
                 }

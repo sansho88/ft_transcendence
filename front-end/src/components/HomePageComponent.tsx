@@ -85,7 +85,6 @@ const HomePage = ({className}: HomePageProps) => {
                         <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
                         <Button image={"/history-list.svg"} onClick={() => console.log("history list button")} alt={"Match History button"}/>
                         <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
-                        <UserOptions user={userContext}/>
                     </Profile>
 
                 <UserList className={"friends"} avatarSize={"medium"} showUserProps={true}/>
