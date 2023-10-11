@@ -15,7 +15,9 @@ export namespace wsChatEvents {
     socket.emit(wsChatRoutesBack.joinRoom(), joinChannel);}
 
   export function leaveRoom(socket: Socket, leaveChannel: channelsDTO.ILeaveChannelDTOPipe) {
-    socket.emit(wsChatRoutesBack.joinRoom(), leaveChannel);}
+    socket.emit(wsChatRoutesBack.leaveRoom(), leaveChannel);
+    console.log('leaveRoomWS ' + JSON.stringify(leaveChannel));
+  }
 
   export function sendMsg(socket: Socket, newMessage: messageDTO.ISendMessageDTOPipe) {
     socket.emit(wsChatRoutesBack.sendMsg(), newMessage);}
@@ -50,6 +52,7 @@ export namespace wsChatListen {
   export function leaveRoomListen(socket: Socket, setter: React.Dispatch<React.SetStateAction<IChannel[]>>) {
     socket.on(wsChatRoutesBack.leaveRoom(), (data: {channel: IChannelEntity}) => {
       // setter(prevChannels => [...prevChannels, data.channel]);//TODO: delete chanel
+      console.log(`event on LEAVED ROOM ` + data.channel.channelID + ' , id=' + data.channel.channelID);
       setter(prevChannels => prevChannels.filter((channel) => channel.channelID != data.channel.channelID))
     })
   }

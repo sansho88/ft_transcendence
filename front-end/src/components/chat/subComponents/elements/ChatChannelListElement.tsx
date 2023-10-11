@@ -9,10 +9,12 @@ import { wsChatEvents } from '@/components/api/WsReq';
 import LeaveChannelCross from './LeaveChannelCross';
 
 import ChatMaster from '../../ChatMaster';
+import { Socket } from 'socket.io-client';
 
 
 
-export default function ChatChannelListElement({channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected}: {
+export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected}: {
+    socket: Socket,
     channelID: number,
     channelName: string,
     onClickFunction: Function,
@@ -122,10 +124,13 @@ useEffect(() => {
             } 
 		}, [currentChannel]);
 
-    function handleLeaveChannel() {
-    
+
         
-    }
+        function leaveChan(socket: Socket, channelLeaveID: number) {
+            const leavedChannel: channelsDTO.ILeaveChannelDTOPipe = {channelID: channelLeaveID}
+            console.log('leave action')
+            wsChatEvents.leaveRoom(socket, leavedChannel)
+        }
     
 
     return (
@@ -133,7 +138,7 @@ useEffect(() => {
             <div key={`button_channel_${uuidv4()}`}
                  className={`${defineClassName.current} justify-between`} onClick={() => onClickSwitcher()}>
                     <div>{channelName}</div>
-                    <LeaveChannelCross onClickFunction={}/>
+                    <LeaveChannelCross onClickFunction={() => leaveChan(socket, channelID)} />
             </div>
             {isPending && (<div id={"invite_options"}>
                 <span onClick={ handleAcceptInvite }>✅</span>

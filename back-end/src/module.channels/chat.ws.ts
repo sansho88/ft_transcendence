@@ -209,6 +209,7 @@ export class ChatGateway
 		@MessageBody(new ValidationPipe()) data: LeaveChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,) {
+			console.log('hello leave BACK ' + JSON.stringify(data));
 		const channel = await this.channelService
 			.findOne(data.channelID, ['adminList', 'userList'])
 			.catch(() => null);
@@ -348,7 +349,10 @@ export class ChatGateway
 		channel = await this.channelService.leaveChannel(channel, user);
 		const socketTarget = await this.getSocket(user.UserID);
 		if (typeof socketTarget !== 'undefined')
+		{
+			console.log('test leaveeeeee')
 			socketTarget.leave(`${channel.channelID}`)
+		}
 		const content: LeaveEventDTO = {user: user, channelID: channel.channelID};
 		this.server.to(`${channel.channelID}`).emit(`leaveRoom`, content);
 		return channel;

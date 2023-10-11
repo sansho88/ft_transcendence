@@ -3,7 +3,7 @@ import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
 import React from 'react'
 import { Socket } from 'socket.io-client';
 
- export default function LeaveChannelCross({socket, onClickFunction, targetChannel}:{ socket: Socket ,onClickFunction: Function, targetChannel: number}) {
+ export default function LeaveChannelCross({onClickFunction}:{onClickFunction: Function}) {
 
 
 	// function leaveChan(channelLeaveID: number) {

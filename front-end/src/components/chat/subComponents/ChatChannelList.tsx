@@ -156,6 +156,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               channelName={channel.name}
               isInvite={false} //TODO:
               isMp={false} //TODO:
+              socket={socket}
               onClickFunction={() => {
                 setCurrentChannel(channel.channelID);
               }}
@@ -176,6 +177,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               channelName={channel.name}
               isInvite={false} //TODO:
               isMp={false} //TODO:
+              socket={socket}
               onClickFunction={(password?: string) => {
                 if (password != undefined && password != null){
                   if(channel.type === EChannelType.PROTECTED)
