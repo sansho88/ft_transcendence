@@ -87,7 +87,7 @@ export namespace getApi {
 			});
 	}
 
-	export const getAllMyFollowers = (): Promise<IUser[]> => {
+	export const getAllMyFollowers = (): any => {
 		return axiosInstance.get(`${strRoutes.followers.getAllMyFollowers()}`, updateAxiosInstance());
 	}
 

@@ -166,7 +166,7 @@ export namespace channel {
 // |                             FOLLOW                                  |
 // +---------------------------------------------------------------------+
 export namespace followers{
-	export const getAllMyFollowers = () => {return `${serverApi}/${routeUsers}/myfollow/`};
+	export const getAllMyFollowers = () => {return `${serverApi}/${routeUsers}/mysubs/`};
 	export const followUser = (userID: number) => {return `${serverApi}/${routeUsers}/follow/${userID}`};
 	export const unfollowUser = (userID: number) => {return `${serverApi}/${routeUsers}/unfollow/${userID}`};
 

@@ -1,9 +1,14 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useRef, useState} from "react";
 import {IUser} from "@/shared/types";
 import Button from "@/components/CustomButtonComponent";
 import {UserContext} from "@/context/globalContext";
 import * as apiReq from '@/components/api/ApiReq'
 import {NotificationManager} from 'react-notifications';
+import Profile from "@/components/ProfileComponent";
+import {getApi} from "@/components/api/ApiReq";
+import getAllMyFollowers = getApi.getAllMyFollowers;
+import {util} from "zod";
+import find = util.find;
 
 export interface userOptionsProps {
    user: IUser;
@@ -12,7 +17,12 @@ export interface userOptionsProps {
 const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, showAdminOptions}) => {
     const {userContext, setUserContext} = useContext(UserContext);
     const [isFollowed, setIsFollowed] = useState(false);
+    const [followers, setFollowers] = useState([]);
 
+    getAllMyFollowers().then((res) => {
+        setFollowers(res.data);
+        setIsFollowed(!!res.data.find(tmpUser => user.UserID == tmpUser.UserID));
+    })
     function handleFollow(){
         if (!isFollowed)
         {

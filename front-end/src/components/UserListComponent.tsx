@@ -44,8 +44,9 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
             if (!usersList)
             {
                 getAllMyFollowers().then((res) => {
-                    if (res.length > 0){
-                        for (const user of res) {
+                    console.log(JSON.stringify(res));
+                    if (res.data.length > 0){
+                        for (const user of res.data) {
                             allDiv.push(
                                 <li key={user.login + "List" + uuidv4()}>
                                     <Profile user={user} avatarSize={avatarSize}>
