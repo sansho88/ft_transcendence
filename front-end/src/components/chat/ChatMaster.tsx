@@ -22,6 +22,8 @@ import { wsChatRoutesBack } from '@/shared/routesApi'
 
 
 export default function ChatMaster({className, token, userID}: {className: string, token: string, userID: number}) {
+  const timeoutRefreshMessage: number = 150; //ajoute un timeout pour laisser le temps au message de se charger
+ 
 
   const [channelsServer, setChannelsServer] = useState<IChannel[]>([]) //recuperer tous les channels server
   const [channels, setChannels] = useState<IChannel[]>([]) //list des channels JOINED
@@ -48,9 +50,9 @@ export default function ChatMaster({className, token, userID}: {className: strin
     try {
       if (currentChannel != -1)
       {
+        // console.log('***********try update messages?************')
         const messages = await apiReq.getApi.getAllMessagesChannel(channelID);
         setMessagesChannel(messages.data);
-        console.log('update messages? ' + JSON.stringify(messages.data))
       }
     }
     catch (error){}
@@ -67,7 +69,10 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
 
   useEffect(() => {
-    updateMessages(currentChannel);
+    setTimeout(() => 
+    {
+      updateMessages(currentChannel);
+    }, timeoutRefreshMessage)
     
     const messageHandler = (message: messageDTO.IReceivedMessageEventDTO) => {
       if (socketChat?.connected)
@@ -107,8 +112,16 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
 
   useEffect(() => {
-    console.log(`CHANNELS UPDATED =  ${JSON.stringify(channels)}`);
+    // console.log(`CHANNELS UPDATED =  ${JSON.stringify(channels)}`);
+    if (socketChat){
+      wsChatListen.channelHasChanged(socketChat, channels, setChannels)
+    }
 
+    return (() => {
+    if (socketChat){
+      wsChatListen.channelHasChangedOFF(socketChat, channels, setChannels)
+    }
+    })
   }, [channels])
   
   return (

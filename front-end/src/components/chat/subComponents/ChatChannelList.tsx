@@ -11,6 +11,7 @@ import SettingsChannel from "@/components/chat/subComponents/SettingsChannel";
 import UserList from "@/components/UserListComponent";
 import * as apiReq from "@/components/api/ApiReq"
 import {IUser} from "@/shared/types";
+import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
 
 
 export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList, channelsServer}
@@ -54,7 +55,6 @@ export default function ChatChannelList({className, socket, channels, setCurrent
                                       channels={channels}
                                       currentChannel={currentChannel}
                                       setterCurrentChannel={setCurrentChannel}
-
                                       />}
       </>
     )
@@ -79,7 +79,8 @@ export default function ChatChannelList({className, socket, channels, setCurrent
                 </button>
           { actualChannel && isPopupSettingsVisible &&  <SettingsChannel className={"chat_new_channel_popup"}
           socket={socket}
-          channelToEdit={actualChannel}/> }
+          channelToEdit={actualChannel}
+          /> }
 
       </>
     )
@@ -88,10 +89,12 @@ export default function ChatChannelList({className, socket, channels, setCurrent
     useEffect(() => {
         const fetchData = async () => {
             try {
-                await apiReq.getApi.getAllUsersFromChannel(currentChannel).then((res) => {
+                if(currentChannel != -1) {
+                  await apiReq.getApi.getAllUsersFromChannel(currentChannel).then((res) => {
                     setUsersList(res.data);
                     console.log("userList size: " + res.data.length);
-                });
+                  });
+                }
 
             } catch (error) {
                 console.error("Erreur lors de la récupération des utilisateurs :", error);
@@ -119,8 +122,9 @@ export default function ChatChannelList({className, socket, channels, setCurrent
     }
   
   useEffect(() => {
-    console.log('HEY **************************' + JSON.stringify(channelsServer))
-    console.log('HEY **************************' + JSON.stringify(channels))
+    // console.log('HEY **************************' + JSON.stringify(channelsServer))
+    // console.log('HEY **************************' + JSON.stringify(channels))
+    
   }, [])
 
   useEffect(() => {
@@ -128,11 +132,23 @@ export default function ChatChannelList({className, socket, channels, setCurrent
 
   }, [channels])
 
+  useEffect(() => {
+    // console.log('ENFANNNNNNT ****** channelServer3 a changé : ', JSON.stringify(channelsServer));
+    const newList = channelsServer.filter((channel) => channel.type === 2)
+    // console.log('ENFANNNNNNT HEY 3**************************' + JSON.stringify(newList))
+
+
+
+
+}, [channelsServer]);
+
   return (
 
     <div className={`${className}`}>
       <div className={`chat_channel_list`}>
-        {channels && !isServerList &&
+        {/* <ChatChannelListElement channelID={1} channelName='#Channel 1' onClickFunction={setChannels(channel)} /> */}
+        {/* <button onClick={() => setCurrentChannel(2)}> AHHH </button> */}
+        {channels && isServerList === false &&
           channels.map((channel) => (
             <ChatChannelListElement
               key={channel.channelID}
@@ -140,16 +156,18 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               channelName={channel.name}
               isInvite={false} //TODO:
               isMp={false} //TODO:
-              f={() => {
+              onClickFunction={() => {
                 setCurrentChannel(channel.channelID);
               }}
               currentChannel={currentChannel}
+              isProtected={false}
             />
           ))
         }
-        {channelsServer && isServerList &&
+        {/** Cas utilisation en tant que list pour JOIN un chan: */}
+        {channelsServer && isServerList === true &&
           channelsServer
-          .filter(channel => channel.type <= EChannelType.PROTECTED)//FIXME: et bah ca marche po !
+          .filter(channel => channel.type <= EChannelType.PROTECTED)
           .filter(channel => channels && !channels.some(existingChannel => existingChannel.channelID === channel.channelID)) 
           .map((channel) => (
             <ChatChannelListElement
@@ -158,14 +176,30 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               channelName={channel.name}
               isInvite={false} //TODO:
               isMp={false} //TODO:
-              f={() => {
-                wsChatEvents.joinRoom(socket, channel) //FIXME: differencier de la liste des channels dispo en serveur
-                setCurrentChannel(channel.channelID); //TODO: ajouter new Channel
-                setPopupSettingsVisible(false);
+              onClickFunction={(password?: string) => {
+                if (password != undefined && password != null){
+                  if(channel.type === EChannelType.PROTECTED)
+                  {
+                    const joinChan: channelsDTO.IJoinChannelDTOPipe = {
+                      channelID: channel.channelID,
+                      password: password
+                    }
+                    console.log('OUI CEST MOI : ' + JSON.stringify(password))
+                    wsChatEvents.joinRoom(socket, joinChan)
+                    
+                    // setCurrentChannel(channel.channelID);
+                    setPopupChannelVisible(false);
+                  }
+                }
+                else {
+                  wsChatEvents.joinRoom(socket, channel)
+                  setCurrentChannel(channel.channelID);
+                  setPopupChannelVisible(false);
+                }
               }}
               currentChannel={currentChannel}
+              isProtected={channel.type === EChannelType.PROTECTED}
             />
-
           ))
         }
       </div>

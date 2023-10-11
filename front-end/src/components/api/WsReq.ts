@@ -20,6 +20,9 @@ export namespace wsChatEvents {
   export function sendMsg(socket: Socket, newMessage: messageDTO.ISendMessageDTOPipe) {
     socket.emit(wsChatRoutesBack.sendMsg(), newMessage);}
 
+  export function updateChannel(socket: Socket, channel: channelsDTO.IChangeChannelDTOPipe) {
+    socket.emit(wsChatRoutesBack.updateRoom(), channel);}
+
   export function pingUpdateChannelsJoined(socket: Socket) {
     socket.emit(wsChatRoutesClient.updateChannelsJoined())
   }
@@ -48,6 +51,42 @@ export namespace wsChatListen {
     
     socket.on(wsChatRoutesClient.updateChannelsJoined(), (data: IChannelEntity[]) => { //TODO:
       setChannelsJoined(prevChannels => [...prevChannels, ...data]);
+    })
+  }
+
+  export function channelHasChanged(socket: Socket, channels: IChannel[], setChannelsJoined: Function) {
+    
+    socket.on(wsChatRoutesClient.nameChannelsHasChanged(), (data: IChannelEntity) => { //TODO:
+      const newChannels: IChannel[] = [];
+      channels.forEach(channel => {
+        if(channel.channelID == data.channelID)
+        {
+          const modifChan: IChannel = channel;
+          modifChan.name = data.name;
+          newChannels.push(modifChan);
+        }
+        else
+          newChannels.push(channel);
+      })
+      setChannelsJoined(newChannels);
+    })
+  }
+
+  export function channelHasChangedOFF(socket: Socket, channels: IChannel[], setChannelsJoined: Function) {
+    
+    socket.on(wsChatRoutesClient.nameChannelsHasChanged(), (data: IChannelEntity) => { //TODO:
+      const newChannels: IChannel[] = [];
+      channels.forEach(channel => {
+        if(channel.channelID == data.channelID)
+        {
+          const modifChan: IChannel = channel;
+          modifChan.name = data.name;
+          newChannels.push(modifChan);
+        }
+        else
+          newChannels.push(channel);
+      })
+      setChannelsJoined(newChannels);
     })
   }
 

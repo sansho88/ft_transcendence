@@ -73,9 +73,12 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
             
             const newChannel: channelsDTO.ICreateChannelDTOPipe = {
                 name: channelName,
-                privacy: false,
+                privacy: channelType === "Private",
                 password: channelType === "Protected" ? channelPassword : undefined
               }
+
+
+
               wsChatEvents.createRoom(socket, newChannel);
           }
         
