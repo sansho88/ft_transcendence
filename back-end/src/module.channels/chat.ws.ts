@@ -24,6 +24,7 @@ import {accessToken} from '../dto/payload';
 import * as process from 'process';
 import {JwtService} from '@nestjs/jwt';
 import {
+	ChangeChannelDTOPipe,
 	CreateChannelDTOPipe, CreateMpDTOPPipe,
 	JoinChannelDTOPipe,
 	LeaveChannelDTOPipe,
@@ -33,17 +34,14 @@ import {
 } from '../dto.pipe/message.dto';
 import {getToken} from '../module.auth/auth.guard';
 import {
-	BannedEventDTO,
 	JoinEventDTO,
-	KickedEventDTO,
 	LeaveEventDTO,
-	MutedEventDTO,
-	ReceivedInviteEventDTO,
 	ReceivedMessageEventDTO,
 } from '../dto/event.dto'
 import {InviteService} from "./invite.service";
 import {InviteEntity} from "../entities/invite.entity";
-import { wsChatRoutesClient } from 'shared/routesApi';
+import { wsChatRoutesBack, wsChatRoutesClient } from 'shared/routesApi';
+import { channelsDTO } from 'shared/DTO/InterfaceDTO';
 
 class SocketUserList {
 	userID: number;
@@ -95,7 +93,7 @@ export class ChatGateway
 			return client.disconnect();
 		}
 		const user = await this.usersService
-			.findOne(userID, ['channelJoined'])
+			.findOne(userID, ['channelJoined', 'subscribed'])
 			.catch(() => null);
 		if (user == null) return client.disconnect();
 
@@ -105,6 +103,10 @@ export class ChatGateway
 				return `${chan.channelID}`;
 			}),
 		);
+		client.join(
+			user.subscribed.map(follow => `user.${follow.UserID}`)
+		)
+		this.server.to(`user.${user.UserID}`).emit('notifyEvent', `User ${user.login} is online`)
 		await this.usersService.userStatus(user, UserStatus.ONLINE);
 		this.socketUserList.push({
 			socketID: client.id,
@@ -135,8 +137,10 @@ export class ChatGateway
 		const index = this.socketUserList
 			.findIndex(socket => socket.socketID == socket.socketID)
 		this.socketUserList.splice(index, 1);
-		if (this.socketUserList.findIndex(socket => socket.socketID == client.id) == -1)
+		if (this.socketUserList.findIndex(socket => socket.socketID == client.id) == -1) {
+			this.server.to(`user.${user.UserID}`).emit('notifyEvent', `User ${user.login} is offline`)
 			await this.usersService.userStatus(user, UserStatus.OFFLINE);
+		}
 		console.log(`CLIENT ${client.id} left CHAT WS`);
 		return client.disconnect();
 	}
@@ -350,36 +354,19 @@ export class ChatGateway
 		return channel;
 	}
 
-	async ban(channel: ChannelEntity, target: UserEntity, duration: number, user: UserEntity) {
-		const event: BannedEventDTO = {
-			channel,
-			user,
-			type: BannedEventDTO.name,
-			duration,
-		}
-		await this.sendEvent(target, event);
+	async ban(channel: ChannelEntity, target: UserEntity) {
+		await this.sendEvent(target, `You got banned for the channel ${channel.name} by a moderator`);
 		if (await this.channelService.userInChannel(target, channel))
 			await this.leaveChat(channel, target);
 	}
 
-	async mute(channel: ChannelEntity, target: UserEntity, duration: number, user: UserEntity) {
-		const event: MutedEventDTO = {
-			channel,
-			user,
-			type: BannedEventDTO.name,
-			duration,
-		}
-		await this.sendEvent(target, event);
+	async mute(channel: ChannelEntity, target: UserEntity, duration: number) {
+		await this.sendEvent(target, `You got muted by for the channel ${channel.name} by a moderator for ${duration}`);
 		return;
 	}
 
 	async kick(channel: ChannelEntity, user: UserEntity) {
-		const event: KickedEventDTO = {
-			channel,
-			user,
-			type: KickedEventDTO.name,
-		}
-		await this.sendEvent(user, event);
+		await this.sendEvent(user, `You got kicked for the channel ${channel.name} by a moderator`);
 		return await this.leaveChat(channel, user);
 	}
 	
@@ -387,34 +374,38 @@ export class ChatGateway
 	@UseGuards(WSAuthGuard)
 	async handleUpdateNickname(
 		@ConnectedSocket() client: Socket,
-		@MessageBody(new ValidationPipe()) data: {nickname: string},
-		callback: (res: boolean) => void) {
-			console.log(data);
-			console.log(data.nickname);
+		@MessageBody(new ValidationPipe()) data: {nickname: string})
+		{ 
 			const res = await this.usersService.nicknameUsed(data.nickname);
-			console.log(`ret NicknameUsed= ${data.nickname} | ${res}`);
-			// callback(res); //si callback ne fonctionne pas, remplacer par le client emit ci dessous
 		client.emit('NicknameUsed', res);
 	}
 
 	async receivedInvite(invite: InviteEntity) {
-		const event: ReceivedInviteEventDTO = {
-			invite,
-			type: ReceivedInviteEventDTO.name,
-		}
-		await this.sendEvent(invite.user, event);
+		await this.sendEvent(invite.user, `You received an Invite for a channel`);
 	}
 
 	async sendEvent(
 		user: UserEntity,
-		event:
-			ReceivedInviteEventDTO |
-			BannedEventDTO |
-			KickedEventDTO |
-			MutedEventDTO,
+		messages: string
 	) {
 		const socketTarget = await this.getSocket(user.UserID);
 		if (!socketTarget) return;
-		socketTarget.emit('notifyEvent', event);
+		socketTarget.emit('notifyEvent', {messages});
+	}
+
+	
+	@SubscribeMessage(wsChatRoutesBack.updateRoom())
+	@UseGuards(WSAuthGuard)
+	async handleUpdateRoom(
+		@CurrentUser() user: UserEntity,
+		@MessageBody(new ValidationPipe()) data: channelsDTO.IChangeChannelDTOPipe){
+		
+			const channel = await this.channelService.findOne(data.channelID);
+		console.log(channel);
+		if (channel.owner.UserID !== user.UserID)
+			return;
+		const credential = await this.channelCredentialService.create(data.password);
+		this.channelService.modifyChannel(channel, credential, data);
+		this.server.to(data.channelID.toString()).emit(wsChatRoutesClient.nameChannelsHasChanged(), channel)
 	}
 }

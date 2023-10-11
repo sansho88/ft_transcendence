@@ -1,20 +1,25 @@
 import {input} from "zod";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Image from "next/image";
 import Button from "@/components/CustomButtonComponent";
-import { channelsDTO } from "@/shared/DTO/InterfaceDTO";
+import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
 import { wsChatEvents } from "@/components/api/WsReq";
 import { Socket } from "socket.io-client";
+import {CurrentChannelContext, SocketContextChat} from "@/context/globalContext";
+import {IChannel} from "@/shared/typesChannel";
+import * as apiReq from "@/components/api/ApiReq"
+import { channel } from "diagnostics_channel";
 
-const CreateChannelSettings = ({className, socket}: {className: string, socket: Socket}) => {
-    const [channelName, setChannelName] = useState("");
-    const [channelPassword, setChannelPassword] = useState("");
-    const [channelType, setChannelType] = useState("");
-    const [areSettingsValids, setSettingsValid] = useState(false);
-    const [showPassword, setPasswordVisible] = useState("password");
+const SettingsChannel = ({className, socket, channelToEdit}: {className: string, socket: Socket, channelToEdit: IChannel}) => {
+    const [channelName, setChannelName] = useState(channelToEdit.name);
+    const [channelPassword, setChannelPassword] = useState(channelToEdit.password ? channelToEdit.password : "");
+    const [channelType, setChannelType] = useState(channelToEdit.type ? "Private" : channelToEdit.password ? "Protected" : "Public");
+    const [areSettingsValids, setSettingsValid] = useState(true);
+    const [showPassword, setPasswordVisible] = useState(channelToEdit.password);
     const [nameErrorMsg, setNameErrMsg] = useState("");
     const [passwordErrorMsg, setPasswordErrMsg] = useState("");
-    const [isChannelCreated, setIsChannelCreated] = useState(false);
+    const [isChannelEdited, setIsChannelEdited] = useState(false);
+    const {selectedChannel, editSelectChannel} = useContext(CurrentChannelContext);
 
     useEffect(() => {
         if (channelName.length < 3)
@@ -69,19 +74,24 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
         if (areSettingsValids)
         {
             console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
-            setIsChannelCreated(true);
-            
-            const newChannel: channelsDTO.ICreateChannelDTOPipe = {
+            setIsChannelEdited(true);
+
+            // const newEditedChannel : IChannel = {
+            const newEditedChannel : channelsDTO.IChangeChannelDTOPipe = {
+                channelID: channelToEdit.channelID,
                 name: channelName,
-                privacy: channelType === "Private",
-                password: channelType === "Protected" ? channelPassword : undefined
-              }
+                privacy: channelType == "Private",
+                password: channelPassword ? channelPassword : null
+            }
+            // apiReq.putApi.putModifChannel(channelToEdit.channelID, newEditedChannel)//FIXME:
+            // .then(() => {
+            //     console.log('tous va bien dans le meilleur des mondes')
+            // })
+            // .catch((e) => {
+            // console.error(e)})
+            wsChatEvents.updateChannel(socket, newEditedChannel); // utilisation ws pour update tous les clients ensuite
+        }
 
-
-
-              wsChatEvents.createRoom(socket, newChannel);
-          }
-        
     }
 
     function handleShowPassword(event){
@@ -89,11 +99,10 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
         setPasswordVisible(showPassword == "text" ? "password" : "text");
     }
 
-//todo: afficher uniquement en cas de clique sur le bouton d ajout + deplacer les boutons de settings vers le haut
     return (
         <>
-            {!isChannelCreated && <div className={className}>
-                <h1 id={"popup_title"}>NEW CHANNEL</h1>
+            {!isChannelEdited && <div className={className}>
+                <h1 id={"popup_title"}>EDIT CHANNEL</h1>
                 <form>
                     <label>
                         <input id={"channelNameInput"}
@@ -112,12 +121,12 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
                             <li><label> <input type="radio"
                                                name="visibility"
                                                value="Public"
-                                               onChange={handleOnChange}/> Public</label></li>
+                                               onChange={handleOnChange} checked={channelType == "Public"}/> Public</label></li>
 
                             <li><label> <input type="radio"
                                                name="visibility"
                                                value="Protected"
-                                               onChange={handleOnChange}/> Protected</label></li>
+                                               onChange={handleOnChange} checked={channelType == "Protected"}/> Protected</label></li>
                             {channelType == "Protected" &&
                                 <li><label>
                                     <input id={"channelPasswordInput"}
@@ -136,7 +145,7 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
                                 </label></li>}
 
                             <li><label> <input type="radio" name="visibility" value="Private"
-                                               onChange={handleOnChange}/> Private</label></li>
+                                               onChange={handleOnChange} checked={channelType == "Private"}/> Private</label></li>
                         </ul>
 
                     </label>
@@ -155,4 +164,4 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
     )
 }
 
-export default CreateChannelSettings;
+export default SettingsChannel;

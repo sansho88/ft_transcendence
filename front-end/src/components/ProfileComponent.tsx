@@ -13,14 +13,17 @@ import {wsGameRoutes} from "@/shared/routesApi";
 import {IGameSessionInfo} from "@/shared/typesGame";
 import {log} from "util";
 
+interface ProfileProps{
+    user: IUser;
+    avatarSize: string | undefined;
+}
+const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize, isEditable})=>{
 
-const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, login, status, UserID, isEditable})=>{
-
-    const [modifiedNick, setNickText] = useState<string>(nickname ? nickname : login);
+    const [modifiedNick, setNickText] = useState<string>(user.nickname ? user.nickname : user.login);
     const [editMode, setEditMode] = useState(false);
     const [nickErrorMsg, setNickErrMsg] = useState("");
     const [statusColor, setStatusColor] = useState("grey");
-    const [userStatus, setUserStatus] = useState(status);
+    const [userStatus, setUserStatus] = useState(user.status);
     const socketGame      = useContext(SocketContextGame);
     const socketGameRef   = useRef(socketGame);
     const socketChat      = useContext(SocketContextChat);
@@ -34,11 +37,11 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
         }
 
         console.log(socketChatRef.current?.disconnected);
-    }, [login]);
+    }, [user.login]);
 
 
     useEffect(() => {
-        setStatusColor(getEnumNameByIndex(Colors, userStatus ? userStatus : 0));
+        setStatusColor(getEnumNameByIndex(Colors, user.status));
         console.log("[PROFILE] STATUS UPDATED: " + userStatus);
     }, [userStatus]);
 
@@ -54,10 +57,10 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
     })*/
 
     socketGameRef.current?.on("infoGameSession", (data: IGameSessionInfo) => {
-        if ((data.player1 && data.player1.login == login) || data.player2.login == login)
+        if ((data.player1 && data.player1.login == user.login) || data.player2.login == user.login)
         {
             setUserStatus(EStatus.InGame);
-            setStatusColor(getEnumNameByIndex(Colors, userStatus));
+            setStatusColor(getEnumNameByIndex(Colors, user.status));
 
             socketGameRef.current?.on("endgame", () => {
                     setUserStatus(EStatus.Online);
@@ -69,11 +72,10 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
 
 
     useEffect(() => {
-        if (isNicknameUsed && modifiedNick !== nickname) {
+        if (isNicknameUsed && modifiedNick !== user.nickname) {
           setNickErrMsg("Unavailable");
-          console.log("Abandon");
         }
-      }, [isNicknameUsed, modifiedNick, nickname]);
+      }, [isNicknameUsed, modifiedNick, user.nickname]);
 
     async function handleTextChange  (event: React.ChangeEvent<HTMLInputElement>)  { //updated for each character
         setIsNicknameUsed(false);
@@ -88,14 +90,12 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
             setNickErrMsg("Alphanumerics only");
         }
         else {
-            console.log(`value= ${value}, nickname=${nickname} `)
-            if (value != nickname)
+            console.log(`value= ${value}, nickname=${user.nickname} `)
+            if (value != user.nickname)
                 await apiReq.getApi.getIsNicknameUsed(value).then((res) => {
                     const ret: boolean = res.data;
-                    console.log('res = ' + ret);
                     if (ret == true)
                     {
-                        console.log('coucou ');
                         setIsNicknameUsed(true);
                         setNickErrMsg("Unavailable");
                     }
@@ -116,7 +116,7 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
 
         if (!nickErrorMsg.length) {
 
-            await getUserFromId(UserID).then( (userGet) => {
+            await getUserFromId(user.UserID).then( (userGet) => {
             console.log("[PROFILE] login to update: " + userGet.login);
             userGet.nickname = modifiedNick;
             apiReq.putApi.putUser(userGet);
@@ -158,11 +158,24 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
     }
 
 
-    const WIDTH= 4, HEIGHT= WIDTH * 2.5
+    let WIDTH= 4;
+
+
+    if (avatarSize){
+        switch (avatarSize) {
+
+            case "small": WIDTH= 1; break;
+            case "medium": WIDTH= 2; break;
+            case "big": WIDTH = 4; break;
+
+        }
+    }
+   let HEIGHT= WIDTH * 2.5
+
     return (
         <>
             <div className={className}>
-                <Avatar path={avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus}/>
+                <Avatar path={user.avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus}/>
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
                     color: "#07C3FF",
@@ -175,7 +188,7 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
 
                 }
                 }>
-                    <h2 id={"login"} style={{ color: "darkgrey"}}>{login}</h2>
+                    <h2 id={"login"} style={{ color: "darkgrey"}}>{user.login}</h2>
                     {editedNick()}
 
                     <p id={"status"} style={{

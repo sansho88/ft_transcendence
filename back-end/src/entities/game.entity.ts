@@ -5,14 +5,7 @@ import {
 	ManyToOne,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity';
-
-enum GameState {
-	requested,
-	inProgress,
-	p1Win,
-	p2Win,
-}
+import {UserEntity} from './user.entity';
 
 @Entity('TestGames')
 export class GameEntity extends BaseEntity {
@@ -32,10 +25,7 @@ export class GameEntity extends BaseEntity {
 	score2: number;
 
 	@Column({
-		type: 'date',
+		type: 'timestamp',
 	})
 	starting_date: Date;
-
-	@Column()
-	state: GameState;
 }

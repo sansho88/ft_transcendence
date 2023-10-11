@@ -10,6 +10,8 @@ import {JwtService} from '@nestjs/jwt';
 import {accessToken} from '../dto/payload';
 import {UserCredentialService} from './credential.service';
 import * as process from "process";
+import { UserEntity } from 'src/entities/user.entity';
+import { find } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -115,5 +117,90 @@ export class AuthService {
 		console.log('success');
 		const payloadToken: accessToken = {id: user.UserID};
 		return await this.jwtService.signAsync(payloadToken);
+	}
+
+	/** * * * * * * * * * * * * * * **/
+
+	/**
+	 * generate a secret key for 2FA and return the secret and the img
+	 * @param user the user to update
+	 * @returns {img: string}
+	 */
+	async generate2FA(user: UserEntity) {
+		console.log("generate2FA");
+		if (user.has_2fa) throw new HttpException("2fa already enabled.", HttpStatus.BAD_REQUEST)
+
+		const cred = await this.usersService.getCredential(user.UserID);
+		const speakeasy = require('speakeasy');
+		const secret = speakeasy.generateSecret({length: 20, name: "tester c'est douter"});
+		
+		cred.token_2fa = secret.base32;
+		cred.save();
+		
+		return { img: secret.otpauth_url };
+	}
+
+	/**
+	 * check if the token is valid
+	 * @param token the token to check
+	 * @param user the user to update if the 2fa is valid
+	 * @returns {boolean}
+	 */
+	async check2FA(token: string, user: UserEntity) {
+		const cred = await this.usersService.getCredential(user.UserID);
+		if (cred.token_2fa === null) throw new HttpException("No 2fa Generated.", HttpStatus.BAD_REQUEST)
+		
+		token = token.substring(0, 6);
+		
+		const speakeasy = require('speakeasy');
+		if (!speakeasy.totp.verify({ 
+			secret: cred.token_2fa, 
+			encoding: 'base32', 
+			token 
+		})) return false;
+
+		user.has_2fa = true;
+		user.save();
+		return true;
+	}
+
+	/**
+	 * disable the 2fa
+	 * @param user the user to update
+	 * @returns {boolean}
+	 */
+	async disable2FA(token: string, user: UserEntity) {
+		const cred = await this.usersService.getCredential(user.UserID);
+
+		if (!user.has_2fa) throw new HttpException("2fa already disabled.", HttpStatus.BAD_REQUEST)
+		if (!cred.token_2fa) throw new HttpException("No 2fa Generated.", HttpStatus.BAD_REQUEST)
+
+		token = token.substring(0, 6);
+		console.log(token);
+		const speakeasy = require('speakeasy');
+		
+		
+		const bool = speakeasy.totp.verify({ 
+			secret: cred.token_2fa, 
+			encoding: 'base32', 
+			token 
+		});
+
+		console.log("bool: " + bool);
+		
+		
+		if (!speakeasy.totp.verify({ 
+			secret: cred.token_2fa, 
+			encoding: 'base32', 
+			token 
+		})) return false;
+		console.log("2fa disabled");
+		
+		cred.token_2fa = null;
+		cred.save();
+		user.has_2fa = false;
+		user.save();
+
+		return true;
 	}
 }

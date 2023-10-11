@@ -2,11 +2,13 @@
 
 import { IMessageEntity } from "@/shared/entities/IMessage.entity";
 import Axios from "./AxiosConfig";
-import { strRoutes } from "@/shared/routesApi";
+import {strRoutes} from "@/shared/routesApi";
 import { IUser } from "@/shared/types";
 import { IChannel } from "@/shared/typesChannel";
 import axios from "axios";
 import { IChannelEntity } from "@/shared/entities/IChannel.entity";
+import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
+
 
 const AuthManager = require('./AuthManager');
 export const authManager = new AuthManager();
@@ -52,6 +54,10 @@ export namespace getApi {
 		}
 	});}
 
+	export const getAllUsersFromChannel = (channelID: number): Promise<IUser[]> => {
+		return axiosInstance.get(`${strRoutes.channel.getUsersChannel(channelID)}`, updateAxiosInstance());
+	}
+
 	export const getMePromise = () => {
 		return axiosInstance.get(`users/me`, updateAxiosInstance())}
 
@@ -60,6 +66,8 @@ export namespace getApi {
 				'Authorization': `Bearer ${authManager.getToken()}`
 			}
 		});}
+
+
 
 
 	interface IUserChan extends IUser {	channelJoined: IChannel[];	}
@@ -85,10 +93,14 @@ export namespace getApi {
 
 export namespace postApi {
 
-	export const postUser= (newUser: Partial<IUser>)		=>{return axiosInstance.post(`${strRoutes.postUser()}`, newUser);}
+	export const postUser= (newUser: Partial<IUser>)			=>{return axiosInstance.post(`${strRoutes.postUser()}`, newUser);}
 	export const postTryLogin= (loginTest:Partial<IUser>)	=>{return axiosInstance.post(`${strRoutes.postUserCheckLogin()}`, loginTest);}
-	export const postTryLogin42= (code: string)	=>{return axiosInstance.post(`${strRoutes.postUser42()}`, code);}
-	export const postTryGetIntraURL= ()	=>{return axiosInstance.post(`${strRoutes.getIntraURL()}`);}
+	export const postTryLogin42= (code: string)						=>{return axiosInstance.post(`${strRoutes.postUser42()}`, code);}
+	export const postTryGetIntraURL= ()										=>{return axiosInstance.post(`${strRoutes.getIntraURL()}`);}
+
+	export const postGen2FA= ()														=>{return axiosInstance.post(`${strRoutes.postGenerate2FA()}`, {}, updateAxiosInstance());}
+	export const postCheck2FA= (token: string)						=>{return axiosInstance.post(`${strRoutes.postCheck2FA(token)}`, {}, updateAxiosInstance());}
+	export const postDisable2FA= (token: string)					=>{return axiosInstance.post(`${strRoutes.postDisable2FA(token)}`, {}, updateAxiosInstance());}
 
 }
 
@@ -98,6 +110,8 @@ export namespace putApi {
 		console.log("[putApi/putUser] status sent: " + updateUser.status);
 
 		return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, updateAxiosInstance())}
+
+		export const putModifChannel = (channelID: number, data: channelsDTO.IChangeChannelDTOPipe) =>{return axiosInstance.put(`${strRoutes.channel.putModifChannel(channelID)}`, data, updateAxiosInstance())}
 }
 
 export namespace deleteApi {

@@ -11,6 +11,7 @@ import { messageDTO } from '@/shared/DTO/InterfaceDTO'
 
 export default function ChatMessagesList({className, messages, currentChannel, userCurrentID}
   : {className: string, messages: messageDTO.IReceivedMessageEventDTO[], currentChannel: number, userCurrentID: number}) {
+  const setTimeoutGoToEndMesage: number = 200;
 
   const refDivEndMessage = useRef<HTMLDivElement>(null);
   const refDivParent = useRef<HTMLDivElement>(null);
@@ -22,7 +23,9 @@ export default function ChatMessagesList({className, messages, currentChannel, u
     refDivEndMessage.current?.scrollIntoView({behavior: typeScroll});
   }
   useEffect(() => {
-    goToEndMessage('auto');
+    setTimeout(() => {
+      goToEndMessage('auto');
+    }, setTimeoutGoToEndMesage)
     
     
   }, []) //TODO: dependence new message... OU PAS ?
@@ -31,7 +34,7 @@ export default function ChatMessagesList({className, messages, currentChannel, u
 
     setTimeout(() => {
       goToEndMessage('auto');
-    }, 50)
+    }, setTimeoutGoToEndMesage)
     
   }, [currentChannel])
 
@@ -48,7 +51,7 @@ export default function ChatMessagesList({className, messages, currentChannel, u
         {
           setTimeout(() => {
             goToEndMessage('smooth');
-          }, 50)
+          }, setTimeoutGoToEndMesage)
         }
       }
     };
