@@ -82,8 +82,7 @@ export namespace getApi {
 		}
 	}
 
-	export const getAllMessagesChannel = (channelID: number): Promise<IMessageEntity[]> => {
-			// console.warn('DEBUG: getAllMessagesChannel');
+	export const getAllMessagesChannel = (channelID: number): Promise<{data: IMessageEntity[]}> => {
 			return axiosInstance.get(`${strRoutes.channel.getAllMessagesChannel(channelID)}`, {
 				headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
 			});

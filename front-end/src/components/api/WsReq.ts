@@ -32,10 +32,6 @@ export namespace wsChatEvents {
 }
 
 
-function listenEvent(event: string, socket: Socket, f: Function, arg: any) {
-  socket.on(event, () => f(arg));
-}
-
 export namespace wsChatListen {
 
 
@@ -49,13 +45,33 @@ export namespace wsChatListen {
     })
   }
 
-  export function leaveRoomListen(socket: Socket, setter: React.Dispatch<React.SetStateAction<IChannel[]>>) {
-    socket.on(wsChatRoutesBack.leaveRoom(), (data: {channel: IChannelEntity}) => {
-      // setter(prevChannels => [...prevChannels, data.channel]);//TODO: delete chanel
-      console.log(`event on LEAVED ROOM ` + data.channel.channelID + ' , id=' + data.channel.channelID);
+  function leaveChanHandle( socket: Socket, 
+                            setter: React.Dispatch<React.SetStateAction<IChannel[]>>, 
+                            setCurrentChannel: React.Dispatch<React.SetStateAction<number>>, 
+                            channels: IChannel[], 
+                            data: {channel: IChannelEntity}) 
+  {
+    console.log('channels.length=', channels.length)
+    if(channels.length > 0)
       setter(prevChannels => prevChannels.filter((channel) => channel.channelID != data.channel.channelID))
+    setCurrentChannel(-1);
+  }
+
+  export function leaveRoomListen(socket: Socket, setter: React.Dispatch<React.SetStateAction<IChannel[]>>, setCurrentChannel: React.Dispatch<React.SetStateAction<number>>, channels: IChannel[]) {
+    socket.on(wsChatRoutesBack.leaveRoom(), (data: {channel: IChannelEntity}) => {
+        leaveChanHandle(socket, setter, setCurrentChannel, channels, data);
     })
   }
+  export function leaveRoomListenOFF(socket: Socket, setter: React.Dispatch<React.SetStateAction<IChannel[]>>, setCurrentChannel: React.Dispatch<React.SetStateAction<number>>, channels: IChannel[]) {
+    socket.off(wsChatRoutesBack.leaveRoom(), (data: {channel: IChannelEntity}) => {
+      leaveChanHandle(socket, setter, setCurrentChannel, channels, data);
+    })
+  }
+
+
+
+
+
 
   export function updateChannelsJoined(socket: Socket, setChannelsJoined: Function) {
     

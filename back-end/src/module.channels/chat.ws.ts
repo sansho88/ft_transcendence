@@ -347,7 +347,7 @@ export class ChatGateway
 				socketTarget.emit('leaveRoom', {channel: channel});
 			});
 		const content: LeaveEventDTO = {user: user, channelID: channel.channelID};
-		this.server.to(`${channel.channelID}`).emit(`leaveRoom`, content);
+		// this.server.to(`${channel.channelID}`).emit(`leaveRoom`, content);
 		return channel;
 	}
 

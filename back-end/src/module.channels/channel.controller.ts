@@ -297,6 +297,8 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('channelID', ParseIntPipe) channelID: number,
 	) {
+		if (channelID === -1 )//gestion no channel pour simplifier et pas avoir derreur 401.. 
+			return {data: []};
 		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
