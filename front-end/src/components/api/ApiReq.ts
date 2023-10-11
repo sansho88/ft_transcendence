@@ -7,6 +7,8 @@ import { IUser } from "@/shared/types";
 import { IChannel } from "@/shared/typesChannel";
 import axios from "axios";
 import { IChannelEntity } from "@/shared/entities/IChannel.entity";
+import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
+
 
 const AuthManager = require('./AuthManager');
 export const authManager = new AuthManager();
@@ -114,6 +116,12 @@ export namespace putApi {
 	export const unfollowUser = (userID: number) => {
 		return axiosInstance.put(`${strRoutes.followers.unfollowUser}`, userID, updateAxiosInstance());
 	}
+	export const putUser= (updateUser: Partial<IUser>)		=>{
+		console.log("[putApi/putUser] status sent: " + updateUser.status);
+
+		return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, updateAxiosInstance())}
+
+		export const putModifChannel = (channelID: number, data: channelsDTO.IChangeChannelDTOPipe) =>{return axiosInstance.put(`${strRoutes.channel.putModifChannel(channelID)}`, data, updateAxiosInstance())}
 }
 
 export namespace deleteApi {

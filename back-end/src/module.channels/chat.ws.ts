@@ -24,6 +24,7 @@ import {accessToken} from '../dto/payload';
 import * as process from 'process';
 import {JwtService} from '@nestjs/jwt';
 import {
+	ChangeChannelDTOPipe,
 	CreateChannelDTOPipe, CreateMpDTOPPipe,
 	JoinChannelDTOPipe,
 	LeaveChannelDTOPipe,
@@ -39,7 +40,8 @@ import {
 } from '../dto/event.dto'
 import {InviteService} from "./invite.service";
 import {InviteEntity} from "../entities/invite.entity";
-import { wsChatRoutesClient } from 'shared/routesApi';
+import { wsChatRoutesBack, wsChatRoutesClient } from 'shared/routesApi';
+import { channelsDTO } from 'shared/DTO/InterfaceDTO';
 
 class SocketUserList {
 	userID: number;
@@ -372,13 +374,9 @@ export class ChatGateway
 	@UseGuards(WSAuthGuard)
 	async handleUpdateNickname(
 		@ConnectedSocket() client: Socket,
-		@MessageBody(new ValidationPipe()) data: {nickname: string},
-		callback: (res: boolean) => void) {
-			console.log(data);
-			console.log(data.nickname);
+		@MessageBody(new ValidationPipe()) data: {nickname: string})
+		{ 
 			const res = await this.usersService.nicknameUsed(data.nickname);
-			console.log(`ret NicknameUsed= ${data.nickname} | ${res}`);
-			// callback(res); //si callback ne fonctionne pas, remplacer par le client emit ci dessous
 		client.emit('NicknameUsed', res);
 	}
 
@@ -393,5 +391,21 @@ export class ChatGateway
 		const socketTarget = await this.getSocket(user.UserID);
 		if (!socketTarget) return;
 		socketTarget.emit('notifyEvent', {messages});
+	}
+
+	
+	@SubscribeMessage(wsChatRoutesBack.updateRoom())
+	@UseGuards(WSAuthGuard)
+	async handleUpdateRoom(
+		@CurrentUser() user: UserEntity,
+		@MessageBody(new ValidationPipe()) data: channelsDTO.IChangeChannelDTOPipe){
+		
+			const channel = await this.channelService.findOne(data.channelID);
+		console.log(channel);
+		if (channel.owner.UserID !== user.UserID)
+			return;
+		const credential = await this.channelCredentialService.create(data.password);
+		this.channelService.modifyChannel(channel, credential, data);
+		this.server.to(data.channelID.toString()).emit(wsChatRoutesClient.nameChannelsHasChanged(), channel)
 	}
 }
