@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class LogVisitDTOPipe {
 	@IsString()
@@ -8,6 +8,10 @@ export class LogVisitDTOPipe {
 	@IsString()
 	@IsNotEmpty()
 	password: string;
+
+	@IsString()
+	@IsOptional()
+	token_2fa?: string;
 }
 
 export class SignVisitDTOPipe {
