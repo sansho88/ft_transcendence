@@ -47,6 +47,13 @@ export namespace wsChatListen {
     })
   }
 
+  export function leaveRoomListen(socket: Socket, setter: React.Dispatch<React.SetStateAction<IChannel[]>>) {
+    socket.on(wsChatRoutesBack.leaveRoom(), (data: {channel: IChannelEntity}) => {
+      // setter(prevChannels => [...prevChannels, data.channel]);//TODO: delete chanel
+      setter(prevChannels => prevChannels.filter((channel) => channel.channelID != data.channel.channelID))
+    })
+  }
+
   export function updateChannelsJoined(socket: Socket, setChannelsJoined: Function) {
     
     socket.on(wsChatRoutesClient.updateChannelsJoined(), (data: IChannelEntity[]) => { //TODO:

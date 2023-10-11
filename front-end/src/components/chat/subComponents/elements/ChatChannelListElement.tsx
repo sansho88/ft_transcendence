@@ -6,6 +6,9 @@ import Button from "@/components/CustomButtonComponent";
 import Image from "next/image";
 import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
 import { wsChatEvents } from '@/components/api/WsReq';
+import LeaveChannelCross from './LeaveChannelCross';
+
+import ChatMaster from '../../ChatMaster';
 
 
 
@@ -87,15 +90,15 @@ useEffect(() => {
     }
 
 
-function onClickSwitcher() {
+    function onClickSwitcher() {
 
-    if(isProtected === true) {
-        if(areSettingsValids)
-            onClickFunction(channelPassword);
+        if(isProtected === true) {
+            if(areSettingsValids)
+                onClickFunction(channelPassword);
+        }
+        else
+            onClickFunction();
     }
-    else
-        onClickFunction();
-}
 
     const defineClassName = useRef<string>('chat_channel_list_element')
     useEffect(() => {
@@ -119,13 +122,21 @@ function onClickSwitcher() {
             } 
 		}, [currentChannel]);
 
+    function handleLeaveChannel() {
+    
+        
+    }
+    
+
     return (
-        <div className={currentChannel === channelID ? `channel channel_selected` : `channel`}>
+        <div className={currentChannel === channelID ? `channel channel_selected ` : `channel `}>
             <div key={`button_channel_${uuidv4()}`}
-                 className={defineClassName.current} onClick={() => onClickSwitcher()}>{channelName}
+                 className={`${defineClassName.current} justify-between`} onClick={() => onClickSwitcher()}>
+                    <div>{channelName}</div>
+                    <LeaveChannelCross onClickFunction={}/>
             </div>
             {isPending && (<div id={"invite_options"}>
-                <span onClick={ handleAcceptInvite }>✅</span> |
+                <span onClick={ handleAcceptInvite }>✅</span>
                 <span onClick={ handleDeclineInvite }>❌</span>
             </div>)}
             {isProtected && 

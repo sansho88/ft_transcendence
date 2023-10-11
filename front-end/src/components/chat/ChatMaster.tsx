@@ -19,6 +19,7 @@ import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelP
 import { IMessageEntity } from '@/shared/entities/IMessage.entity'
 import { messageDTO } from '@/shared/DTO/InterfaceDTO'
 import { wsChatRoutesBack } from '@/shared/routesApi'
+import RightClik from './subComponents/RightClik'
 
 
 export default function ChatMaster({className, token, userID}: {className: string, token: string, userID: number}) {
