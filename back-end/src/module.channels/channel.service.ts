@@ -55,7 +55,7 @@ export class ChannelService {
 	}
 
 	async findOne(id: number, relations?: string[], canBeMP?: boolean) {
-		let channel;
+		let channel: ChannelEntity;
 		if (canBeMP != true)
 			channel = await this.channelRepository.findOne({
 				where: {channelID: id, mp: false},
@@ -251,5 +251,5 @@ export class ChannelService {
 	async getJoinedChannelList(user: UserEntity): Promise<ChannelEntity[]> {
 		const ret: UserEntity =  await this.userService.findOne(user.UserID, ['channelJoined']);
 			return ret.channelJoined;
-	}
+  }
 }

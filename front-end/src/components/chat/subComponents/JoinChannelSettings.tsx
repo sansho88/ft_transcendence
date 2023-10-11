@@ -44,8 +44,8 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
 
 
         useEffect(() => {
-            console.log('channelServer3 a changé : ', JSON.stringify(channelServer3.data));
-        }, [channelServer3]);
+            // console.log('channelServer3 a changé : ', JSON.stringify(channelServer3.data));
+        }, [channelServer3.data]);
 
     useEffect(() => {
         if (channelName.length < 3)

@@ -2,22 +2,42 @@
 
 import React, {useEffect, useRef, useState} from 'react'
 import {v4 as uuidv4} from "uuid";
+import Button from "@/components/CustomButtonComponent";
+import Image from "next/image";
+import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
+import { wsChatEvents } from '@/components/api/WsReq';
 
 
-export default function ChatChannelListElement({channelID, channelName, f, isInvite, currentChannel, isMp}: {
+
+export default function ChatChannelListElement({channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected}: {
     channelID: number,
     channelName: string,
-    f: Function,
+    onClickFunction: Function,
     isInvite: boolean,
     currentChannel: number,
-    isMp: boolean
+    isMp: boolean,
+    isProtected: boolean
 }) {
     const [isPending, setIsPending] = useState(isInvite);
 
+    const [channelPassword, setChannelPassword] = useState("");
+    const [channelType, setChannelType] = useState("");
+    const [areSettingsValids, setSettingsValid] = useState(false);
+    const [showPassword, setPasswordVisible] = useState("password");
+    const [passwordErrorMsg, setPasswordErrMsg] = useState("");
+
 //   return (
 //     <button key={`button_channel_${uuidv4()}`} 
-//     className='chat_channel_list_element' onClick={() => f(channelID)}> {channelName}</button>
+//     className='chat_channel_list_element' onClick={() => onClickFunction(channelID)}> {channelName}</button>
 //   )
+useEffect(() => {
+    if (channelPassword.length > 2) {
+        setSettingsValid(true);
+    } else {
+        setSettingsValid(false);
+    }
+
+}, [channelName, channelType, channelPassword]);
 
     function handleAcceptInvite() {
         console.log(`Invite to ${channelName} accepted`);
@@ -28,6 +48,54 @@ export default function ChatChannelListElement({channelID, channelName, f, isInv
         console.log(`Invite to ${channelName} declined`);
         setIsPending(false);
     }
+
+
+    function handleOnPasswordChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const value = event.target.value;
+        setChannelPassword(value);
+
+        if (value.length < 3 || value.length > 12) {
+            setPasswordErrMsg("min. 3 characters");
+        }
+        else if (!/^[A-Za-z0-9_]+$/.test(value)) {
+            setPasswordErrMsg("Alphanumerics only");
+        }
+        else
+            setPasswordErrMsg("");
+    }
+
+    function handleShowPassword(event){
+        event.preventDefault();
+        setPasswordVisible(showPassword == "text" ? "password" : "text");
+    }
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        if (areSettingsValids)
+        {
+            // console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
+            // setIsChannelCreated(true);
+            
+            // const newChannel: channelsDTO.IJoinChannelDTOPipe = {
+            //     channelID: channelID,
+            //     password: channelType === "Protected" ? channelPassword : undefined
+            //   }
+            
+            onClickFunction(channelPassword);
+          }
+        
+    }
+
+
+function onClickSwitcher() {
+
+    if(isProtected === true) {
+        if(areSettingsValids)
+            onClickFunction(channelPassword);
+    }
+    else
+        onClickFunction();
+}
 
     const defineClassName = useRef<string>('chat_channel_list_element')
     useEffect(() => {
@@ -54,12 +122,40 @@ export default function ChatChannelListElement({channelID, channelName, f, isInv
     return (
         <div className={currentChannel === channelID ? `channel channel_selected` : `channel`}>
             <div key={`button_channel_${uuidv4()}`}
-                 className={defineClassName.current} onClick={() => f(channelID)}>{channelName}
+                 className={defineClassName.current} onClick={() => onClickSwitcher()}>{channelName}
             </div>
             {isPending && (<div id={"invite_options"}>
                 <span onClick={ handleAcceptInvite }>✅</span> |
                 <span onClick={ handleDeclineInvite }>❌</span>
             </div>)}
+            {isProtected && 
+                <div>
+                          <li><label>
+                                    <input id={"channelPasswordInput"}
+                                           type={showPassword}
+                                           inputMode={"text"}
+                                           minLength={3}
+                                           maxLength={12}
+                                           value={channelPassword}
+                                           placeholder={" Password"}
+                                           autoFocus={true}
+                                           onChange={handleOnPasswordChange}/>
+                                    <Button id={"button_showPassword"} image={showPassword == "password" ? "/eye-off.svg" : "/eye-show.svg"}
+                                            onClick={handleShowPassword}
+                                            alt={"Show password button"}/>
+                                    <p style={{fontSize: "12px", color: "red"}}>{passwordErrorMsg}</p>
+                                </label></li>
+                                 <button onClick={onClickSwitcher} disabled={!areSettingsValids}>
+                                    {areSettingsValids && <Image
+                                    src="/confirm.svg"
+                                    alt="add new channel button"
+                                    width={32}
+                                    height={32}
+                                    disabled={channelType.length == 0}
+                                />}
+                            </button>
+                </div>
+            }
         </div>
     )
 }

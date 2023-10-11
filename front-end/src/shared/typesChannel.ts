@@ -25,6 +25,7 @@ export interface IChannel {
   owner: IUser;
   name: string;
   type: EChannelType;
+  password?: string;
   // adminList: User[];
   // userList: User[];
   // messages: Message[];

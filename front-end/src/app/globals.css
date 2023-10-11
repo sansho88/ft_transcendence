@@ -205,7 +205,7 @@ body {
 }
 
 .userList{
-    max-height: 32vh;
+    max-height: 21vh;
     width: auto;
     overflow-y: auto;
     position: absolute;

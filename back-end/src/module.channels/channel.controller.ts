@@ -48,17 +48,20 @@ export class ChannelController {
 		return this.channelService.findAll();
 	}
 
-
-	@Get('get/:channelID')
+	/**
+	 * Used to get a specified channel (Need the 'user' To avoid conflict with other get)
+	 * @param channelID
+	 */
+	@Get('get/infos/:channelID')
 	@UseGuards(AuthGuard)
 	findOne(@Param('channelID', ParseIntPipe) channelID: number) {
 		return this.channelService.findOne(channelID);
 	}
 
-  @Get('get/users/:channelID')
+	@Get('get/list/:channelID')
 	@UseGuards(AuthGuard)
-	findUserList(@Param('channelID', ParseIntPipe) channelID: number) {
-			return this.channelService.findOne(channelID, ['userList']);
+	getUserList(@Param('channelID', ParseIntPipe) channelID: number) {
+		return this.channelService.findOne(channelID, ['userList']).then(value => value.userList);
 	}
 
 	@Get('mychannel')
@@ -101,6 +104,7 @@ export class ChannelController {
 	 *    -------
 	 *
 	 *  . Path For invite related Get and Put
+	 *  	- myinvite ------------------------------ GET
 	 *    - invite/:channelID --------------------- GET
 	 *    - invite/add/:channelID/:userID --------- PUT
 	 *    - invite/remove/:inviteID --------------- PUT
@@ -175,7 +179,7 @@ export class ChannelController {
 		}
 		const target = await this.usersService.findOne(targetID);
 		await this.channelService.banUser(target, channel, duration);
-		await this.chatGateway.ban(channel, target, duration, user);
+		await this.chatGateway.ban(channel, target);
 	}
 
 	@Put('pardon/:banID')
@@ -222,7 +226,7 @@ export class ChannelController {
 		}
 		const target = await this.usersService.findOne(targetID);
 		await this.channelService.muteUser(target, channel, duration);
-		await this.chatGateway.mute(channel, target, duration, user)
+		await this.chatGateway.mute(channel, target, duration)
 	}
 
 	@Put('unmute/:muteID')
@@ -297,6 +301,14 @@ export class ChannelController {
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterRecent(channel.messages);
+	}
+
+	@Get('myinvite')
+	@UseGuards(AuthGuard)
+	async myInvite(
+		@CurrentUser() user: UserEntity,
+	) {
+		return this.usersService.findOne(user.UserID, ['invite']).then(usr => usr.invite)
 	}
 
 	@Get('invite/:channelID')
