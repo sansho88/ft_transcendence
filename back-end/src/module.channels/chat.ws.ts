@@ -23,8 +23,7 @@ import {accessToken} from '../dto/payload';
 import * as process from 'process';
 import {JwtService} from '@nestjs/jwt';
 import {
-	ChangeChannelDTOPipe,
-  CreateChannelDTOPipe,
+	CreateChannelDTOPipe,
 	CreateMpDTOPPipe,
 	JoinChannelDTOPipe,
 	LeaveChannelDTOPipe,
@@ -372,10 +371,10 @@ export class ChatGateway
 	@UseGuards(WSAuthGuard)
 	async handleUpdateNickname(
 		@ConnectedSocket() client: Socket,
-		@MessageBody(new ValidationPipe()) data: {nickname: string},
- ) { 
+		@MessageBody(new ValidationPipe()) data: { nickname: string },
+	) {
 		const res = await this.usersService.nicknameUsed(data.nickname);
-  	client.emit('NicknameUsed', res);
+		client.emit('NicknameUsed', res);
 	}
 
 	async receivedInvite(invite: InviteEntity) {
@@ -404,26 +403,26 @@ export class ChatGateway
 
 	async sendEvent(
 		user: UserEntity,
-		messages: string
+		message: string
 	) {
 		const socketTargetLst = await this.getSocket(user.UserID);
 		if (!socketTargetLst) return;
-		this.emitSocketLst(socketTargetLst, 'notifyEvent', event);
+		this.emitSocketLst(socketTargetLst, 'notifyEvent', message);
 	}
 
-	private emitSocketLst(socketTarget: RemoteSocket<DefaultEventsMap, any>[], notifyEvent: string, event: ReceivedInviteEventDTO | BannedEventDTO | KickedEventDTO | MutedEventDTO) {
+	private emitSocketLst(socketTarget: RemoteSocket<DefaultEventsMap, any>[], notifyEvent: string, message: string) {
 		socketTarget.map(socket =>
-			socket.emit(notifyEvent, event)
+			socket.emit(notifyEvent, {message})
 		)
-  }
-	
+	}
+
 	@SubscribeMessage(wsChatRoutesBack.updateRoom())
 	@UseGuards(WSAuthGuard)
 	async handleUpdateRoom(
 		@CurrentUser() user: UserEntity,
-		@MessageBody(new ValidationPipe()) data: channelsDTO.IChangeChannelDTOPipe){
-		
-			const channel = await this.channelService.findOne(data.channelID);
+		@MessageBody(new ValidationPipe()) data: channelsDTO.IChangeChannelDTOPipe) {
+
+		const channel = await this.channelService.findOne(data.channelID);
 		console.log(channel);
 		if (channel.owner.UserID !== user.UserID)
 			return;
