@@ -68,8 +68,6 @@ export namespace getApi {
 		});}
 
 
-
-
 	interface IUserChan extends IUser {	channelJoined: IChannel[];	}
 	export const getChannelJoined = (): any => {
 		let user: IUserChan;
@@ -87,7 +85,12 @@ export namespace getApi {
 			return axiosInstance.get(`${strRoutes.channel.getAllMessagesChannel(channelID)}`, {
 				headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
 			});
-		}	
+	}
+
+	export const getAllMyFollowers = (): any => {
+		return axiosInstance.get(`${strRoutes.followers.getAllMyFollowers()}`, updateAxiosInstance());
+	}
+
 }
 
 
@@ -106,12 +109,14 @@ export namespace postApi {
 
 
 export namespace putApi {
-	export const putUser= (updateUser: Partial<IUser>)		=>{
-		console.log("[putApi/putUser] status sent: " + updateUser.status);
-
-		return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, updateAxiosInstance())}
-
-		export const putModifChannel = (channelID: number, data: channelsDTO.IChangeChannelDTOPipe) =>{return axiosInstance.put(`${strRoutes.channel.putModifChannel(channelID)}`, data, updateAxiosInstance())}
+	export const putUser= (updateUser: Partial<IUser>)		=>{return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, updateAxiosInstance())}
+	export const followUser = (userID: number) => {
+		return axiosInstance.put(`${strRoutes.followers.followUser(userID)}`,{}, updateAxiosInstance());
+	}
+	export const unfollowUser = (userID: number) => {
+		return axiosInstance.put(strRoutes.followers.unfollowUser(userID),{}, updateAxiosInstance());
+	}
+	export const putModifChannel = (channelID: number, data: channelsDTO.IChangeChannelDTOPipe) =>{return axiosInstance.put(`${strRoutes.channel.putModifChannel(channelID)}`, data, updateAxiosInstance())}
 }
 
 export namespace deleteApi {
