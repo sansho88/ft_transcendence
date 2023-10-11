@@ -6,6 +6,8 @@ import Button from "@/components/CustomButtonComponent";
 import {v4 as uuidv4} from "uuid";
 import {NotificationManager} from 'react-notifications';
 import UserOptions from "@/components/UserOptions";
+import {getApi} from "@/components/api/ApiReq";
+import getAllMyFollowers = getApi.getAllMyFollowers;
 
 
 
@@ -41,14 +43,21 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
             let allDiv : React.JSX.Element[] = [];
             if (!usersList)
             {
-                getAllUsers().then((res) => {
-                    for (const user of res) {
+                getAllMyFollowers().then((res) => {
+                    if (res.length > 0){
+                        for (const user of res) {
+                            allDiv.push(
+                                <li key={user.login + "List" + uuidv4()}>
+                                    <Profile user={user} avatarSize={avatarSize}>
+                                        {showUserProps == true && <UserOptions user={user}/>}
+                                    </Profile>
+                                </li>
+                            )
+                        }
+                    }
+                    else {
                         allDiv.push(
-                            <li key={user.login + "List" + uuidv4()}>
-                                <Profile user={user} avatarSize={avatarSize}>
-                                    {showUserProps == true && <UserOptions user={user}/>}
-                                </Profile>
-                            </li>
+                            <div>No user followed</div>
                         )
                     }
                     setUserElements(allDiv);
