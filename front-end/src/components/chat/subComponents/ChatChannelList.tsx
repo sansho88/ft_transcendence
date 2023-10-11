@@ -14,14 +14,15 @@ import {IUser} from "@/shared/types";
 import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
 
 
-export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList, channelsServer}
+export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList, channelsServer, userID}
   : { className: string, 
       socket: Socket, 
       channels: IChannel[], 
       channelsServer: IChannel[],
       setCurrentChannel: Function, 
       currentChannel: number, 
-      isServerList: boolean, 
+      isServerList: boolean,
+      userID: number
     }) {
 
   const counterDBG = useRef<number>(0);
@@ -157,6 +158,8 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               isInvite={false} //TODO:
               isMp={false} //TODO:
               socket={socket}
+              isServList={false}
+              itsOwner={channel.owner.UserID === userID }
               onClickFunction={() => {
                 setCurrentChannel(channel.channelID);
               }}
@@ -178,6 +181,8 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               isInvite={false} //TODO:
               isMp={false} //TODO:
               socket={socket}
+              isServList={true}
+              itsOwner={false}
               onClickFunction={(password?: string) => {
                 if (password != undefined && password != null){
                   if(channel.type === EChannelType.PROTECTED)

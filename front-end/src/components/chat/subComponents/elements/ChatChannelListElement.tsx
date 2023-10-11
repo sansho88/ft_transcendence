@@ -13,7 +13,7 @@ import { Socket } from 'socket.io-client';
 
 
 
-export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected}: {
+export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected, isServList, itsOwner}: {
     socket: Socket,
     channelID: number,
     channelName: string,
@@ -21,7 +21,9 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     isInvite: boolean,
     currentChannel: number,
     isMp: boolean,
-    isProtected: boolean
+    isProtected: boolean,
+    isServList: boolean,
+    itsOwner: boolean
 }) {
     const [isPending, setIsPending] = useState(isInvite);
 
@@ -138,7 +140,7 @@ useEffect(() => {
             <div key={`button_channel_${uuidv4()}`}
                  className={`${defineClassName.current} justify-between`} onClick={() => onClickSwitcher()}>
                     <div>{channelName}</div>
-                    <LeaveChannelCross onClickFunction={() => leaveChan(socket, channelID)} />
+                    {!isServList && !itsOwner && <LeaveChannelCross onClickFunction={() => leaveChan(socket, channelID)} />}
             </div>
             {isPending && (<div id={"invite_options"}>
                 <span onClick={ handleAcceptInvite }>✅</span>

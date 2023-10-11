@@ -131,6 +131,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
     <div className={`${className}`}>
       {socketChat?.active ? 
         <ChatChannelList  className={'chat_channel_block'}
+                          userID={userID}
                           socket={socketChat}
                           channels={channels}
                           setCurrentChannel={setterCurrentChannel}
