@@ -96,6 +96,14 @@ export interface IPlay {
   Id_GAME: number;
 }
 
+export interface IGameStats  {
+  nbWin: number;
+  nbLoose: number;
+  level: number;
+  exp: number;
+  rank: number;
+}
+
 // +---------------------------------------------------------------------+
 // |                           CUSTOM INTERFACE                          |
 // +---------------------------------------------------------------------+

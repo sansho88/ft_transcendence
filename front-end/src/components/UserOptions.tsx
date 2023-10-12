@@ -13,16 +13,17 @@ import find = util.find;
 export interface userOptionsProps {
    user: IUser;
    showAdminOptions?: boolean;
+   relationships: {followed:IUser[], blocked?:IUser[]};
 }
-const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, showAdminOptions}) => {
+const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, showAdminOptions, relationships}) => {
     const {userContext, setUserContext} = useContext(UserContext);
-    const [isFollowed, setIsFollowed] = useState(false);
+    const [isFollowed, setIsFollowed] = useState(!!relationships.followed.find(tmpUser => user.UserID == tmpUser.UserID));
     const [followers, setFollowers] = useState([]);
 
-    getAllMyFollowers().then((res) => {
+    /*getAllMyFollowers().then((res) => {
         setFollowers(res.data);
         setIsFollowed(!!res.data.find(tmpUser => user.UserID == tmpUser.UserID));
-    })
+    })*/
     function handleFollow(){
         if (!isFollowed)
         {

@@ -13,7 +13,7 @@ import getAllMyFollowers = getApi.getAllMyFollowers;
 
 interface UserListProps{
     avatarSize?: string | undefined;
-    usersList?: IUser[] | undefined;
+    usersList: IUser[] | undefined;
     showUserProps?: boolean;
 }
 
@@ -30,7 +30,7 @@ async function getAllUsers(): Promise<IUser[]>  {
     }
 
 }
-const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, usersList, showUserProps}) => {
+const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, showUserProps, usersList}) => {
 
     const [userElements, setUserElements] = useState<React.JSX.Element[]>([]);
     const [isHidden, setIsHidden] = useState(userElements.length == 0);
@@ -41,16 +41,17 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
         {
             setPopupUsersVisible(isHidden);
             let allDiv : React.JSX.Element[] = [];
+            getAllMyFollowers().then((res) => {
             if (!usersList)
             {
-                getAllMyFollowers().then((res) => {
+
                     console.log(JSON.stringify(res));
                     if (res.data.length > 0){
                         for (const user of res.data) {
                             allDiv.push(
                                 <li key={user.login + "List" + uuidv4()}>
                                     <Profile user={user} avatarSize={avatarSize}>
-                                        {showUserProps == true && <UserOptions user={user}/>}
+                                        {showUserProps == true && <UserOptions user={user} relationships={{followed: res.data}}/>}
                                     </Profile>
                                 </li>
                             )
@@ -62,20 +63,21 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                         )
                     }
                     setUserElements(allDiv);
-                })
+
             }
             else {
                 for (const user of usersList) {
                     allDiv.push(
                         <li key={user.login + "List" + uuidv4()}>
                             <Profile user={user} avatarSize={avatarSize}>
-                                {showUserProps == true && <UserOptions user={user}/>}
+                                {showUserProps == true && <UserOptions user={user} relationships={{followed: res.data}}/>}
                             </Profile>
                         </li>
                     )
                 }
                 setUserElements(allDiv);
             }
+            })
                 NotificationManager.info(`${allDiv.length} users loaded`);
         }
         else

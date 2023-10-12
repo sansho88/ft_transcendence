@@ -95,8 +95,8 @@ export namespace wsChatRoutesClient {
 // +---------------------------------------------------------------------+
 
 	export const getIsNicknameIsUsed = () 	=>{return `${serverApi}/${routeUsers}/get/nicknameUsed/`}
-
-
+	export const getMe=()							=>{return `${serverApi}/${routeUsers}/me`}
+	export const getMyRelationships=()							=>{return `${serverApi}/${routeUsers}/me/getRelationships`}
 	export const getUsersAll=()							=>{return `${serverApi}/${routeUsers}/get/`}
 	export const getUserById = () 					=>{return `${serverApi}/${routeUsers}/get/`}
 	export const getUserByLogin=()					=>{return `${serverApi}/${routeUsers}/get/`}
@@ -113,6 +113,7 @@ export namespace wsChatRoutesClient {
 // |                              GAME                                   |
 // +---------------------------------------------------------------------+
 
+export namespace game {
 	export const getGamesAllHistory = () 		=> {return `${serverApi}/${routeGame}`};		// return: [game] list des games terminées
 	export const getGamesAllCurrent= () 		=> {return `${serverApi}/${routeGame}`};		// return: [game] list des en cours
 	export const getGameById = () 					=> {return `${serverApi}/${routeGame}/`}; 				// params: :gameId
@@ -123,6 +124,11 @@ export namespace wsChatRoutesClient {
 	export const putGameById = () 					=> {return `${serverApi}/${routeGame}/`};					// params: {P1_score P2_score ...etc}
 	
 	export const deleteGameById = () 				=> {return `${serverApi}/${routeGame}/`};			// si game avortée ?
+
+	export const getStatsFromAllUsers = () => {return `${serverApi}/${routeGame}/stats/`};
+	export const getUserStatsById = (userId: number) => {return `${serverApi}/${routeGame}/stats/${userId}`};
+
+}
 
 // +---------------------------------------------------------------------+
 // |                           MATCHMAKING                               |

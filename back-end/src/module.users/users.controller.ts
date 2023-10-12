@@ -35,6 +35,12 @@ export class UsersController {
 		return user;
 	}
 
+	@Get('/me/getRelationships')
+	@UseGuards(AuthGuard)
+	async meRelation(@CurrentUser() user: UserEntity) {
+		return this.usersService.findOne(user.UserID, ['banned', 'followers', 'subscribed']);
+	}
+
 	@Get('/get/nicknameUsed/:nick')
 	// @UseGuards(AuthGuard)
 	nickNameUsed(@Param('nick') nick: string) {

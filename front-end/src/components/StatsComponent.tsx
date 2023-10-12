@@ -1,4 +1,5 @@
 import React from "react";
+import {getApi} from "@/components/api/ApiReq";
 
 interface StatsProps {
     victories?: number;
