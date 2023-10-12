@@ -101,7 +101,7 @@ export class ChannelService {
 		return this.channelRepository
 			.findOne({
 				where: {channelID: target.channelID},
-				relations: {userList: true},
+				relations: ['userList'],
 			})
 			.then((chan) => chan.userList);
 	}
@@ -166,8 +166,8 @@ export class ChannelService {
 	async removeAdmin(target: UserEntity, channel: ChannelEntity) {
 		if (!(await this.userInChannel(target, channel)))
 			throw new BadRequestException('The target isn\'t part of this Channel');
-		if (target.UserID == channel.owner.UserID)
-			throw new BadRequestException('The target is the ChannelOwner and cannot lost his Administrator Power');
+		// if (target.UserID == channel.owner.UserID)
+		// 	throw new BadRequestException('The target is the ChannelOwner and cannot lost his Administrator Power');
 		channel.adminList.findIndex(
 			(usr) => usr.UserID == target.UserID,
 		);
@@ -249,7 +249,12 @@ export class ChannelService {
 	}
 
 	async getJoinedChannelList(user: UserEntity): Promise<ChannelEntity[]> {
-		const ret: UserEntity =  await this.userService.findOne(user.UserID, ['channelJoined']);
-			return ret.channelJoined;
-  }
+		const ret: UserEntity = await this.userService.findOne(user.UserID, ['channelJoined']);
+		return ret.channelJoined;
+	}
+
+	async remove(channel: ChannelEntity) {
+		channel.messages.map(msg => msg.remove());
+		await this.channelRepository.remove(channel);
+	}
 }

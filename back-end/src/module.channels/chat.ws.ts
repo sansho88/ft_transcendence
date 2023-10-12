@@ -211,7 +211,7 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,) {
 		const channel: ChannelEntity = await this.channelService
-			.findOne(data.channelID, ['adminList', 'userList', 'owner'])
+			.findOne(data.channelID, ['adminList', 'userList', 'owner', 'messages'])
 			.catch(() => null);
 		if (channel == null)
 			return client.emit('leaveRoom', {error: 'There is no such Channel'});
@@ -219,7 +219,12 @@ export class ChatGateway
 			return client.emit('leaveRoom', {error: 'You are not part of this channel'});
 		// if (channel.owner.UserID == user.UserID) //TODO: virer tous le monde du channel et le supprimer de la DB
 		// 	return client.emit('leaveRoom', {error: 'You are the channel Owner, no you cannot quit that channel'});
-		return this.leaveChat(channel, user);
+		if (channel.owner.UserID !== user.UserID)
+			return this.leaveChat(channel, user);
+		channel.userList.map(user => {
+			this.leaveChat(channel, user);
+		})
+		await this.channelService.remove(channel);
 	}
 
 	/**
