@@ -15,7 +15,9 @@ export namespace wsChatEvents {
     socket.emit(wsChatRoutesBack.joinRoom(), joinChannel);}
 
   export function leaveRoom(socket: Socket, leaveChannel: channelsDTO.ILeaveChannelDTOPipe) {
-    socket.emit(wsChatRoutesBack.joinRoom(), leaveChannel);}
+    socket.emit(wsChatRoutesBack.leaveRoom(), leaveChannel);
+    console.log('leaveRoomWS ' + JSON.stringify(leaveChannel));
+  }
 
   export function sendMsg(socket: Socket, newMessage: messageDTO.ISendMessageDTOPipe) {
     socket.emit(wsChatRoutesBack.sendMsg(), newMessage);}
@@ -30,10 +32,6 @@ export namespace wsChatEvents {
 }
 
 
-function listenEvent(event: string, socket: Socket, f: Function, arg: any) {
-  socket.on(event, () => f(arg));
-}
-
 export namespace wsChatListen {
 
 
@@ -46,6 +44,34 @@ export namespace wsChatListen {
       setter(prevChannels => [...prevChannels, data.channel]);
     })
   }
+
+  function leaveChanHandle( socket: Socket, 
+                            setter: React.Dispatch<React.SetStateAction<IChannel[]>>, 
+                            setCurrentChannel: React.Dispatch<React.SetStateAction<number>>, 
+                            channels: IChannel[], 
+                            data: {channel: IChannelEntity}) 
+  {
+    console.log('channels.length=', channels.length)
+    if(data.channel && channels.length > 0)
+      setter(prevChannels => prevChannels.filter((channel) => channel.channelID != data.channel.channelID))
+    setCurrentChannel(-1);
+  }
+
+  export function leaveRoomListen(socket: Socket, setter: React.Dispatch<React.SetStateAction<IChannel[]>>, setCurrentChannel: React.Dispatch<React.SetStateAction<number>>, channels: IChannel[]) {
+    socket.on(wsChatRoutesBack.leaveRoom(), (data: {channel: IChannelEntity}) => {
+        leaveChanHandle(socket, setter, setCurrentChannel, channels, data);
+    })
+  }
+  export function leaveRoomListenOFF(socket: Socket, setter: React.Dispatch<React.SetStateAction<IChannel[]>>, setCurrentChannel: React.Dispatch<React.SetStateAction<number>>, channels: IChannel[]) {
+    socket.off(wsChatRoutesBack.leaveRoom(), (data: {channel: IChannelEntity}) => {
+      leaveChanHandle(socket, setter, setCurrentChannel, channels, data);
+    })
+  }
+
+
+
+
+
 
   export function updateChannelsJoined(socket: Socket, setChannelsJoined: Function) {
     

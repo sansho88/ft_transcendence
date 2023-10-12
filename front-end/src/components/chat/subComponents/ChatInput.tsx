@@ -39,27 +39,30 @@ export default function ChatInput({className, socket, channelID}: {className: st
 	};
 
   // let message: string = '';
-  return (
+  return (<>{ channelID != -1 ?
+    
     <div className={`${className}`}>
-
-        <input
-          type="text"
+    
+    <input
+    type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') 
-              sendMessage(message);
+            sendMessage(message);
           }}
           className="chat_block_messages_input_input"
-        />
+          />
         <button onClick={() => {sendMessage(message)}} className="chat_block_messages_input_button">
           <Image
             src="/chat/send.svg"
             alt="Send button"
             width={32}
             height={32}
-          />
-        </button>
-    </div>
+            />
+            </button>
+            </div>: <></>
+            }
+            </>
     )
 }

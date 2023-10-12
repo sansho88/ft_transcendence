@@ -19,6 +19,7 @@ import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelP
 import { IMessageEntity } from '@/shared/entities/IMessage.entity'
 import { messageDTO } from '@/shared/DTO/InterfaceDTO'
 import { wsChatRoutesBack } from '@/shared/routesApi'
+import RightClik from './subComponents/RightClik'
 
 
 export default function ChatMaster({className, token, userID}: {className: string, token: string, userID: number}) {
@@ -47,15 +48,13 @@ export default function ChatMaster({className, token, userID}: {className: strin
   }
 
   async function updateMessages(channelID: number) {
-    try {
-      if (currentChannel != -1)
-      {
         // console.log('***********try update messages?************')
-        const messages = await apiReq.getApi.getAllMessagesChannel(channelID);
-        setMessagesChannel(messages.data);
-      }
-    }
-    catch (error){}
+        await apiReq.getApi.getAllMessagesChannel(channelID)
+        .then((messages) => {
+          setMessagesChannel(messages.data)
+        })
+        .catch((e) => {console.log(e); setMessagesChannel([])})
+
 
   }
 
@@ -69,6 +68,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
 
   useEffect(() => {
+
     setTimeout(() => 
     {
       updateMessages(currentChannel);
@@ -89,6 +89,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
       }
     };
   }, [currentChannel]);
+
 
 
   useEffect(() => {
@@ -114,12 +115,14 @@ export default function ChatMaster({className, token, userID}: {className: strin
   useEffect(() => {
     // console.log(`CHANNELS UPDATED =  ${JSON.stringify(channels)}`);
     if (socketChat){
-      wsChatListen.channelHasChanged(socketChat, channels, setChannels)
+      wsChatListen.channelHasChanged(socketChat, channels, setChannels);
+      wsChatListen.leaveRoomListen(socketChat, setChannels, setCurrentChannel, channels)
     }
-
+    
     return (() => {
-    if (socketChat){
-      wsChatListen.channelHasChangedOFF(socketChat, channels, setChannels)
+      if (socketChat){
+        wsChatListen.channelHasChangedOFF(socketChat, channels, setChannels)
+        wsChatListen.leaveRoomListenOFF(socketChat, setChannels, setCurrentChannel, channels)
     }
     })
   }, [channels])
@@ -128,6 +131,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
     <div className={`${className}`}>
       {socketChat?.active ? 
         <ChatChannelList  className={'chat_channel_block'}
+                          userID={userID}
                           socket={socketChat}
                           channels={channels}
                           setCurrentChannel={setterCurrentChannel}

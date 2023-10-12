@@ -217,8 +217,8 @@ export class ChatGateway
 			return client.emit('leaveRoom', {error: 'There is no such Channel'});
 		if (!await this.channelService.isUserOnChan(channel, user))
 			return client.emit('leaveRoom', {error: 'You are not part of this channel'});
-		if (channel.owner.UserID == user.UserID)
-			return client.emit('leaveRoom', {error: 'You are the channel Owner, no you cannot quit that channel'});
+		// if (channel.owner.UserID == user.UserID) //TODO: virer tous le monde du channel et le supprimer de la DB
+		// 	return client.emit('leaveRoom', {error: 'You are the channel Owner, no you cannot quit that channel'});
 		return this.leaveChat(channel, user);
 	}
 
@@ -347,7 +347,7 @@ export class ChatGateway
 				socketTarget.emit('leaveRoom', {channel: channel});
 			});
 		const content: LeaveEventDTO = {user: user, channelID: channel.channelID};
-		this.server.to(`${channel.channelID}`).emit(`leaveRoom`, content);
+		// this.server.to(`${channel.channelID}`).emit(`leaveRoom`, content);
 		return channel;
 	}
 
