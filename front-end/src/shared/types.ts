@@ -11,6 +11,10 @@ export interface IUser {
   token_2fa?: string;
   has_2fa: boolean;
   visit?: boolean;
+  banned:IUser[];
+  followers: IUser[];
+  subscribed: IUser[];
+
 }
 
 // export interface IChannel {

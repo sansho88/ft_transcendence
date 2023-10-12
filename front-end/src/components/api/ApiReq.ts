@@ -62,7 +62,7 @@ export namespace getApi {
 		return axiosInstance.get(strRoutes.getMe(), updateAxiosInstance())
 	}
 
-	export const getMyRelationships = () => {
+	export const getMyRelationships = (): Promise<{data:IUser }> => {
 		return axiosInstance.get(strRoutes.getMyRelationships(), updateAxiosInstance());
 	}
 

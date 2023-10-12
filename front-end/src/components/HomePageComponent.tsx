@@ -53,9 +53,10 @@ const HomePage = ({className}: HomePageProps) => {
     })
 
 
-    socketRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
+    /*socketRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
         let updateUser = userContext;
-        if (updateUser && (newStatus != updateUser.status))
+        console.log("[StatusUpdate from ws] new status: " + newStatus);
+        if (updateUser/!* && (newStatus != updateUser.status)*!/)
         {
             updateUser.status = newStatus;
             apiReq.putApi.putUser(updateUser)
@@ -65,13 +66,8 @@ const HomePage = ({className}: HomePageProps) => {
                 })
             setUserContext(updateUser);
         }
-    });
-    /*
-    socketRef.current?.on("connect", () =>{
-        let updateUser = userContext;
-        updateUser.status = EStatus.Online;
+    });*/
 
-    })*/
 
     return (
         <>
@@ -80,9 +76,7 @@ const HomePage = ({className}: HomePageProps) => {
 
                     <Profile className={"main-user-profile"}
                              user={userContext}
-                             isEditable={true} avatarSize={"big"}>
-
-                        <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
+                             isEditable={true} avatarSize={"big"} showStats={true}>
                         <Button image={"/history-list.svg"} onClick={() => console.log("history list button")} alt={"Match History button"}/>
                         <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
                     </Profile>
