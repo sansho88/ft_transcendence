@@ -72,17 +72,14 @@ export class ChannelService {
 	}
 
 	async joinChannel(user: UserEntity, channel: ChannelEntity) {
-		this.getList(channel).then(async (lst) => {
-			channel.userList = lst;
-			channel.userList.push(user);
-			await channel.save();
-			return channel;
-		});
+		channel.userList.push(user);
+		await channel.save();
+		return channel;
 	}
 
 	async leaveChannel(channel: ChannelEntity, user: UserEntity) {
-		const lst = await this.getList(channel)
-		channel.userList = lst.filter(usr => usr.UserID != user.UserID)
+		console.log('LeaveChannel ===')
+		channel.userList = channel.userList.filter(usr => usr.UserID != user.UserID)
 		return await channel.save();
 	}
 
@@ -92,23 +89,22 @@ export class ChannelService {
 	 * @param chan
 	 */
 	async userInChannel(user: UserEntity, chan: ChannelEntity) {
+		console.log('User IN channel ===== ')
 		return this.getList(chan).then((userList) => {
 			return userList.find((usr) => usr.UserID == user.UserID);
 		});
 	}
 
 	async getList(target: ChannelEntity) {
-		return this.channelRepository
-			.findOne({
-				where: {channelID: target.channelID},
-				relations: ['userList'],
-			})
-			.then((chan) => chan.userList);
+		return (await this.findOne(target.channelID, ['userList'])
+			.then((chan) => {
+				console.log('Crash test chan -> ', chan)
+				return chan.userList
+			}))
 	}
 
 	async isUserOnChan(channel: ChannelEntity, user: UserEntity) {
-		const list = await this.getList(channel);
-		return !!list.find((value) => value.UserID == user.UserID);
+		return !!channel.userList.find((value) => value.UserID == user.UserID);
 	}
 
 	async getMessages(target: ChannelEntity) {
@@ -248,13 +244,16 @@ export class ChannelService {
 		return channel.save();
 	}
 
-	async getJoinedChannelList(user: UserEntity): Promise<ChannelEntity[]> {
-		const ret: UserEntity = await this.userService.findOne(user.UserID, ['channelJoined']);
+	async getJoinedChannelList(user: UserEntity) {
+		const ret = await this.userService.findOne(user.UserID, ['channelJoined']);
 		return ret.channelJoined;
 	}
 
 	async remove(channel: ChannelEntity) {
-		channel.messages.map(msg => msg.remove());
+		const id = channel.channelID;
+		channel.messages.map(async msg => await msg.remove());
+		console.log('BEFORE === ', channel.channelID);
 		await this.channelRepository.remove(channel);
+		channel.channelID = id;
 	}
 }

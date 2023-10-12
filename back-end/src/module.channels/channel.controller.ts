@@ -175,7 +175,7 @@ export class ChannelController {
 		@Param('banDuration', ParseIntPipe) duration: number, // Time of ban in sec()
 	) {
 		await this.bannedService.update();
-		const channel = await this.channelService.findOne(channelID, ['adminList']);
+		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
