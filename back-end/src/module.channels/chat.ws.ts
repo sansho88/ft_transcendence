@@ -5,7 +5,7 @@ import {
 	OnGatewayDisconnect,
 	SubscribeMessage,
 	WebSocketGateway,
-	WebSocketServer, WsException
+	WebSocketServer,
 } from '@nestjs/websockets';
 import {IoAdapter} from '@nestjs/platform-socket.io';
 import {RemoteSocket, Server, Socket} from 'socket.io';
@@ -205,7 +205,7 @@ export class ChatGateway
 
 	@SubscribeMessage('leaveRoom')
 	@UseGuards(WSAuthGuard)
-	async handelLeaveRoom(  // Todo : Need To check if Owner leave The channel
+	async handelLeaveRoom(
 		@MessageBody(new ValidationPipe()) data: LeaveChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,) {
