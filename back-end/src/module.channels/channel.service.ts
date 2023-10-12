@@ -51,19 +51,19 @@ export class ChannelService {
 	}
 
 	async findAll(relations?: string[]) {
-		return this.channelRepository.find({relations});
+		return this.channelRepository.find({relations, where: {archive: false}});
 	}
 
 	async findOne(id: number, relations?: string[], canBeMP?: boolean) {
 		let channel: ChannelEntity;
 		if (canBeMP != true)
 			channel = await this.channelRepository.findOne({
-				where: {channelID: id, mp: false},
+				where: {channelID: id, mp: false, archive: false},
 				relations,
 			});
 		else
 			channel = await this.channelRepository.findOne({
-				where: {channelID: id},
+				where: {channelID: id, archive: false},
 				relations,
 			});
 		if (channel == null)
@@ -110,7 +110,7 @@ export class ChannelService {
 	async getMessages(target: ChannelEntity) {
 		return this.channelRepository
 			.findOne({
-				where: {channelID: target.channelID},
+				where: {channelID: target.channelID, archive: false},
 				relations: ['messages', 'messages.author'],
 			}).then((chan) => chan.messages);
 	}
@@ -118,7 +118,7 @@ export class ChannelService {
 	async getAllMessages(target: ChannelEntity) {
 		return await this.channelRepository
 			.findOne({
-				where: {channelID: target.channelID},
+				where: {channelID: target.channelID, archive: false},
 				relations: ['messages', 'messages.author'],
 			})
 			.then((chan) => chan.messages);
@@ -126,7 +126,7 @@ export class ChannelService {
 
 	async checkCredential(data: JoinChannelDTOPipe) {
 		const channel = await this.channelRepository.findOne({
-			where: {channelID: data.channelID, mp: false},
+			where: {channelID: data.channelID, mp: false, archive: false},
 			relations: ['credential'],
 		});
 		const credential = channel.credential;
@@ -151,7 +151,7 @@ export class ChannelService {
 		if (!(await this.userInChannel(target, channel)))
 			throw new BadRequestException('The target isn\'t part of this Channel');
 		channel = await this.channelRepository.findOne({
-			where: {channelID: channel.channelID, mp: false},
+			where: {channelID: channel.channelID, mp: false, archive: false},
 			relations: ['adminList'],
 		});
 		channel.adminList.push(target);
@@ -221,7 +221,7 @@ export class ChannelService {
 		const id1: number = Math.min(user1.UserID, user2.UserID);
 		const id2: number = Math.max(user1.UserID, user2.UserID);
 		const channel = await this.channelRepository.findOne({
-			where: {mp: true, name: `mp.${id1}.${id2}`},
+			where: {mp: true, name: `mp.${id1}.${id2}`, archive: false},
 			relations: ['userList'],
 		});
 		if (!channel)
@@ -250,10 +250,8 @@ export class ChannelService {
 	}
 
 	async remove(channel: ChannelEntity) {
-		const id = channel.channelID;
-		channel.messages.map(async msg => await msg.remove());
-		console.log('BEFORE === ', channel.channelID);
-		await this.channelRepository.remove(channel);
-		channel.channelID = id;
+		channel.archive = true;
+		await channel.save();
+		return channel;
 	}
 }

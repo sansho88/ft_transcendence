@@ -45,7 +45,7 @@ export class ChannelController {
 	@Get('get')
 	@UseGuards(AuthGuard)
 	findAll() {
-		return this.channelService.findAll();
+		return this.channelService.findAll().catch(e => []);
 	}
 
 	/**

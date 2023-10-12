@@ -5,7 +5,7 @@ import {
 	OnGatewayDisconnect,
 	SubscribeMessage,
 	WebSocketGateway,
-	WebSocketServer
+	WebSocketServer, WsException
 } from '@nestjs/websockets';
 import {IoAdapter} from '@nestjs/platform-socket.io';
 import {RemoteSocket, Server, Socket} from 'socket.io';
@@ -209,18 +209,23 @@ export class ChatGateway
 		@MessageBody(new ValidationPipe()) data: LeaveChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,) {
-		const channel: ChannelEntity = await this.channelService
+		console.log('data =========== ', data);
+		let channel: ChannelEntity = await this.channelService
 			.findOne(data.channelID, ['adminList', 'userList', 'owner', 'messages'])
 			.catch(() => null);
+		console.log('test 00');
 		if (channel == null)
 			return client.emit('leaveRoom', {error: 'There is no such Channel'});
+		console.log('test 01');
 		if (!await this.channelService.isUserOnChan(channel, user))
 			return client.emit('leaveRoom', {error: 'You are not part of this channel'});
+		console.log('test 02');
 		if (channel.owner.UserID === user.UserID) {
-			channel.userList.map(async user =>
-				await this.leaveChat(channel, user))
-			return await this.channelService.remove(channel);
+			console.log('test 03');
+			channel.userList.map(async user => await this.leaveChat(channel, user))
+			return channel = await this.channelService.remove(channel);
 		}
+
 		return await this.leaveChat(channel, user);
 	}
 
@@ -424,8 +429,10 @@ export class ChatGateway
 	async handleUpdateRoom(
 		@CurrentUser() user: UserEntity,
 		@MessageBody(new ValidationPipe()) data: channelsDTO.IChangeChannelDTOPipe) {
-
-		const channel = await this.channelService.findOne(data.channelID);
+		console.log(' update ', data);
+		const channel = await this.channelService.findOne(data.channelID).catch(() => null);
+		if (channel === null)
+			return;
 		console.log(channel);
 		if (channel.owner.UserID !== user.UserID)
 			return;
