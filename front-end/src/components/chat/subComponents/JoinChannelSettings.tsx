@@ -43,9 +43,6 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
     }, [])
 
 
-        useEffect(() => {
-            // console.log('channelServer3 a changé : ', JSON.stringify(channelServer3.data));
-        }, [channelServer3.data]);
 
     useEffect(() => {
         if (channelName.length < 3)
@@ -81,7 +78,7 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
     return (
         <>
             {!isChannelJoined && isLoading && 
-            <div className={className}>
+            <div className={`${className} max-h-72 overflow-y-auto`}>
                 <h1 id={"popup_title"}>JOIN A CHANNEL</h1>
                 <ChatChannelList  className={'chat_channel_block'}
                           socket={socketChat}

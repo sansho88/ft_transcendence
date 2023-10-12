@@ -167,7 +167,7 @@ useEffect(() => {
             <div key={`button_channel_${uuidv4()}`}
                  className={`${defineClassName.current} justify-between ${channelName.length <= 10 ? 'flex' : 'flex-col'}`} onClick={() => onClickSwitcher()}>
                     <div className={`flex truncate ${channelName.length <= 10 ? '' : ' text-xs'}`} >{channelName}</div>
-                    {!isServList && !isOwner && isHovered && <LeaveChannelCross className={`flex-shrink-0 text-red-800 z-0`} onClickFunction={() => leaveChan(socket, channelID)} />}
+                    {!isServList && !isMp && isHovered && <LeaveChannelCross className={`flex-shrink-0 text-red-800 z-0`} onClickFunction={() => leaveChan(socket, channelID)} />}
             </div>
             {isPending && (<div id={"invite_options"}>
                 <span onClick={ handleAcceptInvite }>✅</span>
