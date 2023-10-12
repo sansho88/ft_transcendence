@@ -323,7 +323,7 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('channelID', ParseIntPipe) channelID: number,
 	) {
-		const channel = await this.channelService.findOne(channelID);
+		const channel = await this.channelService.findOne(channelID, ['userList']);
 		if (!await this.channelService.userInChannel(user, channel))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return await this.inviteService.findAllChannel(channel);
