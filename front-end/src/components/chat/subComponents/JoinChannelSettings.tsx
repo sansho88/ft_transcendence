@@ -78,7 +78,7 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
     return (
         <>
             {!isChannelJoined && isLoading && 
-            <div className={`${className} max-h-72 overflow-y-auto`}>
+            <div className={`${className} max-h-72 overflow-y-auto  chat_message_list_sub`}>
                 <h1 id={"popup_title"}>JOIN A CHANNEL</h1>
                 <ChatChannelList  className={'chat_channel_block'}
                           socket={socketChat}
