@@ -36,7 +36,7 @@ export class UsersController {
 	}
 
 	@Get('/get/nicknameUsed/:nick')
-	// @UseGuards(AuthGuard)
+	@UseGuards(AuthGuard)
 	nickNameUsed(@Param('nick') nick: string) {
 		console.log('nick?: ' + nick)
 		return this.usersService.nicknameUsed(nick);
