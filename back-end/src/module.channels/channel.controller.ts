@@ -146,6 +146,8 @@ export class ChannelController {
 				"This user doesn't have administrator power",
 			);
 		}
+		if (target.UserID == channel.owner.UserID)
+			throw new BadRequestException('The target is the ChannelOwner and cannot lost his Administrator Power');
 		return this.channelService.removeAdmin(target, channel);
 	}
 
