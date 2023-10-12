@@ -51,19 +51,19 @@ export class ChannelService {
 	}
 
 	async findAll(relations?: string[]) {
-		return this.channelRepository.find({relations});
+		return this.channelRepository.find({relations, where: {archive: false}});
 	}
 
 	async findOne(id: number, relations?: string[], canBeMP?: boolean) {
 		let channel: ChannelEntity;
 		if (canBeMP != true)
 			channel = await this.channelRepository.findOne({
-				where: {channelID: id, mp: false},
+				where: {channelID: id, mp: false, archive: false},
 				relations,
 			});
 		else
 			channel = await this.channelRepository.findOne({
-				where: {channelID: id},
+				where: {channelID: id, archive: false},
 				relations,
 			});
 		if (channel == null)
@@ -72,17 +72,14 @@ export class ChannelService {
 	}
 
 	async joinChannel(user: UserEntity, channel: ChannelEntity) {
-		this.getList(channel).then(async (lst) => {
-			channel.userList = lst;
-			channel.userList.push(user);
-			await channel.save();
-			return channel;
-		});
+		channel.userList.push(user);
+		await channel.save();
+		return channel;
 	}
 
 	async leaveChannel(channel: ChannelEntity, user: UserEntity) {
-		const lst = await this.getList(channel)
-		channel.userList = lst.filter(usr => usr.UserID != user.UserID)
+		console.log('LeaveChannel ===')
+		channel.userList = channel.userList.filter(usr => usr.UserID != user.UserID)
 		return await channel.save();
 	}
 
@@ -92,29 +89,28 @@ export class ChannelService {
 	 * @param chan
 	 */
 	async userInChannel(user: UserEntity, chan: ChannelEntity) {
+		console.log('User IN channel ===== ')
 		return this.getList(chan).then((userList) => {
 			return userList.find((usr) => usr.UserID == user.UserID);
 		});
 	}
 
 	async getList(target: ChannelEntity) {
-		return this.channelRepository
-			.findOne({
-				where: {channelID: target.channelID},
-				relations: {userList: true},
-			})
-			.then((chan) => chan.userList);
+		return (await this.findOne(target.channelID, ['userList'])
+			.then((chan) => {
+				console.log('Crash test chan -> ', chan)
+				return chan.userList
+			}))
 	}
 
 	async isUserOnChan(channel: ChannelEntity, user: UserEntity) {
-		const list = await this.getList(channel);
-		return !!list.find((value) => value.UserID == user.UserID);
+		return !!channel.userList.find((value) => value.UserID == user.UserID);
 	}
 
 	async getMessages(target: ChannelEntity) {
 		return this.channelRepository
 			.findOne({
-				where: {channelID: target.channelID},
+				where: {channelID: target.channelID, archive: false},
 				relations: ['messages', 'messages.author'],
 			}).then((chan) => chan.messages);
 	}
@@ -122,7 +118,7 @@ export class ChannelService {
 	async getAllMessages(target: ChannelEntity) {
 		return await this.channelRepository
 			.findOne({
-				where: {channelID: target.channelID},
+				where: {channelID: target.channelID, archive: false},
 				relations: ['messages', 'messages.author'],
 			})
 			.then((chan) => chan.messages);
@@ -130,7 +126,7 @@ export class ChannelService {
 
 	async checkCredential(data: JoinChannelDTOPipe) {
 		const channel = await this.channelRepository.findOne({
-			where: {channelID: data.channelID, mp: false},
+			where: {channelID: data.channelID, mp: false, archive: false},
 			relations: ['credential'],
 		});
 		const credential = channel.credential;
@@ -155,7 +151,7 @@ export class ChannelService {
 		if (!(await this.userInChannel(target, channel)))
 			throw new BadRequestException('The target isn\'t part of this Channel');
 		channel = await this.channelRepository.findOne({
-			where: {channelID: channel.channelID, mp: false},
+			where: {channelID: channel.channelID, mp: false, archive: false},
 			relations: ['adminList'],
 		});
 		channel.adminList.push(target);
@@ -166,8 +162,8 @@ export class ChannelService {
 	async removeAdmin(target: UserEntity, channel: ChannelEntity) {
 		if (!(await this.userInChannel(target, channel)))
 			throw new BadRequestException('The target isn\'t part of this Channel');
-		if (target.UserID == channel.owner.UserID)
-			throw new BadRequestException('The target is the ChannelOwner and cannot lost his Administrator Power');
+		// if (target.UserID == channel.owner.UserID)
+		// 	throw new BadRequestException('The target is the ChannelOwner and cannot lost his Administrator Power');
 		channel.adminList.findIndex(
 			(usr) => usr.UserID == target.UserID,
 		);
@@ -225,7 +221,7 @@ export class ChannelService {
 		const id1: number = Math.min(user1.UserID, user2.UserID);
 		const id2: number = Math.max(user1.UserID, user2.UserID);
 		const channel = await this.channelRepository.findOne({
-			where: {mp: true, name: `mp.${id1}.${id2}`},
+			where: {mp: true, name: `mp.${id1}.${id2}`, archive: false},
 			relations: ['userList'],
 		});
 		if (!channel)
@@ -248,8 +244,14 @@ export class ChannelService {
 		return channel.save();
 	}
 
-	async getJoinedChannelList(user: UserEntity): Promise<ChannelEntity[]> {
-		const ret: UserEntity =  await this.userService.findOne(user.UserID, ['channelJoined']);
-			return ret.channelJoined;
-  }
+	async getJoinedChannelList(user: UserEntity) {
+		const ret = await this.userService.findOne(user.UserID, ['channelJoined']);
+		return ret.channelJoined;
+	}
+
+	async remove(channel: ChannelEntity) {
+		channel.archive = true;
+		await channel.save();
+		return channel;
+	}
 }

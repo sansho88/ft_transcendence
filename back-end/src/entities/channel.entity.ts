@@ -53,6 +53,12 @@ export class ChannelEntity extends BaseEntity {
 	})
 	mp: boolean;
 
+	@Column({
+		type: 'boolean',
+		default: false,
+	})
+	archive: boolean;
+
 	@OneToOne(() => ChannelCredentialEntity, {cascade: true})
 	@JoinColumn({name: 'TestCredential'})
 	credential: ChannelCredentialEntity;
@@ -65,8 +71,8 @@ export class ChannelEntity extends BaseEntity {
 	@JoinTable({name: 'TestUserList'})
 	userList: UserEntity[];
 
-	@OneToMany(() => MessageEntity, (MessageEntity) => MessageEntity.channel)
-	@JoinColumn({name: 'TestMessageList'})
+	@OneToMany(() => MessageEntity, (MessageEntity) => MessageEntity.channel, {cascade: ['remove']})
+	@JoinTable({name: 'TestMessageList'})
 	messages: MessageEntity[];
 
 	@OneToMany(() => InviteEntity, (InviteEntity) => InviteEntity.channel)

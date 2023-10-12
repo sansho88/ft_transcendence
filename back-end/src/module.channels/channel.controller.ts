@@ -45,7 +45,7 @@ export class ChannelController {
 	@Get('get')
 	@UseGuards(AuthGuard)
 	findAll() {
-		return this.channelService.findAll();
+		return this.channelService.findAll().catch(e => []);
 	}
 
 	/**
@@ -146,6 +146,8 @@ export class ChannelController {
 				"This user doesn't have administrator power",
 			);
 		}
+		if (target.UserID == channel.owner.UserID)
+			throw new BadRequestException('The target is the ChannelOwner and cannot lost his Administrator Power');
 		return this.channelService.removeAdmin(target, channel);
 	}
 
@@ -173,7 +175,7 @@ export class ChannelController {
 		@Param('banDuration', ParseIntPipe) duration: number, // Time of ban in sec()
 	) {
 		await this.bannedService.update();
-		const channel = await this.channelService.findOne(channelID, ['adminList']);
+		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
@@ -297,9 +299,11 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('channelID', ParseIntPipe) channelID: number,
 	) {
-		if (channelID === -1 )//gestion no channel pour simplifier et pas avoir derreur 401.. 
+		if (channelID === -1)//gestion no channel pour simplifier et pas avoir derreur 401..
 			return {data: []};
+		console.log('channel');
 		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
+		console.log(channel);
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterRecent(channel.messages);
@@ -319,7 +323,7 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('channelID', ParseIntPipe) channelID: number,
 	) {
-		const channel = await this.channelService.findOne(channelID);
+		const channel = await this.channelService.findOne(channelID, ['userList']);
 		if (!await this.channelService.userInChannel(user, channel))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return await this.inviteService.findAllChannel(channel);

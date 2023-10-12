@@ -5,7 +5,7 @@ import {
 	OnGatewayDisconnect,
 	SubscribeMessage,
 	WebSocketGateway,
-	WebSocketServer
+	WebSocketServer,
 } from '@nestjs/websockets';
 import {IoAdapter} from '@nestjs/platform-socket.io';
 import {RemoteSocket, Server, Socket} from 'socket.io';
@@ -31,7 +31,6 @@ import {
 import {SendMessageDTOPipe,} from '../dto.pipe/message.dto';
 import {
 	JoinEventDTO,
-	LeaveEventDTO,
 	ReceivedMessageEventDTO,
 } from '../dto/event.dto'
 import {InviteService} from "./invite.service";
@@ -152,7 +151,7 @@ export class ChatGateway
 		const credential = await this.channelCredentialService.create(
 			data.password,
 		);
-		const channel: ChannelEntity = await this.channelService.create(
+		const channel = await this.channelService.create(
 			data.name,
 			credential,
 			data.privacy,
@@ -206,20 +205,28 @@ export class ChatGateway
 
 	@SubscribeMessage('leaveRoom')
 	@UseGuards(WSAuthGuard)
-	async handelLeaveRoom(  // Todo : Need To check if Owner leave The channel
+	async handelLeaveRoom(
 		@MessageBody(new ValidationPipe()) data: LeaveChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,) {
-		const channel: ChannelEntity = await this.channelService
-			.findOne(data.channelID, ['adminList', 'userList', 'owner'])
+		console.log('data =========== ', data);
+		let channel: ChannelEntity = await this.channelService
+			.findOne(data.channelID, ['adminList', 'userList', 'owner', 'messages'])
 			.catch(() => null);
+		console.log('test 00');
 		if (channel == null)
 			return client.emit('leaveRoom', {error: 'There is no such Channel'});
+		console.log('test 01');
 		if (!await this.channelService.isUserOnChan(channel, user))
 			return client.emit('leaveRoom', {error: 'You are not part of this channel'});
-		// if (channel.owner.UserID == user.UserID) //TODO: virer tous le monde du channel et le supprimer de la DB
-		// 	return client.emit('leaveRoom', {error: 'You are the channel Owner, no you cannot quit that channel'});
-		return this.leaveChat(channel, user);
+		console.log('test 02');
+		if (channel.owner.UserID === user.UserID) {
+			console.log('test 03');
+			channel.userList.map(async user => await this.leaveChat(channel, user))
+			return channel = await this.channelService.remove(channel);
+		}
+
+		return await this.leaveChat(channel, user);
 	}
 
 	/**
@@ -246,7 +253,7 @@ export class ChatGateway
 		@ConnectedSocket() client: Socket,
 	) {
 		const channel = await this.channelService
-			.findOne(data.channelID, [], true)
+			.findOne(data.channelID, ['userList'], true)
 			.catch(() => null);
 		if (channel == null)
 			return client.emit('sendMsg', {error: 'There is no such Channel'});
@@ -330,9 +337,8 @@ export class ChatGateway
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity,
 	) {
-		const socketLST = await this.getSocket(user.UserID);
-		console.log('Socket lst ==== ', socketLST.length, '\n=====');
-
+		user = await this.usersService.findOne(user.UserID, ['channelJoined']);
+		console.log(user);
 	}
 
 
@@ -343,10 +349,12 @@ export class ChatGateway
 		const socketTargetLst = await this.getSocket(user.UserID);
 		if (typeof socketTargetLst !== 'undefined')
 			socketTargetLst.map(socketTarget => {
+				console.log('emit => ', socketTarget.id);
+				console.log('emit => ', channel);
 				socketTarget.leave(`${channel.channelID}`)
 				socketTarget.emit('leaveRoom', {channel: channel});
 			});
-		const content: LeaveEventDTO = {user: user, channelID: channel.channelID};
+		// const content: LeaveEventDTO = {user: user, channelID: channel.channelID};
 		// this.server.to(`${channel.channelID}`).emit(`leaveRoom`, content);
 		return channel;
 	}
@@ -421,8 +429,10 @@ export class ChatGateway
 	async handleUpdateRoom(
 		@CurrentUser() user: UserEntity,
 		@MessageBody(new ValidationPipe()) data: channelsDTO.IChangeChannelDTOPipe) {
-
-		const channel = await this.channelService.findOne(data.channelID);
+		console.log(' update ', data);
+		const channel = await this.channelService.findOne(data.channelID).catch(() => null);
+		if (channel === null)
+			return;
 		console.log(channel);
 		if (channel.owner.UserID !== user.UserID)
 			return;
