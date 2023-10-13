@@ -87,6 +87,10 @@ export class UserEntity extends BaseEntity {
 	@JoinTable({name: 'TestSubscriber'})
 	subscribed: UserEntity[];
 
+	@ManyToMany(() => UserEntity)
+	@JoinTable({name: 'TestSubscriber'})
+	blocked: UserEntity[];
+
 	@OneToMany(() => InviteEntity, (invite) => invite.user)
 	invite: InviteEntity[];
 
