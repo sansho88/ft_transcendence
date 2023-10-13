@@ -13,7 +13,7 @@ import { Socket } from 'socket.io-client';
 
 
 
-export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected, isServList, itsOwner: isOwner}: {
+export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected, isServList, isOwner}: {
     socket: Socket,
     channelID: number,
     channelName: string,
@@ -23,7 +23,7 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     isMp: boolean,
     isProtected: boolean,
     isServList: boolean,
-    itsOwner: boolean
+    isOwner: boolean
 }) {
     const [isPending, setIsPending] = useState(isInvite);
 

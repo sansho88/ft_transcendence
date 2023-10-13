@@ -9,12 +9,13 @@ interface StatsProps {
 
 const Stats: React.FC<StatsProps> = ({className, user})=>{
 
-    const [stats, setStats] = useState<IGameStats>({nbWin:0, level:0, rank:0, nbLoose:0, exp: 0});
+    const [stats, setStats] = useState<IGameStats>({nbWin:0, level:-1, rank:0, nbLoose:0, exp: 0});
 
     useEffect(() => {
-        getUserStatsById(user.UserID).then((result) => {
-            setStats(result.data);
-        })
+        if (stats.level >= 0 )
+            getUserStatsById(user.UserID).then((result) => {
+                setStats(result.data);
+            })
             .catch((error) => console.error("Request for STATS failed: " + error));
     })
 

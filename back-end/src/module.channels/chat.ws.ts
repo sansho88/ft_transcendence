@@ -284,6 +284,7 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
+		console.log('ENTER createMp WS =' + JSON.stringify(data))
 		const user2: UserEntity = await this.usersService.findOne(data.targetID);
 		if (!user2) return client.emit('createMP', {messages: 'This user doesn\'t exist'});
 		if (user2.UserID == user.UserID) return client.emit('createMP', {messages: 'You cannot create a mp with yourself, Find a friend :D'});
@@ -297,6 +298,20 @@ export class ChatGateway
 		client1Lst.map(socket => socket.join(`${mp.channelID}`));
 		const client2Lst = await this.getSocket(user2.UserID);
 		client2Lst.map(client2 => client2.join(`${mp.channelID}`))
+
+		// const clientLst1 = await this.getSocket(user.UserID);
+		// clientLst1.map(socket => {
+		// 	socket.join(`${mp.channelID}`);
+		// 	socket.emit(`infoRoom`, {message: `Channel Created with id ${mp.channelID}`});
+		// 	socket.emit(`createRoom`, {channel: mp});
+		// });
+		// const clientLst2 = await this.getSocket(data.targetID);
+		// clientLst2.map(socket => {
+		// 	socket.join(`${mp.channelID}`);
+		// 	socket.emit(`infoRoom`, {message: `Channel Created with id ${mp.channelID}`});
+		// 	socket.emit(`createRoom`, {channel: mp});
+		// });
+
 		console.log(mp);
 	}
 

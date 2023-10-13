@@ -162,7 +162,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               isMp={false} //TODO:
               socket={socket}
               isServList={false}
-              itsOwner={channel.owner.UserID === userID }
+              isOwner={channel.owner ? channel.owner.UserID === userID : false }
               onClickFunction={() => {
                 setCurrentChannel(channel.channelID);
               }}
@@ -184,7 +184,7 @@ export default function ChatChannelList({className, socket, channels, setCurrent
               isMp={false} //TODO:
               socket={socket}
               isServList={true}
-              itsOwner={false}
+              isOwner={false}
               onClickFunction={(password?: string) => {
                 if (password != undefined && password != null){
                   if(channel.type === EChannelType.PROTECTED)

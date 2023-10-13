@@ -37,4 +37,8 @@ export namespace channelsDTO {
 		password: string | null;
 		privacy: boolean;
 	}
+
+	export interface ICreateMpDTOPPipe {
+		targetID: number
+	}
 }
