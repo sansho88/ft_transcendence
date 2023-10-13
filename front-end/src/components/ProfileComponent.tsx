@@ -12,12 +12,14 @@ import {SocketContextChat, SocketContextGame} from "@/context/globalContext";
 import {wsGameRoutes} from "@/shared/routesApi";
 import {IGameSessionInfo} from "@/shared/typesGame";
 import {log} from "util";
+import Stats from "@/components/StatsComponent";
 
 interface ProfileProps{
     user: IUser;
     avatarSize: string | undefined;
+    showStats?: boolean;
 }
-const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize, isEditable})=>{
+const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize, isEditable, showStats})=>{
 
     const [modifiedNick, setNickText] = useState<string>(user.nickname ? user.nickname : user.login);
     const [editMode, setEditMode] = useState(false);
@@ -44,17 +46,6 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
         setStatusColor(getEnumNameByIndex(Colors, user.status));
         console.log("[PROFILE] STATUS UPDATED: " + userStatus);
     }, [userStatus]);
-
-
-    /*socketGameRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
-        console.log('new status = ' + newStatus);
-       setUserStatus(newStatus);
-        setStatusColor(getEnumNameByIndex(Colors, userStatus));
-    });*/
-
-   /* socketGameRef.current?.on("connect", () => {
-        setUserStatus(EStatus.Online);
-    })*/
 
     socketGameRef.current?.on("infoGameSession", (data: IGameSessionInfo) => {
         if ((data.player1 && data.player1.login == user.login) || data.player2.login == user.login)
@@ -117,7 +108,6 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
         if (!nickErrorMsg.length) {
 
             await getUserFromId(user.UserID).then( (userGet) => {
-            console.log("[PROFILE] login to update: " + userGet.login);
             userGet.nickname = modifiedNick;
             apiReq.putApi.putUser(userGet);
             });
@@ -197,7 +187,10 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
                         {getEnumNameByIndex(EStatus, userStatus)}
                     </p>
                 </div>
-                <div id={"children"} style={{marginLeft: "4px"}}>{children}</div>
+                <div id={"children"} style={{marginLeft: "4px"}}>
+                    {showStats && <Stats user={user}/>}
+                    {children}
+                </div>
             </div>
         </>);
 };

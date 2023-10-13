@@ -11,6 +11,10 @@ export interface IUser {
   token_2fa?: string;
   has_2fa: boolean;
   visit?: boolean;
+  banned:IUser[];
+  followers: IUser[];
+  subscribed: IUser[];
+
 }
 
 // export interface IChannel {
@@ -94,6 +98,14 @@ export interface IAdministrate {
 export interface IPlay {
   id_user: number;
   Id_GAME: number;
+}
+
+export interface IGameStats  {
+  nbWin: number;
+  nbLoose: number;
+  level: number;
+  exp: number;
+  rank: number;
 }
 
 // +---------------------------------------------------------------------+

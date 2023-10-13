@@ -7,9 +7,7 @@ import {v4 as uuidv4} from "uuid";
 import {NotificationManager} from 'react-notifications';
 import UserOptions from "@/components/UserOptions";
 import {getApi} from "@/components/api/ApiReq";
-import getAllMyFollowers = getApi.getAllMyFollowers;
-
-
+import getMyRelationships = getApi.getMyRelationships;
 
 interface UserListProps{
     avatarSize?: string | undefined;
@@ -30,7 +28,7 @@ async function getAllUsers(): Promise<IUser[]>  {
     }
 
 }
-const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, usersList, showUserProps}) => {
+const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, showUserProps, usersList}) => {
 
     const [userElements, setUserElements] = useState<React.JSX.Element[]>([]);
     const [isHidden, setIsHidden] = useState(userElements.length == 0);
@@ -41,16 +39,20 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
         {
             setPopupUsersVisible(isHidden);
             let allDiv : React.JSX.Element[] = [];
+            getMyRelationships().then((res) => {
+                const me = res.data;
+                let subs = me.subscribed;
+                let followers =me.followers;
+                let blocked = me.banned;
+                const isUserSubscribedToMe = !!subs.find(tmpUser => tmpUser.UserID);
             if (!usersList)
             {
-                getAllMyFollowers().then((res) => {
-                    console.log(JSON.stringify(res));
-                    if (res.data.length > 0){
-                        for (const user of res.data) {
+                    if (subs.length > 0){
+                        for (const user of subs) {
                             allDiv.push(
                                 <li key={user.login + "List" + uuidv4()}>
-                                    <Profile user={user} avatarSize={avatarSize}>
-                                        {showUserProps == true && <UserOptions user={user}/>}
+                                    <Profile user={user} avatarSize={avatarSize} showStats={isUserSubscribedToMe}>
+                                        {showUserProps == true && <UserOptions user={user} relationships={{followed: subs, blocked:blocked}}/>}
                                     </Profile>
                                 </li>
                             )
@@ -62,20 +64,22 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                         )
                     }
                     setUserElements(allDiv);
-                })
+
             }
             else {
                 for (const user of usersList) {
                     allDiv.push(
                         <li key={user.login + "List" + uuidv4()}>
                             <Profile user={user} avatarSize={avatarSize}>
-                                {showUserProps == true && <UserOptions user={user}/>}
+                                {showUserProps == true && <UserOptions user={user} relationships={{followed: subs, blocked: blocked}}/>}
                             </Profile>
                         </li>
                     )
                 }
                 setUserElements(allDiv);
             }
+            })
+                .catch((error) => console.error("[UserList] Impossible to get relationships of actual user: " + error));
                 NotificationManager.info(`${allDiv.length} users loaded`);
         }
         else

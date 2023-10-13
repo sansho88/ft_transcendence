@@ -1,7 +1,7 @@
 import * as PODGAME from 'shared/typesGame';
+import {EGameMod} from 'shared/typesGame';
 import * as POD from 'shared/types';
-import {Socket} from 'socket.io';
-import {Server} from 'socket.io'
+import {Server, Socket} from 'socket.io';
 import {wsGameRoutes} from 'shared/routesApi';
 import {GameService} from '../game.service';
 
@@ -609,7 +609,8 @@ export class GameSession {
 				.emit('info', `${this.player2.user.nickname} won this game`);
 			console.log(`${this.player2.user.nickname} won this game`);
 		}
-		this.gameService.create(this.player1.user.UserID, this.player2.user.UserID, this.table.scoreP1, this.table.scoreP2, this.startDate);
+		if (this.gameMod != EGameMod.trainning)
+			this.gameService.create(this.player1.user.UserID, this.player2.user.UserID, this.table.scoreP1, this.table.scoreP2, this.startDate);
 		this.messageEndGameAndReset();
 	}
 

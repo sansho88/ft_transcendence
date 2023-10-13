@@ -2,8 +2,8 @@
 
 import { IMessageEntity } from "@/shared/entities/IMessage.entity";
 import Axios from "./AxiosConfig";
-import {strRoutes} from "@/shared/routesApi";
-import { IUser } from "@/shared/types";
+import {getStatsFromAllUsers, strRoutes} from "@/shared/routesApi";
+import {IGameStats, IUser} from "@/shared/types";
 import { IChannel } from "@/shared/typesChannel";
 import axios from "axios";
 import { IChannelEntity } from "@/shared/entities/IChannel.entity";
@@ -59,7 +59,12 @@ export namespace getApi {
 	}
 
 	export const getMePromise = () => {
-		return axiosInstance.get(`users/me`, updateAxiosInstance())}
+		return axiosInstance.get(strRoutes.getMe(), updateAxiosInstance())
+	}
+
+	export const getMyRelationships = (): Promise<{data:IUser }> => {
+		return axiosInstance.get(strRoutes.getMyRelationships(), updateAxiosInstance());
+	}
 
 	export const getIsNicknameUsed = (nick: string) =>{return axiosInstance.get(`${strRoutes.getIsNicknameIsUsed()}${nick}`, {
 			headers: {
@@ -86,8 +91,15 @@ export namespace getApi {
 			});
 	}
 
-	export const getAllMyFollowers = (): any => {
+	export const getAllMyFollowers = (): Promise<{data:IUser[]}> => {
 		return axiosInstance.get(`${strRoutes.followers.getAllMyFollowers()}`, updateAxiosInstance());
+	}
+
+	export const getStatsFromAllUsers = (): Promise<{data:IGameStats}> => {
+		return axiosInstance.get(`${strRoutes.game.getStatsFromAllUsers()}`, updateAxiosInstance());
+	}
+	export const getUserStatsById = (userId: number): Promise<{data:IGameStats}> => {
+	  return axiosInstance.get(`${strRoutes.game.getUserStatsById(userId)}`, updateAxiosInstance());
 	}
 
 }
