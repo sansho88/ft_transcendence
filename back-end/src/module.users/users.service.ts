@@ -106,8 +106,16 @@ export class UsersService {
 	 * return false if nickname is not used
 	 */
 	async nicknameUsed(nickname: string) {
-		const test = !!await this.usersRepository.findOneBy({nickname: nickname});
-		// console.log('checkNick', test);
-		return test;
+		return !!await this.usersRepository.findOneBy({nickname: nickname});
+	}
+
+	blockUser(user: UserEntity, target: UserEntity) {
+		user.blocked.push(target);
+		return user.save();
+	}
+
+	unBlockUser(user: UserEntity, target: UserEntity) {
+		user.blocked = user.blocked.filter(block => block.UserID != target.UserID);
+		return user.save();
 	}
 }
