@@ -56,7 +56,7 @@ export namespace getApi {
 
 	export const getAllUsersFromChannel = (channelID: number, time): Promise<{data:IUser[]}> => {
 		const tqt = time;
-		return axiosInstance.get(`${strRoutes.channel.getUsersChannel(channelID)}`, updateAxiosInstance());
+		return axiosInstance.get(`${strRoutes.channel.getUsersChannel(channelID)}`, updateAxiosInstance(), time);
 	}
 
 	export const getMePromise = () => {
