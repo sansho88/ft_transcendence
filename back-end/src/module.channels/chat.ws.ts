@@ -252,8 +252,9 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
+		console.log('sendMESSAGES ======= ');
 		const channel = await this.channelService
-			.findOne(data.channelID, ['userList'], true)
+			.findOne(data.channelID, ['userList', 'muteList'], true)
 			.catch(() => null);
 		if (channel == null)
 			return client.emit('sendMsg', {error: 'There is no such Channel'});
@@ -288,8 +289,11 @@ export class ChatGateway
 		if (!user2) return client.emit('createMP', {messages: 'This user doesn\'t exist'});
 		if (user2.UserID == user.UserID) return client.emit('createMP', {messages: 'You cannot create a mp with yourself, Find a friend :D'});
 		const channel = await this.channelService.getmp(user, user2).catch(() => null);
-		if (channel)
+		console.log(' TEST T55555 ', channel);
+		if (channel !== null) {
+			console.log('AAAA')
 			return client.emit('createMP', {messages: 'You already have a direct channel with this user'});
+		}
 		// if (user blocked)
 		// 	throw new BadRequestException('You cannot create a direct channel with them');
 		const mp = await this.channelService.createMP(user, user2);

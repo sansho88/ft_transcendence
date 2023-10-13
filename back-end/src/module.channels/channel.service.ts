@@ -85,22 +85,9 @@ export class ChannelService {
 
 	/**
 	 * return true if User in channel
-	 * @param user
-	 * @param chan
 	 */
-	async userInChannel(user: UserEntity, chan: ChannelEntity) {
-		console.log('User IN channel ===== ')
-		return this.getList(chan).then((userList) => {
-			return userList.find((usr) => usr.UserID == user.UserID);
-		});
-	}
-
-	async getList(target: ChannelEntity) {
-		return (await this.findOne(target.channelID, ['userList'])
-			.then((chan) => {
-				console.log('Crash test chan -> ', chan)
-				return chan.userList
-			}))
+	async userInChannel(user: UserEntity, channel: ChannelEntity) {
+		return channel.userList.find(usr => usr.UserID == user.UserID);
 	}
 
 	async isUserOnChan(channel: ChannelEntity, user: UserEntity) {
@@ -207,7 +194,7 @@ export class ChannelService {
 		const id1: number = Math.min(user1.UserID, user2.UserID);
 		const id2: number = Math.max(user1.UserID, user2.UserID);
 		const mp = this.channelRepository.create({
-			name: `.mp${id1}.${id2}`,
+			name: `mp.${id1}.${id2}`,
 			userList: [user1, user2],
 			type: ChannelType.DIRECT,
 			mp: true,
@@ -217,7 +204,6 @@ export class ChannelService {
 	}
 
 	async getmp(user1: UserEntity, user2: UserEntity) {
-		// const chanlst = await this.findAll([]
 		const id1: number = Math.min(user1.UserID, user2.UserID);
 		const id2: number = Math.max(user1.UserID, user2.UserID);
 		const channel = await this.channelRepository.findOne({
