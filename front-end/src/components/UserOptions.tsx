@@ -13,20 +13,56 @@ export interface userOptionsProps {
 const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, showAdminOptions, relationships}) => {
     const {userContext, setUserContext} = useContext(UserContext);
     const [isFollowed, setIsFollowed] = useState(!!relationships.followed.find(tmpUser => user.UserID == tmpUser.UserID));
+    const [isBlocked, setIsBlocked] = useState(relationships.blocked && !!relationships.blocked.find(tmpUser => user.UserID == tmpUser.UserID));
 
     function handleFollow(){
         if (!isFollowed)
         {
-            apiReq.putApi.followUser(user.UserID);
-            NotificationManager.success(`You are now following ${user.nickname} (${user.login})`);
+            apiReq.putApi.followUser(user.UserID)
+                .then(() =>{
+                    NotificationManager.success(`You are now following ${user.nickname} (${user.login})`);
+                    setIsFollowed(!isFollowed);
+                })
+                .catch(() => {
+                    NotificationManager.error(`You can\'t follow ${user.nickname} (${user.login})`);
+                });
         }
         else
         {
-            apiReq.putApi.unfollowUser(user.UserID);
-            NotificationManager.success(`You don\'t follow ${user.nickname} (${user.login}) anymore.`);
+            apiReq.putApi.unfollowUser(user.UserID)
+                .then(() => {
+                    NotificationManager.success(`You don\'t follow ${user.nickname} (${user.login}) anymore.`);
+                    setIsFollowed(!isFollowed);
+                })
+                .catch(() => {
+                    NotificationManager.error(`You can\'t unfollow ${user.nickname} (${user.login})`);
+                });
         }
-        setIsFollowed(!isFollowed);
-
+    }
+    
+    function handleBlock(){
+        if (!isBlocked)
+        {
+            apiReq.putApi.blockUser(user.UserID)
+                .then(() =>{
+                    NotificationManager.success(`You are now blocking ${user.nickname} (${user.login})`);
+                    setIsBlocked(!isBlocked);
+                })
+                .catch(() => {
+                    NotificationManager.error(`You can\'t block ${user.nickname} (${user.login})`);
+                });
+        }
+        else
+        {
+            apiReq.putApi.unblockUser(user.UserID)
+                .then(() => {
+                    NotificationManager.success(`You don\'t block ${user.nickname} (${user.login}) anymore.`);
+                    setIsBlocked(!isBlocked);
+                })
+                .catch(() => {
+                    NotificationManager.error(`You can\'t unblock ${user.nickname} (${user.login})`);
+                });
+        }
     }
 
     return (
@@ -37,13 +73,13 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
                         {!isFollowed ? <Button image={"/add-user.svg"} onClick={handleFollow} alt={"Follow"}/>
                             : <Button image={"/remove-user.svg"} onClick={handleFollow} alt={"Unfollow"}/>}
 
+                        {!isBlocked ? <Button image={"/user-block.svg"} onClick={handleBlock} alt={"Block"}/>
+                        : <Button image={"/user-accepted.svg"} onClick={handleBlock} alt={"Block"}/>}
 
                         <Button image={"/send-message.svg"} onClick={() => console.log("send MP button")} alt={"Send MP"}/>
-                        <Button image={"/user-block.svg"} onClick={() => console.log("Block User button")} alt={"Block"}/>
-                        {showAdminOptions
-                            &&  <Button image={"/block-message.svg"} onClick={() => console.log("Mute User button")} alt={"Mute"}/>
-                            &&  <Button image={"/hammer.svg"} onClick={() => console.log("Ban User button")} alt={"Ban"}/>
-                        }
+                        {showAdminOptions &&  <Button image={"/block-message.svg"} onClick={() => console.log("Mute User button")} alt={"Mute"}/>}
+                        {showAdminOptions   &&  <Button image={"/hammer.svg"} onClick={() => console.log("Ban User button")} alt={"Ban"}/>}
+
                     </span>
                 </div>}
         </>
