@@ -70,16 +70,21 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
             {userContext.UserID != user.UserID &&
                 <div className={classname} id={idProperty} style={{marginTop:"10px"}}>
                     <span >
-                        {!isFollowed ? <Button image={"/add-user.svg"} onClick={handleFollow} alt={"Follow"}/>
-                            : <Button image={"/remove-user.svg"} onClick={handleFollow} alt={"Unfollow"}/>}
+                        {!isFollowed ? <Button image={"/add-user.svg"} onClick={handleFollow} alt={"Follow"}  title={"Follow"}/>
+                        : <Button image={"/remove-user.svg"} onClick={handleFollow} alt={"Unfollow"} title={"Unfollow"}/>}
 
-                        {!isBlocked ? <Button image={"/user-block.svg"} onClick={handleBlock} alt={"Block"}/>
-                        : <Button image={"/user-accepted.svg"} onClick={handleBlock} alt={"Block"}/>}
+                        {!isBlocked ? <Button image={"/block.svg"} onClick={handleBlock} alt={"Block"} title={"Block"}/>
+                        : <Button image={"/accept.svg"} onClick={handleBlock} alt={"Block"} margin={"0 5px 0 0"} title={"Unblock"}/>}
 
-                        <Button image={"/send-message.svg"} onClick={() => console.log("send MP button")} alt={"Send MP"}/>
-                        {showAdminOptions &&  <Button image={"/block-message.svg"} onClick={() => console.log("Mute User button")} alt={"Mute"}/>}
-                        {showAdminOptions   &&  <Button image={"/hammer.svg"} onClick={() => console.log("Ban User button")} alt={"Ban"}/>}
+                        <Button image={"/send-message.svg"} onClick={() => console.log("send MP button")} alt={"Send MP"} title={"MP"}/>
 
+                        {showAdminOptions &&
+                            <span style={{float:"right"}}>
+                                <Button image={"/block-message.svg"} onClick={() => console.log("Mute User button")} alt={"Mute"} margin={"0 5px 0 0"} title={"Mute"}/>
+                                <Button image={"/door.svg"} onClick={() => console.log("Kick User button")} alt={"Kick"} margin={"0 5px 0 0"} title={"Kick"}/>
+                                <Button image={"/hammer.svg"} onClick={() => console.log("Ban User button")} alt={"Ban"} title={"Ban"}/>
+                            </span>
+                        }
                     </span>
                 </div>}
         </>
