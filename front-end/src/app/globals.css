@@ -209,6 +209,8 @@ body {
     max-height: 21vh;
     width: auto;
     overflow-y: auto;
+    scrollbar-width: thin;
+
     position: absolute;
     right: 2vw;
     top: 8vh;

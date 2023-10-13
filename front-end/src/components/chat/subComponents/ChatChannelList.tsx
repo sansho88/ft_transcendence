@@ -33,6 +33,19 @@ export default function ChatChannelList({className, socket, channels, setCurrent
   const actualChannel = channels.find(channel => channel.channelID === currentChannel);
   const [usersList, setUsersList] = useState<IUser[]>([]);
 
+
+function isOwner(): boolean {
+
+    if (channels &&  channels.length > 0)
+        {
+          const tchan = channels.findIndex((channel) => channel.channelID === currentChannel)
+          if (channels[tchan].type !== EChannelType.DIRECT)
+            return channels[tchan].owner.UserID === userID
+          else
+            return false
+        }
+    return false
+}
   const addChannel = () => {
     return (
       <>
@@ -121,6 +134,8 @@ export default function ChatChannelList({className, socket, channels, setCurrent
                                               avatarSize={"medium"}
                                               usersList={usersList}
                                               showUserProps={true}
+                                              adminMode={isOwner()}
+                                              // adminMode={false} //TODO: TODO: bug si mp , owner not define
                 /> }
 
             </>

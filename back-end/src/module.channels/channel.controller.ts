@@ -45,7 +45,7 @@ export class ChannelController {
 	@Get('get')
 	@UseGuards(AuthGuard)
 	findAll() {
-		return this.channelService.findAll().catch(e => []);
+		return this.channelService.findAll().catch(() => []);
 	}
 
 	/**
@@ -61,7 +61,7 @@ export class ChannelController {
 	@Get('get/list/:channelID')
 	@UseGuards(AuthGuard)
 	getUserList(@Param('channelID', ParseIntPipe) channelID: number) {
-		return this.channelService.findOne(channelID, ['userList']).then(value => value.userList);
+		return this.channelService.findOne(channelID, ['userList'], true).then(value => value.userList);
 	}
 
 	@Get('mychannel')
@@ -116,7 +116,7 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@Param('targetID', ParseIntPipe) targetID: number,
 	) {
-		const channel = await this.channelService.findOne(channelID, ['adminList']);
+		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
@@ -136,7 +136,7 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@Param('targetID', ParseIntPipe) targetID: number,
 	) {
-		const channel = await this.channelService.findOne(channelID, ['adminList']);
+		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}

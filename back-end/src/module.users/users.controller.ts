@@ -38,7 +38,7 @@ export class UsersController {
 	@Get('/me/getRelationships')
 	@UseGuards(AuthGuard)
 	async meRelation(@CurrentUser() user: UserEntity) {
-		return this.usersService.findOne(user.UserID, ['banned', 'followers', 'subscribed']);
+		return this.usersService.findOne(user.UserID, ['blocked', 'followers', 'subscribed']);
 	}
 
 	@Get('/get/nicknameUsed/:nick')
@@ -145,5 +145,43 @@ export class UsersController {
 		@CurrentUser() user: UserEntity
 	) {
 		return this.usersService.findOne(user.UserID, ['followers']).then(user => user.followers);
+	}
+
+	@Put('block/:userID')
+	@UseGuards(AuthGuard)
+	async blockUser(
+		@CurrentUser() user: UserEntity,
+		@Param('userID', ParseIntPipe) targetID: number,
+	) {
+		if (targetID == user.UserID)
+			throw new BadRequestException('Don\'t try to block yourself plz ...');
+		const target = await this.usersService.findOne(targetID);
+		user = await this.usersService.findOne(user.UserID, ['blocked']);
+		if (user.blocked.find(block => block.UserID == target.UserID))
+			throw new BadRequestException('You already have blocked this user');
+		return this.usersService.blockUser(user, target);
+	}
+
+	@Put('unblock/:userID')
+	@UseGuards(AuthGuard)
+	async unBlockUser(
+		@CurrentUser() user: UserEntity,
+		@Param('userID', ParseIntPipe) targetID: number,
+	) {
+		if (targetID == user.UserID)
+			throw new BadRequestException('Yeah you can accept yourself now ?');
+		const target = await this.usersService.findOne(targetID);
+		user = await this.usersService.findOne(user.UserID, ['blocked']);
+		if (!user.blocked.find(block => block.UserID == target.UserID))
+			throw new BadRequestException('You haven\'t block this user yet');
+		return this.usersService.unBlockUser(user, target);
+	}
+
+	@Get('block')
+	@UseGuards(AuthGuard)
+	async blockedUser(
+		@CurrentUser() user: UserEntity,
+	) {
+		return this.usersService.findOne(user.UserID, ['banned']).then(user => user.banned);
 	}
 }

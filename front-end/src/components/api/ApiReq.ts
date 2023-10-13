@@ -56,7 +56,7 @@ export namespace getApi {
 
 	export const getAllUsersFromChannel = (channelID: number, time): Promise<{data:IUser[]}> => {
 		const tqt = time;
-		return axiosInstance.get(`${strRoutes.channel.getUsersChannel(channelID)}`, updateAxiosInstance());
+		return axiosInstance.get(`${strRoutes.channel.getUsersChannel(channelID)}`, updateAxiosInstance(), time);
 	}
 
 	export const getMePromise = () => {
@@ -93,7 +93,7 @@ export namespace getApi {
 	}
 
 	export const getAllMyFollowers = (): Promise<{data:IUser[]}> => {
-		return axiosInstance.get(`${strRoutes.followers.getAllMyFollowers()}`, updateAxiosInstance());
+		return axiosInstance.get(`${strRoutes.relationships.getAllMyFollowers()}`, updateAxiosInstance());
 	}
 
 	export const getStatsFromAllUsers = (): Promise<{data:IGameStats}> => {
@@ -123,10 +123,16 @@ export namespace postApi {
 export namespace putApi {
 	export const putUser= (updateUser: Partial<IUser>)		=>{return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, updateAxiosInstance())}
 	export const followUser = (userID: number) => {
-		return axiosInstance.put(`${strRoutes.followers.followUser(userID)}`,{}, updateAxiosInstance());
+		return axiosInstance.put(`${strRoutes.relationships.followUser(userID)}`,{}, updateAxiosInstance());
 	}
 	export const unfollowUser = (userID: number) => {
-		return axiosInstance.put(strRoutes.followers.unfollowUser(userID),{}, updateAxiosInstance());
+		return axiosInstance.put(strRoutes.relationships.unfollowUser(userID),{}, updateAxiosInstance());
+	}
+	export const blockUser = (userID: number) => {
+		return axiosInstance.put(`${strRoutes.relationships.blockUser(userID)}`,{}, updateAxiosInstance());
+	}
+	export const unblockUser = (userID: number) => {
+		return axiosInstance.put(strRoutes.relationships.unblockUser(userID),{}, updateAxiosInstance());
 	}
 	export const putModifChannel = (channelID: number, data: channelsDTO.IChangeChannelDTOPipe) =>{return axiosInstance.put(`${strRoutes.channel.putModifChannel(channelID)}`, data, updateAxiosInstance())}
 }

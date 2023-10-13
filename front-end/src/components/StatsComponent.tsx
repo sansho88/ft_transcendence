@@ -12,11 +12,11 @@ const Stats: React.FC<StatsProps> = ({className, user})=>{
     const [stats, setStats] = useState<IGameStats>({nbWin:0, level:-1, rank:0, nbLoose:0, exp: 0});
 
     useEffect(() => {
-        if (stats.level >= 0 )
+        if (stats.level < 0)
             getUserStatsById(user.UserID).then((result) => {
                 setStats(result.data);
             })
-            .catch((error) => console.error("Request for STATS failed: " + error));
+                .catch((error) => console.error("Request for STATS failed: " + error));
     })
 
     return (
