@@ -171,12 +171,14 @@ export namespace channel {
 // +---------------------------------------------------------------------+
 // |                             FOLLOW                                  |
 // +---------------------------------------------------------------------+
-export namespace followers{
+export namespace relationships{
 	export const getAllMyFollowers = () => {return `${serverApi}/${routeUsers}/mysubs/`};
 	export const followUser = (userID: number) => {return `${serverApi}/${routeUsers}/follow/${userID}`};
 	export const unfollowUser = (userID: number) => {return `${serverApi}/${routeUsers}/unfollow/${userID}`};
-
+	export const blockUser = (userID: number) => {return `${serverApi}/${routeUsers}/block/${userID}`};
+	export const unblockUser = (userID: number) => {return `${serverApi}/${routeUsers}/unblock/${userID}`};
 }
+
 
 	// +---------------------------------------------------------------------+
 // |                              BANNED                                 |

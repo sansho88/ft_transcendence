@@ -13,6 +13,7 @@ interface UserListProps{
     avatarSize?: string | undefined;
     usersList?: IUser[] | undefined;
     showUserProps?: boolean;
+    adminMode?: boolean
 }
 
 async function getAllUsers(): Promise<IUser[]>  {
@@ -28,7 +29,7 @@ async function getAllUsers(): Promise<IUser[]>  {
     }
 
 }
-const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, showUserProps, usersList}) => {
+const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, showUserProps, usersList, adminMode}) => {
 
     const [userElements, setUserElements] = useState<React.JSX.Element[]>([]);
     const [isHidden, setIsHidden] = useState(userElements.length == 0);
@@ -41,9 +42,9 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
             let allDiv : React.JSX.Element[] = [];
             getMyRelationships().then((res) => {
                 const me = res.data;
-                let subs = me.subscribed;
-                let followers =me.followers;
-                let blocked = me.banned;
+                let subs = me.subscribed; //users suivis par l'actuel user
+                let followers = me.followers; //users qui suivent l'actuel user
+                let blocked = me.blocked;
                 const isUserSubscribedToMe = !!subs.find(tmpUser => tmpUser.UserID);
             if (!usersList)
             {
@@ -71,7 +72,7 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                     allDiv.push(
                         <li key={user.login + "List" + uuidv4()}>
                             <Profile user={user} avatarSize={avatarSize}>
-                                {showUserProps == true && <UserOptions user={user} relationships={{followed: subs, blocked: blocked}}/>}
+                                {showUserProps == true && <UserOptions user={user} relationships={{followed: subs, blocked: blocked}} showAdminOptions={adminMode}/>}
                             </Profile>
                         </li>
                     )
