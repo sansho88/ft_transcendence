@@ -55,20 +55,30 @@ export class ChannelService {
 	}
 
 	async findOne(id: number, relations?: string[], canBeMP?: boolean) {
-		let channel: ChannelEntity;
-		if (canBeMP != true)
-			channel = await this.channelRepository.findOne({
+		var chan: any;
+		if (canBeMP !== true) {
+			chan = await this.channelRepository.findOne({
 				where: {channelID: id, mp: false, archive: false},
 				relations,
 			});
-		else
-			channel = await this.channelRepository.findOne({
+		}
+		else {
+			console.log("TEST ABUCIA" + JSON.stringify(await this.channelRepository.findOne({
 				where: {channelID: id, archive: false},
-				relations,
+				relations
+			})))
+			chan = await this.channelRepository.findOne({
+				where: {channelID: id, archive: false},
+				relations
 			});
-		if (channel == null)
-			throw new BadRequestException('This channel doesn\'t exist');
-		return channel;
+		}
+		console.log(chan)
+		if (chan === null)
+		{
+			console.log("COUCOU 2")
+			throw new BadRequestException('This chan doesn\'t exist');
+		}
+		return chan;
 	}
 
 	async joinChannel(user: UserEntity, channel: ChannelEntity) {
