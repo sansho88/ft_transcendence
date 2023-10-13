@@ -2,7 +2,7 @@
 
 import { IMessageEntity } from "@/shared/entities/IMessage.entity";
 import Axios from "./AxiosConfig";
-import {getStatsFromAllUsers, strRoutes} from "@/shared/routesApi";
+import {strRoutes} from "@/shared/routesApi";
 import {IGameStats, IUser} from "@/shared/types";
 import { IChannel } from "@/shared/typesChannel";
 import axios from "axios";
@@ -54,7 +54,8 @@ export namespace getApi {
 		}
 	});}
 
-	export const getAllUsersFromChannel = (channelID: number): Promise<IUser[]> => {
+	export const getAllUsersFromChannel = (channelID: number, time): Promise<{data:IUser[]}> => {
+		const tqt = time;
 		return axiosInstance.get(`${strRoutes.channel.getUsersChannel(channelID)}`, updateAxiosInstance());
 	}
 
@@ -62,7 +63,7 @@ export namespace getApi {
 		return axiosInstance.get(strRoutes.getMe(), updateAxiosInstance())
 	}
 
-	export const getMyRelationships = (): Promise<{data:IUser }> => {
+	export const getMyRelationships = (): Promise<{data}> => {
 		return axiosInstance.get(strRoutes.getMyRelationships(), updateAxiosInstance());
 	}
 

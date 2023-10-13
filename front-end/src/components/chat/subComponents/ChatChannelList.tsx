@@ -12,7 +12,6 @@ import UserList from "@/components/UserListComponent";
 import * as apiReq from "@/components/api/ApiReq"
 import {IUser} from "@/shared/types";
 import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
-import UserOptions from "@/components/UserOptions";
 
 
 export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList, channelsServer, userID}
@@ -91,7 +90,8 @@ export default function ChatChannelList({className, socket, channels, setCurrent
         const fetchData = async () => {
             try {
                 if(currentChannel != -1) {
-                  await apiReq.getApi.getAllUsersFromChannel(currentChannel).then((res) => {
+                    const timestamp = Date.now();
+                  await apiReq.getApi.getAllUsersFromChannel(currentChannel, timestamp).then((res) => {
                     setUsersList(res.data);
                     console.log("userList size: " + res.data.length);
                   });
