@@ -107,9 +107,11 @@ export class UsersController {
 		if (targetID == user.UserID)
 			throw new BadRequestException('You cannot follow Yourself');
 		const target: UserEntity = await this.usersService.findOne(targetID);
-		user = await this.usersService.findOne(user.UserID, ['subscribed'])
+		user = await this.usersService.findOne(user.UserID, ['subscribed', 'blocked'])
 		if (user.subscribed.findIndex(usr => usr.UserID === target.UserID) + 1)
 			throw new BadRequestException('You already following that user');
+		if (!!user.blocked.find(targ => targ.UserID == target.UserID))
+			user.blocked = user.blocked.filter(targ => targ.UserID !== target.UserID); //todo: allow or not to follow blocked users
 		user.subscribed.push(target);
 		await user.save();
 		await this.chatWsService.sendEvent(target, `The User ${user.login} started Followed you`);
@@ -156,9 +158,11 @@ export class UsersController {
 		if (targetID == user.UserID)
 			throw new BadRequestException('Don\'t try to block yourself plz ...');
 		const target = await this.usersService.findOne(targetID);
-		user = await this.usersService.findOne(user.UserID, ['blocked']);
+		user = await this.usersService.findOne(user.UserID, ['blocked', 'subscribed']);
 		if (user.blocked.find(block => block.UserID == target.UserID))
 			throw new BadRequestException('You already have blocked this user');
+		if (!!user.subscribed.find(targ => targ.UserID == target.UserID))
+			user.subscribed = user.subscribed.filter(targ => targ.UserID !== target.UserID);
 		return this.usersService.blockUser(user, target);
 	}
 
