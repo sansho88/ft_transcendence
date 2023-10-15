@@ -229,7 +229,10 @@ function isOwner(): boolean {
       </div>
      {!isServerList &&
       <div className='chat_channel_buttons'>
-          <span>{addChannel()}</span>&nbsp; &nbsp; | &nbsp; &nbsp; <span>{paramChannel()}</span> &nbsp; &nbsp; | &nbsp; &nbsp; <span>{showUsersInChannel()}</span>
+          <span>{addChannel()}</span>&nbsp; &nbsp;  &nbsp; &nbsp; <span>{ 
+          actualChannel?.type !== EChannelType.DIRECT &&
+          // actualChannel?.owner === //admin list //TODO: recuperer ladmin list pour channel et comparer si lactualUser est un admin pour afficher la roue setting
+          paramChannel()}</span> &nbsp; &nbsp;  &nbsp; &nbsp; <span>{showUsersInChannel()}</span>
       </div>}
     </div>
   )
