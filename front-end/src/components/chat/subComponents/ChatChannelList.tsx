@@ -58,9 +58,9 @@ function isOwner(): boolean {
           <Image
               src="/channel-add.svg"
               alt="ADD CHANNEL BUTTON"
-              width={26}
+              width={22}
               height={22}
-              style={{ height: "auto", width: "auto"}}
+              style={{width: "80%", height:"auto", maxWidth:"4vw", maxHeight:"4vh"}}
               />
         </button>
     { isPopupChannelsVisible && <ChatNewChannelPopup
@@ -89,6 +89,7 @@ function isOwner(): boolean {
                       alt="OPEN PARAMS BUTTON"
                       width={18}
                       height={18}
+                      style={{width: "80%", height:"auto", maxWidth:"4vw", maxHeight:"4vh"}}
                   />
                 </button>
           { actualChannel && isPopupSettingsVisible &&  <SettingsChannel className={"chat_new_channel_popup"}
@@ -125,7 +126,6 @@ function isOwner(): boolean {
                 {isPopupUsersVisible && <div id={"make_popup_disappear"} onClick={() => setPopupUsersVisible(false)}></div>}
                 <button  onClick={() => {
                     setPopupUsersVisible(!isPopupUsersVisible);
-                    console.log("POPUP userList size: " + usersList.length);
                 }}>
 
                 </button>
@@ -229,10 +229,7 @@ function isOwner(): boolean {
       </div>
      {!isServerList &&
       <div className='chat_channel_buttons'>
-          <span>{addChannel()}</span>&nbsp; &nbsp;  &nbsp; &nbsp; <span>{ 
-          actualChannel?.type !== EChannelType.DIRECT &&
-          // actualChannel?.owner === //admin list //TODO: recuperer ladmin list pour channel et comparer si lactualUser est un admin pour afficher la roue setting
-          paramChannel()}</span> &nbsp; &nbsp;  &nbsp; &nbsp; <span>{showUsersInChannel()}</span>
+          <span>{addChannel()}</span> <span style={{marginLeft:"10%"}}>{actualChannel?.type !== EChannelType.DIRECT && paramChannel()}</span> <span>{showUsersInChannel()}</span>
       </div>}
     </div>
   )
