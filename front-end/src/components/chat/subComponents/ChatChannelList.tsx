@@ -51,9 +51,8 @@ function isOwner(): boolean {
           <Image
               src="/channel-add.svg"
               alt="ADD CHANNEL BUTTON"
-              width={26}
+              width={22}
               height={22}
-              style={{ height: "auto", width: "auto"}}
               />
         </button>
     { isPopupChannelsVisible && <ChatNewChannelPopup
