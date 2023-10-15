@@ -14,6 +14,9 @@ export namespace wsChatEvents {
   export function joinRoom(socket: Socket, joinChannel: channelsDTO.IJoinChannelDTOPipe) {
     socket.emit(wsChatRoutesBack.joinRoom(), joinChannel);}
 
+    export function createMP(socket: Socket, userTargetMp: channelsDTO.ICreateMpDTOPPipe) {
+    socket.emit(wsChatRoutesBack.createMP(), userTargetMp);}
+
   export function leaveRoom(socket: Socket, leaveChannel: channelsDTO.ILeaveChannelDTOPipe) {
     socket.emit(wsChatRoutesBack.leaveRoom(), leaveChannel);
     console.log('leaveRoomWS ' + JSON.stringify(leaveChannel));

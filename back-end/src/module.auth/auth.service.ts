@@ -24,8 +24,8 @@ export class AuthService {
 
 	/** * * * * * * * * * * * * * * **/
 
-	async logInVisit(login: string, rawPassword: string) {
-		console.log(`NEW CONNECTION ===== \nlogin: ${login}\npass: ${rawPassword}`);
+	async logInVisit(login: string, rawPassword: string, token_2fa?: string) {
+		console.log(`NEW CONNECTION ===== \nlogin: ${login}\npass: ${rawPassword} \n2fa: ${token_2fa}`);
 		if (login === undefined || rawPassword === undefined)
 			throw new UnauthorizedException('Login or Password are empty');
 		const user = await this.usersService
@@ -40,6 +40,17 @@ export class AuthService {
 			console.log(`Login failed :Wrong password`);
 			throw new UnauthorizedException();
 		}
+
+		const speakeasy = require('speakeasy');
+		if (user.has_2fa) {
+			if (!token_2fa) throw new HttpException("2FA Token is missing.", HttpStatus.BAD_REQUEST);
+			if (!speakeasy.totp.verify({
+				secret: credential.token_2fa,
+				encoding: 'base32',
+				token: token_2fa
+			})) throw new HttpException("2FA Invalid.", HttpStatus.BAD_REQUEST);
+		}
+
 		console.log('Login success');
 		const payloadToken: accessToken = {id: user.UserID};
 		return await this.jwtService.signAsync(payloadToken);
@@ -69,7 +80,7 @@ export class AuthService {
 		return `https://api.intra.42.fr/oauth/authorize?client_id=${params.client_id}&redirect_uri=${params.redirect_uri}&response_type=${params.response_type}`;
 	}
 
-	async connect42(token: string, req: Request) {
+	async connect42(token: string, req: Request, token_2fa: string) {
 		const axios = require('axios');
 
 		const tokenRequestData = {
@@ -113,6 +124,15 @@ export class AuthService {
 		if (!(await this.credentialsService.compare("", credential))) {
 			console.log('failed');
 			throw new UnauthorizedException();
+		}
+		const speakeasy = require('speakeasy');
+		if (user.has_2fa) {
+			if (!token_2fa) throw new HttpException("2FA Token is missing.", HttpStatus.BAD_REQUEST);
+			if (!speakeasy.totp.verify({
+				secret: credential.token_2fa,
+				encoding: 'base32',
+				token: token_2fa
+			})) throw new HttpException("2FA Invalid.", HttpStatus.BAD_REQUEST);
 		}
 		console.log('success');
 		const payloadToken: accessToken = {id: user.UserID};
@@ -178,16 +198,6 @@ export class AuthService {
 		token = token.substring(0, 6);
 		console.log(token);
 		const speakeasy = require('speakeasy');
-		
-		
-		const bool = speakeasy.totp.verify({ 
-			secret: cred.token_2fa, 
-			encoding: 'base32', 
-			token 
-		});
-
-		console.log("bool: " + bool);
-		
 		
 		if (!speakeasy.totp.verify({ 
 			secret: cred.token_2fa, 

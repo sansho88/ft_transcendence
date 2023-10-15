@@ -61,7 +61,7 @@ export class ChannelController {
 	@Get('get/list/:channelID')
 	@UseGuards(AuthGuard)
 	getUserList(@Param('channelID', ParseIntPipe) channelID: number) {
-		return this.channelService.findOne(channelID, ['userList']).then(value => value.userList);
+		return this.channelService.findOne(channelID, ['userList'], true).then(value => value.userList);
 	}
 
 	@Get('mychannel')

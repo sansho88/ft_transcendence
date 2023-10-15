@@ -10,6 +10,8 @@ import LeaveChannelCross from './LeaveChannelCross';
 
 import ChatMaster from '../../ChatMaster';
 import { Socket } from 'socket.io-client';
+import { IUser } from '@/shared/types';
+import * as apiReq from '@/components/api/ApiReq'
 
 
 
@@ -23,7 +25,7 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     isMp: boolean,
     isProtected: boolean,
     isServList: boolean,
-    isOwner: boolean
+    isOwner: boolean,
 }) {
     const [isPending, setIsPending] = useState(isInvite);
 
@@ -33,12 +35,41 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     const [showPassword, setPasswordVisible] = useState("password");
     const [passwordErrorMsg, setPasswordErrMsg] = useState("");
     const [isHovered, setIsHovered] = useState<boolean>(false);
-    // const refDivGlobal = useRef(null);
+    const [actualUserID, setActualUserID] = useState<number>(-1)
+    const [channelMpName, setChannelMpName] = useState<string | null>(null)
+    const [usersList, setUsersList] = useState<IUser[]>([]);
 
-//   return (
-//     <button key={`button_channel_${uuidv4()}`} 
-//     className='chat_channel_list_element' onClick={() => onClickFunction(channelID)}> {channelName}</button>
-//   )
+
+    async function getUserId(){
+        
+        
+        await apiReq.getApi.getMeUser()
+            .then((res) => {
+
+                setActualUserID(res.data.UserID);
+                return apiReq.getApi.getAllUsersFromChannel(channelID, new Date)
+            })
+            .then((res) => {
+                setUsersList(res.data);
+            })
+    }
+
+    useEffect(() => {
+        if (isMp)
+            getUserId();
+    }, [])
+
+
+    useEffect(() => {
+        if(isMp) {
+            const friendMpIndex: number = usersList.findIndex((user) => user.UserID !== actualUserID)
+            if (friendMpIndex != -1)
+                setChannelMpName(usersList[friendMpIndex].login)
+        }
+    }, [usersList])
+
+
+
 
 useEffect(() => {
     if (channelPassword.length > 2) {
@@ -166,7 +197,7 @@ useEffect(() => {
                 className={currentChannel === channelID ? `channel channel_selected ` : `channel `}>
             <div key={`button_channel_${uuidv4()}`}
                  className={`${defineClassName.current} justify-between ${channelName.length <= 10 ? 'flex' : 'flex-col'}`} onClick={() => onClickSwitcher()}>
-                    <div className={`flex truncate ${channelName.length <= 10 ? '' : ' text-xs'}`} >{channelName}</div>
+                    <div className={`flex truncate ${channelName.length <= 10 ? '' : ' text-xs'}`} >{channelMpName === null ? channelName : channelMpName}</div>
                     {!isServList && !isMp && isHovered && <LeaveChannelCross className={`flex-shrink-0 text-red-800 z-0`} onClickFunction={() => leaveChan(socket, channelID)} />}
             </div>
             {isPending && (<div id={"invite_options"}>

@@ -166,6 +166,7 @@ export default function Auth({className}: { className?: string }) {
                                     }
                                 }
                         />
+                        {enterCode2FA()}
                     </>
                     :
                     <div className={"text-center"}>
@@ -230,10 +231,11 @@ export default function Auth({className}: { className?: string }) {
                     props=
                         {
                             {
-                                type: "number",
+                                type: "text",
                                 value: code2FAInput,
                                 onChange: () => (e: React.ChangeEvent<HTMLInputElement>) => {
                                     setcode2FAInput(e.target.value)
+                                    sessionStorage.setItem('code2FA', e.target.value);
                                 },
                                 onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
                                     if (e.key === "Enter") {
@@ -244,24 +246,8 @@ export default function Auth({className}: { className?: string }) {
                         }
                 />
                 {
-                    <div className=' font-thin'>Enter your 2FA Code</div>
+                    <div className=' font-thin'>Enter your 2FA Code [if enabled]</div>
                 }
-                <button type="button" className={"button-login my-12 "} onClick={() => {
-                   if (code2FAInput == "424242")
-                       connectUser();
-                   else
-                       NotificationManager.error("Invalid 2FA code");
-
-                }}><span className="text">CONFIRM</span></button>
-
-                <button type="button" className={"button-login"} onClick={() => {
-                    setLogin('');
-                    setLoginInput('');
-                    setcode2FA('');
-                    setcode2FAInput('');
-                    setCurrentStepLogin(EStepLogin.signOrLogIn);
-                }}><span className="text">CANCEL</span></button>
-
             </div>
         )
     }
@@ -442,7 +428,7 @@ export default function Auth({className}: { className?: string }) {
                     return;
 
                 case EStepLogin.tryToConnect:
-                    const existingUser: Partial<POD.IUser> = {login: login, password: passwordInput, visit: true}
+                    const existingUser: Partial<POD.IUser> = {login: login, password: passwordInput, visit: true, token_2fa: code2FAInput ? code2FAInput : "42"}
                     await apiReq.postApi.postTryLogin(existingUser)
                         .then(async (res) => {
                             if (res.status === 200) {
@@ -534,6 +520,7 @@ export default function Auth({className}: { className?: string }) {
             {currentStepLogin === EStepLogin.start &&
                 <button onClick={() => goto42auth()} className='button-login h-14'>LOGIN
                     42</button>}
+            {currentStepLogin === EStepLogin.start && enterCode2FA()}
             {currentStepLogin < EStepLogin.tryLoginAsInvite &&
                 <button onClick={() => nextStepCheck()} className='button-login'><span>{inviteButtonText}</span>
                 </button>}
