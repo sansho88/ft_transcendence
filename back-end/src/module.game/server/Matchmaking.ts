@@ -1,5 +1,5 @@
 import {userInfoSocket, EGameMod} from 'shared/typesGame';
-import {Server} from 'socket.io';
+import {Server, Socket} from 'socket.io';
 import {GameSession} from './GameSession';
 import {v4 as uuidv4} from "uuid";
 import {GameService} from '../game.service';
@@ -57,5 +57,11 @@ export class Matchmaking {
 			return new GameSession(server, P1, P2, startDate, game_id, gameMod, generateSessionName, this.gameService);
 		} else
 			console.log('Matchmaking: Pas assez de joueurs pour lancer une partie');
+	}
+
+	public leftConnection(player: Socket) {
+		const search = this.userTab.findIndex((user) => user.socket == player)
+		if (search !== -1)
+			this.removeUser(this.userTab[search]);
 	}
 }

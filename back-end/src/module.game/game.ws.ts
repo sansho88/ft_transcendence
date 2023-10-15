@@ -45,12 +45,11 @@ export class WebsocketGatewayGame
 
 	}
 
+	@UseGuards(WSAuthGuard)
 	handleDisconnect(client: Socket) {
-		// client.disconnect();
-		// Code pour gérer les déconnexions client
 		console.log('CLIENT ' + client.id + ' left');
-		client.emit(wsGameRoutes.statusUpdate(), UserStatus.OFFLINE);
 
+		this.serverGame.leftConnectionUserMatchmaking(client)
 	}
 
 	emitToGameRoom(room: string, payload: any) {
