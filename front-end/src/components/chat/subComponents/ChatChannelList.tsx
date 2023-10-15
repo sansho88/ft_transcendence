@@ -174,7 +174,7 @@ function isOwner(): boolean {
               channelID={channel.channelID}
               channelName={channel.name}
               isInvite={false} //TODO:
-              isMp={false} //TODO:
+              isMp={channel.type === EChannelType.DIRECT} //TODO:
               socket={socket}
               isServList={false}
               isOwner={channel.owner ? channel.owner.UserID === userID : false }
