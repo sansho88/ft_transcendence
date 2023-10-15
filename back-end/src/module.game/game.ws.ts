@@ -45,10 +45,8 @@ export class WebsocketGatewayGame
 
 	}
 
-	@UseGuards(WSAuthGuard)
 	handleDisconnect(client: Socket) {
 		console.log('CLIENT ' + client.id + ' left');
-
 		this.serverGame.leftConnectionUserMatchmaking(client)
 	}
 
