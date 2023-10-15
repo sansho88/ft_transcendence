@@ -9,9 +9,8 @@ import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
 import {EStatus, IUser} from "@/shared/types";
 import {getUserFromId} from "@/app/auth/Auth";
 import {SocketContextChat, SocketContextGame} from "@/context/globalContext";
-import {wsGameRoutes} from "@/shared/routesApi";
+import {NotificationManager} from 'react-notifications';
 import {IGameSessionInfo} from "@/shared/typesGame";
-import {log} from "util";
 import Stats from "@/components/StatsComponent";
 
 interface ProfileProps{
@@ -31,6 +30,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
     const socketChat      = useContext(SocketContextChat);
     const socketChatRef   = useRef(socketChat);
     const [isNicknameUsed, setIsNicknameUsed] = useState(false);
+    const [userRefreshed, setUserRefreshed] = useState(user);
 
     useEffect(() => {
         if (socketChatRef.current?.disconnected)
@@ -41,6 +41,23 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
         console.log(socketChatRef.current?.disconnected);
     }, [user.login]);
 
+    useEffect(() => {
+        const timer = setInterval(() => {
+            getUserFromId(user.UserID).then((res) => {
+                setUserRefreshed(res);
+                setUserStatus(res.status);
+                setStatusColor(getEnumNameByIndex(Colors, res.status));
+            })
+                .catch((error) =>
+                console.log("[Profile] trying to receive refreshed user data"));
+
+        }, 4000);
+
+        return () => {
+            clearInterval(timer);
+        };
+    })
+
 
     useEffect(() => {
         setStatusColor(getEnumNameByIndex(Colors, user.status));
@@ -50,17 +67,21 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
     socketGameRef.current?.on("infoGameSession", (data: IGameSessionInfo) => {
         if ((data.player1 && data.player1.login == user.login) || data.player2.login == user.login)
         {
-            setUserStatus(EStatus.InGame);
-            setStatusColor(getEnumNameByIndex(Colors, user.status));
+           /* setUserStatus(EStatus.InGame);
+            setStatusColor(getEnumNameByIndex(Colors, user.status));*/
+            let tmpUser = userRefreshed;
+            tmpUser.status = EStatus.InGame;
+            apiReq.putApi.putUser(tmpUser);
 
             socketGameRef.current?.on("endgame", () => {
-                    setUserStatus(EStatus.Online);
-                    setStatusColor(getEnumNameByIndex(Colors, userStatus));
+                    /*setUserStatus(EStatus.Online);
+                    setStatusColor(getEnumNameByIndex(Colors, userStatus));*/
+                tmpUser.status = EStatus.Online;
+                apiReq.putApi.putUser(tmpUser);
             });
         }
 
     });
-
 
     useEffect(() => {
         if (isNicknameUsed && modifiedNick !== user.nickname) {
@@ -96,7 +117,8 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
 
                     }
 
-            });
+            })
+                    .catch((error) => console.error("Failed to check if nickname is used or not"));
         }
     }
 
@@ -109,10 +131,18 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
 
             await getUserFromId(user.UserID).then( (userGet) => {
             userGet.nickname = modifiedNick;
-            apiReq.putApi.putUser(userGet);
-            });
+            apiReq.putApi.putUser(userGet)
+                .then(() => {
+                    setEditMode(false);
+                })
+                .catch((error) => {
+                    NotificationManager.error(error.data, "Edit of nickname failed");
+                })
+            ;
+            })
+                .catch((error) => console.error(`Failed to get data from getUserFromId in Profile.`));
 
-            setEditMode(false);
+
 
         }
     }
