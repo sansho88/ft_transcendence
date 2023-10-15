@@ -421,7 +421,11 @@ export default function Game({className, token}: {className: string, token: stri
   }
 
   function cancelMatchmaking() {
-    socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchmaking(), userLogged.userContext);
+    console.log('gameMod = ' , gameMod.current)
+    if (gameMod.current === PODGAME.EGameMod.classic)
+      socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchmaking(), userLogged.userContext);
+    else
+      socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchmakingGhost(), userLogged.userContext);
     setStepCurrentSession(EStatusFrontGame.idle);
   }
 
