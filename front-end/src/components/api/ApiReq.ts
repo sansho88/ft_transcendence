@@ -114,7 +114,7 @@ export namespace postApi {
 
 	export const postUser= (newUser: Partial<IUser>)			=>{return axiosInstance.post(`${strRoutes.postUser()}`, newUser);}
 	export const postTryLogin= (loginTest:Partial<IUser>)	=>{return axiosInstance.post(`${strRoutes.postUserCheckLogin()}`, loginTest);}
-	export const postTryLogin42= (code: string)						=>{return axiosInstance.post(`${strRoutes.postUser42()}`, code);}
+	export const postTryLogin42= (code: string, token: string | null)						=>{return axiosInstance.post(`${strRoutes.postUser42(token)}`, code);}
 	export const postTryGetIntraURL= ()										=>{return axiosInstance.post(`${strRoutes.getIntraURL()}`);}
 
 	export const postGen2FA= ()														=>{return axiosInstance.post(`${strRoutes.postGenerate2FA()}`, {}, updateAxiosInstance());}
@@ -180,10 +180,10 @@ export namespace utilsCheck {
 		}
 	}
 
-	export async function isPasswordMatch(login: string, password: string) {
+	export async function isPasswordMatch(login: string, password: string, code2FAInput?: string) {
 		console.log('\n\ncall isPasswordMatch: login: ||' + login + '||\npassword: ||' + password + '||\n\n');
 		try {
-			const res = await postApi.postTryLogin({login, password});
+			const res = await postApi.postTryLogin({login, password, token_2fa:code2FAInput});
 			return res.status === 201;
 		} 
 		catch (error) {

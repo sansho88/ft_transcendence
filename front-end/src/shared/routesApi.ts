@@ -87,7 +87,7 @@ export namespace wsChatRoutesClient {
 // |                            USERS 42                                 |
 // +---------------------------------------------------------------------+
 
-	export const postUser42=()							=>{return `${serverApi}/auth/42/connect/`}
+	export const postUser42=(token: string | null)							=>{return `${serverApi}/auth/42/connect/${token}`}
 	export const getIntraURL=()							=>{return `${serverApi}/auth/42/getIntraURL/`}
 
 
@@ -103,7 +103,7 @@ export namespace wsChatRoutesClient {
 	export const getUserByLogin=()					=>{return `${serverApi}/${routeUsers}/get/`}
 		
 	export const postUser=()								=>{return `${serverApi}/auth/visit/sign`}
-	export const postUserCheckLogin=()			=>{return `${serverApi}/auth/visit/login/`}
+	export const postUserCheckLogin=()			=>{return `${serverApi}/auth/visit/login`}
 		
 	export const putUser=()									=>{return `${serverApi}/${routeUsers}/`}
 
