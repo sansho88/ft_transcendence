@@ -303,22 +303,8 @@ export class ChatGateway
 		const client2Lst = await this.getSocket(user2.UserID);
 		client2Lst.map(client2 => client2.join(`${mp.channelID}`))
 		
-		client1Lst.map(socket => socket.emit(`createRoom`, {channel: mp})); //TEST
-		client2Lst.map(socket => socket.emit(`createRoom`, {channel: mp})); //TEST   -- update list en real time une fois join -- DONT WORK surment car la route get channels return que le chan nexiste pas
-		// const clientLst1 = await this.getSocket(user.UserID);
-		// clientLst1.map(socket => {
-		// 	socket.join(`${mp.channelID}`);
-		// 	socket.emit(`infoRoom`, {message: `Channel Created with id ${mp.channelID}`});
-		// 	socket.emit(`createRoom`, {channel: mp});
-		// });
-		// const clientLst2 = await this.getSocket(data.targetID);
-		// clientLst2.map(socket => {
-		// 	socket.join(`${mp.channelID}`);
-		// 	socket.emit(`infoRoom`, {message: `Channel Created with id ${mp.channelID}`});
-		// 	socket.emit(`createRoom`, {channel: mp});
-		// });
-
-		console.log(mp);
+		client1Lst.map(socket => socket.emit(`createRoom`, {channel: mp})); 
+		client2Lst.map(socket => socket.emit(`createRoom`, {channel: mp})); //update list en real time after join this
 	}
 
 	// @SubscribeMessage('getMP')
