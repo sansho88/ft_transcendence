@@ -50,7 +50,10 @@ const HomePage = ({className}: HomePageProps) => {
         }
         localStorage.setItem('userContext', JSON.stringify(userContext));
 
-    })
+        return(() => {
+            window.location.reload();
+        })
+    }, [])
 
 
     /*socketRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
@@ -90,7 +93,7 @@ const HomePage = ({className}: HomePageProps) => {
                 } alt={"Logout button"}/>
 
                 <div className={"game"}>
-                    {tokenRef.current.length > 0 &&
+                    {/* {tokenRef.current && */
                     <Game className={"game"} token={tokenRef.current}/>
                     }
                 </div>
