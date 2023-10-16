@@ -301,9 +301,7 @@ export class ChannelController {
 	) {
 		if (channelID === -1)//gestion no channel pour simplifier et pas avoir derreur 401..
 			return {data: []};
-		console.log('channel');
 		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
-		console.log(channel);
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterRecent(channel.messages);
@@ -360,7 +358,6 @@ export class ChannelController {
 		const invite = await this.inviteService.findOne(inviteID);
 		if (invite == null)
 			throw new BadRequestException('This invite is not created or already accepted');
-		console.log(user);
 		if (invite.sender.UserID != user.UserID)
 			throw new BadRequestException('This invite is not created by you');
 		await this.inviteService.remove(invite);
@@ -374,7 +371,6 @@ export class ChannelController {
 		@Body(new ValidationPipe()) data: ChangeChannelDTOPipe,
 	) {
 		const channel = await this.channelService.findOne(channelID);
-		console.log(channel);
 		if (channel.owner.UserID !== user.UserID)
 			throw new BadRequestException('You need to be the channel Owner to change it');
 		const credential = await this.credentialService.create(data.password);

@@ -1,8 +1,10 @@
-import {userInfoSocket, EGameMod} from 'shared/typesGame';
+import {EGameMod, userInfoSocket} from 'shared/typesGame';
 import {Server, Socket} from 'socket.io';
 import {GameSession} from './GameSession';
 import {v4 as uuidv4} from "uuid";
 import {GameService} from '../game.service';
+import {UsersService} from "../../module.users/users.service";
+import {UserStatus} from "../../entities/user.entity";
 
 
 export class Matchmaking {
@@ -10,6 +12,7 @@ export class Matchmaking {
 
 	constructor(
 		private gameService: GameService,
+		private usersService: UsersService,
 	) {
 	}
 
@@ -37,20 +40,25 @@ export class Matchmaking {
 	public removeUser(user: userInfoSocket): void {
 		if (this.containsUser(user)) {
 			// let index = this.userTab.findIndex(u => u.user.UserID === user.user.UserID);
-			this.userTab.map((ref) => {console.log(ref.user.login + ' | ')})
+			this.userTab.map((ref) => {
+				console.log(ref.user.login + ' | ')
+			})
 			this.userTab = this.userTab.filter((userRef) => userRef.user.UserID !== user.user.UserID)
-			this.userTab.map((ref) => {console.log(ref.user.login + ' | ')})
-				console.log(`User(${user.user.login}) has been removed from the matchmaking list`)
-			}
-		 else
+			this.userTab.map((ref) => {
+				console.log(ref.user.login + ' | ')
+			})
+			console.log(`User(${user.user.login}) has been removed from the matchmaking list`)
+		} else
 			console.log(`User(${user.user.login}) is not in matchmaking list`)
 	}
 
 	//create game instance for 1v1 classic game
-	public createGame(server: Server, game_id: number, gameMod: EGameMod): GameSession {
+	public async createGame(server: Server, game_id: number, gameMod: EGameMod): Promise<GameSession> {
 		if (this.getUsersNumber() >= 2) {
 			const P1: userInfoSocket = this.userTab.pop();
+			await this.usersService.userStatus(await this.usersService.findOne(P1.user.UserID), UserStatus.INGAME);
 			const P2: userInfoSocket = this.userTab.pop();
+			await this.usersService.userStatus(await this.usersService.findOne(P2.user.UserID), UserStatus.INGAME);
 			const startDate: Date = new Date();
 			const generateSessionName: string = uuidv4();
 			console.log(`NEW GAME SESSION: ${generateSessionName} | ${P1.user.nickname}(${P1.user.login}) vs ${P2.user.nickname}(${P2.user.login})`);

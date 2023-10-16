@@ -3,7 +3,7 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {GameEntity} from 'src/entities/game.entity';
 import {UsersService} from 'src/module.users/users.service';
 import {Repository} from 'typeorm';
-import {UserEntity} from "../entities/user.entity";
+import {UserEntity, UserStatus} from "../entities/user.entity";
 import {GameStats} from "../dto/gameStats";
 
 interface levelList {
@@ -73,10 +73,10 @@ export class GameService {
 	}
 
 	async calAllLevel(lstGame: GameEntity[]) {
-		let allLevel:levelList[] = [];
+		let allLevel: levelList[] = [];
 		const lstUser = await this.usersService.findAll();
 		lstUser.forEach(user => {
-			allLevel.push({userID:user.UserID, level:this.calcLevel(this.getWinGame(user, lstGame).length)});
+			allLevel.push({userID: user.UserID, level: this.calcLevel(this.getWinGame(user, lstGame).length)});
 		});
 		return allLevel;
 	}
@@ -137,5 +137,16 @@ export class GameService {
 			rank,
 		};
 		return stats;
+	}
+
+	async endGameStatus(UserID, UserID2) {
+		setTimeout(async () => {
+			const user1 = await this.usersService.findOne(UserID);
+			if (user1.status != UserStatus.OFFLINE)
+				await this.usersService.userStatus(user1, UserStatus.ONLINE)
+			const user2 = await this.usersService.findOne(UserID2);
+			if (user2.status != UserStatus.OFFLINE)
+				await this.usersService.userStatus(user2, UserStatus.ONLINE)
+		}, 2000);
 	}
 }

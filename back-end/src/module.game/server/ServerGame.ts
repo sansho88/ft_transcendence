@@ -5,6 +5,7 @@ import {Server, Socket} from 'socket.io';
 import {userInfoSocket, EGameMod} from 'shared/typesGame';
 import {v4 as uuidv4} from "uuid";
 import {GameService} from '../game.service';
+import {UsersService} from "../../module.users/users.service";
 
 // @Injectable()
 // export class gameSocketService {
@@ -16,33 +17,34 @@ export class ServerGame {
 	// gameService: GameService;
 	constructor(
 		private gameService: GameService,
+		private usersService: UsersService,
 	) {
 	};
 
-	private matchmaking: Matchmaking = new Matchmaking(this.gameService);
-	private matchmakingGhost: Matchmaking = new Matchmaking(this.gameService);
+	private matchmaking: Matchmaking = new Matchmaking(this.gameService, this.usersService);
+	private matchmakingGhost: Matchmaking = new Matchmaking(this.gameService, this.usersService);
 	private gameSession: GameSession[] = [];
 	private trainningSession: GameSession[] = []; //pour ne pas les melangers, pas de spectator, donc pas besoin de get cette liste
 
 
-	public addPlayerToMatchmaking(player: userInfoSocket, server: Server) {
+	public async addPlayerToMatchmaking(player: userInfoSocket, server: Server) {
 		if (!player)
 			return console.log('addPlayerToMatchmaking: Error player')
 		this.matchmaking.addUser(player);
 		console.log(`${player.user.login}: add in matchmaking list`);
 		if (this.matchmaking.getUsersNumber() >= 2) {
-			this.gameSession.push(this.matchmaking.createGame(server, this.gameSession.length, EGameMod.classic));
+			this.gameSession.push(await this.matchmaking.createGame(server, this.gameSession.length, EGameMod.classic));
 		}
 
 	}
 
-	public addPlayerToMatchmakingGhost(player: userInfoSocket, server: Server) {
+	public async addPlayerToMatchmakingGhost(player: userInfoSocket, server: Server) {
 		if (!player)
 			return console.log('addPlayerToMatchmakingGhost: Error player')
 		this.matchmakingGhost.addUser(player);
 		console.log(`${player.user.login}: add in matchmakingGhost list`);
 		if (this.matchmakingGhost.getUsersNumber() >= 2) {
-			this.gameSession.push(this.matchmakingGhost.createGame(server, this.gameSession.length, EGameMod.ghost));
+			this.gameSession.push(await this.matchmakingGhost.createGame(server, this.gameSession.length, EGameMod.ghost));
 		}
 	}
 
@@ -92,6 +94,5 @@ export class ServerGame {
 		this.matchmaking.leftConnection(playerSocket)
 		this.matchmakingGhost.leftConnection(playerSocket)
 
-	
 	}
 }
