@@ -23,6 +23,15 @@ export class GameController {
 		return this.gameService.getAllGame(user, await this.gameService.getAll());
 	}
 
+	@Get('users/:UserID')
+	@UseGuards(AuthGuard)
+	async findOther(
+		@Param('UserID', ParseIntPipe) targetID: number,
+	) {
+		const target = await this.usersService.findOne(targetID);
+		return this.gameService.getAllGame(target, await this.gameService.getAll());
+	}
+
 	@Get('stats')
 	@UseGuards(AuthGuard)
 	async getStats(
