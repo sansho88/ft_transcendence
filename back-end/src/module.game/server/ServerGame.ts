@@ -1,7 +1,7 @@
 import {Injectable} from '@nestjs/common';
 import {Matchmaking} from './Matchmaking';
 import {GameSession} from './GameSession';
-import {Server} from 'socket.io';
+import {Server, Socket} from 'socket.io';
 import {userInfoSocket, EGameMod} from 'shared/typesGame';
 import {v4 as uuidv4} from "uuid";
 import {GameService} from '../game.service';
@@ -86,5 +86,12 @@ export class ServerGame {
 
 	public getAllGameSession(): GameSession[] {
 		return this.gameSession;
+	}
+
+	public leftConnectionUserMatchmaking(playerSocket: Socket) {
+		this.matchmaking.leftConnection(playerSocket)
+		this.matchmakingGhost.leftConnection(playerSocket)
+
+	
 	}
 }

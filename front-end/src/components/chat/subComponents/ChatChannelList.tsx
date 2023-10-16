@@ -35,8 +35,15 @@ export default function ChatChannelList({className, socket, channels, setCurrent
 
 
 function isOwner(): boolean {
-    if (channels && channels.length > 0)
-        return channels[channels.findIndex((channel) => channel.channelID === currentChannel)].owner.UserID === userID
+
+    if (channels &&  channels.length > 0)
+        {
+          const tchan = channels.findIndex((channel) => channel.channelID === currentChannel)
+          if (channels[tchan].type !== EChannelType.DIRECT)
+            return channels[tchan].owner.UserID === userID
+          else
+            return false
+        }
     return false
 }
   const addChannel = () => {
@@ -51,9 +58,9 @@ function isOwner(): boolean {
           <Image
               src="/channel-add.svg"
               alt="ADD CHANNEL BUTTON"
-              width={26}
+              width={22}
               height={22}
-              style={{ height: "auto", width: "auto"}}
+              style={{width: "80%", height:"auto", maxWidth:"4vw", maxHeight:"4vh"}}
               />
         </button>
     { isPopupChannelsVisible && <ChatNewChannelPopup
@@ -82,6 +89,7 @@ function isOwner(): boolean {
                       alt="OPEN PARAMS BUTTON"
                       width={18}
                       height={18}
+                      style={{width: "80%", height:"auto", maxWidth:"4vw", maxHeight:"4vh"}}
                   />
                 </button>
           { actualChannel && isPopupSettingsVisible &&  <SettingsChannel className={"chat_new_channel_popup"}
@@ -118,7 +126,6 @@ function isOwner(): boolean {
                 {isPopupUsersVisible && <div id={"make_popup_disappear"} onClick={() => setPopupUsersVisible(false)}></div>}
                 <button  onClick={() => {
                     setPopupUsersVisible(!isPopupUsersVisible);
-                    console.log("POPUP userList size: " + usersList.length);
                 }}>
 
                 </button>
@@ -128,6 +135,7 @@ function isOwner(): boolean {
                                               usersList={usersList}
                                               showUserProps={true}
                                               adminMode={isOwner()}
+                                              // adminMode={false} //TODO: TODO: bug si mp , owner not define
                 /> }
 
             </>
@@ -166,10 +174,10 @@ function isOwner(): boolean {
               channelID={channel.channelID}
               channelName={channel.name}
               isInvite={false} //TODO:
-              isMp={false} //TODO:
+              isMp={channel.type === EChannelType.DIRECT} //TODO:
               socket={socket}
               isServList={false}
-              isOwner={channel.owner.UserID === userID }
+              isOwner={channel.owner ? channel.owner.UserID === userID : false }
               onClickFunction={() => {
                 setCurrentChannel(channel.channelID);
               }}
@@ -221,7 +229,7 @@ function isOwner(): boolean {
       </div>
      {!isServerList &&
       <div className='chat_channel_buttons'>
-          <span>{addChannel()}</span>&nbsp; &nbsp; | &nbsp; &nbsp; <span>{paramChannel()}</span> &nbsp; &nbsp; | &nbsp; &nbsp; <span>{showUsersInChannel()}</span>
+          <span>{addChannel()}</span> <span style={{marginLeft:"10%"}}>{actualChannel?.type !== EChannelType.DIRECT && paramChannel()}</span> <span>{showUsersInChannel()}</span>
       </div>}
     </div>
   )

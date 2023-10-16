@@ -421,7 +421,11 @@ export default function Game({className, token}: {className: string, token: stri
   }
 
   function cancelMatchmaking() {
-    socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchmaking(), userLogged.userContext);
+    console.log('gameMod = ' , gameMod.current)
+    if (gameMod.current === PODGAME.EGameMod.classic)
+      socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchmaking(), userLogged.userContext);
+    else
+      socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchmakingGhost(), userLogged.userContext);
     setStepCurrentSession(EStatusFrontGame.idle);
   }
 
@@ -540,6 +544,10 @@ export default function Game({className, token}: {className: string, token: stri
         {/* <Scoreboard/> // bugger*/}
         {/* <CenterDBG/> */}
         <Player className='paddle absolute ' position='left' refDiv={pad1Ref} /> 
+        {stepCurrentSession === EStatusFrontGame.matchmakingRequest &&
+            <div className='flex space-x-5 items-center justify-end pr-10 pl-10 pt-20'>
+              keys:<br/>up: up arrow key<br/>down: down arrow key
+            </div> }
         <Player className='paddle absolute'  position='right' refDiv={pad2Ref} />
         {!ballIsHidden && <Ball/>}
         {stepCurrentSession === EStatusFrontGame.idle &&

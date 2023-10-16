@@ -1,9 +1,13 @@
 import React, {useContext, useState} from "react";
 import {IUser} from "@/shared/types";
 import Button from "@/components/CustomButtonComponent";
-import {UserContext} from "@/context/globalContext";
+import {UserContext, SocketContextChat} from "@/context/globalContext";
 import * as apiReq from '@/components/api/ApiReq'
 import {NotificationManager} from 'react-notifications';
+import { wsChatRoutesBack } from "@/shared/routesApi";
+import { wsChatEvents } from "./api/WsReq";
+import { Socket } from "socket.io-client";
+
 
 export interface userOptionsProps {
    user: IUser;
@@ -14,6 +18,8 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
     const {userContext, setUserContext} = useContext(UserContext);
     const [isFollowed, setIsFollowed] = useState(!!relationships.followed.find(tmpUser => user.UserID == tmpUser.UserID));
     const [isBlocked, setIsBlocked] = useState(relationships.blocked && !!relationships.blocked.find(tmpUser => user.UserID == tmpUser.UserID));
+
+    const socketRef = useContext(SocketContextChat)
 
     function handleFollow(){
         if (!isFollowed)
@@ -65,6 +71,13 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
         }
     }
 
+    function handleMp() {
+        if (socketRef)
+         {  
+            console.log('Hey je suis handleMp')
+            wsChatEvents.createMP(socketRef, { targetID: user.UserID });}
+    }
+
     return (
         <>
             {userContext.UserID != user.UserID &&
@@ -76,7 +89,7 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
                         {!isBlocked ? <Button image={"/block.svg"} onClick={handleBlock} alt={"Block"} title={"Block"}/>
                         : <Button image={"/accept.svg"} onClick={handleBlock} alt={"Block"} margin={"0 5px 0 0"} title={"Unblock"}/>}
 
-                        <Button image={"/send-message.svg"} onClick={() => console.log("send MP button")} alt={"Send MP"} title={"MP"}/>
+                        <Button image={"/send-message.svg"} onClick={handleMp} alt={"Send MP"} title={"MP"}/>
 
                         {showAdminOptions &&
                             <span style={{float:"right"}}>

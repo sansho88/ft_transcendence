@@ -61,7 +61,7 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                     }
                     else {
                         allDiv.push(
-                            <div>No user followed</div>
+                            <div key={"NoUser" + uuidv4()}>No user followed</div>
                         )
                     }
                     setUserElements(allDiv);

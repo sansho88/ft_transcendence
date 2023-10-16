@@ -27,8 +27,10 @@ export class AuthController {
 
 	@HttpCode(HttpStatus.OK)
 	@Post('visit/login')
-	logVisitIn(@Body(new ValidationPipe()) loginDto: LogVisitDTOPipe) {
-		return this.authService.logInVisit(loginDto.login, loginDto.password);
+	logVisitIn(
+		@Body(new ValidationPipe()) loginDto: LogVisitDTOPipe,
+		@Param('2faToken') token: string) {
+		return this.authService.logInVisit(loginDto.login, loginDto.password, loginDto.token_2fa);
 	}
 
 	// /**************************************/
@@ -42,11 +44,12 @@ export class AuthController {
 	}
 
 	@HttpCode(HttpStatus.OK)
-	@Post('42/connect')
+	@Post('42/connect/:2faToken')
 	connect42(
-		@Body()body : string, 
+		@Param('2faToken') token: string,
+		@Body()body : string,
 		@Req() req: Request) {
-		return this.authService.connect42(Object.keys(body)[0], req);
+		return this.authService.connect42(Object.keys(body)[0], req, token);
 	}
 
 	@HttpCode(HttpStatus.OK)

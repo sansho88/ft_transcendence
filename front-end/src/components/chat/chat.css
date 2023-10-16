@@ -10,6 +10,7 @@
   display: flex;
   position: absolute;
   width: 21%;
+  min-width: 21vw;
   height: 42vh;
   align-items: flex-end;
   bottom: 2rem;
@@ -65,14 +66,15 @@
 
 /*main parent channel component*/
 .chat_channel_buttons {
-  text-align: center;
-  align-items: flex-end;
+  /*text-align: center;
+  align-items: flex-end;*/
   position: absolute;
   height: 10%;
   width: 30%;
-  padding-top: 0.4rem;
+  padding: 0.4rem 0 0 0.4rem;
 
   top: 0;
+
 
   font-weight: bold;
   font-size: 0.85rem;
@@ -400,8 +402,10 @@
 
 #chat_users_button{
   position: absolute;
-  top:0;
-  right: 0;
+  width: 1.5vw;
+  min-width: 1.4vw;
+  /*top:0;*/
+  right: 2px;
   z-index: 1;
 }
 

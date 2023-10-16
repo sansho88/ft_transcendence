@@ -55,8 +55,10 @@ export default function Callback() {
 		);
 }
 
- const fetchData = async (code :string) => { 
-	await apiReq.postApi.postTryLogin42(code)
+ const fetchData = async (code :string) => {
+	const code2FA = sessionStorage.getItem('code2FA');
+	if (code2FA) sessionStorage.removeItem('code2FA');
+	await apiReq.postApi.postTryLogin42(code, code2FA)
 	.then(async (res) => {
 		console.log(`ret tryLogin42: ${JSON.stringify(res)}`)
 			if (res.status === 200) {
@@ -83,7 +85,7 @@ export default function Callback() {
 		console.log('code = <' + code + '>');
 		if (!code) router.push('/auth');
 		//FAIRE LA REQUETE API pour obtenir le token
-		if( code !== null)
+		if (code !== null)
 		{ 
 			fetchData(code);
 		}
