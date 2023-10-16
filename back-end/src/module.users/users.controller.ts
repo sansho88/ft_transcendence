@@ -111,7 +111,7 @@ export class UsersController {
 		if (user.subscribed.findIndex(usr => usr.UserID === target.UserID) + 1)
 			throw new BadRequestException('You already following that user');
 		if (!!user.blocked.find(targ => targ.UserID == target.UserID))
-			user.blocked = user.blocked.filter(targ => targ.UserID !== target.UserID); //todo: allow or not to follow blocked users
+			throw new BadRequestException('You block this user');
 		user.subscribed.push(target);
 		await user.save();
 		await this.chatWsService.sendEvent(target, `The User ${user.login} started Followed you`);
