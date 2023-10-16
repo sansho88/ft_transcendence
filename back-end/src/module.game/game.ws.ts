@@ -5,49 +5,106 @@ import {
 	OnGatewayConnection,
 	OnGatewayDisconnect,
 	ConnectedSocket,
+	MessageBody,
 } from '@nestjs/websockets';
 
 import {Server, Socket} from 'socket.io';
 import {ServerGame} from 'src/module.game/server/ServerGame';
 import {wsChatRoutesBack, wsGameRoutes} from 'shared/routesApi';
 import {userInfoSocket} from 'shared/typesGame';
-import {UseGuards} from '@nestjs/common';
+import {Param, UseGuards, ValidationPipe} from '@nestjs/common';
 import {UserEntity, UserStatus} from '../entities/user.entity';
 import {CurrentUser} from '../module.auth/indentify.user';
 import {WSAuthGuard, getToken} from "../module.auth/auth.guard";
+import {accessToken} from '../dto/payload';
+import {JwtService} from '@nestjs/jwt';
+import { UsersService } from 'src/module.users/users.service';
 
 
+
+class SocketUserList {
+	userID: number;
+	socketID: string;
+}
 @WebSocketGateway({
 	namespace: '/game',
 })
-
 export class WebsocketGatewayGame
 	implements OnGatewayConnection, OnGatewayDisconnect {
-	constructor(private serverGame: ServerGame) {
+	constructor(
+		private serverGame: ServerGame, 
+		private jwtService: JwtService,
+		private usersService: UsersService,
+
+		) {
 	}
 
 	@WebSocketServer()  
 	public server: Server;
+	private socketUserList: SocketUserList[] = [];
 
-	handleConnection(@ConnectedSocket() client: Socket) {
+	async handleConnection(@ConnectedSocket() client: Socket) {
 		console.log('NEW CONNEXION WS CLIENT THEGAME, id = ' + client.id);
 		const tokenInfo = getToken(client);
 
 		const type = tokenInfo.type;
 		const token = tokenInfo.token;
+		if (type !== 'Bearer')
+			return client.disconnect();
+		let userID: number;
 
 		// console.log('token game = ' + token)
+		try {
+			const payloadToken: accessToken = await this.jwtService.verifyAsync(
+				token,
+				{
+					secret: process.env.SECRET_KEY,
+				},
+			);
+			userID = payloadToken.id;
+		} catch {
 
-		client.emit(wsGameRoutes.statusUpdate(), UserStatus.ONLINE);
-
-		this.server.to(client.id).emit('welcome', 'Bienvenue sur TheGame');
-		client.emit('welcome', 'Bienvenue sur TheGame');
-
+			return client.disconnect();
+		}
+		const user = await this.usersService.findOne(userID, ['channelJoined', 'subscribed'])
+		.catch(() => null);
+		
+		if (user == null)
+			return client.disconnect();
+		this.server.to(client.id).emit('welcome', 'Bienvenue sur TheGame');//FIXME:
+		client.emit('welcome', 'Bienvenue sur TheGame');//FIXME:
+		this.socketUserList.push({
+			socketID: client.id,
+			userID: userID,
+		});
 	}
 
-	handleDisconnect(client: Socket) {
+	async handleDisconnect(client: Socket) {
 		console.log('CLIENT ' + client.id + ' left');
 		this.serverGame.leftConnectionUserMatchmaking(client)
+
+		const tokenInfo = getToken(client);
+
+		const type = tokenInfo.type;
+		const token = tokenInfo.token;
+		if (type !== 'Bearer') return client.disconnect();
+		if (!token) return client.disconnect();
+		let payloadToken: accessToken;
+		try {
+			payloadToken = await this.jwtService.verifyAsync(token, {
+				secret: process.env.SECRET_KEY,
+			});
+		} catch {
+				return client.disconnect();
+		}
+		const user = await this.usersService
+			.findOne(payloadToken.id)
+			.catch(() => null);
+		if (!user)
+			return client.disconnect();
+		this.socketUserList = this.socketUserList.filter(value => value.socketID != client.id);
+		console.log(`CLIENT ${client.id} left CHAT WS`);
+		return client.disconnect();
 	}
 
 	emitToGameRoom(room: string, payload: any) {
@@ -135,13 +192,37 @@ export class WebsocketGatewayGame
 	@SubscribeMessage(wsChatRoutesBack.createChallenge())
 	@UseGuards(WSAuthGuard)
 	createChallengeGame(
+		@MessageBody(new ValidationPipe()) data: CreateChannel,
 		@ConnectedSocket() client: Socket,
-		@CurrentUser() user: UserEntity
+		@CurrentUser() user: UserEntity,
 	) {
 		// console.log(client.id + ': ' + payload.nickname);
 		// console.log('json user: ' + JSON.stringify(payload));
 		const player: userInfoSocket = {socket: client, user};
-		this.serverGame.createChallenge(this.server, )
+		// this.serverGame.createChallenge(this.server, ) //TODO: TODO:
 		client.emit('info', `Trainning game loading...`);
+	}
+
+
+
+
+	/**
+	 * Return a List of all the Socket used by the User
+	 * */
+	private async getSocket(userID: number) {
+		const indexes = this.socketUserList.map(
+			value => userID == value.userID
+		);
+		const socketIDLst = this.socketUserList.filter((value, index) => indexes[index]);
+		const socketLst = await this.server.fetchSockets();
+
+		return socketLst.filter(socket => {
+			for (const Id of socketIDLst) {
+				console.log('id = ', Id.socketID);
+				if (Id.socketID == socket.id)
+					return true;
+			}
+			return false;
+		})
 	}
 }

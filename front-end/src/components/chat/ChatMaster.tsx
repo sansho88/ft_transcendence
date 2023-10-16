@@ -44,6 +44,11 @@ export default function ChatMaster({className, token, userID}: {className: strin
   if(socketChat?.disconnected) 
   { 
     console.log(`Chat WS is connected in ChatMaster`);
+    if (!token){
+      const tokentmp = localStorage.getItem('token');
+      if (tokentmp)
+        token = tokentmp;
+    }
     socketChat.auth = { type: `Bearer`, token: `${token}` };
     socketChat.connect();
   }

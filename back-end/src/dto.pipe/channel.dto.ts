@@ -57,3 +57,9 @@ export class ChangeChannelDTOPipe {
 	@IsBoolean()
 	privacy: boolean;
 }
+
+export class CreateChallengeDTOPPipe {
+	@IsNumber()
+	@IsNotEmpty()
+	targetID: number
+}
