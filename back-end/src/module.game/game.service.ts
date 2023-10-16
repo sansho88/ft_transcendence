@@ -139,14 +139,21 @@ export class GameService {
 		return stats;
 	}
 
-	async endGameStatus(UserID, UserID2) {
-		setTimeout(async () => {
-			const user1 = await this.usersService.findOne(UserID);
-			if (user1.status != UserStatus.OFFLINE)
-				await this.usersService.userStatus(user1, UserStatus.ONLINE)
-			const user2 = await this.usersService.findOne(UserID2);
-			if (user2.status != UserStatus.OFFLINE)
-				await this.usersService.userStatus(user2, UserStatus.ONLINE)
-		}, 2000);
+	async endGameStatus(UserID, UserID2?) {
+		if (UserID2)
+			setTimeout(async () => {
+				const user1 = await this.usersService.findOne(UserID);
+				if (user1.status != UserStatus.OFFLINE)
+					await this.usersService.userStatus(user1, UserStatus.ONLINE)
+				const user2 = await this.usersService.findOne(UserID2);
+				if (user2.status != UserStatus.OFFLINE)
+					await this.usersService.userStatus(user2, UserStatus.ONLINE)
+			}, 2000);
+		else
+			setTimeout(async () => {
+				const user1 = await this.usersService.findOne(UserID);
+				if (user1.status != UserStatus.OFFLINE)
+					await this.usersService.userStatus(user1, UserStatus.ONLINE)
+			}, 2000);
 	}
 }

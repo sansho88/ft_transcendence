@@ -575,8 +575,6 @@ export class GameSession {
 		setTimeout(() => {
 				this.serverSocket.to(this.gameRoomEvent).emit('reset');
 				console.log('reset');
-				this.player1.socket.emit(wsGameRoutes.statusUpdate(), POD.EStatus.Online);
-				this.player2.socket.emit(wsGameRoutes.statusUpdate(), POD.EStatus.Online);
 				this.player1.socket.leave(this.gameRoomEvent);
 				this.player2.socket.leave(this.gameRoomEvent);
 			}
@@ -601,9 +599,11 @@ export class GameSession {
 				.emit('info', `${this.player2.user.nickname} won this game`);
 			console.log(`${this.player2.user.nickname} won this game`);
 		}
-		if (this.gameMod != EGameMod.trainning)
+		if (this.gameMod != EGameMod.trainning) {
 			this.gameService.create(this.player1.user.UserID, this.player2.user.UserID, this.table.scoreP1, this.table.scoreP2, this.startDate);
-		this.gameService.endGameStatus(this.player1.user.UserID, this.player2.user.UserID);
+			this.gameService.endGameStatus(this.player1.user.UserID, this.player2.user.UserID);
+		} else
+			this.gameService.endGameStatus(this.player1.user.UserID);
 		this.messageEndGameAndReset();
 	}
 

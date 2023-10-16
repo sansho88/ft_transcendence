@@ -117,14 +117,14 @@ export class WebsocketGatewayGame
 
 	@SubscribeMessage(wsGameRoutes.createTrainningGame())
 	@UseGuards(WSAuthGuard)
-	createTrainningGame(
+	async createTrainningGame(
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity
 	) {
 		// console.log(client.id + ': ' + payload.nickname);
 		// console.log('json user: ' + JSON.stringify(payload));
 		const player: userInfoSocket = {socket: client, user};
-		this.serverGame.addPlayerInTrainningSession(player, this.server);
+		await this.serverGame.addPlayerInTrainningSession(player, this.server);
 		client.emit('info', `Trainning game loading...`);
 	}
 }
