@@ -12,7 +12,7 @@ interface levelList {
 }
 
 export interface leaderboard {
-	userID: number;
+	user: UserEntity;
 	level: number;
 	rank: number;
 }
@@ -112,7 +112,7 @@ export class GameService {
 		allLevel.sort((a, b) => b.level - a.level).forEach((level, index) => {
 			if (index > 0 && level.level < allLevel[index - 1].level) rank++;
 			leaderboard.push({
-				userID: lstUser.find(user => user.UserID === level.userID).UserID,
+				user: lstUser.find(user => user.UserID === level.userID),
 				level: level.level,
 				rank: rank,
 			});
