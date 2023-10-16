@@ -1,22 +1,18 @@
 import Profile from "@/components/ProfileComponent";
-import Stats from "@/components/StatsComponent";
 import Button from "@/components/CustomButtonComponent";
 import UserList from "@/components/UserListComponent";
 import Game from "@/components/game/Game";
 import React, {useContext, useEffect, useRef} from "react";
 import {LoggedContext, SocketContextGame, UserContext} from "@/context/globalContext";
-import {EStatus} from "@/shared/types";
-import * as apiReq from "@/components/api/ApiReq";
+import {authManager} from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
-import {authManager} from "@/components/api/ApiReq";
 import NotifComponent from "@/components/notif/NotificationComponent";
 import Button2FA from "@/components/2FA/2FAComponent";
 import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
-import {wsGameRoutes} from "@/shared/routesApi";
 import LoadingComponent from "@/components/waiting/LoadingComponent";
-import UserOptions from "@/components/UserOptions";
+import MatchHistory from "@/components/MatchHistoryComponent";
 
 interface HomePageProps {
     className: unknown
@@ -81,6 +77,7 @@ const HomePage = ({className}: HomePageProps) => {
                         <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
                     </Profile>
 
+                <MatchHistory/>
                 <UserList className={"friends"} avatarSize={"medium"} showUserProps={true}/>
                 <Button className={"logout"} image={"/logout.svg"} onClick={() => {
                     localStorage.clear();

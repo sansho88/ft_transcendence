@@ -8,7 +8,7 @@ import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
 import {EStatus, IUser} from "@/shared/types";
 import {getUserFromId} from "@/app/auth/Auth";
-import {SocketContextChat, SocketContextGame} from "@/context/globalContext";
+import {SelectedUserContext, SocketContextChat, SocketContextGame} from "@/context/globalContext";
 import {NotificationManager} from 'react-notifications';
 import {IGameSessionInfo} from "@/shared/typesGame";
 import Stats from "@/components/StatsComponent";
@@ -22,6 +22,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
 
     const [modifiedNick, setNickText] = useState<string>(user.nickname ? user.nickname : user.login);
     const [editMode, setEditMode] = useState(false);
+    const {selectedUserContext, setSelectedUserContext} = useContext(SelectedUserContext);
     const [nickErrorMsg, setNickErrMsg] = useState("");
     const [statusColor, setStatusColor] = useState("grey");
     const [userStatus, setUserStatus] = useState(user.status);
@@ -194,7 +195,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
 
     return (
         <>
-            <div className={className}>
+            <div className={className} onClick={() => setSelectedUserContext(user)}>
                 <Avatar path={user.avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus}/>
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
