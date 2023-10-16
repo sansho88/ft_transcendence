@@ -240,4 +240,10 @@ export class ChannelService {
 		await channel.save();
 		return channel;
 	}
+
+	async checkBlock(user: UserEntity, channel: ChannelEntity) {
+		const targetID = channel.userList.find(usr => usr.UserID != user.UserID).UserID;
+		const target = await this.userService.findOne(targetID, ['blocked']);
+		return !!target.blocked.find(usr => usr.UserID == user.UserID)
+	}
 }

@@ -260,6 +260,8 @@ export class ChatGateway
 			return client.emit('sendMsg', {error: 'There is no such Channel'});
 		if (await this.channelService.userIsMute(channel, user))
 			return client.emit('sendMsg', {error: 'You are muted on that channel'});
+		if (await this.channelService.checkBlock(user, channel))
+			return client.emit('sendMsg', {error: 'This User blocked you'});
 		if (await this.channelService.userInChannel(user, channel)) {
 			await this.messageService.create(user, data.content, channel);
 			return await this.SendMessage(channel, user, data.content);
@@ -302,8 +304,8 @@ export class ChatGateway
 		client1Lst.map(socket => socket.join(`${mp.channelID}`));
 		const client2Lst = await this.getSocket(user2.UserID);
 		client2Lst.map(client2 => client2.join(`${mp.channelID}`))
-		
-		client1Lst.map(socket => socket.emit(`createRoom`, {channel: mp})); 
+
+		client1Lst.map(socket => socket.emit(`createRoom`, {channel: mp}));
 		client2Lst.map(socket => socket.emit(`createRoom`, {channel: mp})); //update list en real time after join this
 	}
 
