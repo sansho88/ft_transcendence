@@ -30,6 +30,12 @@ export class GameController {
 		return await this.gameService.getStats(user);
 	}
 
+	@Get('leaderboard')
+	@UseGuards(AuthGuard)
+	async getLeaderboard() {
+		return await this.gameService.getLeaderboard();
+	}
+
 	@Get('stats/:userID')
 	@UseGuards(AuthGuard)
 	async getStatsUser(
