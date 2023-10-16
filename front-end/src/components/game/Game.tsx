@@ -78,6 +78,12 @@ export default function Game({className, token}: {className: string, token: stri
   useEffect(( ) => {
     if (logged === true) {
       if(socketRef.current){
+        if (!token){
+          const tokentmp = localStorage.getItem('token');
+          if (tokentmp)
+            token = tokentmp;
+        }
+        
         socketRef.current.auth = { type: `Bearer`, token: `${token}` };
         console.log('token2 ' + token)
         socketRef.current.connect();
