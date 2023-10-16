@@ -4,6 +4,7 @@ import {UsersService} from "../module.users/users.service";
 import {AuthGuard} from "../module.auth/auth.guard";
 import {CurrentUser} from "../module.auth/indentify.user";
 import {UserEntity} from "../entities/user.entity";
+import {leaderboard} from "./game.service"
 
 @Controller('game')
 export class GameController {
@@ -28,6 +29,12 @@ export class GameController {
 		@CurrentUser() user: UserEntity
 	) {
 		return await this.gameService.getStats(user);
+	}
+
+	@Get('leaderboard')
+	@UseGuards(AuthGuard)
+	async getLeaderboard() {
+		return await this.gameService.getLeaderboard();
 	}
 
 	@Get('stats/:userID')
