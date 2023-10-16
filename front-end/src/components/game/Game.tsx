@@ -8,6 +8,7 @@ import * as apiRoutes from '@/shared/routesApi'
 import * as ClipLoader from 'react-spinners'
 import SwitcherTheme from '@/components/game/SwitcherTheme'
 import {NotificationContainer, NotificationManager} from 'react-notifications';
+import ChallengeList from './ChallengeList'
 
 enum EStatusFrontGame {
   idle,
@@ -533,6 +534,15 @@ export default function Game({className, token}: {className: string, token: stri
     }
   }, [tableRef.current])
   
+  const challengeList = () => {
+  
+    return (
+        <div>
+          <ChallengeList/>
+        </div>
+      
+      )
+  }
 
 
   return (
@@ -543,6 +553,7 @@ export default function Game({className, token}: {className: string, token: stri
       <Table tableRef={tableRef} className='table w-full h-full relative font-vt323'> 
         {/* <Scoreboard/> // bugger*/}
         {/* <CenterDBG/> */}
+        {challengeList()}
         <Player className='paddle absolute ' position='left' refDiv={pad1Ref} /> 
         {stepCurrentSession === EStatusFrontGame.matchmakingRequest &&
             <div className='flex space-x-5 items-center justify-end pr-10 pl-10 pt-20'>

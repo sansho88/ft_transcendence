@@ -5,6 +5,8 @@ import {Server, Socket} from 'socket.io';
 import {userInfoSocket, EGameMod} from 'shared/typesGame';
 import {v4 as uuidv4} from "uuid";
 import {GameService} from '../game.service';
+import { IChallenge, IUser } from 'shared/types';
+import { ChallengeManager } from './ChallengeManager'
 
 // @Injectable()
 // export class gameSocketService {
@@ -23,6 +25,7 @@ export class ServerGame {
 	private matchmakingGhost: Matchmaking = new Matchmaking(this.gameService);
 	private gameSession: GameSession[] = [];
 	private trainningSession: GameSession[] = []; //pour ne pas les melangers, pas de spectator, donc pas besoin de get cette liste
+	private challengeList: ChallengeManager = new ChallengeManager()//FIXME:
 
 
 	public addPlayerToMatchmaking(player: userInfoSocket, server: Server) {
@@ -91,7 +94,16 @@ export class ServerGame {
 	public leftConnectionUserMatchmaking(playerSocket: Socket) {
 		this.matchmaking.leftConnection(playerSocket)
 		this.matchmakingGhost.leftConnection(playerSocket)
+	}
 
-	
+	public createGame(server: Server, p1: userInfoSocket, p2: userInfoSocket, gameMod: EGameMod) {
+		const startDate: Date = new Date();
+		const generateSessionName: string = uuidv4();
+		console.log(`NEW CHALLENGE GAME: ${generateSessionName}  ${p2.user.nickname} vs ${p1.user.nickname})`);
+		return new GameSession(server, p1, p2, startDate, this.gameSession.length, gameMod, generateSessionName, this.gameService);
+	}
+
+	public createChallenge(server: Server, p1: userInfoSocket, p2: userInfoSocket, gameMod: EGameMod) {
+		
 	}
 }

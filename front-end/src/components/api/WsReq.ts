@@ -14,7 +14,7 @@ export namespace wsChatEvents {
   export function joinRoom(socket: Socket, joinChannel: channelsDTO.IJoinChannelDTOPipe) {
     socket.emit(wsChatRoutesBack.joinRoom(), joinChannel);}
 
-    export function createMP(socket: Socket, userTargetMp: channelsDTO.ICreateMpDTOPPipe) {
+  export function createMP(socket: Socket, userTargetMp: channelsDTO.ICreateMpDTOPPipe) {
     socket.emit(wsChatRoutesBack.createMP(), userTargetMp);}
 
   export function leaveRoom(socket: Socket, leaveChannel: channelsDTO.ILeaveChannelDTOPipe) {
@@ -32,6 +32,8 @@ export namespace wsChatEvents {
     socket.emit(wsChatRoutesClient.updateChannelsJoined())
   }
 
+  export function challenge(socket: Socket, userTargetChallenge: channelsDTO.ICreateChallengeDTOPPipe) {
+    socket.emit(wsChatRoutesBack.createChallenge(), userTargetChallenge);}
 }
 
 

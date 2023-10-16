@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useContext, useEffect, useState, useRef, createContext } from 'react'
-import { LoggedContext, SocketContextChat, UserContext } from '@/context/globalContext'
+import { LoggedContext, SocketContextChat, SocketContextGame, UserContext } from '@/context/globalContext'
 import { IChannel } from '@/shared/typesChannel'
 import { Channel } from './class/Channel'
 import ChatInput from './subComponents/ChatInput'
@@ -30,9 +30,10 @@ export default function ChatMaster({className, token, userID}: {className: strin
   const [channels, setChannels] = useState<IChannel[]>([]) //list des channels JOINED
   const [messagesChannel, setMessagesChannel] = useState<messageDTO.IReceivedMessageEventDTO[]>([]) //les messages actuellement load du channel //TODO: faire route ws avec ping et update
   const [currentChannel, setCurrentChannel] = useState<number>(-1); // definir le channel en cours by ID
-
-
+  
+  
   const socketChat = useContext(SocketContextChat);
+  const socketGame = useContext(SocketContextGame);
   const {logged, setLogged} = useContext(LoggedContext);
 
   const setterCurrentChannel = (newIdChannel: number) => {

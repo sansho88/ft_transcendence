@@ -62,6 +62,8 @@ export namespace wsChatRoutesBack {
 	export const leaveRoom=()      						   		=> {return `leaveRoom`} 
 	export const sendMsg=()      						   			=> {return `sendMsg`} 
 	export const createMP=()      						   			=> {return `createMP`} 
+	// export const requestChallenge=()      						   			=> {return `requestChallenge`} 
+	export const createChallenge=()      						   			=> {return `createChallenge`} 
 	
 }
 export namespace wsChatRoutesClient {

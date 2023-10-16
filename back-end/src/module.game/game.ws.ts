@@ -9,7 +9,7 @@ import {
 
 import {Server, Socket} from 'socket.io';
 import {ServerGame} from 'src/module.game/server/ServerGame';
-import {wsGameRoutes} from 'shared/routesApi';
+import {wsChatRoutesBack, wsGameRoutes} from 'shared/routesApi';
 import {userInfoSocket} from 'shared/typesGame';
 import {UseGuards} from '@nestjs/common';
 import {UserEntity, UserStatus} from '../entities/user.entity';
@@ -128,6 +128,20 @@ export class WebsocketGatewayGame
 		// console.log('json user: ' + JSON.stringify(payload));
 		const player: userInfoSocket = {socket: client, user};
 		this.serverGame.addPlayerInTrainningSession(player, this.server);
+		client.emit('info', `Trainning game loading...`);
+	}
+
+
+	@SubscribeMessage(wsChatRoutesBack.createChallenge())
+	@UseGuards(WSAuthGuard)
+	createChallengeGame(
+		@ConnectedSocket() client: Socket,
+		@CurrentUser() user: UserEntity
+	) {
+		// console.log(client.id + ': ' + payload.nickname);
+		// console.log('json user: ' + JSON.stringify(payload));
+		const player: userInfoSocket = {socket: client, user};
+		this.serverGame.createChallenge(this.server, )
 		client.emit('info', `Trainning game loading...`);
 	}
 }

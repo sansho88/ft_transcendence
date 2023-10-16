@@ -1,7 +1,7 @@
 import React, {useContext, useState} from "react";
 import {IUser} from "@/shared/types";
 import Button from "@/components/CustomButtonComponent";
-import {UserContext, SocketContextChat} from "@/context/globalContext";
+import {UserContext, SocketContextChat, SocketContextGame} from "@/context/globalContext";
 import * as apiReq from '@/components/api/ApiReq'
 import {NotificationManager} from 'react-notifications';
 import { wsChatRoutesBack } from "@/shared/routesApi";
@@ -20,6 +20,7 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
     const [isBlocked, setIsBlocked] = useState(relationships.blocked && !!relationships.blocked.find(tmpUser => user.UserID == tmpUser.UserID));
 
     const socketRef = useContext(SocketContextChat)
+    const socketRefGame = useContext(SocketContextGame)
 
     function handleFollow(){
         if (!isFollowed)
@@ -73,9 +74,14 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
 
     function handleMp() {
         if (socketRef)
-         {  
-            console.log('Hey je suis handleMp')
-            wsChatEvents.createMP(socketRef, { targetID: user.UserID });}
+            wsChatEvents.createMP(socketRef, { targetID: user.UserID });
+    }
+        
+    function handleChallenge() {
+        if (socketRefGame){
+            console.log('challenge user request => ' , user.login)
+            wsChatEvents.challenge(socketRefGame, {targetID: user.UserID})
+        }
     }
 
     return (
@@ -98,6 +104,7 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
                                 <Button image={"/hammer.svg"} onClick={() => console.log("Ban User button")} alt={"Ban"} title={"Ban"}/>
                             </span>
                         }
+                        <Button image={"/sword.svg"} onClick={handleChallenge} alt={"Challenge"} title={"Challenge"}/>
                     </span>
                 </div>}
         </>

@@ -41,4 +41,8 @@ export namespace channelsDTO {
 	export interface ICreateMpDTOPPipe {
 		targetID: number
 	}
+
+	export interface ICreateChallengeDTOPPipe {
+		targetID: number
+	}
 }
