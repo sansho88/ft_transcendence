@@ -21,13 +21,13 @@ Transcendence est un projet final de l'école 42. Il s'agit de créer une versio
 1. Clonez le dépôt:
 
 ```bash
-git clone [url-du-dépôt]
+git clone https://github.com/BenJ3D/ft_transcendence.git
 ```
 
 2. Naviguez vers le répertoire du projet et lancez Docker Compose:
 
 ```bash
-cd [nom-du-répertoire]
+cd ft_transcendence
 docker-compose up --build
 ```
 
