@@ -25,7 +25,7 @@ export class ServerGame {
 	private matchmakingGhost: Matchmaking = new Matchmaking(this.gameService);
 	private gameSession: GameSession[] = [];
 	private trainningSession: GameSession[] = []; //pour ne pas les melangers, pas de spectator, donc pas besoin de get cette liste
-	// private challengeList: ChallengeManager = new ChallengeManager()//FIXME:
+	private challengeList: ChallengeManager[] = []//FIXME:
 
 
 	public addPlayerToMatchmaking(player: userInfoSocket, server: Server) {

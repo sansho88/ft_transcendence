@@ -73,7 +73,11 @@ export namespace wsChatListen {
     })
   }
 
-
+  export function newChallengeListen(socket: Socket) {
+    socket.on(wsChatRoutesBack.createChallenge(), (res) => {
+      console.log(res);//TODO: reception des donner pour accepter le challenge (login, nickname, et event de reponse)
+    })
+  }
 
 
 

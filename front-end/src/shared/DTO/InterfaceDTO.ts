@@ -1,3 +1,4 @@
+import { userInfoSocket } from "shared/typesGame";
 import { IUser } from "../types";
 
 export namespace messageDTO {
@@ -44,5 +45,15 @@ export namespace channelsDTO {
 
 	export interface ICreateChallengeDTOPPipe {
 		targetID: number
+	}
+
+	export interface IChallengeRequestDTOPipe {
+		challenger: userInfoSocket;
+		userTargetID: number;
+	}
+	
+	export interface I {
+		challenger: userInfoSocket;
+		userTargetID: number;
 	}
 }

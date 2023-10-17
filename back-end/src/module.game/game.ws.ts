@@ -19,6 +19,7 @@ import {WSAuthGuard, getToken} from "../module.auth/auth.guard";
 import {accessToken} from '../dto/payload';
 import {JwtService} from '@nestjs/jwt';
 import { UsersService } from 'src/module.users/users.service';
+import { CreateChallengeDTOPPipe } from 'src/dto.pipe/channel.dto';
 
 
 
@@ -192,7 +193,7 @@ export class WebsocketGatewayGame
 	@SubscribeMessage(wsChatRoutesBack.createChallenge())
 	@UseGuards(WSAuthGuard)
 	createChallengeGame(
-		@MessageBody(new ValidationPipe()) data: CreateChannel,
+		@MessageBody(new ValidationPipe()) data: CreateChallengeDTOPPipe,
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity,
 	) {
@@ -200,8 +201,11 @@ export class WebsocketGatewayGame
 		// console.log('json user: ' + JSON.stringify(payload));
 		const player: userInfoSocket = {socket: client, user};
 		// this.serverGame.createChallenge(this.server, ) //TODO: TODO:
-		client.emit('info', `Trainning game loading...`);
+		client.emit('info', `Challenge requested...`);
 	}
+
+
+
 
 
 
