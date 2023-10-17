@@ -258,7 +258,7 @@ export class ChatGateway
 			return client.emit('sendMsg', {error: 'There is no such Channel'});
 		if (await this.channelService.userIsMute(channel, user))
 			return client.emit('sendMsg', {error: 'You are muted on that channel'});
-		if (await this.channelService.checkBlock(user, channel))
+		if (channel.mp && await this.channelService.checkBlock(user, channel))
 			return client.emit('sendMsg', {error: 'This User blocked you'});
 		if (await this.channelService.userInChannel(user, channel)) {
 			await this.messageService.create(user, data.content, channel);
