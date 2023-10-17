@@ -224,10 +224,10 @@ body {
 }
 
 .matchHistory{
-    max-height: 21vh;
-    width: 32ch;
+    max-height: 42%;
+    width: auto;
     overflow-y: auto;
-    scrollbar-width: thin;
+    scrollbar-width: none;
 
     position: absolute;
     left: 1vw;
@@ -238,11 +238,20 @@ body {
     border-style: inherit ;
     box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
     border-radius: 8px;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+}
 
+.matchHistory h1{
+    font-size: 2.2ch;
+    text-align: center;
+    padding: 1ch 0;
+    text-shadow: 1px 1px 5px darkgrey ;
+    font-weight: bold;
 }
 
 #match{
-    width: 30ch;
+    width: auto;
     background: rgba(112, 112, 112, 0.27);
     margin: 0.4rem -1rem;
 

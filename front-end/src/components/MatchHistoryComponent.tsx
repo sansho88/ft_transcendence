@@ -4,7 +4,7 @@ import {getApi} from "@/components/api/ApiReq";
 import {v4 as uuidv4} from "uuid";
 import {SelectedUserContext} from "@/context/globalContext";
 
-const MatchHistory : React.FC = ({className, id, userListIdProperty}) => {
+const MatchHistory : React.FC = () => {
     const [matchesList, setMatchesList] = useState<IMatch[]>([]);
     const {selectedUserContext, setSelectedUserContext} = useContext(SelectedUserContext);
     let matchElements : React.JSX.Element[] = [];
@@ -34,13 +34,19 @@ const MatchHistory : React.FC = ({className, id, userListIdProperty}) => {
 
     if (matchesList.length > 0 && matchesList.at(0).ID >= 0){
         for (const match of matchesList) {
-            const p1Color = match.score1 > match.score2 ? "winner" : "looser";
-            const p2Color = p1Color == "looser" ? "winner" : "looser";
+            const p1Color = match.player1.UserID == selectedUserContext.UserID ? "gold" : "white";
+            const p2Color = p1Color == "white" ? "gold" : "white";
 
             matchElements.push(
                 <li key={match.ID + "List" + uuidv4()}>
                     <div id={"match"}>
-                        <span id={p1Color}>{match.player1.nickname}</span> <span id={p2Color}>{match.player2.nickname}</span><br/>
+                        <span id={"winner"} style={{color:p1Color, cursor:"pointer"}} onClick={() => setSelectedUserContext(match.player1)}>
+                            {match.player1.nickname}
+                        </span>
+                        <span id={"looser"} style={{color:p2Color, cursor:"pointer"}} onClick={() => setSelectedUserContext(match.player2)}>
+                            {match.player2.nickname}
+                        </span>
+                        <br/>
                         <span id={"scorep1"}>{match.score1}</span>  <span id={"scorep2"}>{match.score2}</span>
                     </div>
                 </li>
@@ -55,7 +61,7 @@ const MatchHistory : React.FC = ({className, id, userListIdProperty}) => {
 
     return (
         <div className={"matchHistory"}>
-            <h1>Matches history</h1>
+            <h1>MATCHES HISTORY</h1>
             {selectedUserContext ?
                 <ul>
                     {selectedUserContext.nickname} ({selectedUserContext.login})
