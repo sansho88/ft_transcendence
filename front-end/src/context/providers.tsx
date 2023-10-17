@@ -1,10 +1,11 @@
 "use client";
 
-import {createContext, useContext, useEffect, useRef, useState} from "react";
+import {useEffect, useState} from "react";
 import {IUser} from "@/shared/types";
 import {
 	ThemeContext,
 	UserContext,
+    SelectedUserContext,
 	LoggedContext,
 	OriginContext,
 	LoggedContextType,
@@ -69,6 +70,7 @@ export function SocketProvider({ children }) {
   export function Providers({children}) {
     const [isLogged, setIsLogged] = useState<boolean>(false);
     const [userContext, setUserContext] = useState<IUser>(null);
+    const [selectedUserContext, setSelectedUserContext] = useState<IUser>(null);
   
 	return (
 		<>
@@ -76,7 +78,9 @@ export function SocketProvider({ children }) {
 
 					<SocketProvider>
 						<UserContext.Provider value={{userContext: userContext, setUserContext: setUserContext}}>
-							{children}
+                            <SelectedUserContext.Provider value={{selectedUserContext: selectedUserContext, setSelectedUserContext: setSelectedUserContext}}>
+                                {children}
+                            </SelectedUserContext.Provider>
 						</UserContext.Provider>
 					</SocketProvider>
 

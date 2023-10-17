@@ -128,6 +128,8 @@ export namespace game {
 
 	export const getStatsFromAllUsers = () => {return `${serverApi}/${routeGame}/stats/`};
 	export const getUserStatsById = (userId: number) => {return `${serverApi}/${routeGame}/stats/${userId}`};
+	export const getMatchHistory = () => {return `${serverApi}/${routeGame}/myGame`;}
+	export const getMatchHistoryFromUserId = (userId: number) => {return `${serverApi}/${routeGame}/users/${userId}`;}
 
 }
 
