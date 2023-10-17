@@ -1,4 +1,4 @@
-# Projet Transcendence
+# Projet Transcendence (10/23 -- WIP)
 
 ## Description
 
