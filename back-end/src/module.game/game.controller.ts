@@ -5,6 +5,7 @@ import {AuthGuard} from "../module.auth/auth.guard";
 import {CurrentUser} from "../module.auth/indentify.user";
 import {UserEntity} from "../entities/user.entity";
 import {leaderboard} from "./game.service"
+import {checkLimitID} from "../dto.pipe/checkIntData";
 
 @Controller('game')
 export class GameController {
@@ -28,6 +29,7 @@ export class GameController {
 	async findOther(
 		@Param('UserID', ParseIntPipe) targetID: number,
 	) {
+		checkLimitID(targetID);
 		const target = await this.usersService.findOne(targetID);
 		return this.gameService.getAllGame(target, await this.gameService.getAll());
 	}
@@ -51,6 +53,7 @@ export class GameController {
 	async getStatsUser(
 		@Param('userID', ParseIntPipe) targetID,
 	) {
+		checkLimitID(targetID);
 		const target = await this.usersService.findOne(targetID);
 		return await this.gameService.getStats(target);
 	}
