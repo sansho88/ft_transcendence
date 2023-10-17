@@ -200,24 +200,28 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
                     fontFamily: "sans-serif",
                     color: "#07C3FF",
                     lineHeight: "1.5em",
+                    marginLeft: "10px",
                     display: "inline-block",
                     position: "relative",
-                    marginLeft: "10px",
-                    paddingTop: "2%",
-                    top: "2vh"
-
+                    transition:"1000ms",
+                    top: "0"
                 }
                 }>
-                    <h2 id={"login"} style={{ color: "darkgrey"}}>{user.login}</h2>
+                    <h2 id={"login"} style={{ color: "darkgrey", marginTop: "0"}}>{user.login}</h2>
                     {editedNick()}
 
                     <p id={"status"} style={{
                         color:statusColor,
-                        transition:"1000ms"}}>
+                        transition:"0ms",
+                        position: "relative", 
+                        top: "0",
+                        fontFamily: "sans-serif",
+                        lineHeight: "1.5em",
+                        }}>
                         {getEnumNameByIndex(EStatus, userStatus)}
                     </p>
                 </div>
-                <div id={"children"} style={{marginLeft: "4px"}}>
+                <div id={"children"} style={{marginLeft: "4px", marginTop: "6px"}}>
                     {showStats && <Stats user={user}/>}
                     {children}
                 </div>
