@@ -1,4 +1,4 @@
-import {BadRequestException, forwardRef, Inject, Injectable} from '@nestjs/common';
+import {BadRequestException, Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {ChannelEntity, ChannelType} from '../entities/channel.entity';
@@ -15,7 +15,6 @@ export class ChannelService {
 	constructor(
 		@InjectRepository(ChannelEntity)
 		private channelRepository: Repository<ChannelEntity>,
-		@Inject(forwardRef(() => UsersService))
 		private userService: UsersService,
 		private channelCredentialService: ChannelCredentialService,
 		private bannedService: BannedService,
@@ -126,7 +125,7 @@ export class ChannelService {
 			case ChannelType.PRIVATE:
 				return false; // todo: redo with invite !
 			case ChannelType.DIRECT:
-				return false;
+				return false; // todo: WIP
 		}
 	}
 
@@ -246,23 +245,5 @@ export class ChannelService {
 		const targetID = channel.userList.find(usr => usr.UserID != user.UserID).UserID;
 		const target = await this.userService.findOne(targetID, ['blocked']);
 		return !!target.blocked.find(usr => usr.UserID == user.UserID)
-	}
-
-	async createGenerale(admin?: UserEntity) {
-		const channels = await this.channelRepository.find({
-			where: {type: ChannelType.PUBLIC}
-		})
-		let channel = channels.find(chan => chan.owner && (chan.owner.UserID === admin.UserID))
-		console.log(channel);
-		if (!channel && admin)
-			channel = await this.channelRepository.create({
-				name: `Global`,
-				userList: [],
-				type: ChannelType.PUBLIC,
-				mp: false,
-				owner: admin,
-			}).save();
-
-		return channel;
 	}
 }
