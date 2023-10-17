@@ -8,7 +8,10 @@ import {ChannelModule} from "../module.channels/channel.module";
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([UserEntity, UserCredentialEntity]),
+		TypeOrmModule.forFeature([
+			UserEntity,
+			UserCredentialEntity,
+		]),
 		forwardRef(() => ChannelModule),
 	],
 	controllers: [UsersController],

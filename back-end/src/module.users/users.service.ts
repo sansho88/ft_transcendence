@@ -4,12 +4,14 @@ import {UserEntity, UserStatus} from '../entities/user.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {UserCredentialEntity} from '../entities/credential.entity';
+import {ChannelService} from "../module.channels/channel.service";
 
 @Injectable()
 export class UsersService {
 	constructor(
 		@InjectRepository(UserEntity)
-		private usersRepository: Repository<UserEntity>,
+		private readonly usersRepository: Repository<UserEntity>,
+		private readonly channelService: ChannelService,
 	) {
 	}
 
@@ -33,10 +35,12 @@ export class UsersService {
 			nickname = this.generateNickname();
 		while (await this.nicknameUsed(nickname))
 			nickname = this.generateNickname();
+		const channel = await this.channelService.createGenerale(await this.getAdmin());
 		const user = this.usersRepository.create({
 			login: newLogin,
 			nickname: nickname,
 			visit: newInvite,
+			channelJoined: [channel],
 		});
 		user.credential = newCredential;
 		await user.save();
@@ -115,5 +119,13 @@ export class UsersService {
 	unBlockUser(user: UserEntity, target: UserEntity) {
 		user.blocked = user.blocked.filter(block => block.UserID != target.UserID);
 		return user.save();
+	}
+
+	async getAdmin(cred?: UserCredentialEntity) {
+		let admin = await this.usersRepository.findOneBy({login: 'admin'});
+		if (!admin)
+			admin = await this.create('admin', true, cred);
+		return admin;
+
 	}
 }
