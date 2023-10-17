@@ -1,4 +1,4 @@
-import {Module, OnApplicationBootstrap} from '@nestjs/common';
+import {Module} from '@nestjs/common';
 import {ConfigModule} from '@nestjs/config';
 import {AppController} from './app.controller';
 import {AppService} from './app.service';
@@ -20,9 +20,6 @@ import {MuteEntity} from './entities/mute.entity';
 import {BannedEntity} from './entities/banned.entity';
 import {WebsocketGatewayGlobal} from './websocket/websocket.gateway';
 import {GameModule} from './module.game/game.module';
-import {ChannelService} from "./module.channels/channel.service";
-import {UsersService} from "./module.users/users.service";
-import {UserCredentialService} from "./module.auth/credential.service";
 
 @Module({
 	imports: [
@@ -58,18 +55,5 @@ import {UserCredentialService} from "./module.auth/credential.service";
 	controllers: [AppController],
 	providers: [AppService, WebsocketGatewayGlobal],
 })
-export class AppModule implements OnApplicationBootstrap {
-
-	constructor(
-		private channelService: ChannelService,
-		private usersService: UsersService,
-		private userCredentialService: UserCredentialService,
-	) {
-	}
-
-	async onApplicationBootstrap(): Promise<any> {
-		const cred = await this.userCredentialService.create('admin')
-		const admin = await this.usersService.getAdmin(cred);
-		await this.channelService.createGenerale(admin);
-	}
+export class AppModule {
 }
