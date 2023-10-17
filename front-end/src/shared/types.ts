@@ -63,6 +63,12 @@ export interface IMatch {
   starting_date: Date;
 }
 
+export interface ILeaderboard {
+  user: IUser;
+  level: number;
+  rank: number;
+}
+
 export interface IMatchmaking {
   Id_MATCHMAKING?: number;
   id_user: number;
