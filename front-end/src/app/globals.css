@@ -255,20 +255,6 @@ body {
     font-weight: bold;
 }
 
-.matchHistory::-webkit-scrollbar {
-    width: 12px; /* Largeur de la scrollbar personnalisée */
-}
-
-.matchHistory::-webkit-scrollbar-thumb {
-    background-color: transparent; /* Couleur transparente pour le curseur de la scrollbar */
-    border: none; /* Supprime la bordure du curseur */
-}
-
-.matchHistory::-webkit-scrollbar-track {
-    background-color: transparent; /* Couleur transparente pour la piste de la scrollbar */
-    border: none; /* Supprime la bordure de la piste */
-}
-
 #match{
     width: auto;
     background: rgba(112, 112, 112, 0.27);

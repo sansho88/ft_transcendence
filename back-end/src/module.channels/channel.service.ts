@@ -1,4 +1,4 @@
-import {BadRequestException, forwardRef, Inject, Injectable} from '@nestjs/common';
+import {BadRequestException, Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {ChannelEntity, ChannelType} from '../entities/channel.entity';
@@ -15,7 +15,6 @@ export class ChannelService {
 	constructor(
 		@InjectRepository(ChannelEntity)
 		private channelRepository: Repository<ChannelEntity>,
-		@Inject(forwardRef(() => UsersService))
 		private userService: UsersService,
 		private channelCredentialService: ChannelCredentialService,
 		private bannedService: BannedService,

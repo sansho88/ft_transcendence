@@ -1,6 +1,6 @@
 import {
 	CanActivate,
-	ExecutionContext, forwardRef, Inject,
+	ExecutionContext,
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
@@ -16,7 +16,6 @@ import {UsersService} from '../module.users/users.service';
 export class AuthGuard implements CanActivate {
 	constructor(
 		private jwtService: JwtService,
-		@Inject(forwardRef(() => UsersService))
 		private usersService: UsersService,
 	) {
 	}
@@ -55,7 +54,6 @@ export class AuthGuard implements CanActivate {
 export class WSAuthGuard implements CanActivate {
 	constructor(
 		private jwtService: JwtService,
-		@Inject(forwardRef(() => UsersService))
 		private usersService: UsersService,
 	) {
 	}

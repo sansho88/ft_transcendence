@@ -11,7 +11,7 @@ import {IoAdapter} from '@nestjs/platform-socket.io';
 import {RemoteSocket, Server, Socket} from 'socket.io';
 import {MessageService} from './message.service';
 import {getToken, WSAuthGuard} from '../module.auth/auth.guard';
-import {forwardRef, Inject, UseGuards, ValidationPipe} from '@nestjs/common';
+import {UseGuards, ValidationPipe} from '@nestjs/common';
 import {CurrentUser} from '../module.auth/indentify.user';
 import {ChannelService} from './channel.service';
 import {BannedService} from "./banned.service";
@@ -57,7 +57,6 @@ export class ChatGateway
 	constructor(
 		private messageService: MessageService,
 		private channelService: ChannelService,
-		@Inject(forwardRef(() => UsersService))
 		private usersService: UsersService,
 		private bannedService: BannedService,
 		private channelCredentialService: ChannelCredentialService,
@@ -445,13 +444,7 @@ export class ChatGateway
 		if (channel.owner.UserID !== user.UserID)
 			return;
 		const credential = await this.channelCredentialService.create(data.password);
-		await this.channelService.modifyChannel(channel, credential, data);
+		this.channelService.modifyChannel(channel, credential, data);
 		this.server.to(data.channelID.toString()).emit(wsChatRoutesClient.nameChannelsHasChanged(), channel)
-	}
-
-	async updateUserStatusEmit(user: UserEntity) {
-		console.log('TEST  THERE ');
-		console.log(this.server.emit('userUpdate', user)
-		)
 	}
 }
