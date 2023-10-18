@@ -5,6 +5,8 @@ import {
 	IsOptional,
 	IsString,
 	Length,
+	Max,
+	Min,
 } from 'class-validator';
 
 export class CreateChannelDTOPipe {
@@ -24,6 +26,8 @@ export class CreateChannelDTOPipe {
 
 export class JoinChannelDTOPipe {
 	@IsNumber()
+	@Max(2147483647)
+	@Min(0)
 	@IsNotEmpty()
 	channelID: number;
 
@@ -34,12 +38,16 @@ export class JoinChannelDTOPipe {
 
 export class LeaveChannelDTOPipe {
 	@IsNumber()
+	@Max(2147483647)
+	@Min(0)
 	@IsNotEmpty()
 	channelID: number;
 }
 
 export class CreateMpDTOPPipe {
 	@IsNotEmpty()
+	@Max(2147483647)
+	@Min(0)
 	@IsNumber()
 	targetID: number
 }

@@ -227,6 +227,125 @@ body {
     border-radius: 8px;
 }
 
+.matchHistory{
+    max-height: 42%;
+    width: auto;
+    overflow-y: auto;
+    scrollbar-width: none;
+    margin-top: 2ch;
+
+    position: absolute;
+    left: 1vw;
+    top: 21vh;
+    padding-inline: 2vh;
+    background: rgba(54, 54, 54, 0.17);
+    border: 2px rgba(0, 0, 0, 0.11);
+    border-style: inherit ;
+    box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
+    border-radius: 8px;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+}
+
+.matchHistory h1{
+    font-size: 2.2ch;
+    text-align: center;
+    padding: 1ch 0;
+    text-shadow: 1px 1px 5px darkgrey ;
+    font-weight: bold;
+}
+
+#match{
+    width: auto;
+    background: rgba(112, 112, 112, 0.27);
+    margin: 0.4rem -1rem;
+
+    border: 1px solid rgba(119, 118, 118, 0.21);
+    border-radius: 1ch;
+}
+
+#winner{
+    color: goldenrod;
+    position: absolute;
+    left: 2.4ch;
+}
+
+#looser{
+    position: absolute;
+    right: 2.4ch;
+    color: darkred;
+}
+
+#scorep1{
+    position: relative;
+    left: 40%;
+    font-size: 2ch;
+}
+
+#scorep2{
+    position: absolute;
+    right: 40%;
+    font-size: 2ch;
+}
+
+.leaderboard{
+    max-height: 42%;
+    width: auto;
+    scrollbar-width: none;
+    margin-top: 2ch;
+
+    position: absolute;
+    left: 1vw;
+    top: 21vh;
+    padding-inline: 2vh;
+    background: rgba(148, 148, 146, 0.17);
+    border: 2px rgba(0, 0, 0, 0.11);
+    border-style: inherit ;
+    box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
+    border-radius: 8px;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+
+    overflow-y: auto; /* Cache la barre de défilement verticale */
+}
+
+.leaderboard h1{
+    color: goldenrod;
+    font-size: 2.2ch;
+    text-align: center;
+    padding: 1.5ch 0 0 0;
+    text-shadow: 1px 2px 6px darkgoldenrod ;
+    font-weight: bold;
+
+}
+
+.leaderboard_rank{
+    margin:10px 2ch 0 1ch;
+    position: relative;
+    left:0;
+}
+
+.leaderboard_user{
+    width: auto;
+    height: 1vh;
+    position: relative;
+    display: inline-block;
+}
+
+.leaderboard::-webkit-scrollbar {
+    width: 12px; /* Largeur de la scrollbar personnalisée */
+}
+
+.leaderboard::-webkit-scrollbar-thumb {
+    background-color: transparent; /* Couleur transparente pour le curseur de la scrollbar */
+    border: none; /* Supprime la bordure du curseur */
+}
+
+.leaderboard::-webkit-scrollbar-track {
+    background-color: transparent; /* Couleur transparente pour la piste de la scrollbar */
+    border: none; /* Supprime la bordure de la piste */
+}
+
 .main-user-profile{
     display: inline-block;
     position: absolute;

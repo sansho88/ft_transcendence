@@ -54,6 +54,21 @@ export interface IGame {
   start_date: Date;
 }
 
+export interface IMatch {
+  ID: number;
+  player1: IUser;
+  player2: IUser;
+  score1: number;
+  score2: number;
+  starting_date: Date;
+}
+
+export interface ILeaderboard {
+  user: IUser;
+  level: number;
+  rank: number;
+}
+
 export interface IMatchmaking {
   Id_MATCHMAKING?: number;
   id_user: number;

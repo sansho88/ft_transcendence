@@ -18,8 +18,6 @@
 	const routeMessages = 			'messages'
 	const routeGame = 					'game';
 	const routeMatchmaking = 		'matchmaking';
-	const routeBanned = 				'banned';
-	const routeFollow = 				'follow';
 // const routeChannelInvite = 	'channel-invite';
 // const routeMute = 					'mute';
 // const routeChallenge = 			'challenge';
@@ -30,7 +28,6 @@
 	// const routePlay = 					'play';
 	
   const routeWsGame =          'game';
-  const routeWsChat =          'chat'
 
 
 // +---------------------------------------------------------------------+
@@ -130,7 +127,10 @@ export namespace game {
 
 	export const getStatsFromAllUsers = () => {return `${serverApi}/${routeGame}/stats/`};
 	export const getUserStatsById = (userId: number) => {return `${serverApi}/${routeGame}/stats/${userId}`};
+	export const getMatchHistory = () => {return `${serverApi}/${routeGame}/myGame`;}
+	export const getMatchHistoryFromUserId = (userId: number) => {return `${serverApi}/${routeGame}/users/${userId}`;}
 
+	export const getLeaderboard = () => {return `${serverApi}/${routeGame}/leaderboard`}
 }
 
 // +---------------------------------------------------------------------+

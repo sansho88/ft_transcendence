@@ -131,10 +131,8 @@ export class ChatGateway
 			.findOne(payloadToken.id)
 			.catch(() => null);
 		if (!user) return client.disconnect();
-		const index = this.socketUserList
-			.findIndex(socket => socket.socketID == socket.socketID)
-		this.socketUserList.splice(index, 1);
-		if (this.socketUserList.findIndex(socket => socket.socketID == client.id) == -1) {
+		this.socketUserList = this.socketUserList.filter(value => value.socketID != client.id);
+		if (this.socketUserList.findIndex(socket => socket.userID == user.UserID) == -1) {
 			this.server.to(`user.${user.UserID}`).emit('notifyEvent', `User ${user.login} is offline`)
 			await this.usersService.userStatus(user, UserStatus.OFFLINE);
 		}

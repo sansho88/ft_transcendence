@@ -2,47 +2,45 @@ import {Injectable} from '@nestjs/common';
 import {Matchmaking} from './Matchmaking';
 import {GameSession} from './GameSession';
 import {Server, Socket} from 'socket.io';
-import {userInfoSocket, EGameMod} from 'shared/typesGame';
+import {EGameMod, userInfoSocket} from 'shared/typesGame';
 import {v4 as uuidv4} from "uuid";
 import {GameService} from '../game.service';
-
-// @Injectable()
-// export class gameSocketService {
-//     constructor(private websocketGatewayGame: WebsocketGatewayGame) {}
-// }
+import {UsersService} from "../../module.users/users.service";
+import {UserStatus} from "../../entities/user.entity";
 
 @Injectable()
 export class ServerGame {
 	// gameService: GameService;
 	constructor(
 		private gameService: GameService,
+		private usersService: UsersService,
 	) {
 	};
 
-	private matchmaking: Matchmaking = new Matchmaking(this.gameService);
-	private matchmakingGhost: Matchmaking = new Matchmaking(this.gameService);
+	private matchmaking: Matchmaking = new Matchmaking(this.gameService, this.usersService);
+	private matchmakingGhost: Matchmaking = new Matchmaking(this.gameService, this.usersService);
 	private gameSession: GameSession[] = [];
 	private trainningSession: GameSession[] = []; //pour ne pas les melangers, pas de spectator, donc pas besoin de get cette liste
 
 
-	public addPlayerToMatchmaking(player: userInfoSocket, server: Server) {
+	public async addPlayerToMatchmaking(player: userInfoSocket, server: Server) {
 		if (!player)
 			return console.log('addPlayerToMatchmaking: Error player')
 		this.matchmaking.addUser(player);
 		console.log(`${player.user.login}: add in matchmaking list`);
 		if (this.matchmaking.getUsersNumber() >= 2) {
-			this.gameSession.push(this.matchmaking.createGame(server, this.gameSession.length, EGameMod.classic));
+			this.gameSession.push(await this.matchmaking.createGame(server, this.gameSession.length, EGameMod.classic));
 		}
 
 	}
 
-	public addPlayerToMatchmakingGhost(player: userInfoSocket, server: Server) {
+	public async addPlayerToMatchmakingGhost(player: userInfoSocket, server: Server) {
 		if (!player)
 			return console.log('addPlayerToMatchmakingGhost: Error player')
 		this.matchmakingGhost.addUser(player);
 		console.log(`${player.user.login}: add in matchmakingGhost list`);
 		if (this.matchmakingGhost.getUsersNumber() >= 2) {
-			this.gameSession.push(this.matchmakingGhost.createGame(server, this.gameSession.length, EGameMod.ghost));
+			this.gameSession.push(await this.matchmakingGhost.createGame(server, this.gameSession.length, EGameMod.ghost));
 		}
 	}
 
@@ -60,10 +58,10 @@ export class ServerGame {
 		console.log(`${player.user.login}: remove in matchmaking list`);
 	}
 
-	public addPlayerInTrainningSession(player: userInfoSocket, server: Server) {
+	public async addPlayerInTrainningSession(player: userInfoSocket, server: Server) {
 		if (!player)
 			return console.log('addPlayerToMatchmaking: Error player');
-		this.trainningSession.push(this.createTrainningSessionGame(server, 0, player));
+		this.trainningSession.push(await this.createTrainningSessionGame(server, 0, player));
 	}
 
 	public getGameSession(game_id: number): GameSession {
@@ -75,11 +73,13 @@ export class ServerGame {
 	}
 
 	//create game instance for solo trainnig game
-	private createTrainningSessionGame(server: Server, game_id: number, player: userInfoSocket): GameSession {
+	private async createTrainningSessionGame(server: Server, game_id: number, player: userInfoSocket): Promise<GameSession> {
 
 		const startDate: Date = new Date();
 		const generateSessionName: string = uuidv4();
 		console.log(`NEW TRAINING SESSION: ${generateSessionName} | ${player.user.nickname})`);
+		const usr = await this.usersService.findOne(player.user.UserID);
+		this.usersService.userStatus(usr, UserStatus.INGAME);
 		return new GameSession(server, player, player, startDate, game_id, EGameMod.trainning, generateSessionName, this.gameService);
 	}
 
@@ -92,6 +92,5 @@ export class ServerGame {
 		this.matchmaking.leftConnection(playerSocket)
 		this.matchmakingGhost.leftConnection(playerSocket)
 
-	
 	}
 }
