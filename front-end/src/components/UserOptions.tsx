@@ -78,10 +78,10 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
             wsChatEvents.createMP(socketRef, { targetID: user.UserID });
     }
         
-    function handleChallenge() {
+    function handleChallenge(gameMod: EGameMod) {
         if (socketRefGame){
             console.log('challenge user request => ' , user.login)
-            wsGameEvents.createChallenge(socketRefGame, {userIdTarget: user.UserID, gameMod: EGameMod.classic}) //TODO: pouvoir choisir le gameMod
+            wsGameEvents.createChallenge(socketRefGame, {userIdTarget: user.UserID, gameMod: gameMod}) //TODO: pouvoir choisir le gameMod
         }
     }
 
@@ -105,7 +105,8 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
                                 <Button image={"/hammer.svg"} onClick={() => console.log("Ban User button")} alt={"Ban"} title={"Ban"}/>
                             </span>
                         }
-                        <Button image={"/sword.svg"} onClick={handleChallenge} alt={"Challenge"} title={"Challenge"}/>
+                        <Button image={"/sword.svg"} onClick={() => handleChallenge(EGameMod.classic)} alt={"Challenge"} title={"Classic Challenge"}/>
+                        <Button image={"/swordGhost.svg"} onClick={() => handleChallenge(EGameMod.ghost)} alt={"Challenge"} title={"Ghost Challenge"}/>
                     </span>
                 </div>}
         </>
