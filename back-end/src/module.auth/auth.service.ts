@@ -1,6 +1,7 @@
 import {
+	forwardRef,
 	HttpException,
-	HttpStatus,
+	HttpStatus, Inject,
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
@@ -10,12 +11,12 @@ import {JwtService} from '@nestjs/jwt';
 import {accessToken} from '../dto/payload';
 import {UserCredentialService} from './credential.service';
 import * as process from "process";
-import { UserEntity } from 'src/entities/user.entity';
-import { find } from 'rxjs';
+import {UserEntity} from 'src/entities/user.entity';
 
 @Injectable()
 export class AuthService {
 	constructor(
+		@Inject(forwardRef(() => UsersService))
 		private readonly usersService: UsersService,
 		private jwtService: JwtService,
 		private credentialsService: UserCredentialService,
@@ -153,11 +154,11 @@ export class AuthService {
 		const cred = await this.usersService.getCredential(user.UserID);
 		const speakeasy = require('speakeasy');
 		const secret = speakeasy.generateSecret({length: 20, name: "tester c'est douter"});
-		
+
 		cred.token_2fa = secret.base32;
 		cred.save();
-		
-		return { img: secret.otpauth_url };
+
+		return {img: secret.otpauth_url};
 	}
 
 	/**
@@ -169,14 +170,14 @@ export class AuthService {
 	async check2FA(token: string, user: UserEntity) {
 		const cred = await this.usersService.getCredential(user.UserID);
 		if (cred.token_2fa === null) throw new HttpException("No 2fa Generated.", HttpStatus.BAD_REQUEST)
-		
+
 		token = token.substring(0, 6);
-		
+
 		const speakeasy = require('speakeasy');
-		if (!speakeasy.totp.verify({ 
-			secret: cred.token_2fa, 
-			encoding: 'base32', 
-			token 
+		if (!speakeasy.totp.verify({
+			secret: cred.token_2fa,
+			encoding: 'base32',
+			token
 		})) return false;
 
 		user.has_2fa = true;
@@ -198,14 +199,14 @@ export class AuthService {
 		token = token.substring(0, 6);
 		console.log(token);
 		const speakeasy = require('speakeasy');
-		
-		if (!speakeasy.totp.verify({ 
-			secret: cred.token_2fa, 
-			encoding: 'base32', 
-			token 
+
+		if (!speakeasy.totp.verify({
+			secret: cred.token_2fa,
+			encoding: 'base32',
+			token
 		})) return false;
 		console.log("2fa disabled");
-		
+
 		cred.token_2fa = null;
 		cred.save();
 		user.has_2fa = false;
