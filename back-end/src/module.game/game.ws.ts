@@ -21,12 +21,14 @@ import {JwtService} from '@nestjs/jwt';
 import { UsersService } from 'src/module.users/users.service';
 import { CreateChallengeDTOPPipe } from 'src/dto.pipe/channel.dto';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import { channelsDTO } from 'shared/DTO/InterfaceDTO';
 
 
 
-class SocketUserList {
+export interface SocketUserList {
 	userID: number;
 	socketID: string;
+	socket: Socket;
 }
 @WebSocketGateway({
 	namespace: '/game',
@@ -68,6 +70,8 @@ export class WebsocketGatewayGame
 
 			return client.disconnect();
 		}
+
+
 		const user = await this.usersService.findOne(userID, ['channelJoined', 'subscribed'])
 		.catch(() => null);
 		
@@ -78,8 +82,9 @@ export class WebsocketGatewayGame
 		this.socketUserList.push({
 			socketID: client.id,
 			userID: userID,
+			socket: client
 		});
-		console.log('+1 ws game list = ', JSON.stringify(this.socketUserList))
+
 	}
 
 	async handleDisconnect(client: Socket) {
@@ -203,49 +208,42 @@ export class WebsocketGatewayGame
 		
 		const P1: userInfoSocket = { socket: client, user: user };
 
-		const sockersChallenged: RemoteSocket<DefaultEventsMap, any>[]= await this.getSocket(data.targetID);
+		const sockersChallenged: SocketUserList[] = await this.getSocket(data.targetID);
 		// console.log(JSON.stringify(sockersChallenged))
+		sockersChallenged.forEach((elem) => {
+			elem.socket.emit('info', 'BON ALORS CA DIT QUOI LA')
+		
+		})
 		const P2: UserEntity = await this.usersService.findOne(data.targetID)
-		sockersChallenged.forEach((socket) => {
-			console.log('send to socket : ' + socket);
-			socket.emit('info', 'hello Challenged')
+		sockersChallenged.forEach((socketLst) => {
+			console.log('send to socket : ' + socketLst);
+			socketLst.socket.emit('info', 'hello Challenged')
 		})
 		console.log('map lenght = ' , sockersChallenged.length);
 		this.serverGame.createChallenge(this.server, P1, P2, data.gameMod, sockersChallenged);
-		// console.log(client.id + ': ' + payload.nickname);
-		// console.log('json user: ' + JSON.stringify(payload));
 		const player: userInfoSocket = {socket: client, user};
-		// this.serverGame.createChallenge(this.server, ) //TODO: TODO:
-
-		// client.emit('info', `Challenge requested...`); 
 	}
 
-	private async getSocket(userID: number) {
+	@SubscribeMessage(wsChatRoutesBack.responseChallenge())
+	@UseGuards(WSAuthGuard)
+	async acceptChallengeGame(
+		@MessageBody() data: channelsDTO.IChallengeAcceptedDTO,
+		@ConnectedSocket() client: Socket,
+		@CurrentUser() user: UserEntity,
+	) {
+		if(data.response) {
+			console.log('ACCEPTED challenge , target event = ', data.event);
+			const P2: userInfoSocket = { socket: client, user: user };
+			this.serverGame.acceptChallenge(this.server, user, client, data.event);
+		}
+		else{
+			console.log('REFUSER, A FAIRE game.ws.ts:240')
+		}
+	}
+
+	private async getSocket(userID: number) : Promise<SocketUserList[]> {
     const socketIDLst = this.socketUserList.filter(value => value.userID === userID);
-    const socketLst = await this.server.fetchSockets();
+    return socketIDLst.filter(socket => {socket.userID === userID});
+	}
 
-    return socketLst.filter(socket => {
-        return socketIDLst.some(Id => Id.socketID === socket.id);
-    });
-}
-
-	/**
-	 * Return a List of all the Socket used by the User
-	 * */
-	// private async getSocket(userID: number) {
-	// 	const indexes = this.socketUserList.map(
-	// 		value => userID == value.userID
-	// 	);
-	// 	const socketIDLst = this.socketUserList.filter((value, index) => indexes[index]);
-	// 	const socketLst = await this.server.fetchSockets();
-
-	// 	return socketLst.filter(socket => {
-	// 		for (const Id of socketIDLst) {
-	// 			console.log('id = ', Id.socketID);
-	// 			if (Id.socketID == socket.id)
-	// 				return true;
-	// 		}
-	// 		return false;
-	// 	})
-	// }
 }

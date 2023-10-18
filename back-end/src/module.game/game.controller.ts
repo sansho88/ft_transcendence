@@ -29,7 +29,7 @@ export class GameController {
 	async getChallenges(
 		@CurrentUser() user: UserEntity
 	) {
-		console.log('DBG******', this.serverGame.getAllChallengeUser(user.UserID))
+		// console.log('DBG******', this.serverGame.getAllChallengeUser(user.UserID))
 		return this.serverGame.getAllChallengeUser(user.UserID);
 	}
 

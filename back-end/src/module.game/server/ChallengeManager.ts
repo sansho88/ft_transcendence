@@ -6,6 +6,7 @@ import { GameSession } from "./GameSession";
 import { channelsDTO } from "shared/DTO/InterfaceDTO";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { IUser } from "shared/types";
+import { SocketUserList } from "../game.ws";
 
 interface IChallenge {
 	P1: number;
@@ -17,12 +18,12 @@ type FCreateGameType = (server: Server, p1: userInfoSocket, p2: userInfoSocket, 
 export class ChallengeManager {
 
 	private challenge: IChallenge;
-	private socketP1: userInfoSocket;
+	public socketP1: userInfoSocket;
 	private P2: Partial<IUser>;
 	private eventChallenge: string = uuidv4();
-	private gameMod: EGameMod;
+	public gameMod: EGameMod;
 	private proposeChallenge: channelsDTO.IChallengeProposeDTO;
-	private socketsChallenged: RemoteSocket<DefaultEventsMap, any>[];
+	private socketsChallenged: SocketUserList[];
 	private server: Server;
 	private isArchivate: boolean = false;
 
@@ -32,7 +33,7 @@ export class ChallengeManager {
 		server: Server,
 		challengerUser: userInfoSocket,
 		challengedUser: IUser,
-		socketsChallenged: RemoteSocket<DefaultEventsMap, any>[],
+		socketsChallenged: SocketUserList[],
 		createGameSession: FCreateGameType,
 		gameMod: EGameMod		
 		){
@@ -61,9 +62,11 @@ export class ChallengeManager {
 
 		//actualiser la liste des challenges en cours aupres des sockets du client concerné
 		this.socketsChallenged.map((socket) => {
-			socket.emit(wsChatRoutesClient.proposeChallenge(),  this.proposeChallenge)
-			socket.emit('info',  'Wesh les boloss')
-			socket.on()
+			socket.socket.emit(wsChatRoutesClient.proposeChallenge(),  this.proposeChallenge)
+			socket.socket.emit('info',  'Wesh les boloss')
+			socket.socket.on(this.eventChallenge, (res) => {
+				console.log('LA POUTAA DE SA MAMA')
+			})
 		})
 
 		server.on(this.eventChallenge, ((socket: Socket, res: channelsDTO.IChallengeAcceptedDTO) => {
@@ -116,14 +119,19 @@ export class ChallengeManager {
 			const tmp: IChallengeStepDTO = {challengerequested: false}
 			this.socketP1.socket.emit('challengeStep', tmp);
 		}
-		this.socketP1.user = null;
-		this.socketP1.socket = null;
-		this.server.off(this.eventChallenge, () => []);
+		// this.socketP1.user = null;
+		// this.socketP1.socket = null;
+		// this.server.off(this.eventChallenge, () => []);
 		//TODO: ping les clients pour refresh les list challenges
 	}
+
+	// public challengeDone
 
 	public getIsArchivate(): boolean{
 		return this.isArchivate;
 	}
 
+	public getEventChallenge() : string {
+		return this.eventChallenge;
+	}
 }

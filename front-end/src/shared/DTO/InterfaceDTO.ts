@@ -56,5 +56,6 @@ export namespace channelsDTO {
 	
 	export interface IChallengeAcceptedDTO {
 		response: boolean;
+		event: string;
 	}
 }

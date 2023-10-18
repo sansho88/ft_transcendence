@@ -74,9 +74,9 @@ export default function ChallengeList({currentStepGameFront}: {currentStepGameFr
 
 
 	function acceptChallenge(challenge: channelsDTO.IChallengeProposeDTO){
-		const tmp: channelsDTO.IChallengeAcceptedDTO = {response: true}
+		const tmp: channelsDTO.IChallengeAcceptedDTO = {response: true, event: challenge.eventChallenge}
 		console.log('ACCEPT CHALLENGE: ' , challenge.eventChallenge)
-		socket?.emit(challenge.eventChallenge,  tmp);
+		socket?.emit(wsChatRoutesBack.responseChallenge(), tmp);
 	}
 
 	const challengeButtonListElement = (challenge: channelsDTO.IChallengeProposeDTO) => {
