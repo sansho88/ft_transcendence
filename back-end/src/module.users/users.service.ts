@@ -76,7 +76,6 @@ export class UsersService {
 	}
 
 	async update(user: UserEntity, updateUser: UpdateUserDto) {
-		console.log("updateUser: ", updateUser + "\nuser: ", user);
 		if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
 		if (updateUser.avatar_path !== undefined) user.avatar_path = updateUser.avatar_path;
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
@@ -136,7 +135,6 @@ export class UsersService {
 			if (user.avatar_path?.includes(internalPath) ?? false) {
 				let oldAvatarPath = `${process.cwd()}${user.avatar_path.substring(internalPath.length)}`;
 				oldAvatarPath = oldAvatarPath.trim();
-				console.log("oldAvatarPath: ", oldAvatarPath);
 				await fs.remove(oldAvatarPath);
 			}
 	

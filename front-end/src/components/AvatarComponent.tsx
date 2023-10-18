@@ -57,9 +57,8 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus, isMai
 	}, [playerStatus]);
 
 	path = path ? path : "/tests/avatar.jpg";
+  isMainProfile = isMainProfile === undefined ? false : isMainProfile;
   
-    isMainProfile = isMainProfile === undefined ? false : isMainProfile;
-  console.log(isMainProfile)
 	return (
 		<div style={{ position: 'relative', float: "left" }}>
       <img
