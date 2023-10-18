@@ -52,7 +52,7 @@ const HomePage = () => {
 
                     <Profile className={"main-user-profile"}
                              user={userContext}
-                             isEditable={true} avatarSize={"big"} showStats={true}>
+                             isEditable={true} avatarSize={"big"} showStats={true} isMainProfile={true}>
                         <Button image={"/history-list.svg"} onClick={() => setMatchHistoryVisible(!showMatchHistory)} alt={"Match History button"} title={"Match History"}/>
                         <Button image={"/podium.svg"} onClick={() => setLeaderboardVisible(!showLeaderboard)} alt={"Leaderboard button"} title={"Leaderboard"} margin={"0 0 0 2ch"}/>
                         <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
