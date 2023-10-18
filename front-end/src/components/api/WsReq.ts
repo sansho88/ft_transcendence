@@ -5,6 +5,7 @@ import { channelsDTO, messageDTO} from "@/shared/DTO/InterfaceDTO"
 import { IChannelEntity } from "@/shared/entities/IChannel.entity";
 import { channel } from "diagnostics_channel";
 import { IMessageEntity } from "@/shared/entities/IMessage.entity";
+import { IChallenge } from "@/shared/types";
 
 export namespace wsChatEvents { 
 
@@ -32,11 +33,16 @@ export namespace wsChatEvents {
     socket.emit(wsChatRoutesClient.updateChannelsJoined())
   }
 
-  export function challenge(socket: Socket, userTargetChallenge: channelsDTO.ICreateChallengeDTOPPipe) {
-    socket.emit(wsChatRoutesBack.createChallenge(), userTargetChallenge);}
 }
 
-
+export namespace wsGameEvents { 
+  export function createChallenge(socketGame: Socket, userTargetChallenge: channelsDTO.ICreateChallengeDTO) {
+    socketGame.emit(wsChatRoutesBack.createChallenge(), userTargetChallenge);}
+}
+export namespace wsGameListen {
+  export function proposeChallengeListen(socket: Socket, userTargetChallenge: channelsDTO.IChallengeProposeDTO) {
+    socket.emit(wsChatRoutesClient.proposeChallenge(), userTargetChallenge);}
+}
 export namespace wsChatListen {
 
 
@@ -73,7 +79,10 @@ export namespace wsChatListen {
     })
   }
 
-  export function newChallengeListen(socket: Socket) {
+
+
+  function handleChallenge(socket: Socket, )
+  export function newChallengeListen(socket: Socket, listChallenge: IChallenge[]) {
     socket.on(wsChatRoutesBack.createChallenge(), (res) => {
       console.log(res);//TODO: reception des donner pour accepter le challenge (login, nickname, et event de reponse)
     })

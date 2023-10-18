@@ -62,7 +62,6 @@ export namespace wsChatRoutesBack {
 	export const leaveRoom=()      						   		=> {return `leaveRoom`} 
 	export const sendMsg=()      						   			=> {return `sendMsg`} 
 	export const createMP=()      						   			=> {return `createMP`} 
-	// export const requestChallenge=()      						   			=> {return `requestChallenge`} 
 	export const createChallenge=()      						   			=> {return `createChallenge`} 
 	
 }
@@ -70,6 +69,7 @@ export namespace wsChatRoutesClient {
 	export const updateChannel=()      						  	=> {return `createRoom`} 
 	export const updateChannelsJoined=()    					=> {return `updateChannelsJoined`} 
 	export const nameChannelsHasChanged=()    					=> {return `nameChannelsHasChanged`} 
+	export const proposeChallenge=()      						  => {return `proposeChallenge`} 
 
 
 }
@@ -130,6 +130,8 @@ export namespace game {
 
 	export const getStatsFromAllUsers = () => {return `${serverApi}/${routeGame}/stats/`};
 	export const getUserStatsById = (userId: number) => {return `${serverApi}/${routeGame}/stats/${userId}`};
+	export const getMyChallenges = () => {return `${serverApi}/${routeGame}/myChallenges`};
+
 
 }
 

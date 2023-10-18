@@ -5,8 +5,9 @@ import {UserContext, SocketContextChat, SocketContextGame} from "@/context/globa
 import * as apiReq from '@/components/api/ApiReq'
 import {NotificationManager} from 'react-notifications';
 import { wsChatRoutesBack } from "@/shared/routesApi";
-import { wsChatEvents } from "./api/WsReq";
+import { wsChatEvents, wsGameEvents } from "./api/WsReq";
 import { Socket } from "socket.io-client";
+import { EGameMod } from "@/shared/typesGame";
 
 
 export interface userOptionsProps {
@@ -80,7 +81,7 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
     function handleChallenge() {
         if (socketRefGame){
             console.log('challenge user request => ' , user.login)
-            wsChatEvents.challenge(socketRefGame, {targetID: user.UserID})
+            wsGameEvents.createChallenge(socketRefGame, {userIdTarget: user.UserID, gameMod: EGameMod.classic}) //TODO: pouvoir choisir le gameMod
         }
     }
 

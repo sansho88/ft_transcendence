@@ -8,7 +8,7 @@ import {
 	MessageBody,
 } from '@nestjs/websockets';
 
-import {Server, Socket} from 'socket.io';
+import {RemoteSocket, Server, Socket} from 'socket.io';
 import {ServerGame} from 'src/module.game/server/ServerGame';
 import {wsChatRoutesBack, wsGameRoutes} from 'shared/routesApi';
 import {userInfoSocket} from 'shared/typesGame';
@@ -20,6 +20,7 @@ import {accessToken} from '../dto/payload';
 import {JwtService} from '@nestjs/jwt';
 import { UsersService } from 'src/module.users/users.service';
 import { CreateChallengeDTOPPipe } from 'src/dto.pipe/channel.dto';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 
 
@@ -192,22 +193,23 @@ export class WebsocketGatewayGame
 
 	@SubscribeMessage(wsChatRoutesBack.createChallenge())
 	@UseGuards(WSAuthGuard)
-	createChallengeGame(
-		@MessageBody(new ValidationPipe()) data: CreateChallengeDTOPPipe,
+	async createChallengeGame(
+		@MessageBody() data: CreateChallengeDTOPPipe,
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity,
 	) {
+
+		const P1: userInfoSocket = { socket: client, user: user };
+		const sockersChallenged: RemoteSocket<DefaultEventsMap, any>[]= await this.getSocket(data.targetID);
+		const P2: UserEntity = await this.usersService.findOne(data.targetID)
+
+		this.serverGame.createChallenge(this.server, P1, P2, data.gameMod, sockersChallenged);
 		// console.log(client.id + ': ' + payload.nickname);
 		// console.log('json user: ' + JSON.stringify(payload));
 		const player: userInfoSocket = {socket: client, user};
 		// this.serverGame.createChallenge(this.server, ) //TODO: TODO:
-		client.emit('info', `Challenge requested...`);
+		client.emit('info', `Challenge requested...`); 
 	}
-
-
-
-
-
 
 
 	/**

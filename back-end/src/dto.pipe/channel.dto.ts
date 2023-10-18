@@ -6,6 +6,7 @@ import {
 	IsString,
 	Length,
 } from 'class-validator';
+import { EGameMod } from 'shared/typesGame';
 
 export class CreateChannelDTOPipe {
 	@IsString()
@@ -62,4 +63,8 @@ export class CreateChallengeDTOPPipe {
 	@IsNumber()
 	@IsNotEmpty()
 	targetID: number
+
+	@IsNumber()
+	@IsNotEmpty()
+	gameMod: EGameMod;
 }

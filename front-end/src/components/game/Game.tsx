@@ -557,9 +557,9 @@ export default function Game({className, token}: {className: string, token: stri
       {/* {console.log('DIV GAME MONTER')} */}
     </>
       <Table tableRef={tableRef} className='table w-full h-full relative font-vt323'> 
+        {stepCurrentSession === EStatusFrontGame.idle && challengeList()}
         {/* <Scoreboard/> // bugger*/}
         {/* <CenterDBG/> */}
-        {challengeList()}
         <Player className='paddle absolute ' position='left' refDiv={pad1Ref} /> 
         {stepCurrentSession === EStatusFrontGame.matchmakingRequest &&
             <div className='flex space-x-5 items-center justify-end pr-10 pl-10 pt-20'>

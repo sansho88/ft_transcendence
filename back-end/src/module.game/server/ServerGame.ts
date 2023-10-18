@@ -1,12 +1,15 @@
 import {Injectable} from '@nestjs/common';
 import {Matchmaking} from './Matchmaking';
 import {GameSession} from './GameSession';
-import {Server, Socket} from 'socket.io';
+import {RemoteSocket, Server, Socket} from 'socket.io';
 import {userInfoSocket, EGameMod} from 'shared/typesGame';
 import {v4 as uuidv4} from "uuid";
 import {GameService} from '../game.service';
 import { IChallenge, IUser } from 'shared/types';
 import { ChallengeManager } from './ChallengeManager'
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import { getToken } from 'src/module.auth/auth.guard';
+import { channelsDTO } from 'shared/DTO/InterfaceDTO';
 
 // @Injectable()
 // export class gameSocketService {
@@ -19,6 +22,7 @@ export class ServerGame {
 	constructor(
 		private gameService: GameService,
 	) {
+		// server = new Server;
 	};
 
 	private matchmaking: Matchmaking = new Matchmaking(this.gameService);
@@ -103,7 +107,22 @@ export class ServerGame {
 		return new GameSession(server, p1, p2, startDate, this.gameSession.length, gameMod, generateSessionName, this.gameService);
 	}
 
-	public createChallenge(server: Server, p1: userInfoSocket, p2: userInfoSocket, gameMod: EGameMod) {
-		
+	public createChallenge(server: Server, challenger: userInfoSocket, challenged: IUser, gameMod: EGameMod, sockersChallenged: RemoteSocket<DefaultEventsMap, any>[]) {
+		if (!this.alreadyInChallenge(challenger.user.UserID))
+			this.challengeList.push(new ChallengeManager(server, challenger, challenged, sockersChallenged, this.createGame, gameMod))
+		else
+			challenger.socket.emit('info', 'Vous etes deja en challenge')
+	}
+
+	public alreadyInChallenge(challengerID: number) {
+		return this.challengeList.some((elem) => elem.isChallenger(challengerID))
+	}
+
+	public getAllChallengeUser(userID: number): channelsDTO.IChallengeProposeDTO [] {
+		const list: ChallengeManager[] = this.challengeList.filter((challenge) => challenge.containUserInChallenge(userID) && !challenge.isChallenger(userID))
+		const listAllPropose: channelsDTO.IChallengeProposeDTO[] = [];
+		list.map((element) => {listAllPropose.push(element.getProposeChallenge())})
+
+		return listAllPropose;
 	}
 }
