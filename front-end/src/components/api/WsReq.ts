@@ -81,7 +81,7 @@ export namespace wsChatListen {
 
 
 
-  function handleChallenge(socket: Socket, )
+  // function handleChallenge(socket: Socket, )
   export function newChallengeListen(socket: Socket, listChallenge: IChallenge[]) {
     socket.on(wsChatRoutesBack.createChallenge(), (res) => {
       console.log(res);//TODO: reception des donner pour accepter le challenge (login, nickname, et event de reponse)

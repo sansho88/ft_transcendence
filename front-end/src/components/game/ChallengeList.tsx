@@ -4,48 +4,96 @@ import { IUser } from '@/shared/types'
 import { wsChatEvents, wsChatListen } from '../api/WsReq'
 import { channelsDTO } from '@/shared/DTO/InterfaceDTO'
 import { SocketContextGame } from '@/context/globalContext'
-import { wsChatRoutesBack } from '@/shared/routesApi'
+import { wsChatRoutesBack, wsChatRoutesClient } from '@/shared/routesApi'
 import * as apiReq from '@/components/api/ApiReq'
-import { EGameMod } from '@/shared/typesGame'
+import { EStatusFrontGame } from '@/shared/typesGame'
 import {v4 as uuidv4} from "uuid";
+import { eventNames } from 'process'
 
 
 
-export default function ChallengeList() {
+export default function ChallengeList({currentStepGameFront}: {currentStepGameFront: EStatusFrontGame}) { //FIXME: props useless ?
   const socket      												= useContext(SocketContextGame);
 	const [challengeList, setChallengeList] 	= useState<channelsDTO.IChallengeProposeDTO[]>([]);
+  const [challengeEvent, setChallengeEvent] = useState<string>("");
+
+	
 
 	useEffect(() => {
-		socket?.on(wsChatRoutesBack.createChallenge(), (data: any) => {
-			console.log(JSON.stringify(data));
-		})
+		setTimeout(() => {
+		
+			console.log('socket connect ? : ' , socket?.connected)
+			if (socket?.disconnected)
+			{	
+				socket.connect();
+			}
+
+			socket?.on('info', (data: string) => {
+				console.log('Et bah enfin ! ' , data)
+			})
+
+			socket?.on('challenge', (data: string) => {
+				console.log(`WS challenge recu: ${JSON.stringify(data)}`);
+				setChallengeEvent(data);
+			})
+
+			socket?.on(wsChatRoutesClient.proposeChallenge(), (data: channelsDTO.IChallengeProposeDTO) => {
+				console.log(JSON.stringify(data));
+				const challengeElement = async () => { 
+	
+					await apiReq.getApi.getMyChallenges()
+					.then((res: channelsDTO.IChallengeProposeDTO[]) => {
+						console.log(JSON.stringify(res.data))
+						setChallengeList(res.data);
+					})
+				}
+				challengeElement();
+			})
+		}, 100)
+		
 
 	}, [])
+	
+	useEffect(() => {
+		console.log('challenge event = ' + challengeEvent)
+	}, [challengeEvent])
+	
+	useEffect(() => {
+		const challengeElement = async () => {
+	
+			await apiReq.getApi.getMyChallenges()
+			.then((res: channelsDTO.IChallengeProposeDTO[]) => {
+				console.log(JSON.stringify(res.data))
+				setChallengeList(res.data);
+			})
+		}
+		challengeElement();
+	
+		}, [])
 
 
-	const challengeButton = (challenge: channelsDTO.IChallengeProposeDTO) => {
+
+	function acceptChallenge(challenge: channelsDTO.IChallengeProposeDTO){
+		const tmp: channelsDTO.IChallengeAcceptedDTO = {response: true}
+		console.log('ACCEPT CHALLENGE: ' , challenge.eventChallenge)
+		socket?.emit(challenge.eventChallenge,  tmp);
+	}
+
+	const challengeButtonListElement = (challenge: channelsDTO.IChallengeProposeDTO) => {
 	
 	return (
 		<div className='flex bg-slate-400 max-w-max p-1 mt-1 rounded-md' key={uuidv4()}>
 			{`${challenge.challenger.nickname}(${challenge.challenger.login})`} 
-			<button onClick={()=>console.log('ACCEPT CHALLENGE')}>✅</button>
+			<button onClick={() => acceptChallenge(challenge)}>✅</button>
 			<button onClick={()=>console.log('REFUSAL CHALLENGE')}>❌</button>
 		</div>
 		)
 	}
 	
-	useEffect(() => {
-	const challengeElement = async () => {
 
-		await apiReq.getApi.getMyChallenges()
-		.then((res: channelsDTO.IChallengeProposeDTO[]) => {
-			console.log(JSON.stringify(res.data))
-			setChallengeList(res.data);
-		})
-	}
-	challengeElement();
 
-	}, [])
+
+
 
 
 
@@ -55,7 +103,7 @@ export default function ChallengeList() {
 			<div className='max-h-60 overflow-y-auto noScrollbar '>
 				{challengeList.map((elem) => {
 				
-					return (challengeButton(elem))
+					return (challengeButtonListElement(elem))
 				})}
 			</div>
 		</div>

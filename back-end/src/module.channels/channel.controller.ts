@@ -301,9 +301,9 @@ export class ChannelController {
 	) {
 		if (channelID === -1)//gestion no channel pour simplifier et pas avoir derreur 401..
 			return {data: []};
-		console.log('channel');
+		// console.log('channel');
 		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
-		console.log(channel);
+		// console.log(channel);
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterRecent(channel.messages);

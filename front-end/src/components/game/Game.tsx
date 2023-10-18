@@ -4,22 +4,12 @@ import { UserContext, SocketContextGame, LoggedContext} from '@/context/globalCo
 import { useRouter } from 'next/navigation'
 import { IUser } from '@/shared/types'
 import * as PODGAME from '@/shared/typesGame'
+import { EStatusFrontGame, IChallengeStepDTO }from '@/shared/typesGame'
 import * as apiRoutes from '@/shared/routesApi'
 import * as ClipLoader from 'react-spinners'
 import SwitcherTheme from '@/components/game/SwitcherTheme'
-import {NotificationContainer, NotificationManager} from 'react-notifications';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
 import ChallengeList from './ChallengeList'
-
-enum EStatusFrontGame {
-  idle,
-  modChoice,
-  matchmakingRequest,
-  gameSessionFind,
-  waiting,
-  countdown,
-  gameInProgress,
-  endOfGame
-}
 
 export default function Game({className, token}: {className: string, token: string}) {
   const socket      = useContext(SocketContextGame);
@@ -30,7 +20,6 @@ export default function Game({className, token}: {className: string, token: stri
   const {logged, setLogged} = useContext(LoggedContext);
 
   // const router      = useRouter();
-
 
   const tableRef    = useRef<HTMLDivElement>(null);
   const pad1Ref     = useRef<HTMLDivElement>(null);
@@ -44,6 +33,7 @@ export default function Game({className, token}: {className: string, token: stri
   const [nameGameSession, setNameGameSession] = useState<string>("");
   const [stepCurrentSession, setStepCurrentSession] = useState<EStatusFrontGame>(EStatusFrontGame.idle);
   const [remoteEvent, setRemoteEvent] = useState<string>("");
+
   
   const [p1Size, setP1Size]             = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default avant connection
   const [p2Size, setP2Size]             = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default avant connection
@@ -125,6 +115,7 @@ export default function Game({className, token}: {className: string, token: stri
       setUserP2({});
     }
 
+
 	useEffect(() => {
 
 
@@ -132,12 +123,27 @@ export default function Game({className, token}: {className: string, token: stri
       console.log('CGame: socket non connecter, se connect');
   
       socketRef.current?.on('connect', () => {
-        console.log('CGame: socket connecté YOUHOUUUUUUUU');
+        console.log('GAME: socket connecté');
         // Autres opérations à faire une fois connecté
         
+        socketRef.current?.on('challengeStep', (res: IChallengeStepDTO) => { //TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
+          console.log('res challengeStep', JSON.stringify(res))
+          if (res.challengerequested)
+            setStepCurrentSession(EStatusFrontGame.challengeRequest);
+          else{ 
+            setStepCurrentSession(EStatusFrontGame.idle);
+          }
+          
+        })
+
         socketRef.current?.on('info', (data) => {
           console.log(`WS info recu: ${JSON.stringify(data)}`);
         })
+
+        // socketRef.current?.on('challenge', (data: string) => {
+        //   console.log(`WS challenge recu: ${JSON.stringify(data)}`);
+        //   setChallengeEvent(data);
+        // })
     
         socketRef.current?.on('infoGameSession', (data: PODGAME.IGameSessionInfo) => {
           // tableServerCoef.current = {x: data.startInitElement.tableServerSize.x / window. //taille en x de la div parent au component}
@@ -435,6 +441,11 @@ export default function Game({className, token}: {className: string, token: stri
       socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchmakingGhost(), userLogged.userContext);
     setStepCurrentSession(EStatusFrontGame.idle);
   }
+  function cancelChallenge() {
+    socketRef.current?.emit('cancelChallenge');
+    // setChallengeEvent('');
+    // setStepCurrentSession(EStatusFrontGame.idle);
+  }
 
   function handleSearchGame() {
     const login     = userLogged.userContext?.login
@@ -544,7 +555,7 @@ export default function Game({className, token}: {className: string, token: stri
   
     return (
         <div>
-          <ChallengeList/>
+          <ChallengeList currentStepGameFront={stepCurrentSession}/>
         </div>
       
       )
@@ -587,9 +598,13 @@ export default function Game({className, token}: {className: string, token: stri
               <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.ghost;handleSearchGame()}}>GHOST</button> 
               <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.trainning;handleSearchGame()}}>SOLO TRAINING</button> 
             </div> }
-          {stepCurrentSession === EStatusFrontGame.matchmakingRequest &&
+          {stepCurrentSession === EStatusFrontGame.matchmakingRequest && 
             <div className='flex space-x-5 items-center'>
               <button className='text-white' onClick={() => cancelMatchmaking()}>CANCEL MATCHMAKING</button><ClipLoader.ClipLoader color="#36d7b7" />
+            </div> }
+          {stepCurrentSession === EStatusFrontGame.challengeRequest && 
+            <div className='flex space-x-5 items-center'>
+              <button className='text-white' onClick={() => cancelChallenge()}>CANCEL CHALLENGE</button><ClipLoader.ClipLoader color="#60d7b7" /> //FIXME: change color
             </div> }
      
           {stepCurrentSession === EStatusFrontGame.waiting &&

@@ -44,7 +44,7 @@ export namespace channelsDTO {
 	}
 
 	export interface ICreateChallengeDTO {
-		userIdTarget: number;
+		targetID: number;
 		gameMod: EGameMod;
 	}
 

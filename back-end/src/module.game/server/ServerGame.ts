@@ -107,7 +107,15 @@ export class ServerGame {
 		return new GameSession(server, p1, p2, startDate, this.gameSession.length, gameMod, generateSessionName, this.gameService);
 	}
 
+	private async cleanChallenge() {
+		return this.challengeList = this.challengeList.filter((challenge) => challenge.getIsArchivate() !== true)
+	}
+
 	public createChallenge(server: Server, challenger: userInfoSocket, challenged: IUser, gameMod: EGameMod, sockersChallenged: RemoteSocket<DefaultEventsMap, any>[]) {
+		// console.log('debug challengerID = ' +  JSON.stringify(challenger.user))
+	
+		this.cleanChallenge();
+		// console.log('debug challenge list length: ' , this.challengeList.length)
 		if (!this.alreadyInChallenge(challenger.user.UserID))
 			this.challengeList.push(new ChallengeManager(server, challenger, challenged, sockersChallenged, this.createGame, gameMod))
 		else
@@ -125,4 +133,5 @@ export class ServerGame {
 
 		return listAllPropose;
 	}
+
 }

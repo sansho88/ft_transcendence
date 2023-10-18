@@ -1,7 +1,7 @@
 import { wsChatRoutesBack, wsChatRoutesClient } from "shared/routesApi";
 import { RemoteSocket, Server, Socket } from "socket.io";
 import {v4 as uuidv4} from "uuid";
-import {userInfoSocket, EGameMod} from 'shared/typesGame';
+import {userInfoSocket, EGameMod, IChallengeManager, IChallengeStepDTO} from 'shared/typesGame';
 import { GameSession } from "./GameSession";
 import { channelsDTO } from "shared/DTO/InterfaceDTO";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
@@ -22,7 +22,12 @@ export class ChallengeManager {
 	private eventChallenge: string = uuidv4();
 	private gameMod: EGameMod;
 	private proposeChallenge: channelsDTO.IChallengeProposeDTO;
+	private socketsChallenged: RemoteSocket<DefaultEventsMap, any>[];
+	private server: Server;
+	private isArchivate: boolean = false;
 
+
+	//P1 est le challenger - P2 le challengé
 	constructor(
 		server: Server,
 		challengerUser: userInfoSocket,
@@ -31,28 +36,44 @@ export class ChallengeManager {
 		createGameSession: FCreateGameType,
 		gameMod: EGameMod		
 		){
+		this.server = server;
 		this.gameMod = gameMod;
 		this.challenge =  {P1: challengerUser.user.UserID, P2: challengedUser.UserID}
 		this.socketP1 = challengerUser;
 		this.P2 = challengedUser;
+		this.socketsChallenged = socketsChallenged;
+
+		const tmp: IChallengeStepDTO = {challengerequested: true}
+		this.socketP1.socket.emit('challengeStep', tmp);
+
+		this.socketP1.socket.on('cancelChallenge', ()=> {
+			console.log('coucou cancel')
+			// this.socketP1.socket.emit('challengeStep', {challengerequested: false});
+			this.cancelChallenge()
+		});
+
+		this.socketP1.socket.on('disconnect', ()=> {
+			// this.socketP1.socket.emit('challengeStep', {challengerequested: false});
+			this.cancelChallenge()
+		});
 		
 		this.proposeChallenge = {challenger: this.socketP1.user, eventChallenge: this.eventChallenge, gameMod: this.gameMod }
 
 		//actualiser la liste des challenges en cours aupres des sockets du client concerné
-		socketsChallenged.map((socket) => {
+		this.socketsChallenged.map((socket) => {
 			socket.emit(wsChatRoutesClient.proposeChallenge(),  this.proposeChallenge)
+			socket.emit('info',  'Wesh les boloss')
+			socket.on()
 		})
 
 		server.on(this.eventChallenge, ((socket: Socket, res: channelsDTO.IChallengeAcceptedDTO) => {
 			console.log('Challenge accepted ' + JSON.stringify(res));
+
 			const P2: userInfoSocket = {socket: socket, user: this.P2}
 			if(res.response)
 				createGameSession(server, this.socketP1, P2, this.gameMod);
 			else
-			{
-				//TODO: Supprimer les challenge
-				server.off(this.eventChallenge, () => []);
-			}
+				this.cancelChallenge();
 		}))
 	}
 
@@ -68,6 +89,8 @@ export class ChallengeManager {
 	}
 
 	public containUserInChallenge(userId: number) {
+		if (userId === null)
+			return false;
 		if (userId === this.challenge.P1 || userId === this.challenge.P2)
 			return true;
 		else
@@ -79,6 +102,28 @@ export class ChallengeManager {
 	}
 
 	public isChallenger(userID: number): boolean {
-		return this.socketP1.user.UserID === userID
+		if (userID == null)
+			return false;
+		else
+			return this.socketP1.user.UserID === userID
 	}
+	
+	public cancelChallenge(){
+		this.isArchivate = true;
+		this.challenge.P1 = -1;
+		this.challenge.P2 = -1;
+		if (this.socketP1.socket != null){
+			const tmp: IChallengeStepDTO = {challengerequested: false}
+			this.socketP1.socket.emit('challengeStep', tmp);
+		}
+		this.socketP1.user = null;
+		this.socketP1.socket = null;
+		this.server.off(this.eventChallenge, () => []);
+		//TODO: ping les clients pour refresh les list challenges
+	}
+
+	public getIsArchivate(): boolean{
+		return this.isArchivate;
+	}
+
 }

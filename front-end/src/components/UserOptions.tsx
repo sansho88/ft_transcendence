@@ -8,6 +8,7 @@ import { wsChatRoutesBack } from "@/shared/routesApi";
 import { wsChatEvents, wsGameEvents } from "./api/WsReq";
 import { Socket } from "socket.io-client";
 import { EGameMod } from "@/shared/typesGame";
+import { channelsDTO } from "@/shared/DTO/InterfaceDTO";
 
 
 export interface userOptionsProps {
@@ -80,8 +81,9 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
         
     function handleChallenge(gameMod: EGameMod) {
         if (socketRefGame){
-            console.log('challenge user request => ' , user.login)
-            wsGameEvents.createChallenge(socketRefGame, {userIdTarget: user.UserID, gameMod: gameMod}) //TODO: pouvoir choisir le gameMod
+            console.log('challenge user request => ' , user.login + 'id ' + user.UserID )
+            const tmp: channelsDTO.ICreateChallengeDTO = {targetID: user.UserID, gameMod: gameMod}
+            wsGameEvents.createChallenge(socketRefGame, tmp) //TODO: pouvoir choisir le gameMod
         }
     }
 
