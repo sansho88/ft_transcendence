@@ -9,20 +9,25 @@ export interface avatarProps {
 	width:string;
 	height:string;
 	playerStatus:number;
+  isMainProfile?: boolean;
 }
 
 
-const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus}) => {
+const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus, isMainProfile}) => {
+
 
 	const [statusColor, setStatusColor] = useState(getEnumNameByIndex(Colors, playerStatus));
 	const {userContext, setUserContext} = useContext(UserContext);
 	const [isUploading, setIsUploading] = useState(false);
+  
 
 	const handleImageClick = () => {
-    if (!isUploading) {
-      const fileInput = document.getElementById('file-input');
-      if (fileInput) {
-        fileInput.click();
+    if (isMainProfile) {
+      if (!isUploading) {
+        const fileInput = document.getElementById('file-input');
+        if (fileInput) {
+          fileInput.click();
+        }
       }
     }
   };
@@ -51,9 +56,10 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus}) => {
 		setStatusColor(getEnumNameByIndex(Colors, playerStatus));
 	}, [playerStatus]);
 
-	if (userContext.avatar_path == undefined || userContext.avatar_path?.length == 0)
-		path = "/tests/avatar.jpg"
-
+	path = path ? path : "/tests/avatar.jpg";
+  
+    isMainProfile = isMainProfile === undefined ? false : isMainProfile;
+  console.log(isMainProfile)
 	return (
 		<div style={{ position: 'relative', float: "left" }}>
       <img
@@ -80,15 +86,16 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus}) => {
         }}
         onClick={handleImageClick}
       />
-      {isUploading && <div className="upload-progress">Uploading...</div>}
-      <input
+      {isMainProfile && isUploading && <div className="upload-progress">Uploading...</div>}
+      {isMainProfile && <input
         name="avatar"
         type="file"
         id="file-input"
         accept="image/*"
         style={{ display: 'none' }}
         onChange={handleFileChange}
-      />
+      />}
+      
     </div>
 	)
 }

@@ -17,8 +17,9 @@ interface ProfileProps{
     user: IUser;
     avatarSize: string | undefined;
     showStats?: boolean;
+    isMainProfile?: boolean;
 }
-const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize, isEditable, showStats})=>{
+const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize, isEditable, showStats, isMainProfile})=>{
 
     const [modifiedNick, setNickText] = useState<string>(user.nickname ? user.nickname : user.login);
     const [editMode, setEditMode] = useState(false);
@@ -195,7 +196,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
     return (
         <>
             <div className={className}>
-                <Avatar path={user.avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus}/>
+                <Avatar path={user.avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus} isMainProfile={isMainProfile}/>
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
                     color: "#07C3FF",

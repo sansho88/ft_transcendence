@@ -76,8 +76,9 @@ export class UsersService {
 	}
 
 	async update(user: UserEntity, updateUser: UpdateUserDto) {
+		console.log("updateUser: ", updateUser + "\nuser: ", user);
 		if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
-		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
+		if (updateUser.avatar_path !== undefined) user.avatar_path = updateUser.avatar_path;
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
 		if (updateUser.status !== undefined) user.status = updateUser.status;
 		await user.save();
@@ -88,6 +89,7 @@ export class UsersService {
 	async uploadAvatar(user: UserEntity, file, request) {
 		try {
 			const internalPath = request.protocol + '://' + request.hostname + ':' + process.env.PORT_SERVER;
+			console.log("internalPath: ", internalPath);
 			const buffer = file.buffer;
 			const img = await Jimp.read(buffer)
 				.then((my_img) => {return my_img.getExtension();})
@@ -131,7 +133,7 @@ export class UsersService {
 					.getBufferAsync(Jimp.MIME_JPEG);
 			}));
 	
-			if (user.avatar_path.includes(internalPath)) {
+			if (user.avatar_path?.includes(internalPath) ?? false) {
 				let oldAvatarPath = `${process.cwd()}${user.avatar_path.substring(internalPath.length)}`;
 				oldAvatarPath = oldAvatarPath.trim();
 				console.log("oldAvatarPath: ", oldAvatarPath);

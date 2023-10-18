@@ -76,7 +76,7 @@ const HomePage = ({className}: HomePageProps) => {
 
                     <Profile className={"main-user-profile"}
                              user={userContext}
-                             isEditable={true} avatarSize={"big"} showStats={true}>
+                             isEditable={true} avatarSize={"big"} showStats={true} isMainProfile={true}>
                         <Button image={"/history-list.svg"} onClick={() => console.log("history list button")} alt={"Match History button"}/>
                         <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
                     </Profile>
