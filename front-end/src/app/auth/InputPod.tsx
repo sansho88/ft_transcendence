@@ -9,7 +9,7 @@ export default function PodInput({className, props}: {className: string, props: 
 		: null;
 
 	return (
-		<input autoFocus type={props.type} onChange={props.onChange()} onKeyDown={props.onKeyDown} className={className}></input>
+		<input autoFocus type={props.type} onChange={props.onChange()} onKeyDown={props.onKeyDown} className={className} autoComplete={props.autoComplete}></input>
 	)
 }
 

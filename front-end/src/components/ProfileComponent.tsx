@@ -19,6 +19,8 @@ interface ProfileProps{
     showStats?: boolean;
     isMainProfile?: boolean;
 }
+
+
 const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize, isEditable, showStats, isMainProfile})=>{
 
     const [modifiedNick, setNickText] = useState<string>(user.nickname ? user.nickname : user.login);

@@ -1,5 +1,3 @@
-import './globals.css'
-import { Inter } from 'next/font/google'
 import { Providers } from "@/context/providers";
 import { NavBar } from '@/components/(ben_proto)/DevTools/NavBarDev'
 
@@ -31,3 +29,5 @@ export default function RootLayout({
 		</html>
 	)
 }
+import './globals.css'
+import { Inter } from 'next/font/google'

@@ -7,7 +7,6 @@ import {IUser} from "@/shared/types";
 import * as apiReq from '@/components/api/ApiReq'
 import {authManager} from '@/components/api/ApiReq'
 import * as ClipLoader from 'react-spinners'
-import './auth.css'
 import {useRouter} from 'next/navigation';
 import {LoggedContext, UserContext} from '@/context/globalContext';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
@@ -143,31 +142,31 @@ export default function Auth({className}: { className?: string }) {
 
     const enterLogin = () => {
         return (
-            <div className='flex flex-col justify-center items-center text-white my-2'>
+            <form className='flex flex-col justify-center items-center text-white my-2'>
                 {  currentStepLogin === EStepLogin.logIn ?
-                    <>
-                        <div className=' font-thin'>LOGIN</div>
-                        <InputPod
-                            className='inputLogin'
-                            props=
-                                {
+                    <div>
+                            <div className=' font-thin'>LOGIN</div>
+                            <InputPod
+                                className='inputLogin'
+                                props=
                                     {
-                                        type: "text",
-                                        value: loginInput,
-                                        onChange: () => (e: React.ChangeEvent<HTMLInputElement>) => {
-                                            setLoginInput(e.target.value)
-                                        },
-                                        onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
-                                            if (e.key === "Enter") {
-                                                () => nextStepCheck()
-                                            }
+                                        {
+                                            type: "text",
+                                            value: loginInput,
+                                            onChange: () => (e: React.ChangeEvent<HTMLInputElement>) => {
+                                                setLoginInput(e.target.value)
+                                            },
+                                            onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+                                                if (e.key === "Enter") {
+                                                    () => nextStepCheck()
+                                                }
+                                            },
+                                            autoComplete: "username"
                                         }
-
                                     }
-                                }
-                        />
+                            />
                         {enterCode2FA()}
-                    </>
+                    </div>
                     :
                     <div className={"text-center"}>
                         Keep in minds your future generated login.<br/>
@@ -175,7 +174,7 @@ export default function Auth({className}: { className?: string }) {
                     </div>
                 }
                 {enterPassword()}
-            </div>
+            </form>
         )
     }
 
@@ -197,7 +196,8 @@ export default function Auth({className}: { className?: string }) {
                                     if (e.key === "Enter") {
                                         setCurrentStepLogin(currentStepLogin);
                                     }
-                                }
+                                },
+                                autoComplete: "current-password"
                             }
                         }
                 />
@@ -241,7 +241,8 @@ export default function Auth({className}: { className?: string }) {
                                     if (e.key === "Enter") {
                                         setCurrentStepLogin(currentStepLogin);
                                     }
-                                }
+                                },
+                                autoComplete:"one-time-code"
                             }
                         }
                 />
@@ -539,3 +540,4 @@ export default function Auth({className}: { className?: string }) {
 
     )
 }
+import './auth.css'
