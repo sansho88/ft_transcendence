@@ -3,8 +3,8 @@
 import { IMessageEntity } from "@/shared/entities/IMessage.entity";
 import Axios from "./AxiosConfig";
 import {strRoutes} from "@/shared/routesApi";
-import {IGameStats, IMatch, IUser} from "@/shared/types";
-import { IChannel } from "@/shared/typesChannel";
+import {IGameStats, ILeaderboard, IMatch, IUser} from "@/shared/types";
+import { IChannel} from "@/shared/typesChannel";
 import axios from "axios";
 import { IChannelEntity } from "@/shared/entities/IChannel.entity";
 import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
@@ -111,9 +111,12 @@ export namespace getApi {
 		return axiosInstance.get(strRoutes.game.getMatchHistory(), updateAxiosInstance());
 	}
 	export const getMatchHistoryFromUserId = (userId: number): Promise<{data: IMatch[]}> => {
-			return axiosInstance.get(strRoutes.game.getMatchHistoryFromUserId(userId), updateAxiosInstance());
-		}
+		return axiosInstance.get(strRoutes.game.getMatchHistoryFromUserId(userId), updateAxiosInstance());
+	}
 
+	export const getLeaderboard = () : Promise<{data: ILeaderboard[]}> => {
+		return axiosInstance.get(strRoutes.game.getLeaderboard(), updateAxiosInstance());
+	}
 }
 
 

@@ -10,6 +10,8 @@ interface ButtonProps {
    radius?: string;
    onClick: (event: any | undefined) => void;
    alt: string;
+   title?: string;
+    margin?: string;
 }
 const Button: React.FC<ButtonProps> = ({
     color,

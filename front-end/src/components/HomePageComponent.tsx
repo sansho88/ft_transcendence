@@ -13,6 +13,7 @@ import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
 import LoadingComponent from "@/components/waiting/LoadingComponent";
 import MatchHistory from "@/components/MatchHistoryComponent";
+import Leaderboard from "@/components/LeaderboardComponent";
 
 const HomePage = () => {
     const {userContext, setUserContext} = useContext(UserContext);
@@ -20,6 +21,7 @@ const HomePage = () => {
     const router = useRouter();
     const tokenRef = useRef<string>('');
     const [showMatchHistory, setMatchHistoryVisible] = useState(false);
+    const [showLeaderboard, setLeaderboardVisible] = useState(false);
 
 
     useEffect(() => {
@@ -51,11 +53,14 @@ const HomePage = () => {
                     <Profile className={"main-user-profile"}
                              user={userContext}
                              isEditable={true} avatarSize={"big"} showStats={true}>
-                        <Button image={"/history-list.svg"} onClick={() => setMatchHistoryVisible(!showMatchHistory)} alt={"Match History button"}/>
+                        <Button image={"/history-list.svg"} onClick={() => setMatchHistoryVisible(!showMatchHistory)} alt={"Match History button"} title={"Match History"}/>
+                        <Button image={"/podium.svg"} onClick={() => setLeaderboardVisible(!showLeaderboard)} alt={"Leaderboard button"} title={"Leaderboard"} margin={"0 0 0 2ch"}/>
                         <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
                     </Profile>
 
                 {showMatchHistory && <MatchHistory/>}
+                {showLeaderboard &&  <Leaderboard/>}
+
                 <UserList className={"friends"} avatarSize={"medium"} showUserProps={true}/>
                 <Button className={"logout"} image={"/logout.svg"} onClick={() => {
                     localStorage.clear();
