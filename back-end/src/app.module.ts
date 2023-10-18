@@ -1,4 +1,4 @@
-import {Module} from '@nestjs/common';
+import {Module, OnApplicationBootstrap} from '@nestjs/common';
 import {ConfigModule} from '@nestjs/config';
 import {AppController} from './app.controller';
 import {AppService} from './app.service';
@@ -55,5 +55,14 @@ import {GameModule} from './module.game/game.module';
 	controllers: [AppController],
 	providers: [AppService, WebsocketGatewayGlobal],
 })
-export class AppModule {
+export class AppModule implements OnApplicationBootstrap {
+	constructor(
+		private readonly appService: AppService,
+	) {
+	}
+
+	async onApplicationBootstrap() {
+		const admin = await this.appService.createAdmin();
+		this.appService.createGlobalChannel(admin);
+	}
 }
