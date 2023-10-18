@@ -53,7 +53,7 @@ const HomePage = () => {
                     <Profile className={"main-user-profile"}
                              user={userContext}
 
-                             isEditable={true} avatarSize={"big"} showStats={true}>
+                             isEditable={true} avatarSize={"big"} showStats={true} isMainProfile={true} >
                         <Button image={"/history-list.svg"} onClick={() => {
                             setMatchHistoryVisible(!showMatchHistory);
                             setLeaderboardVisible(false);
