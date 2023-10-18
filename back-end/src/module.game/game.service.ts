@@ -13,7 +13,6 @@ interface levelList {
 
 export interface leaderboard {
 	user: UserEntity;
-	level: number;
 	rank: number;
 }
 
@@ -94,26 +93,22 @@ export class GameService {
 	}
 
 	async getRankUser(lstGame: GameEntity[], userID: number) {
-		userID--;
-		let rank = 1;
-		const allLevel = await this.calAllLevel(lstGame);
-		allLevel.sort((a, b) => b.level - a.level).forEach((level, index) => {
-			if (level.level === allLevel[userID].level) rank = index + 1;
-		});
-		return rank;
+		return (await this.getLeaderboard()).find(mys_usr => mys_usr.user.UserID === userID).rank;
 	}
 
 	async getLeaderboard() {
 		const lstGame = await this.getAll();
-		const allLevel = await this.calAllLevel(lstGame);
 		const lstUser = await this.usersService.findAll();
+		let tmp = [];
+		for (const usr of lstUser) {
+			tmp.push({userID: usr.UserID, nbWin: this.getWinGame(usr, lstGame).length});
+		}
 		let leaderboard: leaderboard[] = [];
 		let rank = 1;
-		allLevel.sort((a, b) => b.level - a.level).forEach((level, index) => {
-			if (index > 0 && level.level < allLevel[index - 1].level) rank++;
+		tmp.sort((a, b) => b.nbWin - a.nbWin).forEach((usr, index) => {
+			if (index > 0 && usr.nbWin < tmp[index - 1].nbWin) rank++;
 			leaderboard.push({
-				user: lstUser.find(user => user.UserID === level.userID),
-				level: level.level,
+				user: lstUser.find(user => user.UserID === usr.userID),
 				rank: rank,
 			});
 		});
