@@ -159,7 +159,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
                     background: "none",
                     padding: "6px"
                 }}/>
-                <span style={{marginLeft: "4px"}}><Button image={"/floppy.svg"} onClick={turnOffEditMode} alt={"Save Button"}/></span>
+                <span style={{marginLeft: "4px", position: "fixed"}}><Button image={"/floppy.svg"} onClick={turnOffEditMode} alt={"Save Button"}/></span>
                 <p style={{fontSize: "12px", color: "red"}}>{nickErrorMsg}</p>
             </div>);
         }
@@ -204,9 +204,9 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
                     display: "inline-block",
                     position: "relative",
                     transition:"1000ms",
-                    top: "0"
+                    top: "15px"
                 }
-                }>
+            }>
                     <h2 id={"login"} style={{ color: "darkgrey", marginTop: "0"}}>{user.login}</h2>
                     {editedNick()}
 
@@ -215,13 +215,11 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
                         transition:"0ms",
                         position: "relative", 
                         top: "0",
-                        fontFamily: "sans-serif",
-                        lineHeight: "1.5em",
                         }}>
                         {getEnumNameByIndex(EStatus, userStatus)}
                     </p>
                 </div>
-                <div id={"children"} style={{marginLeft: "4px", marginTop: "6px"}}>
+                <div id={"children"} style={{marginLeft: "4px", marginTop: "6px", clear: "both"}}>
                     {showStats && <Stats user={user}/>}
                     {children}
                 </div>

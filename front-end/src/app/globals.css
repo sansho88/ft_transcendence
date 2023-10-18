@@ -251,6 +251,13 @@ body {
 
 }
 
+.avatar:hover{
+    cursor: pointer;
+    filter: brightness(0.7);
+    filter: blur(1px);
+    transition: 300ms;
+}
+
 .main-user-profile .infos{
     position: relative;
     width: auto;

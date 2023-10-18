@@ -2,6 +2,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {UserContext} from '@/context/globalContext';
 import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
+import { postApi } from "./api/ApiReq";
 
 export interface avatarProps {
 	path?:string;
@@ -19,7 +20,6 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus}) => {
 
 	const handleImageClick = () => {
     if (!isUploading) {
-      // Ouvrir la boîte de dialogue de sélection de fichier lorsque l'utilisateur clique sur l'avatar
       const fileInput = document.getElementById('file-input');
       if (fileInput) {
         fileInput.click();
@@ -34,9 +34,9 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus}) => {
       const formData = new FormData();
       formData.append('avatar', selectedFile);
 
-      axios.post('http://localhost:8000/upload', formData)
+      postApi.postUploadAvatar(formData)
         .then(response => {
-          const newImagePath = response.data; // Assurez-vous que la réponse contient le chemin de la nouvelle image
+          const newImagePath = response.data;
           setUserContext({ ...userContext, avatar_path: newImagePath });
           setIsUploading(false);
         })
@@ -55,7 +55,7 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus}) => {
 		path = "/tests/avatar.jpg"
 
 	return (
-		<div style={{ position: 'relative' }}>
+		<div style={{ position: 'relative', float: "left" }}>
       <img
         className={"avatar"}
         src={path}
@@ -82,6 +82,7 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus}) => {
       />
       {isUploading && <div className="upload-progress">Uploading...</div>}
       <input
+        name="avatar"
         type="file"
         id="file-input"
         accept="image/*"
