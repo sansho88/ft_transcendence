@@ -197,7 +197,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
     return (
         <>
             <div className={className} onClick={() => setSelectedUserContext(user)}>
-                <Avatar path={user.avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus}/>
+                <Avatar path={user.avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus} isMainProfile={isMainProfile}/>
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
                     color: "#07C3FF",

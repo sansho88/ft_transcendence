@@ -52,6 +52,7 @@ const HomePage = () => {
 
                     <Profile className={"main-user-profile"}
                              user={userContext}
+
                              isEditable={true} avatarSize={"big"} showStats={true}>
                         <Button image={"/history-list.svg"} onClick={() => {
                             setMatchHistoryVisible(!showMatchHistory);
@@ -61,6 +62,7 @@ const HomePage = () => {
                             setLeaderboardVisible(!showLeaderboard);
                             setMatchHistoryVisible(false);
                         }} alt={"Leaderboard button"} title={"Leaderboard"} margin={"0 0 0 2ch"}/>
+              
                         <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
                     </Profile>
 
