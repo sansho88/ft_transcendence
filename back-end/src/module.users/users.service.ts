@@ -1,4 +1,4 @@
-import {BadRequestException, Injectable} from '@nestjs/common';
+import {BadRequestException, forwardRef, Inject, Injectable} from '@nestjs/common';
 import {UpdateUserDto} from '../dto/user/update-user.dto';
 import {UserEntity, UserStatus} from '../entities/user.entity';
 import {InjectRepository} from '@nestjs/typeorm';
@@ -6,13 +6,14 @@ import {Repository} from 'typeorm';
 import {UserCredentialEntity} from '../entities/credential.entity';
 import * as fs from 'fs-extra'; // pour gerer les fichiers a l'intérieur du back (fs = file system)
 import Jimp from 'jimp';
+import {ChatGateway} from "../module.channels/chat.ws";
 
 const acceptedImageTypes = [
-  'jpeg',
-  'png',
-  'gif',
-  'bmp',
-  'tiff',
+	'jpeg',
+	'png',
+	'gif',
+	'bmp',
+	'tiff',
 	'gif'
 ];
 
@@ -21,6 +22,8 @@ export class UsersService {
 	constructor(
 		@InjectRepository(UserEntity)
 		private usersRepository: Repository<UserEntity>,
+		@Inject(forwardRef(() => ChatGateway))
+		private chatGateway: ChatGateway,
 	) {
 	}
 
@@ -80,6 +83,7 @@ export class UsersService {
 		if (updateUser.avatar_path !== undefined) user.avatar_path = updateUser.avatar_path;
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
 		await user.save();
+		await this.chatGateway.updateUserStatusEmit(user);
 		return user;
 	}
 
@@ -89,7 +93,9 @@ export class UsersService {
 			console.log("internalPath: ", internalPath);
 			const buffer = file.buffer;
 			const img = await Jimp.read(buffer)
-				.then((my_img) => {return my_img.getExtension();})
+				.then((my_img) => {
+					return my_img.getExtension();
+				})
 				.catch((err) => {
 					console.error(err);
 				});
@@ -99,7 +105,7 @@ export class UsersService {
 			}
 			const fileName = `${Date.now()}.${crypto.randomUUID()}.${img}`;
 			const uploadPath = `${process.cwd()}/public/avatars/${fileName}`;
-	
+
 			await fs.ensureDir(`${process.cwd()}/public/avatars`);
 			await fs.outputFile(uploadPath, await Jimp.read(buffer).then((my_img) => {
 				const width = my_img.getWidth();
@@ -121,27 +127,25 @@ export class UsersService {
 
 				if (width > height) {
 					cropped = my_img.crop(diff / 4, 0, minSize, minSize).resize(squareSize, squareSize, Jimp.RESIZE_BILINEAR)
-				}
-				else {
+				} else {
 					cropped = my_img.crop(0, diff / 4, minSize, minSize).resize(squareSize, squareSize, Jimp.RESIZE_BILINEAR)
 				}
 				return my_img
 					.quality(90)
 					.getBufferAsync(Jimp.MIME_JPEG);
 			}));
-	
+
 			if (user.avatar_path?.includes(internalPath) ?? false) {
 				let oldAvatarPath = `${process.cwd()}${user.avatar_path.substring(internalPath.length)}`;
 				oldAvatarPath = oldAvatarPath.trim();
 				await fs.remove(oldAvatarPath);
 			}
-	
+
 			user.avatar_path = internalPath + '/public/avatars/' + fileName;
 			user.save();
 			console.log("NEW user.avatar_path: ", user.avatar_path);
 			return user.avatar_path;
-		}
-		catch (error) {
+		} catch (error) {
 			console.log("error: ", error);
 			throw new BadRequestException(error.message);
 		}
@@ -162,6 +166,7 @@ export class UsersService {
 	async userStatus(user: UserEntity, newStatus: UserStatus) {
 		user.status = newStatus;
 		await user.save();
+		await this.chatGateway.updateUserStatusEmit(user);
 	}
 
 	private generateNickname() {
