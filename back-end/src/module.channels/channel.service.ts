@@ -242,6 +242,8 @@ export class ChannelService {
 	}
 
 	async checkBlock(user: UserEntity, channel: ChannelEntity) {
+		if (!channel.mp)
+			return false;
 		const targetID = channel.userList.find(usr => usr.UserID != user.UserID).UserID;
 		const target = await this.userService.findOne(targetID, ['blocked']);
 		return !!target.blocked.find(usr => usr.UserID == user.UserID)
