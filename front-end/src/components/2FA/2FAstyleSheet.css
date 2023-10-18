@@ -126,10 +126,10 @@ textarea:focus, input:focus  .settings .codeInput {
 }
 
 .doubleFA{
-    display: inline-block;
-    position: relative;
+    position: absolute;
+    bottom: 0;
+    right: 0;
     width: 42px;
     border-radius: 18px;
-    left: 120px;
 
 }

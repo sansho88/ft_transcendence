@@ -98,6 +98,8 @@ export namespace wsChatRoutesClient {
 	export const getUsersAll=()							=>{return `${serverApi}/${routeUsers}/get/`}
 	export const getUserById = () 					=>{return `${serverApi}/${routeUsers}/get/`}
 	export const getUserByLogin=()					=>{return `${serverApi}/${routeUsers}/get/`}
+
+	export const postUploadAvatar=()					=>{return `${serverApi}/${routeUsers}/upload/avatar`}
 		
 	export const postUser=()								=>{return `${serverApi}/auth/visit/sign`}
 	export const postUserCheckLogin=()			=>{return `${serverApi}/auth/visit/login`}
