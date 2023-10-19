@@ -449,7 +449,7 @@ export class ChatGateway
 		this.server.to(data.channelID.toString()).emit(wsChatRoutesClient.nameChannelsHasChanged(), channel)
 	}
 
-	async updateUserStatusEmit(user: UserEntity) {
+	async updateUserEmit(user: UserEntity) {
 		console.log('TEST  THERE ');
 		console.log(this.server.emit('userUpdate', user)
 		)

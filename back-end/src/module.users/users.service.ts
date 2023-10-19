@@ -7,6 +7,7 @@ import {UserCredentialEntity} from '../entities/credential.entity';
 import * as fs from 'fs-extra'; // pour gerer les fichiers a l'intérieur du back (fs = file system)
 import Jimp from 'jimp';
 import {ChatGateway} from "../module.channels/chat.ws";
+import {ChannelService} from "../module.channels/channel.service";
 
 const acceptedImageTypes = [
 	'jpeg',
@@ -24,6 +25,8 @@ export class UsersService {
 		private usersRepository: Repository<UserEntity>,
 		@Inject(forwardRef(() => ChatGateway))
 		private chatGateway: ChatGateway,
+		@Inject(forwardRef(() => ChannelService))
+		private channelService: ChannelService
 	) {
 	}
 
@@ -47,10 +50,12 @@ export class UsersService {
 			nickname = this.generateNickname();
 		while (await this.nicknameUsed(nickname))
 			nickname = this.generateNickname();
+		const globalChannel = await this.channelService.getGlobalChannel();
 		const user = this.usersRepository.create({
 			login: newLogin,
 			nickname: nickname,
 			visit: newInvite,
+			channelJoined: [globalChannel],
 		});
 		user.credential = newCredential;
 		await user.save();
@@ -83,7 +88,7 @@ export class UsersService {
 		if (updateUser.avatar_path !== undefined) user.avatar_path = updateUser.avatar_path;
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
 		await user.save();
-		await this.chatGateway.updateUserStatusEmit(user);
+		await this.chatGateway.updateUserEmit(user);
 		return user;
 	}
 
@@ -166,7 +171,7 @@ export class UsersService {
 	async userStatus(user: UserEntity, newStatus: UserStatus) {
 		user.status = newStatus;
 		await user.save();
-		await this.chatGateway.updateUserStatusEmit(user);
+		await this.chatGateway.updateUserEmit(user);
 	}
 
 	private generateNickname() {
@@ -196,5 +201,11 @@ export class UsersService {
 	unBlockUser(user: UserEntity, target: UserEntity) {
 		user.blocked = user.blocked.filter(block => block.UserID != target.UserID);
 		return user.save();
+	}
+
+	async getAdminUser() {
+		return this.usersRepository.findOneBy({
+			login: 'PongGod'
+		});
 	}
 }
