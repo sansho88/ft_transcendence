@@ -1,5 +1,5 @@
 import { MouseEventHandler } from "react";
-
+import './btn_dbg.css'
 
 interface ButtonDBG {
 	f: MouseEventHandler<HTMLButtonElement>;
@@ -12,4 +12,3 @@ export default function ButtonDBG({param}: {param: ButtonDBG}) {
   );
 }
 //'bg-indigo-700 h-10 w-40'
-import './btn_dbg.css'
