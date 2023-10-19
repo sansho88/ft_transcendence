@@ -450,7 +450,7 @@ export class ChatGateway
 	}
 
 	async updateUserStatusEmit(user: UserEntity) {
-		//console.log('TEST  THERE ');
+		console.log('TEST  THERE ');
 		console.log(this.server.emit('userUpdate', user)
 		)
 	}
