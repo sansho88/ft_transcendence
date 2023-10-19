@@ -13,6 +13,7 @@ import ChatMaster from "./chat/ChatMaster";
 import LoadingComponent from "@/components/waiting/LoadingComponent";
 import MatchHistory from "@/components/MatchHistoryComponent";
 import Leaderboard from "@/components/LeaderboardComponent";
+import '@/components/chat/chat.css';
 
 
 const HomePage = () => {
@@ -92,4 +93,3 @@ const HomePage = () => {
 }
 
 export default HomePage;
-import '@/components/chat/chat.css'
