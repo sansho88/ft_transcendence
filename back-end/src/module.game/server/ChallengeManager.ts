@@ -23,7 +23,7 @@ export class ChallengeManager {
 	private eventChallenge: string = uuidv4();
 	public gameMod: EGameMod;
 	private proposeChallenge: channelsDTO.IChallengeProposeDTO;
-	private socketsChallenged: SocketUserList[];
+	private socketsChallenged: RemoteSocket<DefaultEventsMap, any>[];
 	private server: Server;
 	private isArchivate: boolean = false;
 
@@ -33,7 +33,7 @@ export class ChallengeManager {
 		server: Server,
 		challengerUser: userInfoSocket,
 		challengedUser: IUser,
-		socketsChallenged: SocketUserList[],
+		socketsChallenged: RemoteSocket<DefaultEventsMap, any>[],
 		createGameSession: FCreateGameType,
 		gameMod: EGameMod		
 		){
@@ -62,11 +62,11 @@ export class ChallengeManager {
 
 		//actualiser la liste des challenges en cours aupres des sockets du client concerné
 		this.socketsChallenged.map((socket) => {
-			socket.socket.emit(wsChatRoutesClient.proposeChallenge(),  this.proposeChallenge)
-			socket.socket.emit('info',  'Wesh les boloss')
-			socket.socket.on(this.eventChallenge, (res) => {
-				console.log('LA POUTAA DE SA MAMA')
-			})
+			socket.emit(wsChatRoutesClient.proposeChallenge(),  this.proposeChallenge)
+			socket.emit('info',  'Wesh les boloss')
+			// socket.on(this.eventChallenge, (res) => {
+			// console.log('LA POUTAA DE SA MAMA')
+			// })
 		})
 
 		server.on(this.eventChallenge, ((socket: Socket, res: channelsDTO.IChallengeAcceptedDTO) => {

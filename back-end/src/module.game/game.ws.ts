@@ -28,7 +28,7 @@ import { channelsDTO } from 'shared/DTO/InterfaceDTO';
 export interface SocketUserList {
 	userID: number;
 	socketID: string;
-	socket: Socket;
+	// socket: Socket;
 }
 @WebSocketGateway({
 	namespace: '/game',
@@ -81,8 +81,7 @@ export class WebsocketGatewayGame
 		client.emit('welcome', 'Bienvenue sur TheGame');//FIXME:
 		this.socketUserList.push({
 			socketID: client.id,
-			userID: userID,
-			socket: client
+			userID: userID
 		});
 
 	}
@@ -208,16 +207,18 @@ export class WebsocketGatewayGame
 		
 		const P1: userInfoSocket = { socket: client, user: user };
 
-		const sockersChallenged: SocketUserList[] = await this.getSocket(data.targetID);
+		const sockersChallenged: RemoteSocket<DefaultEventsMap, any>[]= await this.getSocket(data.targetID);
+
+		// const sockersChallenged: SocketUserList[] = await this.getSocket(data.targetID);
 		// console.log(JSON.stringify(sockersChallenged))
 		sockersChallenged.forEach((elem) => {
-			elem.socket.emit('info', 'BON ALORS CA DIT QUOI LA')
+			elem.emit('info', 'BON ALORS CA DIT QUOI LA')
 		
 		})
 		const P2: UserEntity = await this.usersService.findOne(data.targetID)
 		sockersChallenged.forEach((socketLst) => {
 			console.log('send to socket : ' + socketLst);
-			socketLst.socket.emit('info', 'hello Challenged')
+			socketLst.emit('info', 'hello Challenged')
 		})
 		console.log('map lenght = ' , sockersChallenged.length);
 		this.serverGame.createChallenge(this.server, P1, P2, data.gameMod, sockersChallenged);
@@ -233,7 +234,7 @@ export class WebsocketGatewayGame
 	) {
 		if(data.response) {
 			console.log('ACCEPTED challenge , target event = ', data.event);
-			const P2: userInfoSocket = { socket: client, user: user };
+			// const P2: userInfoSocket = { socket: client, user: user };
 			this.serverGame.acceptChallenge(this.server, user, client, data.event);
 		}
 		else{
@@ -241,9 +242,17 @@ export class WebsocketGatewayGame
 		}
 	}
 
-	private async getSocket(userID: number) : Promise<SocketUserList[]> {
+	private async getSocket(userID: number) {
     const socketIDLst = this.socketUserList.filter(value => value.userID === userID);
-    return socketIDLst.filter(socket => {socket.userID === userID});
+    const socketLst = await this.server.fetchSockets();
+
+    return socketLst.filter(socket => {
+        return socketIDLst.some(Id => Id.socketID === socket.id);
+    });
 	}
+	// private async getSocket(userID: number) : Promise<RemoteSocket<DefaultEventsMap, any>[]> {
+  //   const socketIDLst = this.socketUserList.filter(value => value.userID === userID);
+  //   return socketIDLst.filter(socket => {socket. === userID});
+	// }
 
 }

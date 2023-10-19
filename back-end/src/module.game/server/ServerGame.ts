@@ -113,7 +113,7 @@ export class ServerGame {
 		return this.challengeList = this.challengeList.filter((challenge) => challenge.getIsArchivate() !== true)
 	}
 
-	public createChallenge(server: Server, challenger: userInfoSocket, challenged: IUser, gameMod: EGameMod, sockersChallenged: SocketUserList[]) {
+	public createChallenge(server: Server, challenger: userInfoSocket, challenged: IUser, gameMod: EGameMod, sockersChallenged: RemoteSocket<DefaultEventsMap, any>[]) {
 		// console.log('debug challengerID = ' +  JSON.stringify(challenger.user))
 	
 		this.cleanChallenge();
