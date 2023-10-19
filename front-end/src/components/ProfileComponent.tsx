@@ -2,8 +2,6 @@ import React, {useContext, useEffect, useRef, useState} from "react";
 import Button from "./CustomButtonComponent"
 import Avatar from "@/components/AvatarComponent";
 import * as apiReq from '@/components/api/ApiReq'
-
-
 import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
 import {EStatus, IUser} from "@/shared/types";
@@ -60,7 +58,6 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
             clearInterval(timer);
         };
     })
-
 
     useEffect(() => {
         setStatusColor(getEnumNameByIndex(Colors, user.status));
