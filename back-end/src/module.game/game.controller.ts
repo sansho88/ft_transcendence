@@ -1,15 +1,17 @@
-import {Controller, Get, Param, ParseIntPipe, UseGuards} from '@nestjs/common';
-import {GameService} from "./game.service";
-import {UsersService} from "../module.users/users.service";
-import {AuthGuard} from "../module.auth/auth.guard";
-import {CurrentUser} from "../module.auth/indentify.user";
-import {UserEntity} from "../entities/user.entity";
+import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { GameService } from "./game.service";
+import { UsersService } from "../module.users/users.service";
+import { AuthGuard } from "../module.auth/auth.guard";
+import { CurrentUser } from "../module.auth/indentify.user";
+import { UserEntity } from "../entities/user.entity";
+import { ServerGame } from './server/ServerGame';
 import {leaderboard} from "./game.service"
 import {checkLimitID} from "../dto.pipe/checkIntData";
 
 @Controller('game')
 export class GameController {
 	constructor(
+		private serverGame: ServerGame, 
 		private gameService: GameService,
 		private usersService: UsersService,
 	) {
@@ -24,6 +26,15 @@ export class GameController {
 		return this.gameService.getAllGame(user, await this.gameService.getAll());
 	}
 
+	@Get('myChallenges')
+	@UseGuards(AuthGuard)
+	async getChallenges(
+		@CurrentUser() user: UserEntity
+	) {
+		return this.serverGame.getAllChallengeUser(user.UserID);
+	}
+
+	
 	@Get('users/:UserID')
 	@UseGuards(AuthGuard)
 	async findOther(

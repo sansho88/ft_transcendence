@@ -66,7 +66,7 @@ export class UserEntity extends BaseEntity {
 		type: 'enum',
 		enum: UserStatus,
 		enumName: `User Status`,
-		default: UserStatus.ONLINE,
+		default: UserStatus.OFFLINE,
 	})
 	status: UserStatus;
 

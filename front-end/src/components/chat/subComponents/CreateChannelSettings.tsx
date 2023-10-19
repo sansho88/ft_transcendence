@@ -68,7 +68,7 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
         event.preventDefault();
         if (areSettingsValids)
         {
-            console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
+            // console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
             setIsChannelCreated(true);
             
             const newChannel: channelsDTO.ICreateChannelDTOPipe = {
