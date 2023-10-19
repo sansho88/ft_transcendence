@@ -6,42 +6,24 @@ import { channelsDTO } from '@/shared/DTO/InterfaceDTO'
 import { SocketContextGame } from '@/context/globalContext'
 import { wsChatRoutesBack, wsChatRoutesClient } from '@/shared/routesApi'
 import * as apiReq from '@/components/api/ApiReq'
-import { EStatusFrontGame } from '@/shared/typesGame'
+import { EGameMod, EStatusFrontGame } from '@/shared/typesGame'
 import {v4 as uuidv4} from "uuid";
 import { eventNames } from 'process'
 
-
-
 export default function ChallengeList({currentStepGameFront}: {currentStepGameFront: EStatusFrontGame}) { //FIXME: props useless ?
   const socket      												= useContext(SocketContextGame);
-	const [challengeList, setChallengeList] 	= useState<channelsDTO.IChallengeProposeDTO[]>([]);
-  const [challengeEvent, setChallengeEvent] = useState<string>("");
-
-	
+	const [challengeList, setChallengeList] 	= useState<channelsDTO.IChallengeProposeDTO[]>([]);	
 
 	useEffect(() => {
 		setTimeout(() => {
-		
-			console.log('socket connect ? : ' , socket?.connected)
 			if (socket?.disconnected)
-			{	
 				socket.connect();
-			}
-
-			socket?.on('info', (data: string) => {
-				console.log('Et bah enfin ! ' , data)
-			})
-
-			socket?.on('challenge', (data: string) => {
-				console.log(`WS challenge recu: ${JSON.stringify(data)}`);
-				setChallengeEvent(data);
-			})
 
 			socket?.on(wsChatRoutesClient.proposeChallenge(), (/*data: channelsDTO.IChallengeProposeDTO*/) => {
 				challengeElement();
 			})
-		}, 100)
-		
+		}, 200) // petit timeout pour laisser les autres componenets / socket se monter avant
+		challengeElement();
 	}, [])
 	
 	//get la list des challenge via api REST
@@ -68,26 +50,23 @@ export default function ChallengeList({currentStepGameFront}: {currentStepGameFr
 	}
 
 	const challengeButtonListElement = (challenge: channelsDTO.IChallengeProposeDTO) => {
-	
-	return (
-		<div className='flex bg-slate-400 max-w-max p-1 mt-1 rounded-md' key={uuidv4()}>
-			{`${challenge.challenger.nickname}(${challenge.challenger.login})`} 
-			<button onClick={() => acceptChallenge(challenge)}>✅</button>
-			<button onClick={()=> declineChallenge(challenge)}>❌</button>
-		</div>
-		)
-	}
-	
 
-
-
-
-
+		return (
+			<div className='flex  max-w-max p-1 mt-1 rounded-md space-x-1' key={uuidv4()}>
+				<div className='mr-2'>
+					{`${challenge.challenger.nickname}(${challenge.challenger.login}) |`}
+					{challenge.gameMod === EGameMod.classic ? ' classic ' : ' ghost '} 
+				</div>
+				<button onClick={() => acceptChallenge(challenge)} title='Accept'>✅</button>
+				<button onClick={()=> declineChallenge(challenge)} title='Decline'>❌</button>
+			</div>
+			)
+		}
 
 
 	return (
-		<div className='flex-col pl-10 noScrollbar'>
-			<div className='pt-10 ml-10'>Challenge en cours</div>
+		<div className='flex-col pl-12 noScrollbar'>
+			<div className='pt-10 ml-10'>{challengeList.length > 0 ? 'CHALLENGES:' : ''}</div>
 			<div className='max-h-60 overflow-y-auto noScrollbar '>
 				{challengeList.map((elem) => {
 					return (challengeButtonListElement(elem))
