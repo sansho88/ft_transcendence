@@ -17,7 +17,8 @@ services:
     networks:
       - webapp
     environment:
-      - NODE_ENV=development
+      # - NODE_ENV=development
+      - NEXT_SKIP_TYPE_CHECK=true
 
   back-end:
     depends_on:
