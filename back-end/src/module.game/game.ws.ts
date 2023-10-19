@@ -188,8 +188,6 @@ export class WebsocketGatewayGame
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity
 	) {
-		// console.log(client.id + ': ' + payload.nickname);
-		// console.log('json user: ' + JSON.stringify(payload));
 		const player: userInfoSocket = {socket: client, user};
 		await this.serverGame.addPlayerInTrainningSession(player, this.server);
 		client.emit('info', `Trainning game loading...`);
@@ -203,18 +201,10 @@ export class WebsocketGatewayGame
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity,
 	) {
-		// console.log('OK Create challenge , target id = ', data.targetID);
-		
+		if (this.isInGame(user))
+			return client.emit('info', 'You are already in game'); //TODO: NOTIF GENERAL
 		const P1: userInfoSocket = { socket: client, user: user };
-
 		const sockersChallenged: RemoteSocket<DefaultEventsMap, any>[]= await this.getSocket(data.targetID);
-
-		// const sockersChallenged: SocketUserList[] = await this.getSocket(data.targetID);
-		// console.log(JSON.stringify(sockersChallenged))
-		sockersChallenged.forEach((elem) => {
-			elem.emit('info', 'BON ALORS CA DIT QUOI LA')
-		
-		})
 		const P2: UserEntity = await this.usersService.findOne(data.targetID)
 		sockersChallenged.forEach((socketLst) => {
 			console.log('send to socket : ' + socketLst);
@@ -232,14 +222,18 @@ export class WebsocketGatewayGame
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity,
 	) {
+		if (this.isInGame(user))
+			return client.emit('info', 'You are already in game'); //TODO: NOTIF GENERAL
 		if(data.response) {
-			console.log('ACCEPTED challenge , target event = ', data.event);
-			// const P2: userInfoSocket = { socket: client, user: user };
 			this.serverGame.acceptChallenge(this.server, user, client, data.event);
 		}
 		else{
 			this.serverGame.declineChallenge(user, data.event);
 		}
+	}
+
+	private isInGame(user: UserEntity): boolean {
+		return user.status === UserStatus.INGAME;	
 	}
 
 	private async getSocket(userID: number) {
@@ -250,9 +244,5 @@ export class WebsocketGatewayGame
         return socketIDLst.some(Id => Id.socketID === socket.id);
     });
 	}
-	// private async getSocket(userID: number) : Promise<RemoteSocket<DefaultEventsMap, any>[]> {
-  //   const socketIDLst = this.socketUserList.filter(value => value.userID === userID);
-  //   return socketIDLst.filter(socket => {socket. === userID});
-	// }
 
 }

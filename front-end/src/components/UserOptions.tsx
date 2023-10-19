@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {EStatus, IUser} from "@/shared/types";
 import Button from "@/components/CustomButtonComponent";
 import {UserContext, SocketContextChat, SocketContextGame} from "@/context/globalContext";
@@ -7,7 +7,7 @@ import {NotificationManager} from 'react-notifications';
 import { wsChatRoutesBack } from "@/shared/routesApi";
 import { wsChatEvents, wsGameEvents } from "./api/WsReq";
 import { Socket } from "socket.io-client";
-import { EGameMod, EStatusFrontGame } from "@/shared/typesGame";
+import { EGameMod, EStatusFrontGame, IChallengeStepDTO } from "@/shared/typesGame";
 import { channelsDTO } from "@/shared/DTO/InterfaceDTO";
 
 
@@ -20,6 +20,7 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
     const {userContext, setUserContext} = useContext(UserContext);
     const [isFollowed, setIsFollowed] = useState(!!relationships.followed.find(tmpUser => user.UserID == tmpUser.UserID));
     const [isBlocked, setIsBlocked] = useState(relationships.blocked && !!relationships.blocked.find(tmpUser => user.UserID == tmpUser.UserID));
+    const [isWaitingChallenge, setIsWaitingChallenge] = useState<boolean>(false);
 
     const socketRef = useContext(SocketContextChat)
     const socketRefGame = useContext(SocketContextGame)
@@ -81,12 +82,24 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
         
     function handleChallenge(gameMod: EGameMod) {
         if (socketRefGame){
-            console.log('challenge user request => ' , user.login + 'id ' + user.UserID )
+            setIsWaitingChallenge(true);
             const tmp: channelsDTO.ICreateChallengeDTO = {targetID: user.UserID, gameMod: gameMod}
             wsGameEvents.createChallenge(socketRefGame, tmp) //TODO: pouvoir choisir le gameMod
         }
     }
 
+    useEffect(() => {
+        if (socketRefGame){
+            socketRefGame.on('challengeStep', (res: IChallengeStepDTO) => {
+                console.log('res challengeStep', JSON.stringify(res))
+                if (!res.challengerequested)
+                    setIsWaitingChallenge(false);
+  
+                
+            })
+        }
+        }, [])
+    
     return (
         <>
             {userContext.UserID != user.UserID &&
@@ -107,7 +120,7 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
                                 <Button image={"/hammer.svg"} onClick={() => console.log("Ban User button")} alt={"Ban"} title={"Ban"}/>
                             </span>
                         }
-                        {userContext.status != EStatus.InGame && user.status != EStatus.Offline &&
+                        { !isWaitingChallenge && user.status != EStatus.Offline &&
                             <>
                                 <Button image={"/sword.svg"} onClick={() => handleChallenge(EGameMod.classic)} alt={"Challenge"} title={"Classic Challenge"}/>
                                 <Button image={"/swordGhost.svg"} onClick={() => handleChallenge(EGameMod.ghost)} alt={"Challenge"} title={"Ghost Challenge"}/>

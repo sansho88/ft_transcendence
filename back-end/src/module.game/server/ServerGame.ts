@@ -134,12 +134,14 @@ export class ServerGame {
 		return listAllPropose;
 	}
 
-	public acceptChallenge(server: Server, userP2: UserEntity, socketP2: Socket, event: string) {
+	public async acceptChallenge(server: Server, userP2: UserEntity, socketP2: Socket, event: string) {
 		const index = this.challengeList.findIndex((challenge) => challenge.getEventChallenge() === event)
 		if (index >= 0){
 			const P1: userInfoSocket = this.challengeList[index].socketP1;
 			const P2: userInfoSocket = {user: userP2, socket: socketP2};
 			const gameMod: EGameMod = this.challengeList[index].gameMod;
+			this.usersService.userStatus(await this.usersService.findOne(P1.user.UserID), UserStatus.INGAME);
+			this.usersService.userStatus(await this.usersService.findOne(P2.user.UserID), UserStatus.INGAME);
 			this.createGame(server, P1, P2, gameMod);
 			this.challengeList[index].cancelChallenge();
 		}
