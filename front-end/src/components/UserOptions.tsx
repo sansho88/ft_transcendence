@@ -1,5 +1,5 @@
 import React, {useContext, useState} from "react";
-import {IUser} from "@/shared/types";
+import {EStatus, IUser} from "@/shared/types";
 import Button from "@/components/CustomButtonComponent";
 import {UserContext, SocketContextChat, SocketContextGame} from "@/context/globalContext";
 import * as apiReq from '@/components/api/ApiReq'
@@ -7,7 +7,7 @@ import {NotificationManager} from 'react-notifications';
 import { wsChatRoutesBack } from "@/shared/routesApi";
 import { wsChatEvents, wsGameEvents } from "./api/WsReq";
 import { Socket } from "socket.io-client";
-import { EGameMod } from "@/shared/typesGame";
+import { EGameMod, EStatusFrontGame } from "@/shared/typesGame";
 import { channelsDTO } from "@/shared/DTO/InterfaceDTO";
 
 
@@ -107,8 +107,12 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
                                 <Button image={"/hammer.svg"} onClick={() => console.log("Ban User button")} alt={"Ban"} title={"Ban"}/>
                             </span>
                         }
-                        <Button image={"/sword.svg"} onClick={() => handleChallenge(EGameMod.classic)} alt={"Challenge"} title={"Classic Challenge"}/>
-                        <Button image={"/swordGhost.svg"} onClick={() => handleChallenge(EGameMod.ghost)} alt={"Challenge"} title={"Ghost Challenge"}/>
+                        {userContext.status != EStatus.InGame && user.status != EStatus.Offline &&
+                            <>
+                                <Button image={"/sword.svg"} onClick={() => handleChallenge(EGameMod.classic)} alt={"Challenge"} title={"Classic Challenge"}/>
+                                <Button image={"/swordGhost.svg"} onClick={() => handleChallenge(EGameMod.ghost)} alt={"Challenge"} title={"Ghost Challenge"}/>
+                            </>
+                        }
                     </span>
                 </div>}
         </>
