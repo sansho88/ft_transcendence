@@ -322,7 +322,6 @@ export class ChannelController {
 			return {data: []};
 		checkLimitID(channelID);
 		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
-		console.log(channel);
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterRecent(channel.messages);

@@ -37,13 +37,12 @@ export default function ChatMaster({className, token, userID}: {className: strin
   const {logged, setLogged} = useContext(LoggedContext);
 
   const setterCurrentChannel = (newIdChannel: number) => {
-    console.log('helloSetter')
     setCurrentChannel(newIdChannel);
   }
 
   if(socketChat?.disconnected) 
   { 
-    console.log(`Chat WS is connected in ChatMaster`);
+    // console.log(`Chat WS is connected in ChatMaster`);
     if (!token){
       const tokentmp = localStorage.getItem('token');
       if (tokentmp)
@@ -59,7 +58,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
         .then((messages) => {
           setMessagesChannel(messages.data)
         })
-        .catch((e) => {console.log(e); setMessagesChannel([])})
+        .catch(() => {})
 
 
   }

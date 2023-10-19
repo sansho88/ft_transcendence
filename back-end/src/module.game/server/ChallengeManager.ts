@@ -61,15 +61,9 @@ export class ChallengeManager {
 		//actualiser la liste des challenges en cours aupres des sockets du client concerné
 		this.socketsChallenged.map((socket) => {
 			socket.emit(wsChatRoutesClient.proposeChallenge(),  this.proposeChallenge)
-			socket.emit('info',  'Wesh les boloss')
-			// socket.on(this.eventChallenge, (res) => {
-			// console.log('LA POUTAA DE SA MAMA')
-			// })
 		})
 
 		server.on(this.eventChallenge, ((socket: Socket, res: channelsDTO.IChallengeAcceptedDTO) => {
-			console.log('Challenge accepted ' + JSON.stringify(res));
-
 			const P2: userInfoSocket = {socket: socket, user: this.P2}
 			if(res.response)
 				createGameSession(server, this.socketP1, P2, this.gameMod);
@@ -121,10 +115,6 @@ export class ChallengeManager {
 		this.socketsChallenged.forEach((socket) => {
 			socket.emit(wsChatRoutesClient.proposeChallenge());
 		})
-		// this.socketP1.user = null;
-		// this.socketP1.socket = null;
-		// this.server.off(this.eventChallenge, () => []);
-		//TODO: ping les clients pour refresh les list challenges
 	}
 
 	// public challengeDone
