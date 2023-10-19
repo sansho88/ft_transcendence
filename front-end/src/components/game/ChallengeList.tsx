@@ -8,7 +8,6 @@ import { wsChatRoutesBack, wsChatRoutesClient } from '@/shared/routesApi'
 import * as apiReq from '@/components/api/ApiReq'
 import { EGameMod, EStatusFrontGame } from '@/shared/typesGame'
 import {v4 as uuidv4} from "uuid";
-import { eventNames } from 'process'
 
 export default function ChallengeList({currentStepGameFront}: {currentStepGameFront: EStatusFrontGame}) { //FIXME: props useless ?
   const socket      												= useContext(SocketContextGame);

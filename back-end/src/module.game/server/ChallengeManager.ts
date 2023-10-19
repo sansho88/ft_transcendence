@@ -48,8 +48,6 @@ export class ChallengeManager {
 		this.socketP1.socket.emit('challengeStep', tmp);
 
 		this.socketP1.socket.on('cancelChallenge', ()=> {
-			console.log('coucou cancel')
-			// this.socketP1.socket.emit('challengeStep', {challengerequested: false});
 			this.cancelChallenge()
 		});
 
@@ -120,6 +118,9 @@ export class ChallengeManager {
 			const tmp: IChallengeStepDTO = {challengerequested: false}
 			this.socketP1.socket.emit('challengeStep', tmp);
 		}
+		this.socketsChallenged.forEach((socket) => {
+			socket.emit(wsChatRoutesClient.proposeChallenge());
+		})
 		// this.socketP1.user = null;
 		// this.socketP1.socket = null;
 		// this.server.off(this.eventChallenge, () => []);
