@@ -604,7 +604,7 @@ export default function Game({className, token}: {className: string, token: stri
             </div> }
           {stepCurrentSession === EStatusFrontGame.challengeRequest && 
             <div className='flex space-x-5 items-center'>
-              <button className='text-white' onClick={() => cancelChallenge()}>CANCEL CHALLENGE</button><ClipLoader.ClipLoader color="#60d7b7" /> //FIXME: change color
+              <button className='text-white' onClick={() => cancelChallenge()}>CANCEL CHALLENGE</button><ClipLoader.ClipLoader color="#60d7b7" />
             </div> }
      
           {stepCurrentSession === EStatusFrontGame.waiting &&
