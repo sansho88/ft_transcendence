@@ -26,7 +26,7 @@ export default function Game({className, token}: {className: string, token: stri
   const pad2Ref     = useRef<HTMLDivElement>(null);
   const ballRef     = useRef<HTMLDivElement>(null);
 
-  const [currentGameTheme, setCurrentGameTheme] = useState<string>('')
+  const [currentGameTheme, setCurrentGameTheme] = useState<string | null >(null)
 
 
 
@@ -62,7 +62,9 @@ export default function Game({className, token}: {className: string, token: stri
 //     setCurrentGameTheme(themeName);
 // }
 
-
+  // useEffect(() => {
+  //   localStorage.setItem('theme', currentGameTheme);
+  // }, [currentGameTheme])
 
 
   useEffect(( ) => {
@@ -518,8 +520,14 @@ export default function Game({className, token}: {className: string, token: stri
   }
 
   useEffect(() => {
+    setCurrentGameTheme(localStorage.getItem('theme'));
+
+      if (!currentGameTheme){
+        localStorage.setItem('theme', new PODGAME.GameTheme().neon)
+        setCurrentGameTheme( new PODGAME.GameTheme().neon);
+      }
+
     resetPositionPaddle();
-    setCurrentGameTheme(new PODGAME.GameTheme().neon);
   }, []);
 
   useEffect(() => {
