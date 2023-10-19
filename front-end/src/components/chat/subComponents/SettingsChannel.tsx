@@ -73,7 +73,7 @@ const SettingsChannel = ({className, socket, channelToEdit}: {className: string,
         event.preventDefault();
         if (areSettingsValids)
         {
-            console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
+            // console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
             setIsChannelEdited(true);
 
             // const newEditedChannel : IChannel = {

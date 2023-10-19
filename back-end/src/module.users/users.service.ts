@@ -88,7 +88,7 @@ export class UsersService {
 		if (updateUser.avatar_path !== undefined) user.avatar_path = updateUser.avatar_path;
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
 		await user.save();
-		await this.chatGateway.updateUserEmit(user);
+		await this.chatGateway.updateUserStatusEmit(user);
 		return user;
 	}
 
@@ -171,7 +171,7 @@ export class UsersService {
 	async userStatus(user: UserEntity, newStatus: UserStatus) {
 		user.status = newStatus;
 		await user.save();
-		await this.chatGateway.updateUserEmit(user);
+		await this.chatGateway.updateUserStatusEmit(user);
 	}
 
 	private generateNickname() {

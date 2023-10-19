@@ -137,7 +137,7 @@ export class ChatGateway
 			this.server.to(`user.${user.UserID}`).emit('notifyEvent', `User ${user.login} is offline`)
 			await this.usersService.userStatus(user, UserStatus.OFFLINE);
 		}
-		console.log(`CLIENT ${client.id} left CHAT WS`);
+		//console.log(`CLIENT ${client.id} left CHAT WS`);
 		return client.disconnect();
 	}
 
@@ -199,7 +199,7 @@ export class ChatGateway
 		const content: JoinEventDTO = {user: user, channelID: channel.channelID}
 		this.server.to(`${channel.channelID}`).emit(`joinRoom`, content);
 		clientLst.map(socket => socket.emit(`createRoom`, {channel: channel}));
-		console.log(`JOIN Room ${data.channelID} By ${user.UserID}`);
+		//console.log(`JOIN Room ${data.channelID} By ${user.UserID}`);
 	}
 
 	@SubscribeMessage('leaveRoom')
@@ -208,19 +208,19 @@ export class ChatGateway
 		@MessageBody(new ValidationPipe()) data: LeaveChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,) {
-		console.log('data =========== ', data);
+		//console.log('data =========== ', data);
 		let channel: ChannelEntity = await this.channelService
 			.findOne(data.channelID, ['adminList', 'userList', 'owner', 'messages'])
 			.catch(() => null);
-		console.log('test 00');
+		//console.log('test 00');
 		if (channel == null)
 			return client.emit('leaveRoom', {error: 'There is no such Channel'});
-		console.log('test 01');
+		//console.log('test 01');
 		if (!await this.channelService.isUserOnChan(channel, user))
 			return client.emit('leaveRoom', {error: 'You are not part of this channel'});
-		console.log('test 02');
+		//console.log('test 02');
 		if (channel.owner.UserID === user.UserID) {
-			console.log('test 03');
+			//console.log('test 03');
 			channel.userList.map(async user => await this.leaveChat(channel, user))
 			return channel = await this.channelService.remove(channel);
 		}
@@ -251,7 +251,7 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
-		console.log('sendMESSAGES ======= ');
+		//console.log('sendMESSAGES ======= ');
 		const channel = await this.channelService
 			.findOne(data.channelID, ['userList', 'muteList'], true)
 			.catch(() => null);
@@ -286,14 +286,14 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
-		console.log('ENTER createMp WS =' + JSON.stringify(data))
+		//console.log('ENTER createMp WS =' + JSON.stringify(data))
 		const user2: UserEntity = await this.usersService.findOne(data.targetID);
 		if (!user2) return client.emit('createMP', {messages: 'This user doesn\'t exist'});
 		if (user2.UserID == user.UserID) return client.emit('createMP', {messages: 'You cannot create a mp with yourself, Find a friend :D'});
 		const channel = await this.channelService.getmp(user, user2).catch(() => null);
-		console.log(' TEST T55555 ', channel);
+		//console.log(' TEST T55555 ', channel);
 		if (channel !== null) {
-			console.log('AAAA')
+			//console.log('AAAA')
 			return client.emit('createMP', {messages: 'You already have a direct channel with this user'});
 		}
 		// if (user blocked)
@@ -317,7 +317,7 @@ export class ChatGateway
 	// ) {
 	// 	const user2 = await this.usersService.findOne(data.targetID);
 	// 	const channel = await this.channelService.getmp(user, user2);
-	// 	console.log('return getmp ', channel);
+	// 	//console.log('return getmp ', channel);
 	// }
 
 	/**
@@ -336,7 +336,7 @@ export class ChatGateway
 			content: content,
 		};
 		this.server.to(`${channel.channelID}`).emit(`sendMsg`, msg);
-		console.log(` Send Message on ${channel.name}, by ${user.UserID}`);
+		//console.log(` Send Message on ${channel.name}, by ${user.UserID}`);
 	}
 
 	@SubscribeMessage('debug')
@@ -346,7 +346,7 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 	) {
 		user = await this.usersService.findOne(user.UserID, ['channelJoined']);
-		console.log(user);
+		//console.log(user);
 	}
 
 
@@ -357,8 +357,8 @@ export class ChatGateway
 		const socketTargetLst = await this.getSocket(user.UserID);
 		if (typeof socketTargetLst !== 'undefined')
 			socketTargetLst.map(socketTarget => {
-				console.log('emit => ', socketTarget.id);
-				console.log('emit => ', channel);
+				//console.log('emit => ', socketTarget.id);
+				//console.log('emit => ', channel);
 				socketTarget.leave(`${channel.channelID}`)
 				socketTarget.emit('leaveRoom', {channel: channel});
 			});
@@ -409,7 +409,7 @@ export class ChatGateway
 
 		return socketLst.filter(socket => {
 			for (const Id of socketIDLst) {
-				console.log('id = ', Id.socketID);
+				//console.log('id = ', Id.socketID);
 				if (Id.socketID == socket.id)
 					return true;
 			}
@@ -437,11 +437,11 @@ export class ChatGateway
 	async handleUpdateRoom(
 		@CurrentUser() user: UserEntity,
 		@MessageBody(new ValidationPipe()) data: channelsDTO.IChangeChannelDTOPipe) {
-		console.log(' update ', data);
+		//console.log(' update ', data);
 		const channel = await this.channelService.findOne(data.channelID).catch(() => null);
 		if (channel === null)
 			return;
-		console.log(channel);
+		//console.log(channel);
 		if (channel.owner.UserID !== user.UserID)
 			return;
 		const credential = await this.channelCredentialService.create(data.password);
@@ -449,7 +449,7 @@ export class ChatGateway
 		this.server.to(data.channelID.toString()).emit(wsChatRoutesClient.nameChannelsHasChanged(), channel)
 	}
 
-	async updateUserEmit(user: UserEntity) {
+	async updateUserStatusEmit(user: UserEntity) {
 		console.log('TEST  THERE ');
 		console.log(this.server.emit('userUpdate', user)
 		)

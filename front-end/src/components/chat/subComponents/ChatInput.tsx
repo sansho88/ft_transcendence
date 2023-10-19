@@ -29,7 +29,6 @@ export default function ChatInput({className, socket, channelID}: {className: st
         content: message,
         channelID: channelID
 			};
-			console.log("DBG DEBUUUUUG => " + messObj.content);
       wsChatEvents.sendMsg(socket, messObj);
 			setMessage("");
 		}

@@ -1,12 +1,14 @@
-import React, {useContext, useState} from "react";
-import {IUser} from "@/shared/types";
+import React, {useContext, useEffect, useState} from "react";
+import {EStatus, IUser} from "@/shared/types";
 import Button from "@/components/CustomButtonComponent";
-import {UserContext, SocketContextChat} from "@/context/globalContext";
+import {UserContext, SocketContextChat, SocketContextGame} from "@/context/globalContext";
 import * as apiReq from '@/components/api/ApiReq'
 import {NotificationManager} from 'react-notifications';
 import { wsChatRoutesBack } from "@/shared/routesApi";
-import { wsChatEvents } from "./api/WsReq";
+import { wsChatEvents, wsGameEvents } from "./api/WsReq";
 import { Socket } from "socket.io-client";
+import { EGameMod, EStatusFrontGame, IChallengeStepDTO } from "@/shared/typesGame";
+import { channelsDTO } from "@/shared/DTO/InterfaceDTO";
 
 
 export interface userOptionsProps {
@@ -18,8 +20,10 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
     const {userContext, setUserContext} = useContext(UserContext);
     const [isFollowed, setIsFollowed] = useState(!!relationships.followed.find(tmpUser => user.UserID == tmpUser.UserID));
     const [isBlocked, setIsBlocked] = useState(relationships.blocked && !!relationships.blocked.find(tmpUser => user.UserID == tmpUser.UserID));
+    const [isWaitingChallenge, setIsWaitingChallenge] = useState<boolean>(false);
 
     const socketRef = useContext(SocketContextChat)
+    const socketRefGame = useContext(SocketContextGame)
 
     function handleFollow(){
         if (!isFollowed)
@@ -73,11 +77,29 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
 
     function handleMp() {
         if (socketRef)
-         {  
-            console.log('Hey je suis handleMp')
-            wsChatEvents.createMP(socketRef, { targetID: user.UserID });}
+            wsChatEvents.createMP(socketRef, { targetID: user.UserID });
+    }
+        
+    function handleChallenge(gameMod: EGameMod) {
+        if (socketRefGame){
+            setIsWaitingChallenge(true);
+            const tmp: channelsDTO.ICreateChallengeDTO = {targetID: user.UserID, gameMod: gameMod}
+            wsGameEvents.createChallenge(socketRefGame, tmp) //TODO: pouvoir choisir le gameMod
+        }
     }
 
+    useEffect(() => {
+        if (socketRefGame){
+            socketRefGame.on('challengeStep', (res: IChallengeStepDTO) => {
+                console.log('res challengeStep', JSON.stringify(res))
+                if (!res.challengerequested)
+                    setIsWaitingChallenge(false);
+  
+                
+            })
+        }
+        }, [])
+    
     return (
         <>
             {userContext.UserID != user.UserID &&
@@ -97,6 +119,12 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
                                 <Button image={"/door.svg"} onClick={() => console.log("Kick User button")} alt={"Kick"} margin={"0 5px 0 0"} title={"Kick"}/>
                                 <Button image={"/hammer.svg"} onClick={() => console.log("Ban User button")} alt={"Ban"} title={"Ban"}/>
                             </span>
+                        }
+                        { !isWaitingChallenge && user.status != EStatus.Offline &&
+                            <>
+                                <Button image={"/sword.svg"} onClick={() => handleChallenge(EGameMod.classic)} alt={"Challenge"} title={"Classic Challenge"}/>
+                                <Button image={"/swordGhost.svg"} onClick={() => handleChallenge(EGameMod.ghost)} alt={"Challenge"} title={"Ghost Challenge"}/>
+                            </>
                         }
                     </span>
                 </div>}
