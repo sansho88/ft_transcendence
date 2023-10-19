@@ -147,6 +147,14 @@ export class ServerGame {
 		}
 
 	}
+	
+	public declineChallenge(userP2: UserEntity, event: string){
+		const index = this.challengeList.findIndex((challenge) => challenge.getEventChallenge() === event)
+		if (index >= 0){
+			if (this.challengeList[index].containUserInChallenge(userP2.UserID) === true)
+				this.challengeList[index].cancelChallenge();
+		}
+	}
 
 
 }

@@ -113,6 +113,7 @@ export class ChallengeManager {
 	
 	public cancelChallenge(){
 		this.isArchivate = true;
+		this.eventChallenge = '';
 		this.challenge.P1 = -1;
 		this.challenge.P2 = -1;
 		if (this.socketP1.socket != null){

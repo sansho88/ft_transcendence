@@ -238,7 +238,7 @@ export class WebsocketGatewayGame
 			this.serverGame.acceptChallenge(this.server, user, client, data.event);
 		}
 		else{
-			console.log('REFUSER, A FAIRE game.ws.ts:240')
+			this.serverGame.declineChallenge(user, data.event);
 		}
 	}
 

@@ -37,40 +37,21 @@ export default function ChallengeList({currentStepGameFront}: {currentStepGameFr
 				setChallengeEvent(data);
 			})
 
-			socket?.on(wsChatRoutesClient.proposeChallenge(), (data: channelsDTO.IChallengeProposeDTO) => {
-				console.log(JSON.stringify(data));
-				const challengeElement = async () => { 
-	
-					await apiReq.getApi.getMyChallenges()
-					.then((res: channelsDTO.IChallengeProposeDTO[]) => {
-						console.log(JSON.stringify(res.data))
-						setChallengeList(res.data);
-					})
-				}
+			socket?.on(wsChatRoutesClient.proposeChallenge(), (/*data: channelsDTO.IChallengeProposeDTO*/) => {
 				challengeElement();
 			})
 		}, 100)
 		
-
 	}, [])
 	
-	useEffect(() => {
-		console.log('challenge event = ' + challengeEvent)
-	}, [challengeEvent])
-	
-	useEffect(() => {
-		const challengeElement = async () => {
-	
-			await apiReq.getApi.getMyChallenges()
-			.then((res: channelsDTO.IChallengeProposeDTO[]) => {
-				console.log(JSON.stringify(res.data))
-				setChallengeList(res.data);
-			})
-		}
-		challengeElement();
-	
-		}, [])
-
+	//get la list des challenge via api REST
+	const challengeElement = async () => {
+		await apiReq.getApi.getMyChallenges()
+		.then((res: channelsDTO.IChallengeProposeDTO[]) => {
+			console.log(JSON.stringify(res.data))
+			setChallengeList(res.data);
+		})
+	}
 
 
 	function acceptChallenge(challenge: channelsDTO.IChallengeProposeDTO){
@@ -79,13 +60,20 @@ export default function ChallengeList({currentStepGameFront}: {currentStepGameFr
 		socket?.emit(wsChatRoutesBack.responseChallenge(), tmp);
 	}
 
+	function declineChallenge(challenge: channelsDTO.IChallengeProposeDTO){
+		const tmp: channelsDTO.IChallengeAcceptedDTO = {response: false, event: challenge.eventChallenge}
+		console.log('DECLINE CHALLENGE: ' , challenge.eventChallenge)
+		socket?.emit(wsChatRoutesBack.responseChallenge(), tmp);
+		challengeElement();
+	}
+
 	const challengeButtonListElement = (challenge: channelsDTO.IChallengeProposeDTO) => {
 	
 	return (
 		<div className='flex bg-slate-400 max-w-max p-1 mt-1 rounded-md' key={uuidv4()}>
 			{`${challenge.challenger.nickname}(${challenge.challenger.login})`} 
 			<button onClick={() => acceptChallenge(challenge)}>✅</button>
-			<button onClick={()=>console.log('REFUSAL CHALLENGE')}>❌</button>
+			<button onClick={()=> declineChallenge(challenge)}>❌</button>
 		</div>
 		)
 	}
@@ -102,7 +90,6 @@ export default function ChallengeList({currentStepGameFront}: {currentStepGameFr
 			<div className='pt-10 ml-10'>Challenge en cours</div>
 			<div className='max-h-60 overflow-y-auto noScrollbar '>
 				{challengeList.map((elem) => {
-				
 					return (challengeButtonListElement(elem))
 				})}
 			</div>
