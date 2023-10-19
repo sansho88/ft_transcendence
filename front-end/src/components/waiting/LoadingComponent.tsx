@@ -1,4 +1,4 @@
-
+import "./loading.css"
 const LoadingComponent = () => {
     return (
         <div className="loading">Loading
@@ -8,4 +8,3 @@ const LoadingComponent = () => {
 }
 
 export default LoadingComponent;
-import "./loading.css"

@@ -144,7 +144,6 @@ export class UsersService {
 			user.avatar_path = internalPath + '/public/avatars/' + fileName;
 			user.save();
 			console.log("NEW user.avatar_path: ", user.avatar_path);
-			await this.chatGateway.updateUserEmit(user);
 			return user.avatar_path;
 		} catch (error) {
 			console.log("error: ", error);

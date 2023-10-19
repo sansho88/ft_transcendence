@@ -160,4 +160,5 @@ export interface IInput {
   onKeyDown: any;
   onChange: any;
   autoComplete: any;
+  name: string;
 }
