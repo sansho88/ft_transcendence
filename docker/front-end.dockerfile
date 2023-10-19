@@ -5,10 +5,12 @@ RUN apt-get install vim -y
 
 WORKDIR /usr/src/app/front-end
 
-COPY --chown=node:node ./front-end/*.json 							./
-COPY --chown=node:node ./front-end/*.js 								./
-COPY --chown=node:node ./front-end/*.ts 								./
+# COPY --chown=node:node ./front-end/*.json 							./
+# COPY --chown=node:node ./front-end/*.js 								./
+# COPY --chown=node:node ./front-end/*.ts 								./
+COPY --chown=node:node ./front-end/ 										./ 
 
 RUN npm install
+RUN npm run build
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start"]
