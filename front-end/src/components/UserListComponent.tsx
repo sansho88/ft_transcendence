@@ -69,14 +69,17 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
             }
             else {
                 for (const user of usersList) {
-                    allDiv.push(
-                        <li key={user.login + "List" + uuidv4()}>
-                            <Profile user={user} avatarSize={avatarSize}>
-                                {showUserProps == true && <UserOptions user={user} relationships={{followed: subs, blocked: blocked}} showAdminOptions={adminMode}/>}
-                            </Profile>
-                        </li>
-                    )
+                    if (user.UserID > 1) {
+                        allDiv.push(
+                            <li key={user.login + "List" + uuidv4()}>
+                                <Profile user={user} avatarSize={avatarSize}>
+                                    {showUserProps === true && <UserOptions user={user} relationships={{followed: subs, blocked: blocked}} showAdminOptions={adminMode}/>}
+                                </Profile>
+                            </li>
+                        );
+                    }
                 }
+                
                 setUserElements(allDiv);
             }
             })
