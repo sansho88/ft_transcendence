@@ -1,15 +1,29 @@
-import {BadRequestException, Injectable} from '@nestjs/common';
+import {BadRequestException, forwardRef, Inject, Injectable} from '@nestjs/common';
 import {UpdateUserDto} from '../dto/user/update-user.dto';
 import {UserEntity, UserStatus} from '../entities/user.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {UserCredentialEntity} from '../entities/credential.entity';
+import * as fs from 'fs-extra'; // pour gerer les fichiers a l'intérieur du back (fs = file system)
+import Jimp from 'jimp';
+import {ChatGateway} from "../module.channels/chat.ws";
+
+const acceptedImageTypes = [
+	'jpeg',
+	'png',
+	'gif',
+	'bmp',
+	'tiff',
+	'gif'
+];
 
 @Injectable()
 export class UsersService {
 	constructor(
 		@InjectRepository(UserEntity)
 		private usersRepository: Repository<UserEntity>,
+		@Inject(forwardRef(() => ChatGateway))
+		private chatGateway: ChatGateway,
 	) {
 	}
 
@@ -66,13 +80,77 @@ export class UsersService {
 
 	async update(user: UserEntity, updateUser: UpdateUserDto) {
 		if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
-		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
+		if (updateUser.avatar_path !== undefined) user.avatar_path = updateUser.avatar_path;
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
-		if (updateUser.status !== undefined) user.status = updateUser.status;
 		await user.save();
-		console.log(user);
+		await this.chatGateway.updateUserStatusEmit(user);
 		return user;
 	}
+
+	async uploadAvatar(user: UserEntity, file, request) {
+		try {
+			const internalPath = request.protocol + '://' + request.hostname + ':' + process.env.PORT_SERVER;
+			console.log("internalPath: ", internalPath);
+			const buffer = file.buffer;
+			const img = await Jimp.read(buffer)
+				.then((my_img) => {
+					return my_img.getExtension();
+				})
+				.catch((err) => {
+					console.error(err);
+				});
+
+			if (!img || !acceptedImageTypes.includes(`${img}`)) {
+				throw new BadRequestException('Le fichier doit avoir une extension .png, .jpg, .jpeg ou .gif');
+			}
+			const fileName = `${Date.now()}.${crypto.randomUUID()}.${img}`;
+			const uploadPath = `${process.cwd()}/public/avatars/${fileName}`;
+
+			await fs.ensureDir(`${process.cwd()}/public/avatars`);
+			await fs.outputFile(uploadPath, await Jimp.read(buffer).then((my_img) => {
+				const width = my_img.getWidth();
+				const height = my_img.getHeight();
+
+				const squareSize = 1000;
+
+				if (width < squareSize || height < squareSize) {
+					my_img.resize(squareSize, squareSize, Jimp.RESIZE_NEAREST_NEIGHBOR);
+					return my_img
+						.quality(99)
+						.getBufferAsync(Jimp.MIME_JPEG);
+				}
+
+				let cropped: any
+				const minSize = Math.min(width, height)
+				const maxSize = Math.max(width, height)
+				const diff = maxSize - minSize
+
+				if (width > height) {
+					cropped = my_img.crop(diff / 4, 0, minSize, minSize).resize(squareSize, squareSize, Jimp.RESIZE_BILINEAR)
+				} else {
+					cropped = my_img.crop(0, diff / 4, minSize, minSize).resize(squareSize, squareSize, Jimp.RESIZE_BILINEAR)
+				}
+				return my_img
+					.quality(90)
+					.getBufferAsync(Jimp.MIME_JPEG);
+			}));
+
+			if (user.avatar_path?.includes(internalPath) ?? false) {
+				let oldAvatarPath = `${process.cwd()}${user.avatar_path.substring(internalPath.length)}`;
+				oldAvatarPath = oldAvatarPath.trim();
+				await fs.remove(oldAvatarPath);
+			}
+
+			user.avatar_path = internalPath + '/public/avatars/' + fileName;
+			user.save();
+			console.log("NEW user.avatar_path: ", user.avatar_path);
+			return user.avatar_path;
+		} catch (error) {
+			console.log("error: ", error);
+			throw new BadRequestException(error.message);
+		}
+	}
+
 
 	async getCredential(userID: number) {
 		const target = await this.usersRepository.findOne({
@@ -88,6 +166,7 @@ export class UsersService {
 	async userStatus(user: UserEntity, newStatus: UserStatus) {
 		user.status = newStatus;
 		await user.save();
+		await this.chatGateway.updateUserStatusEmit(user);
 	}
 
 	private generateNickname() {

@@ -5,6 +5,8 @@ import { AuthGuard } from "../module.auth/auth.guard";
 import { CurrentUser } from "../module.auth/indentify.user";
 import { UserEntity } from "../entities/user.entity";
 import { ServerGame } from './server/ServerGame';
+import {leaderboard} from "./game.service"
+import {checkLimitID} from "../dto.pipe/checkIntData";
 
 @Controller('game')
 export class GameController {
@@ -29,8 +31,18 @@ export class GameController {
 	async getChallenges(
 		@CurrentUser() user: UserEntity
 	) {
-		// console.log('DBG******', this.serverGame.getAllChallengeUser(user.UserID))
 		return this.serverGame.getAllChallengeUser(user.UserID);
+	}
+
+	
+	@Get('users/:UserID')
+	@UseGuards(AuthGuard)
+	async findOther(
+		@Param('UserID', ParseIntPipe) targetID: number,
+	) {
+		checkLimitID(targetID);
+		const target = await this.usersService.findOne(targetID);
+		return this.gameService.getAllGame(target, await this.gameService.getAll());
 	}
 
 	@Get('stats')
@@ -41,11 +53,18 @@ export class GameController {
 		return await this.gameService.getStats(user);
 	}
 
+	@Get('leaderboard')
+	@UseGuards(AuthGuard)
+	async getLeaderboard() {
+		return await this.gameService.getLeaderboard();
+	}
+
 	@Get('stats/:userID')
 	@UseGuards(AuthGuard)
 	async getStatsUser(
 		@Param('userID', ParseIntPipe) targetID,
 	) {
+		checkLimitID(targetID);
 		const target = await this.usersService.findOne(targetID);
 		return await this.gameService.getStats(target);
 	}

@@ -43,7 +43,7 @@ export class WebsocketGatewayGame
 		) {
 	}
 
-	@WebSocketServer()  
+	@WebSocketServer()
 	public server: Server;
 	private socketUserList: SocketUserList[] = [];
 
@@ -145,7 +145,7 @@ export class WebsocketGatewayGame
 
 	@SubscribeMessage(wsGameRoutes.addPlayerToMatchmakingGhost())
 	@UseGuards(WSAuthGuard)
-	addPlayerToMatchmakingGhost(
+	async addPlayerToMatchmakingGhost(
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity
 	) {
@@ -153,7 +153,7 @@ export class WebsocketGatewayGame
 		// console.log('json user: ' + JSON.stringify(payload));
 
 		const player: userInfoSocket = {socket: client, user};
-		this.serverGame.addPlayerToMatchmakingGhost(player, this.server);
+		await this.serverGame.addPlayerToMatchmakingGhost(player, this.server);
 		client.emit('info', `MatchmakingGhost: attente d\'autres joueurs...`);
 	}
 
@@ -184,14 +184,14 @@ export class WebsocketGatewayGame
 
 	@SubscribeMessage(wsGameRoutes.createTrainningGame())
 	@UseGuards(WSAuthGuard)
-	createTrainningGame(
+	async createTrainningGame(
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity
 	) {
 		// console.log(client.id + ': ' + payload.nickname);
 		// console.log('json user: ' + JSON.stringify(payload));
 		const player: userInfoSocket = {socket: client, user};
-		this.serverGame.addPlayerInTrainningSession(player, this.server);
+		await this.serverGame.addPlayerInTrainningSession(player, this.server);
 		client.emit('info', `Trainning game loading...`);
 	}
 

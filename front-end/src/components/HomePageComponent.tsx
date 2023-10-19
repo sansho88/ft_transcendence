@@ -1,34 +1,27 @@
 import Profile from "@/components/ProfileComponent";
-import Stats from "@/components/StatsComponent";
 import Button from "@/components/CustomButtonComponent";
 import UserList from "@/components/UserListComponent";
 import Game from "@/components/game/Game";
-import React, {useContext, useEffect, useRef} from "react";
-import {LoggedContext, SocketContextGame, UserContext} from "@/context/globalContext";
-import {EStatus} from "@/shared/types";
-import * as apiReq from "@/components/api/ApiReq";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import {LoggedContext, UserContext} from "@/context/globalContext";
+import {authManager} from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
-import {authManager} from "@/components/api/ApiReq";
 import NotifComponent from "@/components/notif/NotificationComponent";
 import Button2FA from "@/components/2FA/2FAComponent";
 import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
-import {wsGameRoutes} from "@/shared/routesApi";
 import LoadingComponent from "@/components/waiting/LoadingComponent";
-import UserOptions from "@/components/UserOptions";
+import MatchHistory from "@/components/MatchHistoryComponent";
+import Leaderboard from "@/components/LeaderboardComponent";
 
-interface HomePageProps {
-    className: unknown
-}
-
-const HomePage = ({className}: HomePageProps) => {
+const HomePage = () => {
     const {userContext, setUserContext} = useContext(UserContext);
     const {setLogged} = useContext(LoggedContext);
     const router = useRouter();
     const tokenRef = useRef<string>('');
-    const socket      = useContext(SocketContextGame);
-    const socketRef   = useRef(socket);
+    const [showMatchHistory, setMatchHistoryVisible] = useState(false);
+    const [showLeaderboard, setLeaderboardVisible] = useState(false);
 
 
     useEffect(() => {
@@ -53,7 +46,7 @@ const HomePage = ({className}: HomePageProps) => {
         return(() => {
             window.location.reload();
         })
-    }, [])
+    }, []);
 
 
     /*socketRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
@@ -71,6 +64,7 @@ const HomePage = ({className}: HomePageProps) => {
         }
     });*/
 
+    
 
     return (
         <>
@@ -79,10 +73,22 @@ const HomePage = ({className}: HomePageProps) => {
 
                     <Profile className={"main-user-profile"}
                              user={userContext}
-                             isEditable={true} avatarSize={"big"} showStats={true}>
-                        <Button image={"/history-list.svg"} onClick={() => console.log("history list button")} alt={"Match History button"}/>
+
+                             isEditable={true} avatarSize={"big"} showStats={true} isMainProfile={true} >
+                        <Button image={"/history-list.svg"} onClick={() => {
+                            setMatchHistoryVisible(!showMatchHistory);
+                            setLeaderboardVisible(false);
+                        }} alt={"Match History button"} title={"Match History"}/>
+                        <Button image={"/podium.svg"} onClick={() => {
+                            setLeaderboardVisible(!showLeaderboard);
+                            setMatchHistoryVisible(false);
+                        }} alt={"Leaderboard button"} title={"Leaderboard"} margin={"0 0 0 2ch"}/>
+              
                         <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
                     </Profile>
+
+                {showMatchHistory && <MatchHistory/>}
+                {showLeaderboard &&  <Leaderboard/>}
 
                 <UserList className={"friends"} avatarSize={"medium"} showUserProps={true}/>
                 <Button className={"logout"} image={"/logout.svg"} onClick={() => {

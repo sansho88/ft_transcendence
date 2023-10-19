@@ -11,7 +11,7 @@ import {IoAdapter} from '@nestjs/platform-socket.io';
 import {RemoteSocket, Server, Socket} from 'socket.io';
 import {MessageService} from './message.service';
 import {getToken, WSAuthGuard} from '../module.auth/auth.guard';
-import {UseGuards, ValidationPipe} from '@nestjs/common';
+import {forwardRef, Inject, UseGuards, ValidationPipe} from '@nestjs/common';
 import {CurrentUser} from '../module.auth/indentify.user';
 import {ChannelService} from './channel.service';
 import {BannedService} from "./banned.service";
@@ -57,6 +57,7 @@ export class ChatGateway
 	constructor(
 		private messageService: MessageService,
 		private channelService: ChannelService,
+		@Inject(forwardRef(() => UsersService))
 		private usersService: UsersService,
 		private bannedService: BannedService,
 		private channelCredentialService: ChannelCredentialService,
@@ -131,10 +132,8 @@ export class ChatGateway
 			.findOne(payloadToken.id)
 			.catch(() => null);
 		if (!user) return client.disconnect();
-		const index = this.socketUserList
-			.findIndex(socket => socket.socketID == socket.socketID)
-		this.socketUserList.splice(index, 1);
-		if (this.socketUserList.findIndex(socket => socket.socketID == client.id) == -1) {
+		this.socketUserList = this.socketUserList.filter(value => value.socketID != client.id);
+		if (this.socketUserList.findIndex(socket => socket.userID == user.UserID) == -1) {
 			this.server.to(`user.${user.UserID}`).emit('notifyEvent', `User ${user.login} is offline`)
 			await this.usersService.userStatus(user, UserStatus.OFFLINE);
 		}
@@ -260,6 +259,8 @@ export class ChatGateway
 			return client.emit('sendMsg', {error: 'There is no such Channel'});
 		if (await this.channelService.userIsMute(channel, user))
 			return client.emit('sendMsg', {error: 'You are muted on that channel'});
+		if (await this.channelService.checkBlock(user, channel))
+			return client.emit('sendMsg', {error: 'This User blocked you'});
 		if (await this.channelService.userInChannel(user, channel)) {
 			await this.messageService.create(user, data.content, channel);
 			return await this.SendMessage(channel, user, data.content);
@@ -302,8 +303,8 @@ export class ChatGateway
 		client1Lst.map(socket => socket.join(`${mp.channelID}`));
 		const client2Lst = await this.getSocket(user2.UserID);
 		client2Lst.map(client2 => client2.join(`${mp.channelID}`))
-		
-		client1Lst.map(socket => socket.emit(`createRoom`, {channel: mp})); 
+
+		client1Lst.map(socket => socket.emit(`createRoom`, {channel: mp}));
 		client2Lst.map(socket => socket.emit(`createRoom`, {channel: mp})); //update list en real time after join this
 	}
 
@@ -444,7 +445,13 @@ export class ChatGateway
 		if (channel.owner.UserID !== user.UserID)
 			return;
 		const credential = await this.channelCredentialService.create(data.password);
-		this.channelService.modifyChannel(channel, credential, data);
+		await this.channelService.modifyChannel(channel, credential, data);
 		this.server.to(data.channelID.toString()).emit(wsChatRoutesClient.nameChannelsHasChanged(), channel)
+	}
+
+	async updateUserStatusEmit(user: UserEntity) {
+		console.log('TEST  THERE ');
+		console.log(this.server.emit('userUpdate', user)
+		)
 	}
 }

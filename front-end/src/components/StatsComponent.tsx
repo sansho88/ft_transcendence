@@ -21,10 +21,10 @@ const Stats: React.FC<StatsProps> = ({className, user})=>{
 
     return (
         <div className={className}>
-            <span style={{color: "green", marginInline: "4px"}}>{" " + stats.nbWin + "🏆  "}</span>
-            <span style={{color: "red", marginInline: "4px"}}>{" " +  stats.nbLoose + " 🏳 "}</span>
-            <span style={{color: "gold", marginInline: "4px"}}>{" " + stats.rank +" 🎖 "}️</span>
-            {" "}Lv<span style={{color: "grey"}}></span> {stats.level}
+            <span style={{color: "green", marginInline: "4px", fontFamily: "sans-serif", lineHeight: "1.5em", transition: "1000ms"}}>{" " + stats.nbWin + "🏆  "}</span>
+            <span style={{color: "red", marginInline: "4px", fontFamily: "sans-serif", lineHeight: "1.5em", transition: "1000ms"}}>{" " +  stats.nbLoose + " 🏳 "}</span>
+            <span style={{color: "gold", marginInline: "4px", fontFamily: "sans-serif", lineHeight: "1.5em", transition: "1000ms"}}>{" " + stats.rank +" 🎖 "}️</span>
+            {" "}<span style={{color: "rgb(52 135 255)"}}>Lv<span style={{fontFamily: "sans-serif", lineHeight: "1.5em", transition: "1000ms"}}></span> {stats.level}</span>
         </div>
     );
 };

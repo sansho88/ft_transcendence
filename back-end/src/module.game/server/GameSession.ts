@@ -5,7 +5,6 @@ import {Server, Socket} from 'socket.io';
 import {wsGameRoutes} from 'shared/routesApi';
 import {GameService} from '../game.service';
 
-// import { Ball } from './Ball'
 
 interface KeyPlayerState {
 	isArrowDownPressed: boolean;
@@ -200,11 +199,6 @@ export class GameSession {
 		}
 
 		P2.socket.join(this.gameRoomEvent);
-
-
-		//passer en IN GAME les deux joueurs
-		P1.socket.emit(wsGameRoutes.statusUpdate(), POD.EStatus.InGame);
-		P2.socket.emit(wsGameRoutes.statusUpdate(), POD.EStatus.InGame);
 
 
 		//j'envoi un nom d'event custom a chaque player sur lequel il vont emettre pour informer qu'il bouge
@@ -549,47 +543,43 @@ export class GameSession {
 		}
 	}
 
-  //message de fin de game et reset de la game
-  private messageEndGameAndReset(){
-    this.cleanup()
-    if (this.gameMod !== PODGAME.EGameMod.classic)
-    {
-      this.table.sizeP1 = this.classicPaddleSize;
-      this.table.sizeP2 = this.classicPaddleSize;
-      this.serverSocket.to(this.gameRoomEvent).emit('updateTable', this.table);
-    }
-    const endMessage = () => {
-      if (this.gameMod === PODGAME.EGameMod.trainning){
-        if (this.table.maxTrainningHit <= 3)
-          return `${this.table.maxTrainningHit}: Did you really play?`;
-        else if (this.table.maxTrainningHit >= 4 && this.table.maxTrainningHit <= 8)
-          return `${this.table.maxTrainningHit}: It's a good start, courage!`;
-        else if (this.table.maxTrainningHit > 8 && this.table.maxTrainningHit <= 13)
-          return `${this.table.maxTrainningHit}: One more effort!`;
-        else if (this.table.maxTrainningHit > 13 && this.table.maxTrainningHit <= 20)
-          return `${this.table.maxTrainningHit}: Wow, well done that's great!`;
-        else if (this.table.maxTrainningHit > 20 && this.table.maxTrainningHit < 42)
-          return `${this.table.maxTrainningHit}: You have become a god, but.. return worked!`;
-        else if (this.table.maxTrainningHit >= 42)
-          return `${this.table.maxTrainningHit}: It's impossible ! Otherwise: Incredible!`
-      }
-      else if (this.rageQuit === true)
-        return `${this.looser.user.nickname} has rage quit! ${this.winner.user.nickname} won this game\n${this.table.scoreP1} - ${this.table.scoreP2}`
-      else
-        return `${this.winner.user.nickname} won this game\n${this.table.scoreP1} - ${this.table.scoreP2}`
-    }
-    // console.error(`endMessage`)
-    this.serverSocket.to(this.gameRoomEvent).emit('endgame', endMessage());
-    setTimeout(() => {
-      this.serverSocket.to(this.gameRoomEvent).emit('reset'); 
-      console.log('reset');
-      this.player1.socket.emit(wsGameRoutes.statusUpdate(), POD.EStatus.Online);
-      this.player2.socket.emit(wsGameRoutes.statusUpdate(), POD.EStatus.Online); 
-      this.player1.socket.leave(this.gameRoomEvent);
-      this.player2.socket.leave(this.gameRoomEvent);
-    }
-    , 4000);
-  }
+	//message de fin de game et reset de la game
+	private messageEndGameAndReset() {
+		this.cleanup()
+		if (this.gameMod !== PODGAME.EGameMod.classic) {
+			this.table.sizeP1 = this.classicPaddleSize;
+			this.table.sizeP2 = this.classicPaddleSize;
+			this.serverSocket.to(this.gameRoomEvent).emit('updateTable', this.table);
+		}
+		const endMessage = () => {
+			if (this.gameMod === PODGAME.EGameMod.trainning) {
+				if (this.table.maxTrainningHit <= 3)
+					return `${this.table.maxTrainningHit}: Did you really play?`;
+				else if (this.table.maxTrainningHit >= 4 && this.table.maxTrainningHit <= 8)
+					return `${this.table.maxTrainningHit}: It's a good start, courage!`;
+				else if (this.table.maxTrainningHit > 8 && this.table.maxTrainningHit <= 13)
+					return `${this.table.maxTrainningHit}: One more effort!`;
+				else if (this.table.maxTrainningHit > 13 && this.table.maxTrainningHit <= 20)
+					return `${this.table.maxTrainningHit}: Wow, well done that's great!`;
+				else if (this.table.maxTrainningHit > 20 && this.table.maxTrainningHit < 42)
+					return `${this.table.maxTrainningHit}: You have become a god, but.. return worked!`;
+				else if (this.table.maxTrainningHit >= 42)
+					return `${this.table.maxTrainningHit}: It's impossible ! Otherwise: Incredible!`
+			} else if (this.rageQuit === true)
+				return `${this.looser.user.nickname} has rage quit! ${this.winner.user.nickname} won this game\n${this.table.scoreP1} - ${this.table.scoreP2}`
+			else
+				return `${this.winner.user.nickname} won this game\n${this.table.scoreP1} - ${this.table.scoreP2}`
+		}
+		// console.error(`endMessage`)
+		this.serverSocket.to(this.gameRoomEvent).emit('endgame', endMessage());
+		setTimeout(() => {
+				this.serverSocket.to(this.gameRoomEvent).emit('reset');
+				console.log('reset');
+				this.player1.socket.leave(this.gameRoomEvent);
+				this.player2.socket.leave(this.gameRoomEvent);
+			}
+			, 4000);
+	}
 
 	//Enclenche la fin du jeu
 	private endOfGame() {
@@ -609,8 +599,11 @@ export class GameSession {
 				.emit('info', `${this.player2.user.nickname} won this game`);
 			console.log(`${this.player2.user.nickname} won this game`);
 		}
-		if (this.gameMod != EGameMod.trainning)
+		if (this.gameMod != EGameMod.trainning) {
 			this.gameService.create(this.player1.user.UserID, this.player2.user.UserID, this.table.scoreP1, this.table.scoreP2, this.startDate);
+			this.gameService.endGameStatus(this.player1.user.UserID, this.player2.user.UserID);
+		} else
+			this.gameService.endGameStatus(this.player1.user.UserID);
 		this.messageEndGameAndReset();
 	}
 

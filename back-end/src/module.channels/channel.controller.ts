@@ -21,6 +21,7 @@ import {ChannelEntity} from "../entities/channel.entity";
 import {InviteService} from "./invite.service";
 import {ChangeChannelDTOPipe} from "../dto.pipe/channel.dto";
 import {ChannelCredentialService} from "./credential.service";
+import {checkLimitID} from "../dto.pipe/checkIntData";
 
 @Controller('channel')
 export class ChannelController {
@@ -55,12 +56,14 @@ export class ChannelController {
 	@Get('get/infos/:channelID')
 	@UseGuards(AuthGuard)
 	findOne(@Param('channelID', ParseIntPipe) channelID: number) {
+		checkLimitID(channelID);
 		return this.channelService.findOne(channelID);
 	}
 
 	@Get('get/list/:channelID')
 	@UseGuards(AuthGuard)
 	getUserList(@Param('channelID', ParseIntPipe) channelID: number) {
+		checkLimitID(channelID);
 		return this.channelService.findOne(channelID, ['userList'], true).then(value => value.userList);
 	}
 
@@ -116,6 +119,8 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@Param('targetID', ParseIntPipe) targetID: number,
 	) {
+		checkLimitID(channelID);
+		checkLimitID(targetID);
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
@@ -136,6 +141,8 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@Param('targetID', ParseIntPipe) targetID: number,
 	) {
+		checkLimitID(channelID);
+		checkLimitID(targetID);
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
@@ -158,6 +165,7 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('channelID', ParseIntPipe) channelID: number,
 	) {
+		checkLimitID(channelID);
 		await this.bannedService.update();
 		const channel = await this.channelService.findOne(channelID, ['adminList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
@@ -174,6 +182,8 @@ export class ChannelController {
 		@Param('targetID', ParseIntPipe) targetID: number,
 		@Param('banDuration', ParseIntPipe) duration: number, // Time of ban in sec()
 	) {
+		checkLimitID(channelID);
+		checkLimitID(targetID);
 		await this.bannedService.update();
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
@@ -190,6 +200,7 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('banID', ParseIntPipe) banID: number
 	) {
+		checkLimitID(banID);
 		await this.bannedService.update();
 		const ban = await this.bannedService.findOne(banID);
 		const channel = await this.channelService.findOne(ban.channel.channelID, ['adminList']);
@@ -205,6 +216,7 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('channelID', ParseIntPipe) channelID: number,
 	) {
+		checkLimitID(channelID);
 		await this.mutedService.update();
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'muteList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
@@ -221,6 +233,8 @@ export class ChannelController {
 		@Param('userID', ParseIntPipe) targetID: number,
 		@Param('duration', ParseIntPipe) duration: number,
 	) {
+		checkLimitID(channelID);
+		checkLimitID(targetID);
 		await this.mutedService.update();
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'muteList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
@@ -237,6 +251,7 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('muteID', ParseIntPipe) muteID: number,
 	) {
+		checkLimitID(muteID);
 		await this.mutedService.update();
 		const mute = await this.mutedService.findOne(muteID);
 		const channel = await this.channelService.findOne(mute.channel.channelID, ['adminList', 'muteList']);
@@ -253,6 +268,8 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@Param('userID', ParseIntPipe) targetID: number,
 	) {
+		checkLimitID(channelID);
+		checkLimitID(targetID);
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList'])
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException('You aren\'t administrator on this channel');
@@ -270,6 +287,7 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@Param('timestamp', ParseIntPipe) timestamp: number,
 	) {
+		checkLimitID(channelID);
 		const minTime = new Date(timestamp);
 		minTime.setUTCHours(minTime.getHours() + 2);
 		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
@@ -285,6 +303,7 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@Param('timestamp', ParseIntPipe) timestamp: number,
 	) {
+		checkLimitID(channelID);
 		const maxTime = new Date(timestamp);
 		maxTime.setUTCHours(maxTime.getHours() + 2);
 		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
@@ -301,9 +320,9 @@ export class ChannelController {
 	) {
 		if (channelID === -1)//gestion no channel pour simplifier et pas avoir derreur 401..
 			return {data: []};
-		// console.log('channel');
+		checkLimitID(channelID);
 		const channel: ChannelEntity = await this.channelService.findOne(channelID, ['messages', 'userList'], true)
-		// console.log(channel);
+		console.log(channel);
 		if (!(await this.channelService.userInChannel(user, channel)))
 			throw new BadRequestException('You aren\'t part of that channel')
 		return this.messageService.filterRecent(channel.messages);
@@ -323,6 +342,7 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('channelID', ParseIntPipe) channelID: number,
 	) {
+		checkLimitID(channelID);
 		const channel = await this.channelService.findOne(channelID, ['userList']);
 		if (!await this.channelService.userInChannel(user, channel))
 			throw new BadRequestException('You aren\'t part of that channel')
@@ -336,6 +356,8 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@Param('userID', ParseIntPipe) targetID: number,
 	) {
+		checkLimitID(channelID);
+		checkLimitID(targetID);
 		const channel = await this.channelService.findOne(channelID, ['userList']);
 		const target = await this.usersService.findOne(targetID);
 		if (!await this.channelService.userInChannel(user, channel))
@@ -357,10 +379,10 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('inviteID', ParseIntPipe) inviteID: number,
 	) {
+		checkLimitID(inviteID);
 		const invite = await this.inviteService.findOne(inviteID);
 		if (invite == null)
 			throw new BadRequestException('This invite is not created or already accepted');
-		console.log(user);
 		if (invite.sender.UserID != user.UserID)
 			throw new BadRequestException('This invite is not created by you');
 		await this.inviteService.remove(invite);
@@ -373,8 +395,8 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@Body(new ValidationPipe()) data: ChangeChannelDTOPipe,
 	) {
+		checkLimitID(channelID);
 		const channel = await this.channelService.findOne(channelID);
-		console.log(channel);
 		if (channel.owner.UserID !== user.UserID)
 			throw new BadRequestException('You need to be the channel Owner to change it');
 		const credential = await this.credentialService.create(data.password);

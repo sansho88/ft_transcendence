@@ -8,7 +8,7 @@ import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
 import {EStatus, IUser} from "@/shared/types";
 import {getUserFromId} from "@/app/auth/Auth";
-import {SocketContextChat, SocketContextGame} from "@/context/globalContext";
+import {SelectedUserContext, SocketContextChat, SocketContextGame} from "@/context/globalContext";
 import {NotificationManager} from 'react-notifications';
 import {IGameSessionInfo} from "@/shared/typesGame";
 import Stats from "@/components/StatsComponent";
@@ -17,11 +17,13 @@ interface ProfileProps{
     user: IUser;
     avatarSize: string | undefined;
     showStats?: boolean;
+    isMainProfile?: boolean;
 }
-const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize, isEditable, showStats})=>{
+const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize, isEditable, showStats, isMainProfile})=>{
 
     const [modifiedNick, setNickText] = useState<string>(user.nickname ? user.nickname : user.login);
     const [editMode, setEditMode] = useState(false);
+    const {selectedUserContext, setSelectedUserContext} = useContext(SelectedUserContext);
     const [nickErrorMsg, setNickErrMsg] = useState("");
     const [statusColor, setStatusColor] = useState("grey");
     const [userStatus, setUserStatus] = useState(user.status);
@@ -159,7 +161,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
                     background: "none",
                     padding: "6px"
                 }}/>
-                <span style={{marginLeft: "4px"}}><Button image={"/floppy.svg"} onClick={turnOffEditMode} alt={"Save Button"}/></span>
+                <span style={{marginLeft: "4px", position: "fixed"}}><Button image={"/floppy.svg"} onClick={turnOffEditMode} alt={"Save Button"}/></span>
                 <p style={{fontSize: "12px", color: "red"}}>{nickErrorMsg}</p>
             </div>);
         }
@@ -194,30 +196,32 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
 
     return (
         <>
-            <div className={className}>
-                <Avatar path={user.avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus}/>
+            <div className={className} onClick={() => setSelectedUserContext(user)}>
+                <Avatar path={user.avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus} isMainProfile={isMainProfile}/>
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
                     color: "#07C3FF",
                     lineHeight: "1.5em",
+                    marginLeft: "10px",
                     display: "inline-block",
                     position: "relative",
-                    marginLeft: "10px",
-                    paddingTop: "2%",
-                    top: "2vh"
-
+                    transition:"1000ms",
+                    top: "15px"
                 }
-                }>
-                    <h2 id={"login"} style={{ color: "darkgrey"}}>{user.login}</h2>
+            }>
+                    <h2 id={"login"} style={{ color: "darkgrey", marginTop: "0"}}>{user.login}</h2>
                     {editedNick()}
 
                     <p id={"status"} style={{
                         color:statusColor,
-                        transition:"1000ms"}}>
+                        transition:"0ms",
+                        position: "relative", 
+                        top: "0",
+                        }}>
                         {getEnumNameByIndex(EStatus, userStatus)}
                     </p>
                 </div>
-                <div id={"children"} style={{marginLeft: "4px"}}>
+                <div id={"children"} style={{marginLeft: "4px", marginTop: "6px", clear: "both"}}>
                     {showStats && <Stats user={user}/>}
                     {children}
                 </div>

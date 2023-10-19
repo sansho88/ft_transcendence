@@ -3,8 +3,8 @@
 import { IMessageEntity } from "@/shared/entities/IMessage.entity";
 import Axios from "./AxiosConfig";
 import {strRoutes} from "@/shared/routesApi";
-import {IGameStats, IUser} from "@/shared/types";
-import { IChannel } from "@/shared/typesChannel";
+import {IGameStats, ILeaderboard, IMatch, IUser} from "@/shared/types";
+import { IChannel} from "@/shared/typesChannel";
 import axios from "axios";
 import { IChannelEntity } from "@/shared/entities/IChannel.entity";
 import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
@@ -77,7 +77,6 @@ export namespace getApi {
 			}
 		});}
 
-
 	interface IUserChan extends IUser {	channelJoined: IChannel[];	}
 	export const getChannelJoined = (): any => {
 		let user: IUserChan;
@@ -112,20 +111,38 @@ export namespace getApi {
 	  return axiosInstance.get(`${strRoutes.game.getMyChallenges()}`, updateAxiosInstance());
 	}
 
+	export const getMatchHistory = (): Promise<{data: IMatch[]}> => {
+		return axiosInstance.get(strRoutes.game.getMatchHistory(), updateAxiosInstance());
+	}
+	export const getMatchHistoryFromUserId = (userId: number): Promise<{data: IMatch[]}> => {
+		return axiosInstance.get(strRoutes.game.getMatchHistoryFromUserId(userId), updateAxiosInstance());
+	}
+
+	export const getLeaderboard = () : Promise<{data: ILeaderboard[]}> => {
+		return axiosInstance.get(strRoutes.game.getLeaderboard(), updateAxiosInstance());
+	}
 }
 
 
 export namespace postApi {
 
-	export const postUser= (newUser: Partial<IUser>)			=>{return axiosInstance.post(`${strRoutes.postUser()}`, newUser);}
-	export const postTryLogin= (loginTest:Partial<IUser>)	=>{return axiosInstance.post(`${strRoutes.postUserCheckLogin()}`, loginTest);}
-	export const postTryLogin42= (code: string, token: string | null)						=>{return axiosInstance.post(`${strRoutes.postUser42(token)}`, code);}
-	export const postTryGetIntraURL= ()										=>{return axiosInstance.post(`${strRoutes.getIntraURL()}`);}
+	export const postUser = (newUser: Partial<IUser>) => 										{ return axiosInstance.post(`${strRoutes.postUser()}`, newUser); }
+	export const postTryLogin = (loginTest: Partial<IUser>) => 							{ return axiosInstance.post(`${strRoutes.postUserCheckLogin()}`, loginTest); }
+	export const postTryLogin42 = (code: string, token: string | null) => 	{ return axiosInstance.post(`${strRoutes.postUser42(token)}`, code); }
+	export const postTryGetIntraURL = () => 																{ return axiosInstance.post(`${strRoutes.getIntraURL()}`); }
 
-	export const postGen2FA= ()														=>{return axiosInstance.post(`${strRoutes.postGenerate2FA()}`, {}, updateAxiosInstance());}
-	export const postCheck2FA= (token: string)						=>{return axiosInstance.post(`${strRoutes.postCheck2FA(token)}`, {}, updateAxiosInstance());}
-	export const postDisable2FA= (token: string)					=>{return axiosInstance.post(`${strRoutes.postDisable2FA(token)}`, {}, updateAxiosInstance());}
+	export const postGen2FA = () => 																				{ return axiosInstance.post(`${strRoutes.postGenerate2FA()}`, {}, updateAxiosInstance()); }
+	export const postCheck2FA = (token: string) => 													{ return axiosInstance.post(`${strRoutes.postCheck2FA(token)}`, {}, updateAxiosInstance()); }
+	export const postDisable2FA = (token: string) => 												{ return axiosInstance.post(`${strRoutes.postDisable2FA(token)}`, {}, updateAxiosInstance()); }
 
+	export const postUploadAvatar = (avatar: FormData) => {
+		return axiosInstance.post(strRoutes.postUploadAvatar(), avatar, {
+			headers: {
+				'Authorization': `Bearer ${authManager.getToken()}`,
+				'Content-Type': 'multipart/form-data',
+			},
+		});
+	};
 }
 
 

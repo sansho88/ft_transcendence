@@ -7,6 +7,12 @@ import {
 	UseGuards,
 	ParseIntPipe,
 	BadRequestException,
+	UseInterceptors,
+	UploadedFile,
+	HttpStatus,
+	HttpCode,
+	Post,
+	Request
 } from '@nestjs/common';
 import {UsersService} from './users.service';
 import {UpdateUserDto} from '../dto/user/update-user.dto';
@@ -16,6 +22,8 @@ import {CurrentUser} from '../module.auth/indentify.user';
 import {InviteService} from "../module.channels/invite.service";
 import {ChatGateway} from "../module.channels/chat.ws";
 import {ChannelService} from "../module.channels/channel.service";
+import { FileInterceptor } from '@nestjs/platform-express/multer';
+import {checkLimitID} from "../dto.pipe/checkIntData";
 
 @Controller('users')
 export class UsersController {
@@ -57,6 +65,7 @@ export class UsersController {
 	@Get('/get/:id')
 	@UseGuards(AuthGuard)
 	async findOneID(@Param('id', ParseIntPipe) id: number) {
+		checkLimitID(id);
 		return await this.usersService.findOne(id);
 	}
 
@@ -72,6 +81,14 @@ export class UsersController {
 	}
 
 	/*************************************************/
+
+	@HttpCode(HttpStatus.OK)
+	@Post('upload/avatar')
+  @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('avatar'))
+  async uploadAvatar(@CurrentUser() user: UserEntity, @UploadedFile() file, @Request() req) {
+    return await this.usersService.uploadAvatar(user, file, req);
+  }
 
 	@Put('update')
 	@UseGuards(AuthGuard)
@@ -104,12 +121,15 @@ export class UsersController {
 		@CurrentUser() user: UserEntity,
 		@Param('userID') targetID: number,
 	) {
+		checkLimitID(targetID);
 		if (targetID == user.UserID)
 			throw new BadRequestException('You cannot follow Yourself');
 		const target: UserEntity = await this.usersService.findOne(targetID);
-		user = await this.usersService.findOne(user.UserID, ['subscribed'])
+		user = await this.usersService.findOne(user.UserID, ['subscribed', 'blocked'])
 		if (user.subscribed.findIndex(usr => usr.UserID === target.UserID) + 1)
 			throw new BadRequestException('You already following that user');
+		if (!!user.blocked.find(targ => targ.UserID == target.UserID))
+			throw new BadRequestException('You block this user');
 		user.subscribed.push(target);
 		await user.save();
 		await this.chatWsService.sendEvent(target, `The User ${user.login} started Followed you`);
@@ -119,8 +139,9 @@ export class UsersController {
 	@UseGuards(AuthGuard)
 	async unfollow(
 		@CurrentUser() user: UserEntity,
-		@Param('userID') targetID: number,
+		@Param('userID', ParseIntPipe) targetID: number,
 	) {
+		checkLimitID(targetID);
 		const target: UserEntity = await this.usersService.findOne(targetID);
 		user = await this.usersService.findOne(user.UserID, ['subscribed'])
 		let index = user.subscribed.findIndex(usr => usr.UserID === target.UserID) + 1;
@@ -153,12 +174,15 @@ export class UsersController {
 		@CurrentUser() user: UserEntity,
 		@Param('userID', ParseIntPipe) targetID: number,
 	) {
+		checkLimitID(targetID);
 		if (targetID == user.UserID)
 			throw new BadRequestException('Don\'t try to block yourself plz ...');
 		const target = await this.usersService.findOne(targetID);
-		user = await this.usersService.findOne(user.UserID, ['blocked']);
+		user = await this.usersService.findOne(user.UserID, ['blocked', 'subscribed']);
 		if (user.blocked.find(block => block.UserID == target.UserID))
 			throw new BadRequestException('You already have blocked this user');
+		if (!!user.subscribed.find(targ => targ.UserID == target.UserID))
+			user.subscribed = user.subscribed.filter(targ => targ.UserID !== target.UserID);
 		return this.usersService.blockUser(user, target);
 	}
 
@@ -168,6 +192,7 @@ export class UsersController {
 		@CurrentUser() user: UserEntity,
 		@Param('userID', ParseIntPipe) targetID: number,
 	) {
+		checkLimitID(targetID);
 		if (targetID == user.UserID)
 			throw new BadRequestException('Yeah you can accept yourself now ?');
 		const target = await this.usersService.findOne(targetID);
