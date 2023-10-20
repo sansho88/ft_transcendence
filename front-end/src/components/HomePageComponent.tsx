@@ -26,7 +26,6 @@ const HomePage = () => {
 
 
     useEffect(() => {
-        //authManager.setBaseURL('http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/');
         const token = localStorage.getItem("token");
         if (!token)
             router.push("/auth");
@@ -49,23 +48,6 @@ const HomePage = () => {
         })
     }, []);
 
-
-    /*socketRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
-        let updateUser = userContext;
-        console.log("[StatusUpdate from ws] new status: " + newStatus);
-        if (updateUser/!* && (newStatus != updateUser.status)*!/)
-        {
-            updateUser.status = newStatus;
-            apiReq.putApi.putUser(updateUser)
-                .catch((e) => {
-
-                     console.error(e)
-                })
-            setUserContext(updateUser);
-        }
-    });*/
-
-    
 
     return (
         <>
@@ -100,9 +82,7 @@ const HomePage = () => {
                 } alt={"Logout button"}/>
 
                 <div className={"game"}>
-                    {/* {tokenRef.current && */
                     <Game className={"game"} token={tokenRef.current}/>
-                    }
                 </div>
                <ChatMaster className={'chat_master'} token={tokenRef.current} userID={userContext.UserID}/>
                 <div className={"absolute bottom-0 left-0"}><NotifComponent /></div>
