@@ -87,7 +87,8 @@ export class UsersService {
 		if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
 		await user.save();
-		await this.chatGateway.updateUserStatusEmit(user);
+		if (updateUser.status !== user.status)
+			await this.chatGateway.updateUserStatusEmit(user);
 		return user;
 	}
 
@@ -168,6 +169,7 @@ export class UsersService {
 	 * Need to call a emit to notify other User (Followers) that they change status on 'user.${user.userID}`
 	 */
 	async userStatus(user: UserEntity, newStatus: UserStatus) {
+		if (user.status === newStatus) return;
 		user.status = newStatus;
 		await user.save();
 		await this.chatGateway.updateUserStatusEmit(user);
