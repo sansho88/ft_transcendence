@@ -9,11 +9,12 @@ import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
 import NotifComponent from "@/components/notif/NotificationComponent";
 import Button2FA from "@/components/2FA/2FAComponent";
-import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
 import LoadingComponent from "@/components/waiting/LoadingComponent";
 import MatchHistory from "@/components/MatchHistoryComponent";
 import Leaderboard from "@/components/LeaderboardComponent";
+import '@/components/chat/chat.css';
+
 
 const HomePage = () => {
     const {userContext, setUserContext} = useContext(UserContext);

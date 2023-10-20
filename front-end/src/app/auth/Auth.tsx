@@ -1,17 +1,16 @@
 'use client'
 
+import './auth.css'
 import {useContext, useEffect, useState} from 'react'
-import InputPod from './InputPod'
 import * as POD from "@/shared/types";
 import {IUser} from "@/shared/types";
 import * as apiReq from '@/components/api/ApiReq'
 import {authManager} from '@/components/api/ApiReq'
 import * as ClipLoader from 'react-spinners'
-import './auth.css'
 import {useRouter} from 'next/navigation';
 import {LoggedContext, UserContext} from '@/context/globalContext';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
-import {NotificationManager, NotificationContainer} from 'react-notifications';
+import {NotificationContainer} from 'react-notifications';
 
 // import { Button } from '@/components/CustomButtonComponent'
 enum EStepLogin {
@@ -124,6 +123,7 @@ export default function Auth({className}: { className?: string }) {
         setLogged(true);
         setCurrentStepLogin(EStepLogin.successLogin);
         localStorage.setItem('userContext', JSON.stringify(userContext));
+        window.location.reload(); //refresh for remove "preload fonts" warning
     }
 
     const askForLogOrSignIn = () => {
@@ -143,31 +143,23 @@ export default function Auth({className}: { className?: string }) {
 
     const enterLogin = () => {
         return (
-            <div className='flex flex-col justify-center items-center text-white my-2'>
+            <form className='flex flex-col justify-center items-center text-white my-2'>
                 {  currentStepLogin === EStepLogin.logIn ?
-                    <>
-                        <div className=' font-thin'>LOGIN</div>
-                        <InputPod
-                            className='inputLogin'
-                            props=
-                                {
-                                    {
-                                        type: "text",
-                                        value: loginInput,
-                                        onChange: () => (e: React.ChangeEvent<HTMLInputElement>) => {
-                                            setLoginInput(e.target.value)
-                                        },
-                                        onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
-                                            if (e.key === "Enter") {
-                                                () => nextStepCheck()
-                                            }
-                                        }
+                    <div>
+                            <div className=' font-thin'>LOGIN</div>
+                            <input className='inputLogin' type="text" value={loginInput} autoComplete={"username"} name={"username"} autoFocus={true}
+                                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                       setLoginInput(e.target.value);
+                                   }}
+                                   onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                                       if (e.key === "Enter") {
+                                           () => nextStepCheck();
+                                       }
+                                   }}
 
-                                    }
-                                }
-                        />
+                            />
                         {enterCode2FA()}
-                    </>
+                    </div>
                     :
                     <div className={"text-center"}>
                         Keep in minds your future generated login.<br/>
@@ -175,7 +167,7 @@ export default function Auth({className}: { className?: string }) {
                     </div>
                 }
                 {enterPassword()}
-            </div>
+            </form>
         )
     }
 
@@ -183,23 +175,19 @@ export default function Auth({className}: { className?: string }) {
 
         return (
             <div className='flex flex-col justify-center items-center text-white my-8'>
-                <InputPod
-                    className='inputLogin'
-                    props=
-                        {
-                            {
-                                type: "password",
-                                value: passwordInput,
-                                onChange: () => (e: React.ChangeEvent<HTMLInputElement>) => {
-                                    setPasswordInput(e.target.value)
-                                },
-                                onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+                <input type={"text"} name={"username"} style={{display: "none"}} autoComplete={"username"} />
+                <input className='inputLogin' type="password" value={passwordInput} autoComplete={"current-password"} name={"password"}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    setPasswordInput(e.target.value);
+                                }}
+                                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                                     if (e.key === "Enter") {
-                                        setCurrentStepLogin(currentStepLogin);
+                                        setCurrentStepLogin(currentStepLogin === EStepLogin.logIn ?
+                                            EStepLogin.tryToConnect : EStepLogin.tryToCreateAccount)
+                                        setCredentials();
                                     }
-                                }
-                            }
-                        }
+                                }}
+
                 />
                 {currentStepLogin === EStepLogin.logIn ?
                     <div className=' font-thin'>Enter your password</div> :
@@ -226,24 +214,18 @@ export default function Auth({className}: { className?: string }) {
 
         return (
             <div className='flex flex-col justify-center items-center text-white my-8'>
-                <InputPod
-                    className='inputLogin'
-                    props=
-                        {
-                            {
-                                type: "text",
-                                value: code2FAInput,
-                                onChange: () => (e: React.ChangeEvent<HTMLInputElement>) => {
-                                    setcode2FAInput(e.target.value)
-                                    sessionStorage.setItem('code2FA', e.target.value);
-                                },
-                                onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
-                                    if (e.key === "Enter") {
-                                        setCurrentStepLogin(currentStepLogin);
-                                    }
-                                }
-                            }
-                        }
+                <input className='inputLogin' type="text" value={code2FAInput} autoComplete={"one-time-code"} name={"code2FA"}
+                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                           setcode2FAInput(e.target.value)
+                           sessionStorage.setItem('code2FA', e.target.value);
+                       }}
+                       onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                           if (e.key === "Enter") {
+                               console.log("ENTER key pressed ?");
+                               setCurrentStepLogin(currentStepLogin);
+                           }
+                       }}
+
                 />
                 {
                     <div className=' font-thin'>Enter your 2FA Code [if enabled]</div>
@@ -401,8 +383,9 @@ export default function Auth({className}: { className?: string }) {
                                 authManager.setToken(userToken);
                                 localStorage.setItem("login", login);
                                 setUserContext(await getUserMe(user).then(() => {
-                                        setLogged(true);
-                                        setCurrentStepLogin(EStepLogin.successLogin);
+                                        /*setLogged(true);
+                                        setCurrentStepLogin(EStepLogin.successLogin);*/
+                                        connectUser();
                                     }
                                 ) as Partial<IUser>);
                             }
@@ -428,7 +411,7 @@ export default function Auth({className}: { className?: string }) {
                     return;
 
                 case EStepLogin.tryToConnect:
-                    const existingUser: Partial<POD.IUser> = {login: login, password: passwordInput, visit: true, token_2fa: code2FAInput ? code2FAInput : "42"}
+                    const existingUser: Partial<POD.IUser> = {login: login, password: password, visit: true, token_2fa: code2FAInput ? code2FAInput : "42"}
                     await apiReq.postApi.postTryLogin(existingUser)
                         .then(async (res) => {
                             if (res.status === 200) {
@@ -518,8 +501,7 @@ export default function Auth({className}: { className?: string }) {
             <NotificationContainer/>
             {welcomeTitle()}
             {currentStepLogin === EStepLogin.start &&
-                <button onClick={() => goto42auth()} className='button-login h-14'>LOGIN
-                    42</button>}
+                <button onClick={() => goto42auth()} className='button-login h-14'>LOGIN 42</button>}
             {currentStepLogin === EStepLogin.start && enterCode2FA()}
             {currentStepLogin < EStepLogin.tryLoginAsInvite &&
                 <button onClick={() => nextStepCheck()} className='button-login'><span>{inviteButtonText}</span>
@@ -527,10 +509,6 @@ export default function Auth({className}: { className?: string }) {
             {currentStepLogin === EStepLogin.signOrLogIn && askForLogOrSignIn()}
             {currentStepLogin === EStepLogin.enterLogin && enterLogin()}
             {(currentStepLogin === EStepLogin.signIn || currentStepLogin === EStepLogin.logIn) && enterLogin()}
-
-            {currentStepLogin === EStepLogin.signOrLogIn /*&&
-                <ClipLoader.BeatLoader className='pt-[12vh]' color="#36d7b7" size={13}/>*/
-            }
             {currentStepLogin === EStepLogin.check2FA && enterCode2FA()}
             {currentStepLogin === EStepLogin.successLogin && LoggedSuccess()}
             {currentStepLogin === EStepLogin.failLogin && LoggedFailed(42)}
