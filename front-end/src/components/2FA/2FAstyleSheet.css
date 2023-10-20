@@ -69,7 +69,6 @@ input:checked + .slider:before {
 }
 
 .settings{
-    background-color: #AAAAAA;
     /*padding: 0 2vw;*/
     margin: auto;
     align-content: center;
@@ -80,7 +79,7 @@ input:checked + .slider:before {
     width: auto ;
     z-index: 1;
 
-    background: rgba(126, 126, 126, 0.27);
+    background: rgba(0, 0, 0, 0.67);
     border: 2px rgba(0, 0, 0, 0.11);
     border-style: inherit ;
     box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
@@ -106,7 +105,7 @@ input:checked + .slider:before {
 
     padding: 0;
     background: none;
-    font: 2vh droid sans mono, consolas, monospace;
+    font: 1.6vh droid sans mono, consolas, monospace;
     letter-spacing: 0.2ch;
 }
 textarea:focus, input:focus  .settings .codeInput {
@@ -129,7 +128,7 @@ textarea:focus, input:focus  .settings .codeInput {
     position: absolute;
     bottom: 0;
     right: 0;
-    width: 42px;
+    width: 3vw;
     border-radius: 18px;
 
 }
