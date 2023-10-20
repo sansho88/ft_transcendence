@@ -8,7 +8,7 @@ import {
 	Max,
 	Min,
 } from 'class-validator';
-import { EGameMod } from 'shared/typesGame';
+import { EGameMod } from 'src/shared/typesGame';
 
 export class CreateChannelDTOPipe {
 	@IsString()
