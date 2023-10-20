@@ -520,9 +520,10 @@ export default function Game({className, token}: {className: string, token: stri
   }
 
   useEffect(() => {
+
     setCurrentGameTheme(localStorage.getItem('theme'));
 
-      if (!currentGameTheme){
+      if (localStorage.getItem('theme') === null){
         localStorage.setItem('theme', new PODGAME.GameTheme().neon)
         setCurrentGameTheme( new PODGAME.GameTheme().neon);
       }
