@@ -87,7 +87,7 @@ body {
   background: none;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 12ch) {
   .button-login {
     font-size: 24px;
     min-width: 196px;
@@ -100,6 +100,7 @@ body {
     display: flex;
     color: darkgrey;
 
+    overflow-y: hidden;
     padding: 0;
     margin: 0;
     /*
@@ -212,21 +213,41 @@ body {
   z-index: 2;
 }
 
+#friends_user_list{
+    top: 6vh;
+}
+
 .userList{
     max-height: 21vh;
     width: auto;
     overflow-y: auto;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
 
     position: absolute;
     right: 2vw;
-    top: 8vh;
+    /*top: 8vh;*/
     padding-inline: 2vh;
     background: rgba(0, 0, 0, 0.27);
     border: 2px rgba(0, 0, 0, 0.11);
     border-style: inherit ;
     box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
     border-radius: 8px;
+}
+
+.userList::-webkit-scrollbar {
+    width: 1px; /* Largeur de la scrollbar personnalisée */
+}
+
+.userList::-webkit-scrollbar-thumb {
+    background-color: transparent; /* Couleur transparente pour le curseur de la scrollbar */
+    border: none; /* Supprime la bordure du curseur */
+}
+
+.userList::-webkit-scrollbar-track {
+    background-color: transparent; /* Couleur transparente pour la piste de la scrollbar */
+    border: none; /* Supprime la bordure de la piste */
 }
 
 .matchHistory{
@@ -388,8 +409,7 @@ body {
 
 .avatar:hover{
     cursor: pointer;
-    filter: brightness(0.7);
-    filter: blur(1px);
+    filter: brightness(0.7) blur(1px);
     transition: 300ms;
 }
 
