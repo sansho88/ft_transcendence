@@ -411,7 +411,7 @@
 
 #chat_users_list {
   position: fixed;
-  top: 34vh;
+  bottom: 45vh;
   right: 2vh;
   max-height: 21vh;
   overflow-y: auto;
