@@ -85,7 +85,6 @@ export class UsersService {
 
 	async update(user: UserEntity, updateUser: UpdateUserDto) {
 		if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
-		if (updateUser.avatar_path !== undefined) user.avatar_path = updateUser.avatar_path;
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
 		await user.save();
 		await this.chatGateway.updateUserStatusEmit(user);

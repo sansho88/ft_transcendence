@@ -56,7 +56,7 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus, isMai
 		setStatusColor(getEnumNameByIndex(Colors, playerStatus));
 	}, [playerStatus]);
 
-	path = path ? path : "/tests/avatar.jpg";
+	path = !path ? "/tests/avatar.jpg" : path;
   isMainProfile = isMainProfile === undefined ? false : isMainProfile;
   
 	return (
