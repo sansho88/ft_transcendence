@@ -1,6 +1,4 @@
 import React, { useState} from "react";
-import {IUser} from "@/shared/types";
-import * as apiReq from '@/components/api/ApiReq';
 import Profile from "@/components/ProfileComponent";
 import Button from "@/components/CustomButtonComponent";
 import {v4 as uuidv4} from "uuid";
@@ -8,34 +6,21 @@ import {NotificationManager} from 'react-notifications';
 import UserOptions from "@/components/UserOptions";
 import {getApi} from "@/components/api/ApiReq";
 import getMyRelationships = getApi.getMyRelationships;
+import getAllUsersFromChannel = getApi.getAllUsersFromChannel;
 
 interface UserListProps{
     avatarSize?: string | undefined;
-    usersList?: IUser[] | undefined;
+    usersList?: string | undefined;
     showUserProps?: boolean;
     adminMode?: boolean
+    channelID?: number;
 }
-
-async function getAllUsers(): Promise<IUser[]>  {
-    try {
-        const timestamp = Date.now();
-        return await apiReq.getApi.getUsersAllPromise(timestamp)
-            .then((req) => {
-                return req.data;
-            })
-    }catch(e){
-        console.error("[Get All Users ERROR]" + e);
-        throw e;
-    }
-
-}
-const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, showUserProps, usersList, adminMode}) => {
+const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, showUserProps, usersList, adminMode, channelID}) => {
 
     const [userElements, setUserElements] = useState<React.JSX.Element[]>([]);
     const [isHidden, setIsHidden] = useState(userElements.length == 0);
     const [isPopupUsersVisible, setPopupUsersVisible] = useState(false);
     function handleClick(){
-        console.log(`isHidden;${isHidden}, isPopupVisible"${isPopupUsersVisible}`);
         if (isHidden)
         {
             setPopupUsersVisible(isHidden);
@@ -43,7 +28,6 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
             getMyRelationships().then((res) => {
                 const me = res.data;
                 let subs = me.subscribed; //users suivis par l'actuel user
-                let followers = me.followers; //users qui suivent l'actuel user
                 let blocked = me.blocked;
                 const isUserSubscribedToMe = !!subs.find(tmpUser => tmpUser.UserID);
             if (!usersList)
@@ -68,16 +52,25 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
 
             }
             else {
-                for (const user of usersList) {
-                    allDiv.push(
-                        <li key={user.login + "List" + uuidv4()}>
-                            <Profile user={user} avatarSize={avatarSize}>
-                                {showUserProps == true && <UserOptions user={user} relationships={{followed: subs, blocked: blocked}} showAdminOptions={adminMode}/>}
-                            </Profile>
-                        </li>
-                    )
-                }
-                setUserElements(allDiv);
+                getAllUsersFromChannel(channelID ? channelID : 0, new Date).then((res) => {
+                    for (const user of res.data) {
+                        if (user.UserID > 1) {
+                            allDiv.push(
+                                <li key={user.login + "List" + uuidv4()}>
+                                    <Profile user={user} avatarSize={avatarSize}>
+                                        {showUserProps === true &&
+                                            <UserOptions user={user} relationships={{followed: subs, blocked: blocked}}
+                                                         showAdminOptions={adminMode}/>}
+                                    </Profile>
+                                </li>
+                            );
+                        }
+                    }
+                    setUserElements(allDiv);
+                })
+                    .catch((error) => console.error("[UserList] Impossible to get users of channel: " + error));
+                
+
             }
             })
                 .catch((error) => console.error("[UserList] Impossible to get relationships of actual user: " + error));

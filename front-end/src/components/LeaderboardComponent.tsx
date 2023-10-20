@@ -34,18 +34,19 @@ const Leaderboard : React.FC = () => {
             if (competitor.rank <= 3)
                 rankColor = rankColorsArray[competitor.rank - 1];
 
-            leaderboardElements.push(
-                <li key={competitor.user.login + "List" + uuidv4()}>
-                    <div style={{ margin:"10px 0", color: rankColor}}>
-                        <span className={"leaderboard_rank"} style={{color: rankColor}}>
-                            {competitor.rank}
-                        </span>
-                        <span>
-                           <Profile className={"leaderboard_user"} user={competitor.user} avatarSize={"medium"} showStats={false}/>
-                        </span>
-                    </div>
-                </li>
-            )
+            if (competitor.user.UserID > 1)
+                leaderboardElements.push(
+                    <li key={competitor.user.login + "List" + uuidv4()}>
+                        <div style={{ margin:"10px 0", color: rankColor}}>
+                            <span className={"leaderboard_rank"} style={{color: rankColor}}>
+                                {competitor.rank}
+                            </span>
+                            <span>
+                               <Profile className={"leaderboard_user"} user={competitor.user} avatarSize={"medium"} showStats={false}/>
+                            </span>
+                        </div>
+                    </li>
+                )
         }
     }
     else {

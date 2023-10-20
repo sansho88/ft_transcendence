@@ -9,11 +9,12 @@ import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
 import NotifComponent from "@/components/notif/NotificationComponent";
 import Button2FA from "@/components/2FA/2FAComponent";
-import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
 import LoadingComponent from "@/components/waiting/LoadingComponent";
 import MatchHistory from "@/components/MatchHistoryComponent";
 import Leaderboard from "@/components/LeaderboardComponent";
+import '@/components/chat/chat.css';
+
 
 const HomePage = () => {
     const {userContext, setUserContext} = useContext(UserContext);
@@ -43,7 +44,28 @@ const HomePage = () => {
         }
         localStorage.setItem('userContext', JSON.stringify(userContext));
 
-    });
+        return(() => {
+            window.location.reload();
+        })
+    }, []);
+
+
+    /*socketRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
+        let updateUser = userContext;
+        console.log("[StatusUpdate from ws] new status: " + newStatus);
+        if (updateUser/!* && (newStatus != updateUser.status)*!/)
+        {
+            updateUser.status = newStatus;
+            apiReq.putApi.putUser(updateUser)
+                .catch((e) => {
+
+                     console.error(e)
+                })
+            setUserContext(updateUser);
+        }
+    });*/
+
+    
 
     return (
         <>
@@ -69,7 +91,7 @@ const HomePage = () => {
                 {showMatchHistory && <MatchHistory/>}
                 {showLeaderboard &&  <Leaderboard/>}
 
-                <UserList className={"friends"} avatarSize={"medium"} showUserProps={true}/>
+                <UserList className={"friends"} userListIdProperty={"friends_user_list"} avatarSize={"medium"} showUserProps={true}/>
                 <Button className={"logout"} image={"/logout.svg"} onClick={() => {
                     localStorage.clear();
                     router.push("/auth");
@@ -78,7 +100,7 @@ const HomePage = () => {
                 } alt={"Logout button"}/>
 
                 <div className={"game"}>
-                    {tokenRef.current.length > 0 &&
+                    {/* {tokenRef.current && */
                     <Game className={"game"} token={tokenRef.current}/>
                     }
                 </div>

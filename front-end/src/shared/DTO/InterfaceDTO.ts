@@ -1,3 +1,4 @@
+import { EGameMod, userInfoSocket } from "shared/typesGame";
 import { IUser } from "../types";
 
 export namespace messageDTO {
@@ -21,7 +22,7 @@ export namespace channelsDTO {
 		privacy: boolean;
 		password?: string;
 	}
-
+ 
 	export interface IJoinChannelDTOPipe {
 		channelID: number;
 		password?: string;
@@ -40,5 +41,21 @@ export namespace channelsDTO {
 
 	export interface ICreateMpDTOPPipe {
 		targetID: number
+	}
+
+	export interface ICreateChallengeDTO {
+		targetID: number;
+		gameMod: EGameMod;
+	}
+
+	export interface IChallengeProposeDTO {
+		challenger: Partial<IUser>;
+		eventChallenge: string;
+		gameMod: EGameMod;
+	}
+	
+	export interface IChallengeAcceptedDTO {
+		response: boolean;
+		event: string;
 	}
 }

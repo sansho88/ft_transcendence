@@ -249,4 +249,10 @@ export class ChannelService {
 		const target = await this.userService.findOne(targetID, ['blocked']);
 		return !!target.blocked.find(usr => usr.UserID == user.UserID)
 	}
+
+	async getGlobalChannel() {
+		const admin = await this.userService.getAdminUser();
+		const channelLst = await this.findAll();
+		return channelLst.find(channel => !channel.mp && channel.owner.UserID == admin.UserID);
+	}
 }

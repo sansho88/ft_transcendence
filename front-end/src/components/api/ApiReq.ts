@@ -106,6 +106,11 @@ export namespace getApi {
 	  return axiosInstance.get(`${strRoutes.game.getUserStatsById(userId)}`, updateAxiosInstance());
 	}
 
+
+	export const getMyChallenges = (): Promise<channelsDTO.IChallengeProposeDTO[]> => {
+	  return axiosInstance.get(`${strRoutes.game.getMyChallenges()}`, updateAxiosInstance());
+	}
+
 	export const getMatchHistory = (): Promise<{data: IMatch[]}> => {
 		return axiosInstance.get(strRoutes.game.getMatchHistory(), updateAxiosInstance());
 	}

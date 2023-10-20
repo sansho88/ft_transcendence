@@ -46,7 +46,7 @@ export default function ChatMessagesList({className, messages, currentChannel, u
       if (refDivParent && scrollPosition)
       {
         const maxHeight = refDivParent.current?.scrollHeight - refDivParent.current?.clientHeight;
-        console.log(`scollPos=${scrollPosition} || maxHeigh=${maxHeight - 50}`)
+        // console.log(`scollPos=${scrollPosition} || maxHeigh=${maxHeight - 50}`)
         if (scrollPosition > (maxHeight - 400))
         {
           setTimeout(() => {
@@ -83,8 +83,10 @@ export default function ChatMessagesList({className, messages, currentChannel, u
   
   useEffect(() => {
     if (refDivParent.current !== null)
-    {  const maxHeight = refDivParent.current?.scrollHeight - refDivParent.current?.clientHeight;
-      console.log("Position maximale du scroll :", maxHeight);}
+    {  
+      const maxHeight = refDivParent.current?.scrollHeight - refDivParent.current?.clientHeight;
+      // console.log("Position maximale du scroll :", maxHeight);
+    }
   }, [refDivParent.current]);
   
   

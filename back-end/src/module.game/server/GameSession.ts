@@ -194,7 +194,7 @@ export class GameSession {
 			P1.socket.on(`${this.gameRoomEvent}ready`, () => {
 				this.isP1Ready = true;
 				this.startCountdownIfPlayersReady();
-				console.log(`${this.gameRoomEvent}: player 1 READY`);
+				//console.log(`${this.gameRoomEvent}: player 1 READY`);
 			})
 		}
 
@@ -208,7 +208,7 @@ export class GameSession {
 		P2.socket.on(`${this.gameRoomEvent}ready`, () => {
 			this.isP2Ready = true;
 			this.startCountdownIfPlayersReady();
-			console.log(`${this.gameRoomEvent}: player 2 READY`);
+			//console.log(`${this.gameRoomEvent}: player 2 READY`);
 		})
 
 		if (this.gameMod !== PODGAME.EGameMod.trainning) {
@@ -248,23 +248,23 @@ export class GameSession {
 		//DEV EVENT cheat goal system
 		P1.socket.on(`${this.gameRoomEvent}GOAL`, () => {
 			this.addGoalToPlayer(P1);
-			console.log(`P1 GOALLLL`);
-			console.log(`SCORE: ${this.table.scoreP1} | ${this.table.scoreP2}`);
+			//console.log(`P1 GOALLLL`);
+			//console.log(`SCORE: ${this.table.scoreP1} | ${this.table.scoreP2}`);
 		});
 		P2.socket.on(`${this.gameRoomEvent}GOAL`, () => {
 			this.addGoalToPlayer(P2);
-			console.log(`P2 GOALLLL`);
-			console.log(`SCORE: ${this.table.scoreP1} | ${this.table.scoreP2}`);
+			//console.log(`P2 GOALLLL`);
+			//console.log(`SCORE: ${this.table.scoreP1} | ${this.table.scoreP2}`);
 		});
 
 
 		P1.socket.on(`${this.gameRoomEvent}STOP`, () => {
-			console.log(`Player 1 has given up`);
+			//console.log(`Player 1 has given up`);
 			this.table.scoreP2 = this.scoreLimit;
 			this.isEndGameCheckScoring();//faire gagner le joueur adverse
 		});
 		P2.socket.on(`${this.gameRoomEvent}STOP`, () => {
-			console.log(`Player 2 has given up`);
+			//console.log(`Player 2 has given up`);
 			this.table.scoreP1 = this.scoreLimit;
 			this.isEndGameCheckScoring();//faire gagner le joueur adverse
 		});
@@ -291,7 +291,7 @@ export class GameSession {
 				'infoGameSession',
 				this.infoGameSession
 			);
-		console.log(`INFO GAME SESSION START INIT : ${JSON.stringify(this.infoGameSession.startInitElement)}`)
+		//console.log(`INFO GAME SESSION START INIT : ${JSON.stringify(this.infoGameSession.startInitElement)}`)
 		this.sendUpdateTable(); //lancer setInterval table
 	}
 
@@ -306,7 +306,7 @@ export class GameSession {
 		else
 			this.table.ballIsHidden = false;
 		if (this.hitCounter % this.ballNumberHitBtwGhostZoneUp) {
-			console.log(`La ghost zone s'agrandie : ${this.ghostZoneSize}`)
+			//console.log(`La ghost zone s'agrandie : ${this.ghostZoneSize}`)
 			if (this.ghostZoneSize < this.ghostZoneSizeMax)
 				this.ghostZoneSize *= this.ghostZoneSizeCoef;
 			else
@@ -376,7 +376,7 @@ export class GameSession {
 		if (this.hitCounter % this.ballNumberHitBtwAcceleration === 0 && this.ballSpeed <= this.ballSpeedMax) {
 			this.ballSpeed *= this.ballAccelerationFactor;
 			this.speedPaddle *= this.paddleAccelerationFactor;
-			console.log(`${this.gameRoomEvent}: la balle accelere ! (ballSpeed:${this.ballSpeed})`)
+			//console.log(`${this.gameRoomEvent}: la balle accelere ! (ballSpeed:${this.ballSpeed})`)
 		}
 	}
 
@@ -471,7 +471,7 @@ export class GameSession {
 	private ballEngagement() {
 		const angleRandom: number = (Math.random() * 2 - 1);
 		let dx: number;
-		// console.log(`Random direction for ball engagement = ${angleRandom}`);
+		// //console.log(`Random direction for ball engagement = ${angleRandom}`);
 
 		if (this.lastPlayerScore === this.player1)
 			dx = 1;
@@ -574,7 +574,7 @@ export class GameSession {
 		this.serverSocket.to(this.gameRoomEvent).emit('endgame', endMessage());
 		setTimeout(() => {
 				this.serverSocket.to(this.gameRoomEvent).emit('reset');
-				console.log('reset');
+				//console.log('reset');
 				this.player1.socket.leave(this.gameRoomEvent);
 				this.player2.socket.leave(this.gameRoomEvent);
 			}
@@ -590,14 +590,14 @@ export class GameSession {
 			this.serverSocket
 				.to(this.gameRoomEvent)
 				.emit('info', `${this.player1.user.nickname} won this game`);
-			console.log(`${this.player1.user.nickname} won this game`);
+			//console.log(`${this.player1.user.nickname} won this game`);
 		} else {
 			this.winner = this.player2;
 			this.looser = this.player1;
 			this.serverSocket
 				.to(this.gameRoomEvent)
 				.emit('info', `${this.player2.user.nickname} won this game`);
-			console.log(`${this.player2.user.nickname} won this game`);
+			//console.log(`${this.player2.user.nickname} won this game`);
 		}
 		if (this.gameMod != EGameMod.trainning) {
 			this.gameService.create(this.player1.user.UserID, this.player2.user.UserID, this.table.scoreP1, this.table.scoreP2, this.startDate);
@@ -630,7 +630,7 @@ export class GameSession {
 	}
 
 	private startGame() {
-		console.log(`${this.gameRoomEvent}: le jeu commence`);
+		//console.log(`${this.gameRoomEvent}: le jeu commence`);
 		this.ballEngagement();
 		this.isGameRunning = true;
 		this.positionManagement();

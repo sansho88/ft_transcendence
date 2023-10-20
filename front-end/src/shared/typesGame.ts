@@ -24,6 +24,17 @@ export enum EInfoType {
   gameFind,
 }
 
+export enum EStatusFrontGame {
+  idle,
+  modChoice,
+  matchmakingRequest,
+  gameSessionFind,
+  waiting,
+  countdown,
+  gameInProgress,
+  endOfGame,
+  challengeRequest
+}
 export interface ISizeGameElements {
   tableServerSize   : IVector2D; //sert a calculer le coef d'agrandissement ou reduction cote front par rapport a la taille d'affichage
   ballSize          : IVector2D;
@@ -42,6 +53,16 @@ export interface IGameSessionInfo {
   startInitElement  : ISizeGameElements;
   ballIsHidden      : boolean;
   // spectators: Partial<IUser>[];
+}
+
+
+export interface IChallengeManager{
+  
+}
+
+export interface IChallengeStepDTO {
+  challengerequested: boolean;
+  
 }
 
 export enum EKeyEvent {
