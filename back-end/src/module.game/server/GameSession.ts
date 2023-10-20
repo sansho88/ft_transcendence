@@ -538,7 +538,7 @@ export class GameSession {
 					this.isP2Ready = true;
 					this.startCountdownIfPlayersReady();
 				}
-			}, 8000);
+			}, 5000);
 			return;
 		}
 	}

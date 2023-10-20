@@ -2,7 +2,6 @@ import React, { useState} from "react";
 import Profile from "@/components/ProfileComponent";
 import Button from "@/components/CustomButtonComponent";
 import {v4 as uuidv4} from "uuid";
-import {NotificationManager} from 'react-notifications';
 import UserOptions from "@/components/UserOptions";
 import {getApi} from "@/components/api/ApiReq";
 import getMyRelationships = getApi.getMyRelationships;
@@ -74,7 +73,6 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
             }
             })
                 .catch((error) => console.error("[UserList] Impossible to get relationships of actual user: " + error));
-                NotificationManager.info(`${allDiv.length} users loaded`);
         }
         else
             setUserElements([]);
