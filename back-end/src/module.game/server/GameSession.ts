@@ -529,7 +529,7 @@ export class GameSession {
 					clearInterval(intervalStart);
 				}
 				countdown--;
-			}, 1000)
+			}, 620)
 			return;
 		} else if (this.isP1Ready || this.isP2Ready) {
 			setTimeout(() => {
