@@ -9,18 +9,25 @@ import { wsChatEvents, wsGameEvents } from "./api/WsReq";
 import { Socket } from "socket.io-client";
 import { EGameMod, EStatusFrontGame, IChallengeStepDTO } from "@/shared/typesGame";
 import { channelsDTO } from "@/shared/DTO/InterfaceDTO";
+import { IChannel } from "@/shared/typesChannel";
+import PutDuration, { DurationType } from "./chat/subComponents/PutDuration";
 
 
 export interface userOptionsProps {
    user: IUser;
    showAdminOptions?: boolean;
    relationships: {followed:IUser[], blocked?:IUser[]};
+   channelID?: number;
+   setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
 }
-const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, showAdminOptions, relationships}) => {
+
+const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, showAdminOptions, relationships, channelID, setRefresh}) => {
     const {userContext, setUserContext} = useContext(UserContext);
     const [isFollowed, setIsFollowed] = useState(!!relationships.followed.find(tmpUser => user.UserID == tmpUser.UserID));
     const [isBlocked, setIsBlocked] = useState(relationships.blocked && !!relationships.blocked.find(tmpUser => user.UserID == tmpUser.UserID));
     const [isWaitingChallenge, setIsWaitingChallenge] = useState<boolean>(false);
+    const [isDurationVisible, setIsDurationVisible] = useState<boolean>(false);
+    const [durType, setDurationType] = useState<typeof DurationType[keyof typeof DurationType]>(DurationType.Ban);
 
     const socketRef = useContext(SocketContextChat)
     const socketRefGame = useContext(SocketContextGame)
@@ -88,6 +95,39 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
         }
     }
 
+    function handleKick() {
+        console.log('handleKick')
+        console.log('target: ', user.nickname)
+        console.log('channelID: ', channelID )
+        if (showAdminOptions && channelID !== undefined) {
+            apiReq.putApi.putKickUser(channelID, user.UserID)
+                .then(() => {
+                    console.log('KICK SUCCESS')
+                    setRefresh(true);
+                })
+                .catch(() => {
+                    console.log('KICK FAILED')
+                })
+        }
+    }
+
+    function handleBan() {
+        console.log('handleBan')
+        if (showAdminOptions && channelID !== undefined) {
+            setDurationType(DurationType.Ban);
+            setIsDurationVisible(!isDurationVisible);
+        }
+    }
+
+    function handleMute() {
+        console.log('handleMute')
+        if (showAdminOptions && channelID !== undefined) {
+            setDurationType(DurationType.Mute);
+            setIsDurationVisible(!isDurationVisible);
+        }
+    }
+
+
     useEffect(() => {
         if (socketRefGame){
             socketRefGame.on('challengeStep', (res: IChallengeStepDTO) => {
@@ -115,9 +155,9 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
 
                         {showAdminOptions &&
                             <span style={{float:"right"}}>
-                                <Button image={"/block-message.svg"} onClick={() => console.log("Mute User button")} alt={"Mute"} margin={"0 5px 0 0"} title={"Mute"}/>
-                                <Button image={"/door.svg"} onClick={() => console.log("Kick User button")} alt={"Kick"} margin={"0 5px 0 0"} title={"Kick"}/>
-                                <Button image={"/hammer.svg"} onClick={() => console.log("Ban User button")} alt={"Ban"} title={"Ban"}/>
+                                <Button image={"/block-message.svg"}    onClick={() => {handleMute()}}  alt={"Mute"} margin={"0 5px 0 0"} title={"Mute"}/>
+                                <Button image={"/door.svg"}             onClick={() => {handleKick()}}  alt={"Kick"} margin={"0 5px 0 0"} title={"Kick"}/>
+                                <Button image={"/hammer.svg"}           onClick={() => {handleBan()}}   alt={"Ban"} title={"Ban"}/>
                             </span>
                         }
                         { !isWaitingChallenge && user.status != EStatus.Offline &&
@@ -127,6 +167,15 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
                             </>
                         }
                     </span>
+                    {isDurationVisible && <PutDuration 
+                    user={user} 
+                    channelID={channelID} 
+                    handleType={durType} 
+                    isVisible={isDurationVisible}
+                    setDurationType={setDurationType}
+                    setIsDurationVisible={setIsDurationVisible}
+                    setRefresh={setRefresh}
+                    />}
                 </div>}
         </>
     )

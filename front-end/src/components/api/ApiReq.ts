@@ -8,6 +8,7 @@ import { IChannel} from "@/shared/typesChannel";
 import axios from "axios";
 import { IChannelEntity } from "@/shared/entities/IChannel.entity";
 import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
+import { channel } from "diagnostics_channel";
 
 
 const AuthManager = require('./AuthManager');
@@ -95,6 +96,12 @@ export namespace getApi {
 			});
 	}
 
+	export const getAllBanFromChannel = (channelID: number): Promise<{data: channelsDTO.IBanEntity[]}> => {
+		return axiosInstance.get(`${strRoutes.channel.getAllBanFromChannel(channelID)}`, {
+			headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
+		});
+	}
+
 	export const getAllMyFollowers = (): Promise<{data:IUser[]}> => {
 		return axiosInstance.get(`${strRoutes.relationships.getAllMyFollowers()}`, updateAxiosInstance());
 	}
@@ -161,6 +168,14 @@ export namespace putApi {
 		return axiosInstance.put(strRoutes.relationships.unblockUser(userID),{}, updateAxiosInstance());
 	}
 	export const putModifChannel = (channelID: number, data: channelsDTO.IChangeChannelDTOPipe) =>{return axiosInstance.put(`${strRoutes.channel.putModifChannel(channelID)}`, data, updateAxiosInstance())}
+
+	export const putMuteUser = (channelID: number, userID: number, duration: number) => {return axiosInstance.put(`${strRoutes.channel.putMuteUser(channelID, userID, duration)}`, {}, updateAxiosInstance())}
+	export const putUnmuteUser = (channelID: number, userID: number) => {return axiosInstance.put(`${strRoutes.channel.putUnmuteUser(channelID, userID)}`, {}, updateAxiosInstance())}
+
+	export const putKickUser = (channelID: number, userID: number) => {return axiosInstance.put(`${strRoutes.channel.putKickUser(channelID, userID)}`, {}, updateAxiosInstance())}
+
+	export const putBanUser = (channelID: number, userID: number, duration: number) => {return axiosInstance.put(`${strRoutes.channel.putBanUser(channelID, userID, duration)}`, {}, updateAxiosInstance())}
+	export const putUnbanUser = (banID: number) => {return axiosInstance.put(`${strRoutes.channel.putUnbanUser(banID)}`, {}, updateAxiosInstance())}
 }
 
 export namespace deleteApi {

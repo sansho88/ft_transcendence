@@ -143,28 +143,35 @@ export namespace game {
 // |                             CHANNELS                                |
 // +---------------------------------------------------------------------+
 export namespace channel {
-	// export const postCreateChannel = () 																					=> {return `${serverApi}/${routeChannels}/create`} use WS event
-	export const getAll = () 																											=> {return `${serverApi}/${routeChannels}/get`};
-	export const getUsersChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/get/list/${channelID}`};
-	// export const getMsgsChannel = (channelID: number, timestamp: number)					=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
-	export const getChannelJoined = ()																						=> {return `${serverApi}/${routeChannels}/channelJoined`};
-	export const getAllMessagesChannel = (channelID: number)											=> {return `${serverApi}/${routeChannels}/msg/${channelID}`};
-	export const putModifChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/modif/${channelID}`};
+	// export const postCreateChannel = () 																								=> {return `${serverApi}/${routeChannels}/create`} use WS event
+	export const getAll = () 																														=> {return `${serverApi}/${routeChannels}/get`};
+	export const getUsersChannel = (channelID: number)																	=> {return `${serverApi}/${routeChannels}/get/list/${channelID}`};
+	// export const getMsgsChannel = (channelID: number, timestamp: number)								=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
+	export const getChannelJoined = ()																									=> {return `${serverApi}/${routeChannels}/channelJoined`};
+	export const getAllMessagesChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/msg/${channelID}`};
+	export const putModifChannel = (channelID: number)																	=> {return `${serverApi}/${routeChannels}/modif/${channelID}`};
 
+	export const putMuteUser = (channelID: number, userID: number, duration: number)		=> {return `${serverApi}/${routeChannels}/mute/${channelID}/${userID}/${duration}`};
+	export const putUnmuteUser = (channelID: number, userID: number)										=> {return `${serverApi}/${routeChannels}/unmute/${channelID}/${userID}`};
 
+	export const putKickUser = (channelID: number, userID: number)											=> {return `${serverApi}/${routeChannels}/kick/${channelID}/${userID}`};
+
+	export const getAllBanFromChannel = (channelID: number)															=> {return `${serverApi}/${routeChannels}/ban/${channelID}`};
+	export const putBanUser = (channelID: number, userID: number, duration: number)			=> {return `${serverApi}/${routeChannels}/ban/${channelID}/${userID}/${duration}`};
+	export const putUnbanUser = (banID: number)																					=> {return `${serverApi}/${routeChannels}/pardon/${banID}`};
 }
 
 // +---------------------------------------------------------------------+
 // |                             MESSAGES                                |
 // +---------------------------------------------------------------------+
 
-	export const getMessagesByChannelId=() 	=> {return `${serverApi}/${routeChannels}/`}; 	//all messages in channel_id
+	export const getMessagesByChannelId = ()	=> {return `${serverApi}/${routeChannels}/`}; 	//all messages in channel_id
 
-	export const postMessage = () 					=> {return `${serverApi}/${routeMessages}`};
+	export const postMessage = () 						=> {return `${serverApi}/${routeMessages}`};
 
-	export const putMessageById = () 				=> {return `${serverApi}/${routeMessages}/`}; 			//feature ? 	params: message_id
+	export const putMessageById = () 					=> {return `${serverApi}/${routeMessages}/`}; 			//feature ? 	params: message_id
 
-	export const deleteMessageById = () 		=> {return `${serverApi}/${routeMessages}/`};		// feature ?	params: message_id
+	export const deleteMessageById = () 			=> {return `${serverApi}/${routeMessages}/`};		// feature ?	params: message_id
 
 // +---------------------------------------------------------------------+
 // |                             FOLLOW                                  |

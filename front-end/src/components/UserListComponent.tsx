@@ -1,4 +1,4 @@
-import React, { useState} from "react";
+import React, { use, useEffect, useState} from "react";
 import Profile from "@/components/ProfileComponent";
 import Button from "@/components/CustomButtonComponent";
 import {v4 as uuidv4} from "uuid";
@@ -19,7 +19,17 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
     const [userElements, setUserElements] = useState<React.JSX.Element[]>([]);
     const [isHidden, setIsHidden] = useState(userElements.length == 0);
     const [isPopupUsersVisible, setPopupUsersVisible] = useState(false);
-    function handleClick(){
+    const [refresh, setRefresh] = useState(false);
+
+    useEffect(() => {
+        if (refresh) {
+            setIsHidden(userElements.length == 0);
+            setRefresh(false);
+            handleClickUserList();
+        }
+    }, [refresh]);
+
+    function handleClickUserList(){
         if (isHidden)
         {
             setPopupUsersVisible(isHidden);
@@ -36,7 +46,7 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                             allDiv.push(
                                 <li key={user.login + "List" + uuidv4()}>
                                     <Profile user={user} avatarSize={avatarSize} showStats={isUserSubscribedToMe}>
-                                        {showUserProps == true && <UserOptions user={user} relationships={{followed: subs, blocked:blocked}}/>}
+                                        {showUserProps == true && <UserOptions user={user} relationships={{followed: subs, blocked:blocked}} channelID={channelID} setRefresh={setRefresh}/>}
                                     </Profile>
                                 </li>
                             )
@@ -59,7 +69,7 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                                     <Profile user={user} avatarSize={avatarSize}>
                                         {showUserProps === true &&
                                             <UserOptions user={user} relationships={{followed: subs, blocked: blocked}}
-                                                         showAdminOptions={adminMode}/>}
+                                                         showAdminOptions={adminMode} channelID={channelID} setRefresh={setRefresh}/>}
                                     </Profile>
                                 </li>
                             );
@@ -86,7 +96,7 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                 setIsHidden(true);
                 setUserElements([]);
             }}></div>}
-            <Button className={className} id={id} image={"friends.svg"} onClick={handleClick} alt={"Online Users button"}/>
+            <Button className={className} id={id} image={"friends.svg"} onClick={handleClickUserList} alt={"Online Users button"}/>
             {isPopupUsersVisible && !isHidden && <div id={"make_popup_disappear"} onClick={() => setIsHidden(true)}></div> &&
                 <div className={"userList"} id={userListIdProperty} >
                     <ul>

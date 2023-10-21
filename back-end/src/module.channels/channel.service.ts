@@ -56,6 +56,7 @@ export class ChannelService {
 	}
 
 	async findOne(id: number, relations?: string[], canBeMP?: boolean) {
+		console.log("\n\nID === " + id + "\n\n" );
 		let channel: ChannelEntity;
 		if (canBeMP != true)
 			channel = await this.channelRepository.findOne({
