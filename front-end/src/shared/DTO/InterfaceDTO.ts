@@ -1,5 +1,8 @@
 import { EGameMod, userInfoSocket } from "shared/typesGame";
 import { IUser } from "../types";
+import { IUserEntity } from "shared/entities/IUser.entity";
+import { IChannelEntity } from "shared/entities/IChannel.entity";
+import { UserEntity } from "src/entities/user.entity";
 
 export namespace messageDTO {
 	
@@ -57,5 +60,12 @@ export namespace channelsDTO {
 	export interface IChallengeAcceptedDTO {
 		response: boolean;
 		event: string;
+	}
+
+	export interface IInviteEntity {
+		inviteID: number;
+		user: IUserEntity;
+		channel: IChannelEntity;
+		sender: IUserEntity;
 	}
 }
