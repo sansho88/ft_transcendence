@@ -121,8 +121,8 @@ export namespace getApi {
 	export const getLeaderboard = () : Promise<{data: ILeaderboard[]}> => {
 		return axiosInstance.get(strRoutes.game.getLeaderboard(), updateAxiosInstance());
 	}
-	
-	export const getLeaderboard = () : Promise<{data: ILeaderboard[]}> => {
+
+	export const getMyInvite = () : Promise<{data: ILeaderboard[]}> => { //TODO:
 		return axiosInstance.get(strRoutes.game.getLeaderboard(), updateAxiosInstance());
 	}
 }
