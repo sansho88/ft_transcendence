@@ -1,6 +1,6 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from 'typeorm';
 
-@Entity('TestCredential')
+@Entity('Credential')
 export class UserCredentialEntity extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;
@@ -20,7 +20,7 @@ export class UserCredentialEntity extends BaseEntity {
 	token_2fa: string;
 }
 
-@Entity('TestChannelCredential')
+@Entity('ChannelCredential')
 export class ChannelCredentialEntity extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;
