@@ -13,11 +13,11 @@ export class InviteEntity extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	inviteID: number;
 
-	@ManyToOne(() => UserEntity)
+	@ManyToOne(() => UserEntity, (userEntity) => userEntity.invite, {eager: true})
 	@JoinColumn()
 	user: UserEntity;
 
-	@ManyToOne(() => ChannelEntity)
+	@ManyToOne(() => ChannelEntity, (channelEntity) => channelEntity.inviteList, {eager: true})
 	@JoinColumn()
 	channel: ChannelEntity;
 
