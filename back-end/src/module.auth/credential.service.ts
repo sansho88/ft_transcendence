@@ -21,6 +21,8 @@ export class UserCredentialService {
 	}
 
 	async compare(rawPassword: string, credential: UserCredentialEntity) {
+		if(!rawPassword || !credential)
+		 return false;
 		return bcrypt.compareSync(rawPassword, credential.password);
 	}
 }
