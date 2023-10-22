@@ -9,11 +9,12 @@ import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
 import NotifComponent from "@/components/notif/NotificationComponent";
 import Button2FA from "@/components/2FA/2FAComponent";
-import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
 import LoadingComponent from "@/components/waiting/LoadingComponent";
 import MatchHistory from "@/components/MatchHistoryComponent";
 import Leaderboard from "@/components/LeaderboardComponent";
+import '@/components/chat/chat.css';
+
 
 const HomePage = () => {
     const {userContext, setUserContext} = useContext(UserContext);
@@ -25,7 +26,6 @@ const HomePage = () => {
 
 
     useEffect(() => {
-        //authManager.setBaseURL('http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/');
         const token = localStorage.getItem("token");
         if (!token)
             router.push("/auth");
@@ -43,7 +43,11 @@ const HomePage = () => {
         }
         localStorage.setItem('userContext', JSON.stringify(userContext));
 
-    });
+        return(() => {
+            window.location.reload();
+        })
+    }, []);
+
 
     return (
         <>
@@ -69,7 +73,7 @@ const HomePage = () => {
                 {showMatchHistory && <MatchHistory/>}
                 {showLeaderboard &&  <Leaderboard/>}
 
-                <UserList className={"friends"} avatarSize={"medium"} showUserProps={true}/>
+                <UserList className={"friends"} userListIdProperty={"friends_user_list"} avatarSize={"medium"} showUserProps={true}/>
                 <Button className={"logout"} image={"/logout.svg"} onClick={() => {
                     localStorage.clear();
                     router.push("/auth");
@@ -78,9 +82,7 @@ const HomePage = () => {
                 } alt={"Logout button"}/>
 
                 <div className={"game"}>
-                    {tokenRef.current.length > 0 &&
                     <Game className={"game"} token={tokenRef.current}/>
-                    }
                 </div>
                <ChatMaster className={'chat_master'} token={tokenRef.current} userID={userContext.UserID}/>
                 <div className={"absolute bottom-0 left-0"}><NotifComponent /></div>

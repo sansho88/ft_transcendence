@@ -38,8 +38,6 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
             setIsLoading(true)
         }
         channelsServer2()
-        console.log('channel serv 2= ' + JSON.stringify(channelServer3.data));
-        console.log('channels ******= ' + JSON.stringify(channels));
     }, [])
 
 

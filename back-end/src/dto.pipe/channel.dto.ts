@@ -8,6 +8,7 @@ import {
 	Max,
 	Min,
 } from 'class-validator';
+import { EGameMod } from 'shared/typesGame';
 
 export class CreateChannelDTOPipe {
 	@IsString()
@@ -64,4 +65,14 @@ export class ChangeChannelDTOPipe {
 	@IsOptional()
 	@IsBoolean()
 	privacy: boolean;
+}
+
+export class CreateChallengeDTOPPipe {
+	@IsNumber()
+	@IsNotEmpty()
+	targetID: number
+
+	@IsNumber()
+	@IsNotEmpty()
+	gameMod: EGameMod;
 }
