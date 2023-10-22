@@ -26,7 +26,6 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const channelsServer2 = async () => {
-    
         return apiReq.getApi.getChannels();
     }
 

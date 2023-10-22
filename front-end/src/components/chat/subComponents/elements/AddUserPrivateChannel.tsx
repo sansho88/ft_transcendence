@@ -6,7 +6,12 @@ import Profile from '@/components/ProfileComponent';
 import {v4 as uuidv4} from "uuid";
 
 
-export default function AddUserPrivateChannel({ className, currentChannel, channelID}: { className: string; currentChannel: number, channelID: number }) {
+export default function AddUserPrivateChannel({ className, currentChannel, channelID}: 
+	{ 
+		className: string,
+		currentChannel: number,
+		channelID: number
+	}) {
   const [userListFollo, setUserListFollo] = useState<IUser[]>([]);
   const [userList, setUserList] = useState<IUser[]>([]);
   const [popupIsVisible, setPopupIsVisible] = useState<boolean>(false);
@@ -14,11 +19,15 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
 	const [defineClassName, setDefineClassName] = useState<string>('flex-col')
 
 
-	const elementClickable = (user: IUser) => {
-	
+
+
+	const elementClickable = (user: IUser) => { //FIXME: check is good
+		function queryInvite(userID: number){
+			apiReq.putApi.inviteUserInChannel(userID, channelID);
+		} 
 
 		return (
-			<div key={uuidv4()} className={defineClassName} onClick={() => console.log(`invite ${user.nickname} in this private channel`)} >
+			<div key={uuidv4()} className={defineClassName} onClick={() => queryInvite(user.UserID)} >
 				<Profile user={user} avatarSize={"medium"}></Profile>
 			</div>
 			)

@@ -8,6 +8,7 @@ import { IChannel} from "@/shared/typesChannel";
 import axios from "axios";
 import { IChannelEntity } from "@/shared/entities/IChannel.entity";
 import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
+import { IInviteEntity } from "@/shared/entities/IInvite.entity";
 
 
 const AuthManager = require('./AuthManager');
@@ -122,9 +123,10 @@ export namespace getApi {
 		return axiosInstance.get(strRoutes.game.getLeaderboard(), updateAxiosInstance());
 	}
 
-	export const getMyInvite = () : Promise<{data: ILeaderboard[]}> => { //TODO:
-		return axiosInstance.get(strRoutes.game.getLeaderboard(), updateAxiosInstance());
+	export const getMyInvite = () : Promise<{data: IInviteEntity[]}> => { //TODO:
+		return axiosInstance.get(strRoutes.channel.getMyInvite(), updateAxiosInstance());
 	}
+
 }
 
 
@@ -165,6 +167,11 @@ export namespace putApi {
 		return axiosInstance.put(strRoutes.relationships.unblockUser(userID),{}, updateAxiosInstance());
 	}
 	export const putModifChannel = (channelID: number, data: channelsDTO.IChangeChannelDTOPipe) =>{return axiosInstance.put(`${strRoutes.channel.putModifChannel(channelID)}`, data, updateAxiosInstance())}
+	
+	export const inviteUserInChannel = (userID: number, channelID: number) => {
+		return axiosInstance.put(strRoutes.channel.putAddInvite(channelID, userID),{}, updateAxiosInstance());
+	}
+
 }
 
 export namespace deleteApi {
