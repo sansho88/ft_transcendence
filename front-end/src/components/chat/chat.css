@@ -180,6 +180,30 @@
 
 
 
+.user_private_list {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+/* Pour Chrome, Safari et Opera */
+.user_private_list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pour Firefox */
+.user_private_list {
+  scrollbar-width: none;
+}
+
+/* Pour IE et Edge */
+.user_private_list {
+  -ms-overflow-style: none;
+}
+
+
+
+
 
 /* pour le chat message list component= contient la liste des message (list de chat_message_list_block)*/
 .chat_message_list {
@@ -315,6 +339,31 @@
   0% { opacity: 0; }
   100% { opacity: 1; }
 }
+
+.chat_new_channel_popup_inviteChan{
+  color: darkgrey;
+  background: rgba(0, 0, 0, 0.52);
+  border: 0.2rem rgba(0, 0, 0, 0.15);
+  border-style: inherit ;
+  box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.5);
+  border-radius: 1rem;
+  display: inline-block;
+  position: absolute; 
+  width: 9vw;
+  min-width: 12ch;
+  height: auto;
+  /* bottom: 5vh; */
+  left: 0;
+
+
+  margin-right: 0.5vw;
+  text-align: left;
+  padding-left: 1em;
+
+  animation: fadeIn 500ms;
+  z-index: 10;
+}
+
 
 .chat_new_channel_popup{
   color: darkgrey;
