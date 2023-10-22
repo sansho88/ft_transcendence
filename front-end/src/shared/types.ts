@@ -164,7 +164,7 @@ export interface IInput {
 }
 
 export interface INotif {
-  type: string;
+  type: "sucess" | "error" | "warning" | "info";
   message: string;
   title?: string;
   time?: number;
