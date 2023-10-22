@@ -332,7 +332,7 @@ export class ChannelController {
 	async myInvite(
 		@CurrentUser() user: UserEntity,
 	) {
-		return this.usersService.findOne(user.UserID, ['invite']).then(usr => usr.invite)
+		return this.inviteService.findAllReceivedUser(user);
 	}
 
 	@Get('invite/:channelID')
@@ -382,8 +382,8 @@ export class ChannelController {
 		const invite = await this.inviteService.findOne(inviteID);
 		if (invite == null)
 			throw new BadRequestException('This invite is not created or already accepted');
-		if (invite.sender.UserID != user.UserID)
-			throw new BadRequestException('This invite is not created by you');
+		if (invite.sender.UserID != user.UserID && invite.user.UserID != user.UserID)
+			throw new BadRequestException('You cannot remove this invite (only the sender or receiver)');
 		await this.inviteService.remove(invite);
 	}
 
