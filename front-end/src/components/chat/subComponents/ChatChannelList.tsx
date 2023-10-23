@@ -177,6 +177,7 @@ function isOwner(): boolean {
             />
           ))
         }
+			</div>
 			{!isServerList &&
           <div className='chat_channel_buttons'>
               <span>{addChannel()}</span> <span
