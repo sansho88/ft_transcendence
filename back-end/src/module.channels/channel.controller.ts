@@ -268,6 +268,7 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@Param('userID', ParseIntPipe) targetID: number,
 	) {
+		console.log('kick : chan' + channelID + ' / target : ' + targetID);
 		checkLimitID(channelID);
 		checkLimitID(targetID);
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList'])
@@ -332,7 +333,7 @@ export class ChannelController {
 	async myInvite(
 		@CurrentUser() user: UserEntity,
 	) {
-		return this.usersService.findOne(user.UserID, ['invite']).then(usr => usr.invite)
+		return this.usersService.findOne(user.UserID, ['invite']).then((usr) => {return usr.invite})
 	}
 
 	@Get('invite/:channelID')
