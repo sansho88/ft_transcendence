@@ -152,11 +152,13 @@ export namespace channel {
 	export const putModifChannel = (channelID: number)																	=> {return `${serverApi}/${routeChannels}/modif/${channelID}`};
 
 	export const putMuteUser = (channelID: number, userID: number, duration: number)		=> {return `${serverApi}/${routeChannels}/mute/${channelID}/${userID}/${duration}`};
-	export const putUnmuteUser = (channelID: number, userID: number)										=> {return `${serverApi}/${routeChannels}/unmute/${channelID}/${userID}`};
+	export const putUnmuteUser = (muteID: number)																				=> {return `${serverApi}/${routeChannels}/unmute/${muteID}`};
+
+	export const getAllMuteFromChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/get/mute/${channelID}`};
 
 	export const putKickUser = (channelID: number, userID: number)											=> {return `${serverApi}/${routeChannels}/kick/${channelID}/${userID}`};
 
-	export const getAllBanFromChannel = (channelID: number)															=> {return `${serverApi}/${routeChannels}/ban/${channelID}`};
+	export const getAllBanFromChannel = (channelID: number)															=> {return `${serverApi}/${routeChannels}/get/ban/${channelID}`};
 	export const putBanUser = (channelID: number, userID: number, duration: number)			=> {return `${serverApi}/${routeChannels}/ban/${channelID}/${userID}/${duration}`};
 	export const putUnbanUser = (banID: number)																					=> {return `${serverApi}/${routeChannels}/pardon/${banID}`};
 }

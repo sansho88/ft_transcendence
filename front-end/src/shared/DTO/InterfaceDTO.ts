@@ -66,4 +66,11 @@ export namespace channelsDTO {
 		channel: IChannel;
 		user: IUser;
 	}
+
+	export interface IMuteEntity {
+		muteID: number;
+		endTime: Date | null;
+		channel: IChannel;
+		user: IUser;
+	}
 }

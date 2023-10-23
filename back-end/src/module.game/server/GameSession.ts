@@ -260,13 +260,17 @@ export class GameSession {
 
 		P1.socket.on(`${this.gameRoomEvent}STOP`, () => {
 			//console.log(`Player 1 has given up`);
-			this.table.scoreP2 = this.scoreLimit;
-			this.isEndGameCheckScoring();//faire gagner le joueur adverse
+			if (this.table.scoreP1 < this.scoreLimit && this.table.scoreP2 < this.scoreLimit) {
+				this.table.scoreP2 = this.scoreLimit;
+				this.isEndGameCheckScoring();//faire gagner le joueur adverse
+			}
 		});
 		P2.socket.on(`${this.gameRoomEvent}STOP`, () => {
 			//console.log(`Player 2 has given up`);
-			this.table.scoreP1 = this.scoreLimit;
-			this.isEndGameCheckScoring();//faire gagner le joueur adverse
+			if (this.table.scoreP1 < this.scoreLimit && this.table.scoreP2 < this.scoreLimit) {
+				this.table.scoreP1 = this.scoreLimit;
+				this.isEndGameCheckScoring();//faire gagner le joueur adverse
+			}
 		});
 
 

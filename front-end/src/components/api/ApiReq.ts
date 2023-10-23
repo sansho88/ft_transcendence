@@ -102,6 +102,12 @@ export namespace getApi {
 		});
 	}
 
+	export const getAllMuteFromChannel = (channelID: number): Promise<{data: channelsDTO.IMuteEntity[]}> => {
+		return axiosInstance.get(`${strRoutes.channel.getAllMuteFromChannel(channelID)}`, {
+			headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
+		});
+	}
+
 	export const getAllMyFollowers = (): Promise<{data:IUser[]}> => {
 		return axiosInstance.get(`${strRoutes.relationships.getAllMyFollowers()}`, updateAxiosInstance());
 	}
@@ -170,7 +176,7 @@ export namespace putApi {
 	export const putModifChannel = (channelID: number, data: channelsDTO.IChangeChannelDTOPipe) =>{return axiosInstance.put(`${strRoutes.channel.putModifChannel(channelID)}`, data, updateAxiosInstance())}
 
 	export const putMuteUser = (channelID: number, userID: number, duration: number) => {return axiosInstance.put(`${strRoutes.channel.putMuteUser(channelID, userID, duration)}`, {}, updateAxiosInstance())}
-	export const putUnmuteUser = (channelID: number, userID: number) => {return axiosInstance.put(`${strRoutes.channel.putUnmuteUser(channelID, userID)}`, {}, updateAxiosInstance())}
+	export const putUnmuteUser = (muteID: number) => {return axiosInstance.put(`${strRoutes.channel.putUnmuteUser(muteID)}`, {}, updateAxiosInstance())}
 
 	export const putKickUser = (channelID: number, userID: number) => {return axiosInstance.put(`${strRoutes.channel.putKickUser(channelID, userID)}`, {}, updateAxiosInstance())}
 

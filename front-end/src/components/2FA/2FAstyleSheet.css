@@ -125,10 +125,12 @@ textarea:focus, input:focus  .settings .codeInput {
 }
 
 .doubleFA{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
     position: absolute;
     bottom: 0;
     right: 0;
-    width: 3vw;
-    border-radius: 18px;
-
+    line-height: 1;
+    text-align: center;
 }

@@ -333,7 +333,7 @@ export class ChannelController {
 	async myInvite(
 		@CurrentUser() user: UserEntity,
 	) {
-		return this.usersService.findOne(user.UserID, ['invite']).then(usr => usr.invite)
+		return this.usersService.findOne(user.UserID, ['invite']).then((usr) => {return usr.invite})
 	}
 
 	@Get('invite/:channelID')

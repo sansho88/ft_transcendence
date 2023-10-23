@@ -84,6 +84,7 @@ function isOwner(): boolean {
                       alt="OPEN PARAMS BUTTON"
                       width={18}
                       height={18}
+                      padding-right={"1px"}
                       style={{width: "80%", height:"auto", maxWidth:"4vw", maxHeight:"4vh"}}
                   />
                 </button>
@@ -97,12 +98,13 @@ function isOwner(): boolean {
     const showUsersInChannel =  () => {
         return (
             <>
-                {isPopupUsersVisible && <div id={"make_popup_disappear"} onClick={() => setPopupUsersVisible(false)}></div>}
-                <button  onClick={() => {
+                {isPopupUsersVisible && 
+                <div id={"make_popup_disappear"} onClick={() => setPopupUsersVisible(false)}></div>}
+                {/* <button className='testBUTTON' onClick={() => {
                     setPopupUsersVisible(!isPopupUsersVisible);
                 }}>
 
-                </button>
+                </button> */}
                 { actualChannel  && <UserList id={"chat_users_button"}
                                               userListIdProperty={"chat_users_list"}
                                               avatarSize={"medium"}
@@ -180,7 +182,7 @@ function isOwner(): boolean {
       </div>
      {!isServerList &&
       <div className='chat_channel_buttons'>
-          <span>{addChannel()}</span> <span style={{marginLeft:"10%"}}>{actualChannel?.owner.UserID == userID && actualChannel?.type !== EChannelType.DIRECT && paramChannel()}</span> <span>{showUsersInChannel()}</span>
+          <span>{addChannel()}</span> <span>{actualChannel?.owner.UserID == userID && actualChannel?.type !== EChannelType.DIRECT && paramChannel()}</span> <span>{showUsersInChannel()}</span>
       </div>}
     </div>
   )

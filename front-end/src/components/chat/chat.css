@@ -2,6 +2,7 @@
 
 /*main parent component*/
 .chat_master {
+  inline-size: fit-content;
   background: rgba(0, 0, 0, 0.27);
   border: 0.2rem rgba(0, 0, 0, 0.15);
   border-style: inherit ;
@@ -66,23 +67,38 @@
 
 /*main parent channel component*/
 .chat_channel_buttons {
-  /*text-align: center;
-  align-items: flex-end;*/
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: absolute;
   height: 10%;
   width: 30%;
   padding: 0.4rem 0 0 0.4rem;
-
   top: 0;
-
-
   font-weight: bold;
   font-size: 0.85rem;
   background: rgba(0, 0, 0, 0.27);
-  border-radius: 8px 0 0 0;
+  border-radius: 13px 0 0 0;
   border-bottom: rgba(0, 0, 0, 0.27) solid 2px;
-
   z-index: 1;
+}
+
+.chat_channel_buttons button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+}
+
+.chat_channel_buttons img {
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.chat_channel_buttons button:last-child img {
+  align-self: flex-end;
 }
 
 .channel{
@@ -183,6 +199,7 @@
 
 /* pour le chat message list component= contient la liste des message (list de chat_message_list_block)*/
 .chat_message_list {
+  word-wrap: break-word;
   display: flex;
   flex-direction: column;
   height: 95%; /* BURK , not responsive*/
@@ -398,15 +415,6 @@
   width: 100%;
   height: 100%;
   z-index: -2;
-}
-
-#chat_users_button{
-  position: absolute;
-  width: 1.5vw;
-  min-width: 1.4vw;
-  /*top:0;*/
-  right: 2px;
-  z-index: 1;
 }
 
 #chat_users_list {

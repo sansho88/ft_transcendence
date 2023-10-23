@@ -57,7 +57,6 @@ const PutDuration: React.FC<PutDurationProps> = ({ user, channelID, handleType, 
 		setIsDurationVisible(!isVisible);
 	}
 
-	console.log("TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEST " + isVisible)
 	return (
 		<div>
 			{isVisible && (
