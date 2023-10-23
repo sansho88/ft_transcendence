@@ -179,11 +179,14 @@ function isOwner(): boolean {
             />
           ))
         }
-      </div>
-     {!isServerList &&
-      <div className='chat_channel_buttons'>
-          <span>{addChannel()}</span> <span>{actualChannel?.owner.UserID == userID && actualChannel?.type !== EChannelType.DIRECT && paramChannel()}</span> <span>{showUsersInChannel()}</span>
-      </div>}
-    </div>
-  )
+
+			</div>
+			{!isServerList &&
+          <div className='chat_channel_buttons'>
+              <span>{addChannel()}</span> <span
+              style={{marginLeft: "10%"}}>{actualChannel?.type !== EChannelType.DIRECT && actualChannel?.owner.UserID == userID && paramChannel()}</span>
+              <span>{showUsersInChannel()}</span>
+          </div>}
+		</div>
+	)
 }
