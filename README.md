@@ -1,4 +1,5 @@
 # Projet Transcendence (10/23 -- WIP)
+![image](https://github.com/BenJ3D/ft_transcendence/assets/49345674/a9d1f99b-7592-4733-93cc-d65a53631824)
 
 ## Description
 
