@@ -150,7 +150,7 @@ export namespace strRoutes {
 		return `${serverApi}/${routeUsers}/me/getRelationships`
 	}
 	export const getOtherRelationships = (targetId: number) => {
-		return `${serverApi}/${routeUsers}/getRelationships/${targetId}`
+		return `${serverApi}/${routeUsers}/get/Relationships/${targetId}`
 	}
 	export const getUsersAll = () => {
 		return `${serverApi})${routeUsers}/get/`
