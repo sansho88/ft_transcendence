@@ -9,6 +9,7 @@ import {ChannelCredentialService} from './credential.service';
 import {ChangeChannelDTOPipe, JoinChannelDTOPipe} from '../dto.pipe/channel.dto';
 import {BannedService} from "./banned.service";
 import {MutedService} from "./muted.service";
+import {ChatGateway} from "./chat.ws";
 
 @Injectable()
 export class ChannelService {
@@ -17,6 +18,8 @@ export class ChannelService {
 		private channelRepository: Repository<ChannelEntity>,
 		@Inject(forwardRef(() => UsersService))
 		private userService: UsersService,
+		@Inject(forwardRef(() => ChatGateway))
+		private chatGateway: ChatGateway,
 		private channelCredentialService: ChannelCredentialService,
 		private bannedService: BannedService,
 		private mutedService: MutedService,
@@ -144,6 +147,7 @@ export class ChannelService {
 		});
 		channel.adminList.push(target);
 		await channel.save();
+		await this.chatGateway.EventNotif(target, 'info', 'You have been promoted to an Administrator', channel.name)
 		return channel;
 	}
 
@@ -157,6 +161,7 @@ export class ChannelService {
 		);
 		channel.adminList = channel.adminList.filter((usr) => usr.UserID != target.UserID);
 		await channel.save();
+		await this.chatGateway.EventNotif(target, 'warning', 'You have been demoted from the Administrator', channel.name)
 		return channel;
 	}
 
@@ -181,7 +186,7 @@ export class ChannelService {
 			throw new BadRequestException('The target is the ChannelOwner and cannot be mute');
 		if (await this.userIsMute(channel, target))
 			throw new BadRequestException('The target is already mutes and cannot be mute again');
-		await this.mutedService.create(target, channel, duration);
+		return await this.mutedService.create(target, channel, duration);
 	}
 
 	async userIsMute(channel: ChannelEntity, usr: UserEntity) {

@@ -80,7 +80,7 @@ export class ChannelController {
 	 *
 	 *  ## Path for admin in Channel
 	 *  . Admin
-	 *    - TODO: admin/:channelID
+	 *    - admin/:channelID ---------------------- GET
 	 *  	- admin/add/:channelID/:targetID -------- PUT
 	 *  	- admin/remove/:channelID/:targetID ----- PUT
 	 *
@@ -112,6 +112,20 @@ export class ChannelController {
 	 *    - invite/add/:channelID/:userID --------- PUT
 	 *    - invite/remove/:inviteID --------------- PUT
 	 **/
+
+	/**
+	 * */
+
+	@Get('admin/:channelID')
+	@UseGuards(AuthGuard)
+	async getAdmin(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+	) {
+		return this.channelService.findOne(channelID, ['adminList']).then(channel => channel.adminList);
+	}
+
+
 	@Put('admin/add/:channelID/:targetID')
 	@UseGuards(AuthGuard)
 	async addAdmin(
@@ -207,6 +221,7 @@ export class ChannelController {
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
+		await this.chatGateway.EventNotif(ban.user, 'info', 'You received a pardon for your ban', channel.name);
 		await this.bannedService.pardon(ban);
 	}
 
@@ -241,8 +256,8 @@ export class ChannelController {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
 		const target = await this.usersService.findOne(targetID);
-		await this.channelService.muteUser(target, channel, duration);
-		await this.chatGateway.mute(channel, target, duration)
+		const mute = await this.channelService.muteUser(target, channel, duration);
+		await this.chatGateway.mute(mute.channel, mute.user, duration);
 	}
 
 	@Put('unmute/:muteID')
@@ -258,6 +273,7 @@ export class ChannelController {
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
+		await this.chatGateway.EventNotif(mute.user, 'info', 'You got unmuted', channel.name);
 		await this.mutedService.unmute(mute);
 	}
 
@@ -333,7 +349,9 @@ export class ChannelController {
 	async myInvite(
 		@CurrentUser() user: UserEntity,
 	) {
-		return this.usersService.findOne(user.UserID, ['invite']).then((usr) => {return usr.invite})
+		return this.usersService.findOne(user.UserID, ['invite']).then((usr) => {
+			return usr.invite
+		})
 	}
 
 	@Get('invite/:channelID')
@@ -385,6 +403,7 @@ export class ChannelController {
 			throw new BadRequestException('This invite is not created or already accepted');
 		if (invite.sender.UserID != user.UserID)
 			throw new BadRequestException('This invite is not created by you');
+		await this.chatGateway.EventNotif(invite.user, 'info', 'You invitation has been canceled', invite.channel.name);
 		await this.inviteService.remove(invite);
 	}
 

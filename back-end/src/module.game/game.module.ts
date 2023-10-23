@@ -6,6 +6,7 @@ import {ServerGame} from './server/ServerGame';
 import {UsersModule} from "../module.users/users.module";
 import {GameEntity} from 'src/entities/game.entity';
 import {TypeOrmModule} from '@nestjs/typeorm';
+import {ChannelModule} from "../module.channels/channel.module";
 
 @Module({
 	controllers: [GameController],
@@ -16,7 +17,8 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 	],
 	imports: [
 		TypeOrmModule.forFeature([GameEntity]),
-		forwardRef(() => UsersModule)
+		forwardRef(() => UsersModule),
+		forwardRef(() => ChannelModule),
 	]
 })
 export class GameModule {

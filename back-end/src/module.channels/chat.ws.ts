@@ -368,18 +368,18 @@ export class ChatGateway
 	}
 
 	async ban(channel: ChannelEntity, target: UserEntity) {
-		await this.sendEvent(target, `You got banned for the channel ${channel.name} by a moderator`);
+		await this.EventNotif(target, 'warning', `You got banned for the channel ${channel.name} by a moderator`);
 		if (await this.channelService.userInChannel(target, channel))
 			await this.leaveChat(channel, target);
 	}
 
 	async mute(channel: ChannelEntity, target: UserEntity, duration: number) {
-		await this.sendEvent(target, `You got muted by for the channel ${channel.name} by a moderator for ${duration}`);
+		await this.EventNotif(target, 'warning', `You got muted by for the channel ${channel.name} by a moderator for ${duration}`);
 		return;
 	}
 
 	async kick(channel: ChannelEntity, user: UserEntity) {
-		await this.sendEvent(user, `You got kicked for the channel ${channel.name} by a moderator`);
+		await this.EventNotif(user, 'info', `You got kicked for the channel ${channel.name} by a moderator`, 'Got Kicked');
 		return await this.leaveChat(channel, user);
 	}
 
@@ -394,7 +394,7 @@ export class ChatGateway
 	}
 
 	async receivedInvite(invite: InviteEntity) {
-		await this.sendEvent(invite.user, `You received an Invite for a channel`);
+		await this.EventNotif(invite.user, 'info', 'You received an Invite for a channel');
 	}
 
 	/**
@@ -417,18 +417,21 @@ export class ChatGateway
 		})
 	}
 
-	async sendEvent(
+	async EventNotif(
 		user: UserEntity,
-		message: string
+		type: 'success' | 'info' | 'warning' | 'error',
+		message: string,
+		title?: string,
+		time?: number,
 	) {
 		const socketTargetLst = await this.getSocket(user.UserID);
 		if (!socketTargetLst) return;
-		this.emitSocketLst(socketTargetLst, 'notifyEvent', message);
+		this.emitSocketLst(socketTargetLst, 'notif', {message, title, time, type});
 	}
 
-	private emitSocketLst(socketTarget: RemoteSocket<DefaultEventsMap, any>[], notifyEvent: string, message: string) {
+	private emitSocketLst(socketTarget: RemoteSocket<DefaultEventsMap, any>[], notifyEvent: string, notif: object) {
 		socketTarget.map(socket =>
-			socket.emit(notifyEvent, {message})
+			socket.emit(notifyEvent, notif)
 		)
 	}
 
