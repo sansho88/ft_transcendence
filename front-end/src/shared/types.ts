@@ -162,3 +162,10 @@ export interface IInput {
   autoComplete: any;
   name: string;
 }
+
+export interface INotif {
+  type: "sucess" | "error" | "warning" | "info";
+  message: string;
+  title?: string;
+  time?: number;
+}
