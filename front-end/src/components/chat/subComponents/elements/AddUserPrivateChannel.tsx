@@ -4,7 +4,7 @@ import UserList  from '@/components/UserListComponent'
 import * as apiReq from '@/components/api/ApiReq'
 import Profile from '@/components/ProfileComponent';
 import {v4 as uuidv4} from "uuid";
-
+import { IInviteEntity } from '@/shared/entities/IInvite.entity';
 
 export default function AddUserPrivateChannel({ className, currentChannel, channelID}: 
 	{ 
@@ -13,10 +13,10 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
 		channelID: number
 	}) {
   const [userListFollo, setUserListFollo] = useState<IUser[]>([]);
+  const [inviteListChannel, setInviteListChannel] = useState<IInviteEntity[]>([]);
   const [userListChan, setUserListChan] = useState<IUser[]>([]);
   const [userList, setUserList] = useState<IUser[]>([]);
   const [popupIsVisible, setPopupIsVisible] = useState<boolean>(false);
-  const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 	const [defineClassName, setDefineClassName] = useState<string>('flex-col')
 
 
@@ -54,24 +54,34 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
 			})
 			apiReq.getApi.getAllMyFollowers()
 			.then((res) => {
-				// console.log(JSON.stringify(res));
 				const tmpLst: IUser[] = res.data.filter((user) => !userList.includes(user))
 				setUserListFollo(tmpLst);
+			})
+			apiReq.getApi.getInviteChannelID(channelID)
+			.then((res) => {
+					setInviteListChannel(res.data);
 			})
 		}
 	
 	}, [popupIsVisible])
 
 
+
   function handleAddUser() {
     return (
-			<div className=' h-52 user_private_list'>
-				{userListFollo.filter((user) => {return userListChan.filter((chan) => user.UserID !== chan.UserID)}).map((user) => {
-					return elementClickable(user)
-				})}
-
+			<div className="h-52 user_private_list">
+				{userListFollo
+					.filter((user) => {
+						return !userListChan.some((chan) => user.UserID === chan.UserID);
+					})
+					.filter((user) =>  {
+						return !inviteListChannel.some((chan) => user.UserID === chan.user.UserID);
+					})
+					.map((user) => {
+						return elementClickable(user);
+					})}
 			</div>
-			)
+		);
 		// return <UserList adminMode={false} channelID={currentChannel} />;
   }
 
@@ -81,10 +91,6 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
         className={className}
         onClick={(event) => {
           event.stopPropagation();
-          const x = event.clientX;
-          const y = event.clientY;
-          setPosition({ x, y });
-					// console.log('pos x y = ' , position.x , ' ' , position.y)
 					if (popupIsVisible === false)
           	setPopupIsVisible(true);
 					else

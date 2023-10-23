@@ -123,8 +123,12 @@ export namespace getApi {
 		return axiosInstance.get(strRoutes.game.getLeaderboard(), updateAxiosInstance());
 	}
 
-	export const getMyInvite = () : Promise<{data: IInviteEntity[]}> => { //TODO:
+	export const getMyInvite = () : Promise<{data: IInviteEntity[]}> => {
 		return axiosInstance.get(strRoutes.channel.getMyInvite(), updateAxiosInstance());
+	}
+
+	export const getInviteChannelID = (channelID: number) : Promise<{data: IInviteEntity[]}> => {
+		return axiosInstance.get(strRoutes.channel.getInviteChannel(channelID), updateAxiosInstance());
 	}
 
 }

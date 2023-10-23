@@ -152,6 +152,7 @@ export namespace channel {
 	export const putModifChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/modif/${channelID}`};
 	
 	export const getMyInvite = ()																									=> {return `/channel/myinvite`};
+	export const getInviteChannel = (channelID: number )								=> {return `/channel/invite/${channelID}`};
 	export const putAddInvite = (channelID: number, userID: number)								=> {return `/channel/invite/add/${channelID}/${userID}`};
 
 
