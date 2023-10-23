@@ -22,7 +22,7 @@ import {CurrentUser} from '../module.auth/indentify.user';
 import {InviteService} from "../module.channels/invite.service";
 import {ChatGateway} from "../module.channels/chat.ws";
 import {ChannelService} from "../module.channels/channel.service";
-import { FileInterceptor } from '@nestjs/platform-express/multer';
+import {FileInterceptor} from '@nestjs/platform-express/multer';
 import {checkLimitID} from "../dto.pipe/checkIntData";
 
 @Controller('users')
@@ -47,6 +47,12 @@ export class UsersController {
 	@UseGuards(AuthGuard)
 	async meRelation(@CurrentUser() user: UserEntity) {
 		return this.usersService.findOne(user.UserID, ['blocked', 'followers', 'subscribed']);
+	}
+
+	@Get('/get/Relationships/:UserID')
+	@UseGuards(AuthGuard)
+	async otherRelation(@Param('UserID', ParseIntPipe) targetID: number) {
+		return this.usersService.findOne(targetID, ['blocked', 'followers', 'subscribed']);
 	}
 
 	@Get('/get/nicknameUsed/:nick')
@@ -84,11 +90,11 @@ export class UsersController {
 
 	@HttpCode(HttpStatus.OK)
 	@Post('upload/avatar')
-  @UseGuards(AuthGuard)
-  @UseInterceptors(FileInterceptor('avatar'))
-  async uploadAvatar(@CurrentUser() user: UserEntity, @UploadedFile() file, @Request() req) {
-    return await this.usersService.uploadAvatar(user, file, req);
-  }
+	@UseGuards(AuthGuard)
+	@UseInterceptors(FileInterceptor('avatar'))
+	async uploadAvatar(@CurrentUser() user: UserEntity, @UploadedFile() file, @Request() req) {
+		return await this.usersService.uploadAvatar(user, file, req);
+	}
 
 	@Put('update')
 	@UseGuards(AuthGuard)
