@@ -5,7 +5,6 @@ import {UserContext, SocketContextChat, SocketContextGame} from "@/context/globa
 import * as apiReq from '@/components/api/ApiReq'
 import {NotificationManager} from 'react-notifications';
 import { wsChatEvents, wsGameEvents } from "./api/WsReq";
-import { Socket } from "socket.io-client";
 import { EGameMod, IChallengeStepDTO } from "@/shared/typesGame";
 import { channelsDTO } from "@/shared/DTO/InterfaceDTO";
 import PutDuration, { DurationType } from "./chat/subComponents/PutDuration";
@@ -22,8 +21,8 @@ export interface userOptionsProps {
 }
 
 const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, showAdminOptions, relationships, channelID, setRefresh, banID, muteID}) => {
-    const {userContext, setUserContext} = useContext(UserContext);
-    const [isFollowed, setIsFollowed] = useState(!!relationships.followed.find(tmpUser => user.UserID == tmpUser.UserID));
+    const {userContext} = useContext(UserContext);
+    const [isFollowed, setIsFollowed] = useState(relationships.followed && !!relationships.followed.find(tmpUser => user.UserID === tmpUser.UserID));
     const [isBlocked, setIsBlocked] = useState(relationships.blocked && !!relationships.blocked.find(tmpUser => user.UserID == tmpUser.UserID));
     const [isWaitingChallenge, setIsWaitingChallenge] = useState<boolean>(false);
     const [isDurationVisible, setIsDurationVisible] = useState<boolean>(false);

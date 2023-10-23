@@ -8,7 +8,6 @@ import {IChannel} from "@/shared/typesChannel";
 import axios from "axios";
 import {IChannelEntity} from "@/shared/entities/IChannel.entity";
 import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
-import { channel } from "diagnostics_channel";
 
 
 const AuthManager = require('./AuthManager');
@@ -77,7 +76,7 @@ export namespace getApi {
 		return axiosInstance.get(strRoutes.getMyRelationships(), updateAxiosInstance());
 	}
 
-	export const getOtherRelationships = (targetID: number): Promise<{ data: IUser }> => {
+	export const getOtherRelationships = (targetID: number): any => {
 		return axiosInstance.get(strRoutes.getOtherRelationships(targetID), updateAxiosInstance());
 	}
 
@@ -204,10 +203,6 @@ export namespace putApi {
 	export const unblockUser = (userID: number) => {
 		return axiosInstance.put(strRoutes.relationships.unblockUser(userID), {}, updateAxiosInstance());
 	}
-	export const putModifChannel = (channelID: number, data: channelsDTO.IChangeChannelDTOPipe) => {
-		return axiosInstance.put(`${strRoutes.channel.putModifChannel(channelID)}`, data, updateAxiosInstance())
-	}
-
 	export const putModifChannel = (channelID: number, data: channelsDTO.IChangeChannelDTOPipe) =>{return axiosInstance.put(`${strRoutes.channel.putModifChannel(channelID)}`, data, updateAxiosInstance())}
 
 	export const putMuteUser = (channelID: number, userID: number, duration: number) => {return axiosInstance.put(`${strRoutes.channel.putMuteUser(channelID, userID, duration)}`, {}, updateAxiosInstance())}
