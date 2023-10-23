@@ -13,6 +13,7 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
 		channelID: number
 	}) {
   const [userListFollo, setUserListFollo] = useState<IUser[]>([]);
+  const [userListChan, setUserListChan] = useState<IUser[]>([]);
   const [userList, setUserList] = useState<IUser[]>([]);
   const [popupIsVisible, setPopupIsVisible] = useState<boolean>(false);
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -46,6 +47,11 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
 	useLayoutEffect(() => {
 		if (popupIsVisible){
 
+			apiReq.getApi.getAllUsersFromChannel(channelID, new Date)
+			.then((res) => {
+				const lst = res.data
+				setUserListChan(lst)
+			})
 			apiReq.getApi.getAllMyFollowers()
 			.then((res) => {
 				// console.log(JSON.stringify(res));
@@ -58,32 +64,14 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
 
 
   function handleAddUser() {
-		return apiReq.getApi.getAllUsersFromChannel(channelID, new Date).then(res => {
-			const lstUserFromChan: IUser[] = res.data;
-			const lstUserInvitable: IUser[] = userListFollo.filter(user => lstUserFromChan.filter(use => use.UserID !== user.UserID))
-			if (!lstUserInvitable.length)
-			{
-				return (
-					<></>
-					)
-			}
-			return (
-				<div className=" h-52 user_private_list">
-					{
-						lstUserInvitable.map((user) => {
-							return elementClickable(user);
-						})}
-				</div>
-			);
-		})
-    // return (
-		// 	<div className=' h-52 user_private_list'>
-		// 		{userListFollo.filter(async (user) => {return (await apiReq.getApi.getAllUsersFromChannel(channelID, new Date)).data.filter((chan) => user.UserID !== chan.UserID)}).map((user) => {
-		// 			return elementClickable(user)
-		// 		})}
+    return (
+			<div className=' h-52 user_private_list'>
+				{userListFollo.filter((user) => {return userListChan.filter((chan) => user.UserID !== chan.UserID)}).map((user) => {
+					return elementClickable(user)
+				})}
 
-		// 	</div>
-		// 	)
+			</div>
+			)
 		// return <UserList adminMode={false} channelID={currentChannel} />;
   }
 
