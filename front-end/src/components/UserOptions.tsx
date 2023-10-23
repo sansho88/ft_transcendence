@@ -4,12 +4,10 @@ import Button from "@/components/CustomButtonComponent";
 import {UserContext, SocketContextChat, SocketContextGame} from "@/context/globalContext";
 import * as apiReq from '@/components/api/ApiReq'
 import {NotificationManager} from 'react-notifications';
-import { wsChatRoutesBack } from "@/shared/routesApi";
 import { wsChatEvents, wsGameEvents } from "./api/WsReq";
 import { Socket } from "socket.io-client";
-import { EGameMod, EStatusFrontGame, IChallengeStepDTO } from "@/shared/typesGame";
+import { EGameMod, IChallengeStepDTO } from "@/shared/typesGame";
 import { channelsDTO } from "@/shared/DTO/InterfaceDTO";
-import { IChannel } from "@/shared/typesChannel";
 import PutDuration, { DurationType } from "./chat/subComponents/PutDuration";
 
 
@@ -171,11 +169,9 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
 
                         {showAdminOptions &&
                             <span style={{float:"right"}}>
-                                {muteID === undefined ? <Button image={"/block-message.svg"} onClick={() => {handleMute()}} alt={"Mute"} margin={"0 5px 0 0"} title={"Mute"} color="red"/>
-                                : <Button image={"/block-message.svg"}                       onClick={() => {handleMute()}} alt={"UnMute"} margin={"0 5px 0 0"} title={"UnMute"} color="green"/>}
-                                <Button image={"/door.svg"}                                  onClick={() => {handleKick()}} alt={"Kick"} margin={"0 5px 0 0"} title={"Kick"} color="red"/>
-                                {banID === undefined ? <Button image={"/hammer.svg"}         onClick={() => {handleBan()}}  alt={"Ban"} title={"Ban"}/>
-                                : <Button image={"/hammer.svg"}                              onClick={() => {handleBan()}}  alt={"Unban"} margin={"0 5px 0 0"} title={"Unban"} color="green"/>}
+                                <Button image={`/block-message-${muteID === undefined ? "red" : "green"}.svg`} onClick={() => {handleMute()}} alt={"Mute"} margin={"0 5px 0 0"} title={`${muteID != undefined && "Un" || ""}Mute`}/>
+                                <Button image={"/door-red.svg"} onClick={() => {handleKick()}} alt={"Kick"} margin={"0 5px 0 0"} title={"Kick"}/>
+                                <Button image={`/hammer-${banID === undefined ? "red" : "green"}.svg`} onClick={() => {handleBan()}}  alt={"Ban"} title={`${banID !== undefined && "Un" || ""}Ban`}/>
                             </span>
                         }
                         { !isWaitingChallenge && user.status != EStatus.Offline &&

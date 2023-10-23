@@ -22,12 +22,61 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
     const [isHidden, setIsHidden] = useState(userElements.length == 0);
     const [isPopupUsersVisible, setPopupUsersVisible] = useState(false);
     const [refresh, setRefresh] = useState(false);
+    const [isunBanned, setIsBanned] = useState(false);
+    const [iskicked, setIsMuted] = useState(false);
 
     useEffect(() => {
         if (refresh) {
-            setIsHidden(userElements.length == 0);
             setRefresh(false);
-            handleClickUserList();
+            let bannedList: channelsDTO.IBanEntity[] = [];
+            let muteList: channelsDTO.IMuteEntity[] = [];
+            setPopupUsersVisible(true);
+            let allDiv : React.JSX.Element[] = [];
+            getMyRelationships().then(async (res) => {
+                if (adminMode) {
+                    bannedList = await getApi.getAllBanFromChannel(channelID ? channelID : -1).then((res) => {return res.data;});
+                    muteList = await getApi.getAllMuteFromChannel(channelID ? channelID : -1).then((res) => {return res.data;});
+                }
+                const me = res.data;
+                let subs = me.subscribed; //users suivis par l'actuel user
+                let blocked = me.blocked;
+                if (!usersList)
+                {
+                    if (subs.length > 0) {
+                        for (const user of subs) {
+                            allDiv = allDivPush(allDiv, user, muteList, subs, blocked, undefined);
+                        }
+                        for (const user of bannedList) {
+                            allDiv = allDivPush(allDiv, user.user, muteList, subs, blocked, user.bannedID);
+                        }
+                    }
+                    else {
+                        allDiv.push(
+                            <div key={"NoUser" + uuidv4()}>No user followed</div>
+                            )
+                        }
+                        setUserElements(allDiv);
+                    }
+                    else {
+                        getAllUsersFromChannel(channelID ? channelID : 0, new Date).then(async (res) => {
+                            if (adminMode) {
+                                bannedList = await getApi.getAllBanFromChannel(channelID ? channelID : -1).then((res) => {return res.data;});
+                                muteList = await getApi.getAllMuteFromChannel(channelID ? channelID : -1).then((res) => {return res.data;});
+                            }
+                            for (const user of res.data) {
+                                if (user.UserID > 1) {
+                                    allDiv = allDivPush(allDiv, user, muteList, subs, blocked, undefined);
+                                }
+                            }
+                            for (const user of bannedList) {
+                                allDiv = allDivPush(allDiv, user.user, muteList, subs, blocked, user.bannedID);
+                            }
+                            setUserElements(allDiv);
+                        })
+                        .catch((error) => console.error("[UserList] Impossible to get users of channel: " + error));
+                    }
+                })
+                .catch((error) => console.error("[UserList] Impossible to get relationships of actual user: " + error));
         }
     }, [refresh]);
 
@@ -56,62 +105,11 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
     }
 
     function handleClickUserList(){
-        if (isHidden)
-        {
-            let bannedList: channelsDTO.IBanEntity[] = [];
-            let muteList: channelsDTO.IMuteEntity[] = [];
-            setPopupUsersVisible(isHidden);
-            let allDiv : React.JSX.Element[] = [];
-            getMyRelationships().then(async (res) => {
-                if (adminMode) {
-                    bannedList = await getApi.getAllBanFromChannel(channelID ? channelID : -1).then((res) => {return res.data;});
-                    muteList = await getApi.getAllMuteFromChannel(channelID ? channelID : -1).then((res) => {return res.data;});
-                }
-                const me = res.data;
-                let subs = me.subscribed; //users suivis par l'actuel user
-                let blocked = me.blocked;
-            if (!usersList)
-            {
-                if (subs.length > 0) {
-                    for (const user of subs) {
-                        allDiv = allDivPush(allDiv, user, muteList, subs, blocked, undefined);
-                    }
-                    for (const user of bannedList) {
-                        allDiv = allDivPush(allDiv, user.user, muteList, subs, blocked, user.bannedID);
-                    }
-                }
-                else {
-                    allDiv.push(
-                        <div key={"NoUser" + uuidv4()}>No user followed</div>
-                    )
-                }
-                setUserElements(allDiv);
-            }
-            else {
-                getAllUsersFromChannel(channelID ? channelID : 0, new Date).then(async (res) => {
-                    if (adminMode) {
-                        bannedList = await getApi.getAllBanFromChannel(channelID ? channelID : -1).then((res) => {return res.data;});
-                        muteList = await getApi.getAllMuteFromChannel(channelID ? channelID : -1).then((res) => {return res.data;});
-                    }
-                    for (const user of res.data) {
-                        if (user.UserID > 1) {
-                            allDiv = allDivPush(allDiv, user, muteList, subs, blocked, undefined);
-                        }
-                    }
-                    for (const user of bannedList) {
-                        allDiv = allDivPush(allDiv, user.user, muteList, subs, blocked, user.bannedID);
-                    }
-                    setUserElements(allDiv);
-                })
-                    .catch((error) => console.error("[UserList] Impossible to get users of channel: " + error));
-            }
-            })
-                .catch((error) => console.error("[UserList] Impossible to get relationships of actual user: " + error));
-        }
+        if (isHidden || refresh)
+            setRefresh(true);
         else
             setUserElements([]);
         setIsHidden(userElements.length > 0);
-
     }
     return (
         <>
