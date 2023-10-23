@@ -3,10 +3,11 @@ import Button from "@/components/CustomButtonComponent";
 import UserList from "@/components/UserListComponent";
 import Game from "@/components/game/Game";
 import React, {useContext, useEffect, useRef, useState} from "react";
-import {LoggedContext, UserContext} from "@/context/globalContext";
+import {LoggedContext, SocketContextChat, SocketContextGame, UserContext} from "@/context/globalContext";
 import {authManager} from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
+import {NotificationManager} from 'react-notifications';
 import NotifComponent from "@/components/notif/NotificationComponent";
 import Button2FA from "@/components/2FA/2FAComponent";
 import ChatMaster from "./chat/ChatMaster";
@@ -14,6 +15,7 @@ import LoadingComponent from "@/components/waiting/LoadingComponent";
 import MatchHistory from "@/components/MatchHistoryComponent";
 import Leaderboard from "@/components/LeaderboardComponent";
 import '@/components/chat/chat.css';
+import {INotif} from "@/shared/types";
 
 
 const HomePage = () => {
@@ -23,6 +25,8 @@ const HomePage = () => {
     const tokenRef = useRef<string>('');
     const [showMatchHistory, setMatchHistoryVisible] = useState(false);
     const [showLeaderboard, setLeaderboardVisible] = useState(false);
+    const socketChat = useContext(SocketContextChat);
+    const socketGame = useContext(SocketContextGame);
 
 
     useEffect(() => {
@@ -47,6 +51,44 @@ const HomePage = () => {
             window.location.reload();
         })
     }, []);
+
+    socketChat?.on("notif", (data: INotif) => {
+        switch (data.type) {
+            case "success":
+                NotificationManager.success(data.message, data.title, data.time);
+                break;
+            case "error":
+                NotificationManager.error(data.message, data.title, data.time);
+                break;
+            case "warning":
+                NotificationManager.warning(data.message, data.title, data.time);
+                break;
+            case "info":
+                NotificationManager.info(data.message, data.title, data.time);
+                break;
+            default:
+                console.error("Unknown notif type received: " + JSON.stringify(data));
+        }
+    });
+
+    socketGame?.on("notif", (data: INotif) => {
+        switch (data.type) {
+            case "success":
+                NotificationManager.success(data.message, data.title, data.time);
+                break;
+            case "error":
+                NotificationManager.error(data.message, data.title, data.time);
+                break;
+            case "warning":
+                NotificationManager.warning(data.message, data.title, data.time);
+                break;
+            case "info":
+                NotificationManager.info(data.message, data.title, data.time);
+                break;
+            default:
+                console.error("Unknown notif type received: " + JSON.stringify(data));
+        }
+    });
 
 
     return (

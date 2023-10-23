@@ -9,7 +9,7 @@ import {
 import {UserEntity} from './user.entity';
 import {ChannelEntity} from './channel.entity';
 
-@Entity('TestMute')
+@Entity('Mute')
 export class MuteEntity extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	muteID: number;

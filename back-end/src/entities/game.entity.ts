@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import {UserEntity} from './user.entity';
 
-@Entity('TestGames')
+@Entity('Games')
 export class GameEntity extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	ID: number;

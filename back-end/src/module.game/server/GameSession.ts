@@ -23,7 +23,7 @@ export class GameSession {
 	private ballDirection: PODGAME.IDirectionVec2D = {dx: 1, dy: 0}
 	private fpsTargetInMs: number = 1000 / 60; // = 16.67ms = 60 fps
 	private ballSpeedInitial: number;
-	private ballSpeedMax: number = 6.2;
+	private ballSpeedMax: number = 5.9;
 	private ballSpeed: number = 2.6;
 	private ballAccelerationFactor: number = 1.18;
 	private ballNumberHitBtwAcceleration: number = 3; //tous les X coup, la ball prend speed * AccelerationFactor
@@ -114,9 +114,9 @@ export class GameSession {
 			y: (this.table.tableSize.y / 2) - -(this.table.sizeBall.y / 2),
 		};
 		if (this.gameMod === PODGAME.EGameMod.ghost) {
-			this.ballSpeed *= 0.67;
+			this.ballSpeed *= 0.8;
 			this.ballSpeedInitial = this.ballSpeed;
-			this.ballSpeedMax = this.ballSpeedInitial * 1.032;
+			this.ballSpeedMax = this.ballSpeedMax * 0.7;
 			this.ghostZoneSize = this.ghostZoneSizeInitial;
 		}
 
@@ -533,7 +533,7 @@ export class GameSession {
 					clearInterval(intervalStart);
 				}
 				countdown--;
-			}, 1000)
+			}, 620)
 			return;
 		} else if (this.isP1Ready || this.isP2Ready) {
 			setTimeout(() => {

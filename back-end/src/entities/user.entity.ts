@@ -23,7 +23,7 @@ export enum UserStatus {
 	OFFLINE = 0,
 }
 
-@Entity('TestUser')
+@Entity('User')
 export class UserEntity extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	UserID: number;
@@ -84,11 +84,11 @@ export class UserEntity extends BaseEntity {
 	followers: UserEntity[];
 
 	@ManyToMany(() => UserEntity, (user) => user.followers)
-	@JoinTable({name: 'TestSubscriber'})
+	@JoinTable({name: 'Subscriber'})
 	subscribed: UserEntity[];
 
 	@ManyToMany(() => UserEntity)
-	@JoinTable({name: 'TestBlocked'})
+	@JoinTable({name: 'Blocked'})
 	blocked: UserEntity[];
 
 	@OneToMany(() => InviteEntity, (invite) => invite.user)
