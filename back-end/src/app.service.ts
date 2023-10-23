@@ -31,6 +31,6 @@ export class AppService {
 		if (await this.channelService.getGlobalChannel())
 			return;
 		const credential = await this.channelCredentialService.create(null);
-		return this.channelService.create('GlobalChannel', credential, false, admin);
+		return this.channelService.create('Global', credential, false, admin);
 	}
 }
