@@ -176,6 +176,10 @@ export namespace putApi {
 		return axiosInstance.put(strRoutes.channel.putAddInvite(channelID, userID),{}, updateAxiosInstance());
 	}
 
+	export const inviteIdRemove = (inviteID: number) => {
+		return axiosInstance.put(strRoutes.channel.putInviteChannelRemove(inviteID),{}, updateAxiosInstance());
+	}
+
 }
 
 export namespace deleteApi {

@@ -139,6 +139,8 @@ export namespace game {
 	export const putMatchmakingById=() 			=> {return `${serverApi}/${routeMatchmaking}/`};			
 	export const deleteMatchmakingById=() 	=> {return `${serverApi}/${routeMatchmaking}/`};	
 
+
+
 // +---------------------------------------------------------------------+
 // |                             CHANNELS                                |
 // +---------------------------------------------------------------------+
@@ -152,7 +154,8 @@ export namespace channel {
 	export const putModifChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/modif/${channelID}`};
 	
 	export const getMyInvite = ()																									=> {return `/channel/myinvite`};
-	export const getInviteChannel = (channelID: number )								=> {return `/channel/invite/${channelID}`};
+	export const getInviteChannel = (channelID: number )													=> {return `/channel/invite/${channelID}`};
+	export const putInviteChannelRemove = (inviteID: number )										=> {return `/channel/invite/remove/${inviteID}`};
 	export const putAddInvite = (channelID: number, userID: number)								=> {return `/channel/invite/add/${channelID}/${userID}`};
 
 

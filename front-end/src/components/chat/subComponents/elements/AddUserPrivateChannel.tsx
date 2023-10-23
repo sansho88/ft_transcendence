@@ -1,6 +1,5 @@
 import { IUser } from '@/shared/types'
-import React, { useEffect, useLayoutEffect, useState } from 'react'
-import UserList  from '@/components/UserListComponent'
+import React, { useLayoutEffect, useState } from 'react'
 import * as apiReq from '@/components/api/ApiReq'
 import Profile from '@/components/ProfileComponent';
 import {v4 as uuidv4} from "uuid";
@@ -17,9 +16,6 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
   const [userListChan, setUserListChan] = useState<IUser[]>([]);
   const [userList, setUserList] = useState<IUser[]>([]);
   const [popupIsVisible, setPopupIsVisible] = useState<boolean>(false);
-	const [defineClassName, setDefineClassName] = useState<string>('flex-col')
-
-
 
 
 	const elementClickable = (user: IUser) => { //FIXME: check is good
@@ -30,7 +26,7 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
 		} 
 
 		return (
-			<div key={uuidv4()} className={defineClassName} onClick={() => queryInvite(user.UserID)} >
+			<div key={uuidv4()} className={'flex-col'} onClick={() => queryInvite(user.UserID)} >
 				<Profile user={user} avatarSize={"medium"}></Profile>
 			</div>
 			)

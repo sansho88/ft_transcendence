@@ -16,7 +16,7 @@ import AddUserPrivateChannel from './AddUserPrivateChannel';
 
 
 
-export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected, isServList, isOwner}: {
+export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected, isServList, isOwner, isPending}: {
     socket: Socket,
     channelID: number,
     channelName: string,
@@ -27,8 +27,9 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     isProtected: boolean,
     isServList: boolean,
     isOwner: boolean,
+    isPending: boolean
 }) {
-    const [isPending, setIsPending] = useState(false); //TODO: check si cest une invit ?
+    // const [isPending, setIsPending] = useState(false); //TODO: check si cest une invit ?
 
     const [channelPassword, setChannelPassword] = useState("");
     const [channelType, setChannelType] = useState("");
@@ -82,13 +83,15 @@ useEffect(() => {
 }, [channelName, channelType, channelPassword]);
 
     function handleAcceptInvite() {
-        console.log(`Invite to ${channelName} accepted`);
-        setIsPending(false);
+        // console.log(`Invite to ${channelName} accepted`);
+        // setIsPending(false);
+        onClickSwitcher();
     }
 
     function handleDeclineInvite() {
-        console.log(`Invite to ${channelName} declined`);
-        setIsPending(false);
+        // console.log(`Invite to ${channelName} declined`);
+        // setIsPending(false);
+        // apiReq.putApi.inviteIdRemove() //TODO:
     }
 
 
