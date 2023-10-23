@@ -398,6 +398,7 @@
 }
 
 #button_select_channel_mode{
+  width: -webkit-fill-available;
   padding: 0.32rem 0.59rem;
   margin: 0.3rem;
 
