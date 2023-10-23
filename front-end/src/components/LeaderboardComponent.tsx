@@ -1,15 +1,22 @@
-import React, {useEffect, useState} from "react";
-import {ILeaderboard} from "@/shared/types";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import {EStatus, ILeaderboard, IUser} from "@/shared/types";
 import {getApi} from "@/components/api/ApiReq";
 import {v4 as uuidv4} from "uuid";
 import Profile from "@/components/ProfileComponent";
+import {SocketContextChat, UserContext} from "@/context/globalContext";
 
 const Leaderboard : React.FC = () => {
     const [leaderboard, setLeaderboard] = useState<ILeaderboard[]>([]);
     let leaderboardElements: React.JSX.Element[] = [];
+    const socketChat      = useContext(SocketContextChat);
+    const socketChatRef   = useRef(socketChat);
+    const {userContext} = useContext(UserContext);
+    let refreshLeaderboard = true;
 
     useEffect(() => {
-            if (leaderboard && leaderboard.length == 0)
+        if (refreshLeaderboard)
+        {
+            //if (leaderboard && leaderboard.length == 0)
                 getApi.getLeaderboard()
                     .then((res) => {
                         setLeaderboard(res.data);
@@ -20,12 +27,24 @@ const Leaderboard : React.FC = () => {
                         setLeaderboard(res.data);
                     })
             }, 30000);
-
+            refreshLeaderboard = false;
             return () => {
                 clearInterval(timer);
             };
-    }, )
 
+        }
+
+    }, [refreshLeaderboard] )
+
+    socketChatRef.current?.on("userUpdate", (data: IUser) => {
+        if (data.UserID == userContext.UserID && data.status == EStatus.Online)
+        {
+            refreshLeaderboard = true;
+            console.log("refresh leaderboard");
+        }
+    });
+
+    socketChatRef.current?.off("userUpdate", () => {});
 
     if (leaderboard.length > 0 ){
         const rankColorsArray = ["gold", "silver", "sienna"]

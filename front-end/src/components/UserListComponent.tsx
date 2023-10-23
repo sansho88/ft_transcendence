@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import Profile from "@/components/ProfileComponent";
 import Button from "@/components/CustomButtonComponent";
 import {v4 as uuidv4} from "uuid";
@@ -12,9 +12,9 @@ import { IUser } from "@/shared/types";
 interface UserListProps{
     avatarSize?: string | undefined;
     usersList?: string | undefined;
-    showUserProps?: boolean;
     adminMode?: boolean
     channelID?: number;
+    showUserProps?: boolean;
 }
 const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, showUserProps, usersList, adminMode, channelID}) => {
 
@@ -44,7 +44,7 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                 {
                     if (subs.length > 0) {
                         for (const user of subs) {
-                            allDiv = allDivPush(allDiv, user, muteList, subs, blocked, undefined);
+                            allDiv = allDivPush(allDiv, user, muteList, subs, blocked, undefined, true);
                         }
                         for (const user of bannedList) {
                             allDiv = allDivPush(allDiv, user.user, muteList, subs, blocked, user.bannedID);
@@ -78,25 +78,27 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                 })
                 .catch((error) => console.error("[UserList] Impossible to get relationships of actual user: " + error));
         }
+        return;
     }, [refresh]);
 
     const allDivPush = (
-        allDiv: React.JSX.Element[], 
+        allDiv: React.JSX.Element[],
         user: IUser,
-        muteList: channelsDTO.IMuteEntity[], 
-        follow: IUser[], 
-        blocked: IUser[], 
-        banID?: number) => {
+        muteList: channelsDTO.IMuteEntity[],
+        follow: IUser[],
+        blocked: IUser[],
+        banID?: number,
+        showStats?: boolean) => {
         allDiv.push(
             <li key={user.login + "List" + uuidv4()}>
-                <Profile user={user} avatarSize={avatarSize}>
-                    {showUserProps == true && <UserOptions 
-                    user={user} 
-                    relationships={{followed: follow, blocked:blocked}} 
-                    channelID={channelID} 
-                    showAdminOptions={adminMode} 
+                <Profile user={user} avatarSize={avatarSize} showStats={showStats}>
+                    {showUserProps == true && <UserOptions
+                    user={user}
+                    relationships={{followed: follow, blocked:blocked}}
+                    channelID={channelID}
+                    showAdminOptions={adminMode}
                     setRefresh={setRefresh}
-                    banID={banID} 
+                    banID={banID}
                     muteID={muteList.find(muteUser => muteUser.user.UserID === user.UserID)?.muteID ?? undefined}/>}
                 </Profile>
             </li>

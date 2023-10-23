@@ -8,7 +8,7 @@ import * as apiReq from '@/components/api/ApiReq'
 
 export function NavBar({className}: {className: string}) {
 
-	const {userContext, setUserContext} = useContext(UserContext);
+	const {userContext} = useContext(UserContext);
 	const {logged, setLogged} = useContext(LoggedContext);
 	const [isHovered, setIsHovered] = useState(false);
   const [turnOffAuth, setTurnOffAuth] = useState<boolean>(false);
@@ -25,6 +25,7 @@ export function NavBar({className}: {className: string}) {
 	|
 	  <div className=' text-violet-700'>{userContext?.nickname}</div>
   </div>)
+      return;
   }, [userContext])
 
 

@@ -1,8 +1,8 @@
-import React, {useContext, useEffect, useState} from "react";
-import {IMatch, IRelationships} from "@/shared/types";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import {EStatus, IMatch, IRelationships, IUser} from "@/shared/types";
 import {getApi} from "@/components/api/ApiReq";
 import {v4 as uuidv4} from "uuid";
-import {SelectedUserContext} from "@/context/globalContext";
+import {SelectedUserContext, SocketContextChat} from "@/context/globalContext";
 import UserOptions from "@/components/UserOptions";
 
 const MatchHistory : React.FC = () => {
@@ -11,6 +11,8 @@ const MatchHistory : React.FC = () => {
     const [selectedUserRelationships, setSelectedUserRelationships] = useState<IRelationships>({followed:[], blocked:[]});
     const [refresh, setRefresh] = useState(false);
     let matchElements : React.JSX.Element[] = [];
+    const socketChat      = useContext(SocketContextChat);
+    const socketChatRef   = useRef(socketChat);
 
     useEffect(() => {
         if (selectedUserContext)
@@ -36,6 +38,15 @@ const MatchHistory : React.FC = () => {
             };
         }
     }, [selectedUserContext])
+
+    socketChatRef.current?.on("userUpdate", (data: IUser) => {
+        if (selectedUserContext && data.UserID == selectedUserContext.UserID && selectedUserContext.status == EStatus.Online)
+        {
+            setSelectedUserContext(data);
+        }
+    });
+
+    socketChatRef.current?.off("userUpdate", () => {});
 
 
     if (matchesList.length > 0 && matchesList.at(0).ID >= 0){
@@ -70,8 +81,9 @@ const MatchHistory : React.FC = () => {
             <h1>MATCHES HISTORY</h1>
             {selectedUserContext ?
                 <ul>
-                    <div>{selectedUserContext.nickname}</div>
-                        ({selectedUserContext.login}) <UserOptions user={selectedUserContext} relationships={selectedUserRelationships} setRefresh={setRefresh}/>
+                    {selectedUserContext.nickname}
+                        <span style={{position: "absolute", right: "0"}}>({selectedUserContext.login})</span>
+                    <UserOptions user={selectedUserContext} relationships={selectedUserRelationships} setRefresh={setRefresh}/>
                     <div>{matchElements}</div>
                 </ul>
                 : "No user selected"
