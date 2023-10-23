@@ -1,12 +1,12 @@
 'use client'
 
-import { IMessageEntity } from "@/shared/entities/IMessage.entity";
+import {IMessageEntity} from "@/shared/entities/IMessage.entity";
 import Axios from "./AxiosConfig";
 import {strRoutes} from "@/shared/routesApi";
 import {IGameStats, ILeaderboard, IMatch, IUser} from "@/shared/types";
-import { IChannel} from "@/shared/typesChannel";
+import {IChannel} from "@/shared/typesChannel";
 import axios from "axios";
-import { IChannelEntity } from "@/shared/entities/IChannel.entity";
+import {IChannelEntity} from "@/shared/entities/IChannel.entity";
 import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
 
 
@@ -32,29 +32,34 @@ function updateAxiosInstance() {
 export namespace getApi {
 
 	const timestamp = Date.now();
-	export const getUsersAllPromise= (time) =>{
+	export const getUsersAllPromise = (time) => {
 		const tqt = time;
-		return axiosInstance.get(`${strRoutes.getUsersAll()}`, updateAxiosInstance());}
-	export const getUserByLoginPromise= (login: string) =>{
-		return axiosInstance.get(`users/get/${login}`, );
+		return axiosInstance.get(`${strRoutes.getUsersAll()}`, updateAxiosInstance());
+	}
+	export const getUserByLoginPromise = (login: string) => {
+		return axiosInstance.get(`users/get/${login}`,);
 	}
 
-	export const getUserByIdPromise = (id: number) =>{return axiosInstance.get(`${strRoutes.getUserById()}${id}`, {
-		headers: {
-			'Authorization': `Bearer ${authManager.getToken()}`
-		}
-	});}
-	
-	export const getChannels = (): Promise<IChannelEntity[]> =>{
-		
-		return axiosInstance.get(`${strRoutes.channel.getAll()}`, 
-		
-		{ headers: {
-			'Authorization': `Bearer ${authManager.getToken()}`
-		}
-	});}
+	export const getUserByIdPromise = (id: number) => {
+		return axiosInstance.get(`${strRoutes.getUserById()}${id}`, {
+			headers: {
+				'Authorization': `Bearer ${authManager.getToken()}`
+			}
+		});
+	}
 
-	export const getAllUsersFromChannel = (channelID: number, time): Promise<{data:IUser[]}> => {
+	export const getChannels = (): Promise<IChannelEntity[]> => {
+
+		return axiosInstance.get(`${strRoutes.channel.getAll()}`,
+
+			{
+				headers: {
+					'Authorization': `Bearer ${authManager.getToken()}`
+				}
+			});
+	}
+
+	export const getAllUsersFromChannel = (channelID: number, time): Promise<{ data: IUser[] }> => {
 		const tqt = time;
 		return axiosInstance.get(`${strRoutes.channel.getUsersChannel(channelID)}`, updateAxiosInstance(), time);
 	}
@@ -63,62 +68,71 @@ export namespace getApi {
 		return axiosInstance.get(strRoutes.getMe(), updateAxiosInstance())
 	}
 
-	export const getMeUser = (): Promise<{data: IUser}> => {
+	export const getMeUser = (): Promise<{ data: IUser }> => {
 		return axiosInstance.get(strRoutes.getMe(), updateAxiosInstance())
 	}
 
-	export const getMyRelationships = (): Promise<{data}> => {
+	export const getMyRelationships = (): Promise<{ data }> => {
 		return axiosInstance.get(strRoutes.getMyRelationships(), updateAxiosInstance());
 	}
 
-	export const getIsNicknameUsed = (nick: string) =>{return axiosInstance.get(`${strRoutes.getIsNicknameIsUsed()}${nick}`, {
+	export const getOtherRelationships = (targetID: number): Promise<{ data: IUser }> => {
+		return axiosInstance.get(strRoutes.getOtherRelationships(targetID), updateAxiosInstance());
+	}
+
+	export const getIsNicknameUsed = (nick: string) => {
+		return axiosInstance.get(`${strRoutes.getIsNicknameIsUsed()}${nick}`, {
 			headers: {
 				'Authorization': `Bearer ${authManager.getToken()}`
 			}
-		});}
+		});
+	}
 
-	interface IUserChan extends IUser {	channelJoined: IChannel[];	}
+	interface IUserChan extends IUser {
+		channelJoined: IChannel[];
+	}
+
 	export const getChannelJoined = (): any => {
 		let user: IUserChan;
 		const chanListJoined = async () => {
 			user = await axiosInstance.get(`${strRoutes.channel.getChannelJoined()}`, {
-				headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
+				headers: {'Authorization': `Bearer ${authManager.getToken()}`}
 			});
 			chanListJoined();
 			return user.channelJoined;
 		}
 	}
 
-	export const getAllMessagesChannel = (channelID: number): Promise<{data: IMessageEntity[]}> => {
-			return axiosInstance.get(`${strRoutes.channel.getAllMessagesChannel(channelID)}`, {
-				headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
-			});
+	export const getAllMessagesChannel = (channelID: number): Promise<{ data: IMessageEntity[] }> => {
+		return axiosInstance.get(`${strRoutes.channel.getAllMessagesChannel(channelID)}`, {
+			headers: {'Authorization': `Bearer ${authManager.getToken()}`}
+		});
 	}
 
-	export const getAllMyFollowers = (): Promise<{data:IUser[]}> => {
+	export const getAllMyFollowers = (): Promise<{ data: IUser[] }> => {
 		return axiosInstance.get(`${strRoutes.relationships.getAllMyFollowers()}`, updateAxiosInstance());
 	}
 
-	export const getStatsFromAllUsers = (): Promise<{data:IGameStats}> => {
+	export const getStatsFromAllUsers = (): Promise<{ data: IGameStats }> => {
 		return axiosInstance.get(`${strRoutes.game.getStatsFromAllUsers()}`, updateAxiosInstance());
 	}
-	export const getUserStatsById = (userId: number): Promise<{data:IGameStats}> => {
-	  return axiosInstance.get(`${strRoutes.game.getUserStatsById(userId)}`, updateAxiosInstance());
+	export const getUserStatsById = (userId: number): Promise<{ data: IGameStats }> => {
+		return axiosInstance.get(`${strRoutes.game.getUserStatsById(userId)}`, updateAxiosInstance());
 	}
 
 
 	export const getMyChallenges = (): Promise<channelsDTO.IChallengeProposeDTO[]> => {
-	  return axiosInstance.get(`${strRoutes.game.getMyChallenges()}`, updateAxiosInstance());
+		return axiosInstance.get(`${strRoutes.game.getMyChallenges()}`, updateAxiosInstance());
 	}
 
-	export const getMatchHistory = (): Promise<{data: IMatch[]}> => {
+	export const getMatchHistory = (): Promise<{ data: IMatch[] }> => {
 		return axiosInstance.get(strRoutes.game.getMatchHistory(), updateAxiosInstance());
 	}
-	export const getMatchHistoryFromUserId = (userId: number): Promise<{data: IMatch[]}> => {
+	export const getMatchHistoryFromUserId = (userId: number): Promise<{ data: IMatch[] }> => {
 		return axiosInstance.get(strRoutes.game.getMatchHistoryFromUserId(userId), updateAxiosInstance());
 	}
 
-	export const getLeaderboard = () : Promise<{data: ILeaderboard[]}> => {
+	export const getLeaderboard = (): Promise<{ data: ILeaderboard[] }> => {
 		return axiosInstance.get(strRoutes.game.getLeaderboard(), updateAxiosInstance());
 	}
 }
@@ -126,14 +140,28 @@ export namespace getApi {
 
 export namespace postApi {
 
-	export const postUser = (newUser: Partial<IUser>) => 										{ return axiosInstance.post(`${strRoutes.postUser()}`, newUser); }
-	export const postTryLogin = (loginTest: Partial<IUser>) => 							{ return axiosInstance.post(`${strRoutes.postUserCheckLogin()}`, loginTest); }
-	export const postTryLogin42 = (code: string, token: string | null) => 	{ return axiosInstance.post(`${strRoutes.postUser42(token)}`, code); }
-	export const postTryGetIntraURL = () => 																{ return axiosInstance.post(`${strRoutes.getIntraURL()}`); }
+	export const postUser = (newUser: Partial<IUser>) => {
+		return axiosInstance.post(`${strRoutes.postUser()}`, newUser);
+	}
+	export const postTryLogin = (loginTest: Partial<IUser>) => {
+		return axiosInstance.post(`${strRoutes.postUserCheckLogin()}`, loginTest);
+	}
+	export const postTryLogin42 = (code: string, token: string | null) => {
+		return axiosInstance.post(`${strRoutes.postUser42(token)}`, code);
+	}
+	export const postTryGetIntraURL = () => {
+		return axiosInstance.post(`${strRoutes.getIntraURL()}`);
+	}
 
-	export const postGen2FA = () => 																				{ return axiosInstance.post(`${strRoutes.postGenerate2FA()}`, {}, updateAxiosInstance()); }
-	export const postCheck2FA = (token: string) => 													{ return axiosInstance.post(`${strRoutes.postCheck2FA(token)}`, {}, updateAxiosInstance()); }
-	export const postDisable2FA = (token: string) => 												{ return axiosInstance.post(`${strRoutes.postDisable2FA(token)}`, {}, updateAxiosInstance()); }
+	export const postGen2FA = () => {
+		return axiosInstance.post(`${strRoutes.postGenerate2FA()}`, {}, updateAxiosInstance());
+	}
+	export const postCheck2FA = (token: string) => {
+		return axiosInstance.post(`${strRoutes.postCheck2FA(token)}`, {}, updateAxiosInstance());
+	}
+	export const postDisable2FA = (token: string) => {
+		return axiosInstance.post(`${strRoutes.postDisable2FA(token)}`, {}, updateAxiosInstance());
+	}
 
 	export const postUploadAvatar = (avatar: FormData) => {
 		return axiosInstance.post(strRoutes.postUploadAvatar(), avatar, {
@@ -147,36 +175,42 @@ export namespace postApi {
 
 
 export namespace putApi {
-	export const putUser= (updateUser: Partial<IUser>)		=>{return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, updateAxiosInstance())}
+	export const putUser = (updateUser: Partial<IUser>) => {
+		return axiosInstance.put(`${strRoutes.putUser()}update`, updateUser, updateAxiosInstance())
+	}
 	export const followUser = (userID: number) => {
-		return axiosInstance.put(`${strRoutes.relationships.followUser(userID)}`,{}, updateAxiosInstance());
+		return axiosInstance.put(`${strRoutes.relationships.followUser(userID)}`, {}, updateAxiosInstance());
 	}
 	export const unfollowUser = (userID: number) => {
-		return axiosInstance.put(strRoutes.relationships.unfollowUser(userID),{}, updateAxiosInstance());
+		return axiosInstance.put(strRoutes.relationships.unfollowUser(userID), {}, updateAxiosInstance());
 	}
 	export const blockUser = (userID: number) => {
-		return axiosInstance.put(`${strRoutes.relationships.blockUser(userID)}`,{}, updateAxiosInstance());
+		return axiosInstance.put(`${strRoutes.relationships.blockUser(userID)}`, {}, updateAxiosInstance());
 	}
 	export const unblockUser = (userID: number) => {
-		return axiosInstance.put(strRoutes.relationships.unblockUser(userID),{}, updateAxiosInstance());
+		return axiosInstance.put(strRoutes.relationships.unblockUser(userID), {}, updateAxiosInstance());
 	}
-	export const putModifChannel = (channelID: number, data: channelsDTO.IChangeChannelDTOPipe) =>{return axiosInstance.put(`${strRoutes.channel.putModifChannel(channelID)}`, data, updateAxiosInstance())}
+	export const putModifChannel = (channelID: number, data: channelsDTO.IChangeChannelDTOPipe) => {
+		return axiosInstance.put(`${strRoutes.channel.putModifChannel(channelID)}`, data, updateAxiosInstance())
+	}
 }
 
 export namespace deleteApi {
 
-	export const deleteUserById= (id: number)	=>{
+	export const deleteUserById = (id: number) => {
 		return Axios.delete(`${strRoutes.deleteUserById()}${id}`, {
-		headers: {
-			'Authorization': `Bearer ${authManager.getToken()}`
-		}
-	})}
-	export const deleteUsersAll= ()	=>{
+			headers: {
+				'Authorization': `Bearer ${authManager.getToken()}`
+			}
+		})
+	}
+	export const deleteUsersAll = () => {
 		return axiosInstance.delete(`${strRoutes.deleteUsersAll()}`, {
-		headers: {
-			'Authorization': `Bearer ${authManager.getToken()}`
-		}
-	});}
+			headers: {
+				'Authorization': `Bearer ${authManager.getToken()}`
+			}
+		});
+	}
 }
 
 
@@ -187,7 +221,7 @@ export namespace deleteApi {
 export namespace utilsCheck {
 
 	export async function isLoginAlreadyTaken(login: string): Promise<boolean> {
-		if (!login){	
+		if (!login) {
 			console.log('Call isLoginAlreadyTaken: login is empty !')
 			return false;
 		}
@@ -195,8 +229,7 @@ export namespace utilsCheck {
 		try {
 			await getApi.getUserByLoginPromise(login);
 			return true;
-		}
-		catch (error) {
+		} catch (error) {
 			console.error(error);
 			return false;
 		}
@@ -205,10 +238,9 @@ export namespace utilsCheck {
 	export async function isPasswordMatch(login: string, password: string, code2FAInput?: string) {
 		console.log('\n\ncall isPasswordMatch: login: ||' + login + '||\npassword: ||' + password + '||\n\n');
 		try {
-			const res = await postApi.postTryLogin({login, password, token_2fa:code2FAInput});
+			const res = await postApi.postTryLogin({login, password, token_2fa: code2FAInput});
 			return res.status === 201;
-		} 
-		catch (error) {
+		} catch (error) {
 			console.error(error);
 			return false;
 		}
@@ -217,12 +249,11 @@ export namespace utilsCheck {
 	export async function isOnline(id: number): Promise<boolean> {
 		try {
 			return (await getApi.getUserByIdPromise(id)).status !== 0;
-		} 
-		catch (error) {
+		} catch (error) {
 			console.error(error);
 			return false;
 		}
-		
+
 	}
 
 }
