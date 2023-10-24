@@ -107,6 +107,7 @@ export namespace wsChatListen {
         {
           const modifChan: IChannel = channel;
           modifChan.name = data.name;
+          modifChan.type = data.type;
           newChannels.push(modifChan);
         }
         else

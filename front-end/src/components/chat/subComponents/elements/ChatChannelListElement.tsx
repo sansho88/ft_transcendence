@@ -95,9 +95,10 @@ useEffect(() => {
         onClickSwitcher();
     }
 
+    const [visible, setVisible] = useState<boolean>(true);
     function handleDeclineInvite() {
         // console.log(`Invite to ${channelName} declined`);
-        event?.stopPropagation();
+        setVisible(false);
         apiReq.putApi.inviteIdRemove(inviteID)
         .then((res) => {
             if(res.status === 200)
@@ -207,6 +208,8 @@ useEffect(() => {
         };
 
     return (
+        <>
+        {visible && 
         <div    onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 className={currentChannel === channelID ? `channel channel_selected ` : `channel `}>
@@ -218,8 +221,12 @@ useEffect(() => {
 
             {isPending && 
             <div id={"invite_options"} className='flex space-x-2 mr-2'>
-                <span  onClick={ handleAcceptInvite }>✅</span>
-                <div className='z-0' onClick={ handleDeclineInvite }>❌</div>
+                <span  onClick={ (event) => {
+                    event.stopPropagation()
+                    handleAcceptInvite()} }>✅</span>
+                <div className='z-0' onClick={ (event) => {
+                    event.stopPropagation();
+                    handleDeclineInvite()} }>❌</div>
             </div>}
             </div>
             {isProtected && 
@@ -251,6 +258,9 @@ useEffect(() => {
                 </div>
             }
         </div>
+        }
+        </>
+
     )
 }
 
