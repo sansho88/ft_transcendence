@@ -45,7 +45,8 @@ import {GameModule} from './module.game/game.module';
 				ChannelCredentialEntity,
 				GameEntity,
 			],
-			synchronize: true, // true -> will create the Table on db if class not there
+			// synchronize: true, // true -> will create the Table on db if class not there
+			synchronize: false,
 		}),
 		UsersModule,
 		AuthModule,

@@ -114,7 +114,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
                     border: "2px ridge darkgrey",
                     borderRadius: "4px",
                     background: "none",
-                    padding: "6px"
+                    padding: "6px",
                 }}/>
                 <span style={{marginLeft: "4px", position: "fixed"}}><Button image={"/floppy.svg"} onClick={turnOffEditMode} alt={"Save Button"}/></span>
                 <p style={{fontSize: "12px", color: "red"}}>{nickErrorMsg}</p>
@@ -122,7 +122,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
         }
         else
             return (
-                <p id={"nickname"}>{modifiedNick}
+                <p id={"nickname"} style={{textShadow: "1px 3px 8px #0888AFFF"}}>{modifiedNick}
                     {isEditable ?
                         <span id={"editNickNameButton"} style={{marginLeft: "4px"}}>
                             <Button image={"/edit.svg"} onClick={turnOnEditMode} alt={"edit NickName button"}/>
@@ -161,10 +161,10 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
                     display: "inline-block",
                     position: "relative",
                     transition:"1000ms",
-                    top: "15px"
+                    top: "15px",
                 }
             }>
-                    <h2 id={"login"} style={{ color: "darkgrey", marginTop: "0"}}>{user.login}</h2>
+                    <h2 id={"login"} style={{ color: "darkgrey", marginTop: "0", textShadow: "1px 1px 5px darkgrey"}}>{user.login}</h2>
                     {editedNick()}
 
                     <p id={"status"} style={{
@@ -172,6 +172,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
                         transition:"0ms",
                         position: "relative", 
                         top: "0",
+                        textShadow: `2px 2px 6px ${statusColor}`,
                         }}>
                         {getEnumNameByIndex(EStatus, userStatus)}
                     </p>

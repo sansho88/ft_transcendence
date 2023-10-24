@@ -148,12 +148,11 @@ export class AuthService {
 	 * @returns {img: string}
 	 */
 	async generate2FA(user: UserEntity) {
-		console.log("generate2FA");
 		if (user.has_2fa) throw new HttpException("2fa already enabled.", HttpStatus.BAD_REQUEST)
 
 		const cred = await this.usersService.getCredential(user.UserID);
 		const speakeasy = require('speakeasy');
-		const secret = speakeasy.generateSecret({length: 20, name: "tester c'est douter"});
+		const secret = speakeasy.generateSecret({length: 20, name: "Pong Pod " + user.UserID});
 
 		cred.token_2fa = secret.base32;
 		cred.save();

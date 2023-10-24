@@ -8,7 +8,7 @@ import {
 import {UserEntity} from './user.entity';
 import {ChannelEntity} from './channel.entity';
 
-@Entity('TestInvites')
+@Entity('Invites')
 export class InviteEntity extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	inviteID: number;

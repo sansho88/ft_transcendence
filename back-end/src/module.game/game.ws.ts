@@ -24,23 +24,22 @@ import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { channelsDTO } from 'src/shared/DTO/InterfaceDTO';
 
 
-
 export interface SocketUserList {
 	userID: number;
 	socketID: string;
 	// socket: Socket;
 }
+
 @WebSocketGateway({
 	namespace: '/game',
 })
 export class WebsocketGatewayGame
 	implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
-		private serverGame: ServerGame, 
+		private serverGame: ServerGame,
 		private jwtService: JwtService,
 		private usersService: UsersService,
-
-		) {
+	) {
 	}
 
 	@WebSocketServer()
@@ -73,8 +72,8 @@ export class WebsocketGatewayGame
 
 
 		const user = await this.usersService.findOne(userID, ['channelJoined', 'subscribed'])
-		.catch(() => null);
-		
+			.catch(() => null);
+
 		if (user == null)
 			return client.disconnect();
 		this.server.to(client.id).emit('welcome', 'Bienvenue sur TheGame');//FIXME:
@@ -102,7 +101,7 @@ export class WebsocketGatewayGame
 				secret: process.env.SECRET_KEY,
 			});
 		} catch {
-				return client.disconnect();
+			return client.disconnect();
 		}
 		const user = await this.usersService
 			.findOne(payloadToken.id)
@@ -203,14 +202,14 @@ export class WebsocketGatewayGame
 	) {
 		if (this.isInGame(user))
 			return client.emit('info', 'You are already in game'); //TODO: NOTIF GENERAL
-		const P1: userInfoSocket = { socket: client, user: user };
-		const sockersChallenged: RemoteSocket<DefaultEventsMap, any>[]= await this.getSocket(data.targetID);
+		const P1: userInfoSocket = {socket: client, user: user};
+		const sockersChallenged: RemoteSocket<DefaultEventsMap, any>[] = await this.getSocket(data.targetID);
 		const P2: UserEntity = await this.usersService.findOne(data.targetID)
 		sockersChallenged.forEach((socketLst) => {
 			console.log('send to socket : ' + socketLst);
 			socketLst.emit('info', 'hello Challenged')
 		})
-		console.log('map lenght = ' , sockersChallenged.length);
+		console.log('map lenght = ', sockersChallenged.length);
 		this.serverGame.createChallenge(this.server, P1, P2, data.gameMod, sockersChallenged);
 		const player: userInfoSocket = {socket: client, user};
 	}
@@ -224,25 +223,24 @@ export class WebsocketGatewayGame
 	) {
 		if (this.isInGame(user))
 			return client.emit('info', 'You are already in game'); //TODO: NOTIF GENERAL
-		if(data.response) {
+		if (data.response) {
 			this.serverGame.acceptChallenge(this.server, user, client, data.event);
-		}
-		else{
+		} else {
 			this.serverGame.declineChallenge(user, data.event);
 		}
 	}
 
 	private isInGame(user: UserEntity): boolean {
-		return user.status === UserStatus.INGAME;	
+		return user.status === UserStatus.INGAME;
 	}
 
 	private async getSocket(userID: number) {
-    const socketIDLst = this.socketUserList.filter(value => value.userID === userID);
-    const socketLst = await this.server.fetchSockets();
+		const socketIDLst = this.socketUserList.filter(value => value.userID === userID);
+		const socketLst = await this.server.fetchSockets();
 
-    return socketLst.filter(socket => {
-        return socketIDLst.some(Id => Id.socketID === socket.id);
-    });
+		return socketLst.filter(socket => {
+			return socketIDLst.some(Id => Id.socketID === socket.id);
+		});
 	}
 
 }
