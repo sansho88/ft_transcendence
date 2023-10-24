@@ -359,14 +359,14 @@
 
 .chat_new_channel_popup_inviteChan{
   color: darkgrey;
-  background: rgba(0, 0, 0, 0.52);
+  background: rgba(0, 0, 0, 0.85);
   border: 0.2rem rgba(0, 0, 0, 0.15);
   border-style: inherit ;
   box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.5);
   border-radius: 1rem;
   display: inline-block;
   position: absolute; 
-  width: 9vw;
+  width: 14vw;
   min-width: 12ch;
   height: auto;
   /* bottom: 5vh; */

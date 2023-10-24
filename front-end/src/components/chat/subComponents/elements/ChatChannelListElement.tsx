@@ -220,14 +220,9 @@ useEffect(() => {
                     {!isServList && !isMp && isHovered && <LeaveChannelCross className={`flex-shrink-0 text-red-800 z-0`} onClickFunction={() => leaveChan(socket, channelID)} />}
 
             {isPending && 
-            <div id={"invite_options"} className='flex space-x-2 mr-2'>
-                <span  onClick={ (event) => {
-                    event.stopPropagation()
-                    handleAcceptInvite()} }>✅</span>
-                <div className='z-0' onClick={ (event) => {
-                    event.stopPropagation();
-                    handleDeclineInvite()} }>❌</div>
-            </div>}
+                <div id={"invite_options"} className='flex space-x-2 mr-1'>
+                        <LeaveChannelCross className='flex z-50' onClickFunction={handleDeclineInvite}/>
+                </div>}
             </div>
             {isProtected && 
                 <div>
