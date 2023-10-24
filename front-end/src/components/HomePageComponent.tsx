@@ -53,7 +53,7 @@ const HomePage = () => {
     }, []);
 
     socketChat?.on("notif", (data: INotif) => {
-        switch (data.type) {
+        switch (data.type) { // Fixme: Happened twice despite sending it only once
             case "success":
                 NotificationManager.success(data.message, data.title, data.time);
                 break;
