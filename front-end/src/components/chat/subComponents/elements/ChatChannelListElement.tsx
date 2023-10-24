@@ -13,10 +13,11 @@ import { Socket } from 'socket.io-client';
 import { IUser } from '@/shared/types';
 import * as apiReq from '@/components/api/ApiReq'
 import AddUserPrivateChannel from './AddUserPrivateChannel';
+import { Fascinate } from 'next/font/google';
 
 
 
-export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected, isServList, isOwner, isPending}: {
+export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected, isServList, isOwner, isPending, inviteID}: {
     socket: Socket,
     channelID: number,
     channelName: string,
@@ -27,7 +28,8 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     isProtected: boolean,
     isServList: boolean,
     isOwner: boolean,
-    isPending: boolean
+    isPending: boolean,
+    inviteID: number
 }) {
     // const [isPending, setIsPending] = useState(false); //TODO: check si cest une invit ?
 
@@ -40,6 +42,7 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     const [actualUserID, setActualUserID] = useState<number>(-1)
     const [channelMpName, setChannelMpName] = useState<string | null>(null)
     const [usersList, setUsersList] = useState<IUser[]>([]);
+    // const [inviteID, setInviteID] = useState<number>(0);
 
 
     async function getUserId(){
@@ -56,9 +59,13 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
             })
     }
 
+
     useEffect(() => {
         if (isMp)
             getUserId();
+        
+        console.log('invite ChannelID IN ELEMENT = ', inviteID)
+
     }, [])
 
 
@@ -90,8 +97,12 @@ useEffect(() => {
 
     function handleDeclineInvite() {
         // console.log(`Invite to ${channelName} declined`);
-        // setIsPending(false);
-        // apiReq.putApi.inviteIdRemove() //TODO:
+        event?.stopPropagation();
+        apiReq.putApi.inviteIdRemove(inviteID)
+        .then((res) => {
+            if(res.status === 200)
+                return;
+        }) 
     }
 
 
@@ -205,11 +216,12 @@ useEffect(() => {
                     {isInvite && isHovered && <AddUserPrivateChannel className='' currentChannel={currentChannel} channelID={channelID}/>}
                     {!isServList && !isMp && isHovered && <LeaveChannelCross className={`flex-shrink-0 text-red-800 z-0`} onClickFunction={() => leaveChan(socket, channelID)} />}
 
+            {isPending && 
+            <div id={"invite_options"} className='flex space-x-2 mr-2'>
+                <span  onClick={ handleAcceptInvite }>✅</span>
+                <div className='z-0' onClick={ handleDeclineInvite }>❌</div>
+            </div>}
             </div>
-            {isPending && (<div id={"invite_options"}>
-                <span onClick={ handleAcceptInvite }>✅</span>
-                <span onClick={ handleDeclineInvite }>❌</span>
-            </div>)}
             {isProtected && 
                 <div>
                           <li><label>

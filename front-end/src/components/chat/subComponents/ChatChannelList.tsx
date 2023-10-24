@@ -123,7 +123,7 @@ function isOwner(): boolean {
 
     const [myInviteLst, setMyInviteLst] = useState<IInviteEntity[]>([])
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       getChannelInvite();
     }, [])
 
@@ -135,8 +135,6 @@ function isOwner(): boolean {
     
     function getChannelInvite(){
       apiReq.getApi.getMyInvite().then((res) => {
-        console.log('DBG REQUUUUUUETE, RES = ', JSON.stringify(res)) // LE LOOOG
-
         setMyInviteLst(res.data)
       })
   
@@ -150,15 +148,28 @@ function isOwner(): boolean {
 
     }
 
+    function defineInviteID(channelID: number):number {
+      if (myInviteLst.length > 0)
+      {
+        const index: number = myInviteLst.findIndex((channel) => channel.channel.channelID === channelID)
+        console.log('HEY INDEX ==== ' , index, ' ', isInvitable(channelID))
+        if (index >= 0)
+          return myInviteLst[index].inviteID
+      }
+      return -1;
+    }
+
+
   return (
 
     <div className={`${className}`}>
       <div className={`chat_channel_list`}>
-        {channels && !isServerList &&
+        {channels && !isServerList && 
           channels.map((channel) => (
             <ChatChannelListElement
               key={channel.channelID}
               channelID={channel.channelID}
+              inviteID={-1}
               channelName={channel.name}
               isInvite={channel.type === EChannelType.PRIVATE} //TODO:
               isMp={channel.type === EChannelType.DIRECT} //TODO:
@@ -170,6 +181,7 @@ function isOwner(): boolean {
               }}
               currentChannel={currentChannel}
               isProtected={false}
+              isPending={false}
             />
           ))
         }
@@ -180,12 +192,14 @@ function isOwner(): boolean {
             <ChatChannelListElement
               key={channel.channelID}
               channelID={channel.channelID}
+              inviteID={defineInviteID(channel.channelID)}
               channelName={channel.name}
-              isInvite={channel.type === EChannelType.PRIVATE} //TODO:
+              isInvite={false} //TODO:
               isMp={false} //TODO:
               socket={socket}
               isServList={true}
               isOwner={false}
+              isPending={channel.type === EChannelType.PRIVATE}
               onClickFunction={(password?: string) => {
                 if (password != undefined){
                   if(channel.type === EChannelType.PROTECTED)
