@@ -147,7 +147,6 @@ export class ChannelService {
 		});
 		channel.adminList.push(target);
 		await channel.save();
-		await this.chatGateway.EventNotif(target, 'info', 'You have been promoted to an Administrator', channel.name)
 		return channel;
 	}
 
@@ -161,7 +160,6 @@ export class ChannelService {
 		);
 		channel.adminList = channel.adminList.filter((usr) => usr.UserID != target.UserID);
 		await channel.save();
-		await this.chatGateway.EventNotif(target, 'warning', 'You have been demoted from the Administrator', channel.name)
 		return channel;
 	}
 
