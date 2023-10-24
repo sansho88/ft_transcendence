@@ -80,7 +80,7 @@ export class ChannelController {
 	 *
 	 *  ## Path for admin in Channel
 	 *  . Admin
-	 *    - TODO: admin/:channelID
+	 *    - admin/:channelID ---------------------- GET
 	 *  	- admin/add/:channelID/:targetID -------- PUT
 	 *  	- admin/remove/:channelID/:targetID ----- PUT
 	 *
@@ -112,6 +112,20 @@ export class ChannelController {
 	 *    - invite/add/:channelID/:userID --------- PUT
 	 *    - invite/remove/:inviteID --------------- PUT
 	 **/
+
+	/**
+	 * */
+
+	@Get('admin/:channelID')
+	@UseGuards(AuthGuard)
+	async getAdmin(
+		@CurrentUser() user: UserEntity,
+		@Param('channelID', ParseIntPipe) channelID: number,
+	) {
+		return this.channelService.findOne(channelID, ['adminList']).then(channel => channel.adminList);
+	}
+
+
 	@Put('admin/add/:channelID/:targetID')
 	@UseGuards(AuthGuard)
 	async addAdmin(
@@ -121,7 +135,7 @@ export class ChannelController {
 	) {
 		checkLimitID(channelID);
 		checkLimitID(targetID);
-		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
+		let channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
@@ -131,7 +145,9 @@ export class ChannelController {
 				'This user have already administrator power',
 			);
 		}
-		return this.channelService.addAdmin(target, channel);
+		channel = await this.channelService.addAdmin(target, channel);
+		await this.chatGateway.EventNotif(target, 'info', 'You have been promoted to an Administrator', channel.name)
+		return channel;
 	}
 
 	@Put('admin/remove/:channelID/:targetID')
@@ -143,7 +159,7 @@ export class ChannelController {
 	) {
 		checkLimitID(channelID);
 		checkLimitID(targetID);
-		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
+		let channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
@@ -155,7 +171,9 @@ export class ChannelController {
 		}
 		if (target.UserID == channel.owner.UserID)
 			throw new BadRequestException('The target is the ChannelOwner and cannot lost his Administrator Power');
-		return this.channelService.removeAdmin(target, channel);
+		channel = await this.channelService.removeAdmin(target, channel);
+		await this.chatGateway.EventNotif(target, 'warning', 'You have been demoted from the Administrators', channel.name)
+		return channel
 	}
 
 
@@ -186,10 +204,11 @@ export class ChannelController {
 		checkLimitID(targetID);
 		await this.bannedService.update();
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
-		if (!(this.channelService.userIsAdmin(user, channel))) {
+		if (!(this.channelService.userIsAdmin(user, channel)))
 			throw new BadRequestException("You aren't administrator on this channel");
-		}
 		const target = await this.usersService.findOne(targetID);
+		if (channel.owner.UserID === target.UserID)
+			throw new BadRequestException('You cannot ban the channel Owner')
 		await this.channelService.banUser(target, channel, duration);
 		await this.chatGateway.ban(channel, target);
 	}
@@ -207,6 +226,7 @@ export class ChannelController {
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
+		await this.chatGateway.EventNotif(ban.user, 'info', 'You received a pardon for your ban', channel.name);
 		await this.bannedService.pardon(ban);
 	}
 
@@ -237,12 +257,13 @@ export class ChannelController {
 		checkLimitID(targetID);
 		await this.mutedService.update();
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'muteList']);
-		if (!(this.channelService.userIsAdmin(user, channel))) {
+		if (!(this.channelService.userIsAdmin(user, channel)))
 			throw new BadRequestException("You aren't administrator on this channel");
-		}
 		const target = await this.usersService.findOne(targetID);
-		await this.channelService.muteUser(target, channel, duration);
-		await this.chatGateway.mute(channel, target, duration)
+		if (channel.owner.UserID === target.UserID)
+			throw new BadRequestException('You cannot mute the channel Owner')
+		const mute = await this.channelService.muteUser(target, channel, duration);
+		await this.chatGateway.mute(mute.channel, mute.user, duration);
 	}
 
 	@Put('unmute/:muteID')
@@ -258,6 +279,7 @@ export class ChannelController {
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
+		await this.chatGateway.EventNotif(mute.user, 'info', 'You got unmuted', channel.name);
 		await this.mutedService.unmute(mute);
 	}
 
@@ -268,6 +290,7 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@Param('userID', ParseIntPipe) targetID: number,
 	) {
+		console.log('kick : chan' + channelID + ' / target : ' + targetID);
 		checkLimitID(channelID);
 		checkLimitID(targetID);
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList'])
@@ -277,6 +300,8 @@ export class ChannelController {
 		const target = await this.usersService.findOne(targetID);
 		if (!(await this.channelService.userInChannel(target, channel)))
 			throw new BadRequestException('This user isn\'t part of this channel')
+		if (channel.owner.UserID === target.UserID)
+			throw new BadRequestException('You cannot kick the channel Owner')
 		await this.chatGateway.kick(channel, target);
 	}
 
@@ -332,7 +357,9 @@ export class ChannelController {
 	async myInvite(
 		@CurrentUser() user: UserEntity,
 	) {
-		return this.inviteService.findAllReceivedUser(user);
+		return this.usersService.findOne(user.UserID, ['invite']).then((usr) => {
+			return usr.invite
+		})
 	}
 
 	@Get('invite/:channelID')
@@ -382,8 +409,9 @@ export class ChannelController {
 		const invite = await this.inviteService.findOne(inviteID);
 		if (invite == null)
 			throw new BadRequestException('This invite is not created or already accepted');
-		if (invite.sender.UserID != user.UserID && invite.user.UserID != user.UserID)
-			throw new BadRequestException('You cannot remove this invite (only the sender or receiver)');
+		if (invite.sender.UserID != user.UserID)
+			throw new BadRequestException('This invite is not created by you');
+		await this.chatGateway.EventNotif(invite.user, 'info', 'You invitation has been canceled', invite.channel.name);
 		await this.inviteService.remove(invite);
 	}
 

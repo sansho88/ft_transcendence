@@ -81,14 +81,10 @@ export interface IChallenge {
   accepted: boolean;
 }
 
-export interface IFollow {
-  id_user: number;
-  Id_USERS_1: number;
-}
-
-export interface ISubscribe {
-  id_user: number;
-  Id_USERS_1: number;
+export interface IRelationships {
+  followed: IUser[];
+  followers?: IUser[];
+  blocked?: IUser[];
 }
 
 export interface IBlock {
@@ -161,4 +157,11 @@ export interface IInput {
   onChange: any;
   autoComplete: any;
   name: string;
+}
+
+export interface INotif {
+  type: "success" | "error" | "warning" | "info";
+  message: string;
+  title?: string;
+  time?: number;
 }

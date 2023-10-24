@@ -9,7 +9,7 @@ import {
 import {UserEntity} from './user.entity';
 import {ChannelEntity} from './channel.entity';
 
-@Entity('TestBanned')
+@Entity('Banned')
 export class BannedEntity extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	bannedID: number;
