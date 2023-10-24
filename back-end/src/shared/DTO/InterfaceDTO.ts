@@ -1,6 +1,5 @@
 import { EGameMod, userInfoSocket } from "../typesGame";
 import { IUser } from "../types";
-import { IChannel } from "../typesChannel";
 
 export namespace messageDTO {
 	
@@ -58,19 +57,5 @@ export namespace channelsDTO {
 	export interface IChallengeAcceptedDTO {
 		response: boolean;
 		event: string;
-	}
-
-	export interface IBanEntity {
-		bannedID: number;
-		endTime: Date | null;
-		channel: IChannel;
-		user: IUser;
-	}
-
-	export interface IMuteEntity {
-		muteID: number;
-		endTime: Date | null;
-		channel: IChannel;
-		user: IUser;
 	}
 }

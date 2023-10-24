@@ -2,13 +2,13 @@ import {Injectable} from '@nestjs/common';
 import {Matchmaking} from './Matchmaking';
 import {GameSession} from './GameSession';
 import {RemoteSocket, Server, Socket} from 'socket.io';
-import {userInfoSocket, EGameMod} from 'shared/typesGame';
+import {userInfoSocket, EGameMod} from 'src/shared/typesGame';
 import {v4 as uuidv4} from "uuid";
 import {GameService} from '../game.service';
-import { IUser } from 'shared/types';
+import { IUser } from 'src/shared/types';
 import { ChallengeManager } from './ChallengeManager'
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { channelsDTO } from 'shared/DTO/InterfaceDTO';
+import { channelsDTO } from 'src/shared/DTO/InterfaceDTO';
 import { UserEntity } from 'src/entities/user.entity';
 import {UsersService} from "../../module.users/users.service";
 import {UserStatus} from "../../entities/user.entity";

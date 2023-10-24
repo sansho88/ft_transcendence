@@ -387,7 +387,7 @@ export default function Auth({className}: { className?: string }) {
                                         setCurrentStepLogin(EStepLogin.successLogin);*/
                                         connectUser();
                                     }
-                                ));
+                                ) as Partial<IUser>);
                             }
                         })
                         .catch((e) => {
@@ -428,7 +428,7 @@ export default function Auth({className}: { className?: string }) {
                                     else
                                         connectUser();
 
-                                }));
+                                })as Partial<IUser>);
                             }
                         })
                         .catch((e) => {

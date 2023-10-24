@@ -10,19 +10,18 @@ import {
 
 import {RemoteSocket, Server, Socket} from 'socket.io';
 import {ServerGame} from 'src/module.game/server/ServerGame';
-import {wsChatRoutesBack, wsGameRoutes} from 'shared/routesApi';
-import {userInfoSocket} from 'shared/typesGame';
-import {UseGuards} from '@nestjs/common';
+import {wsChatRoutesBack, wsGameRoutes} from 'src/shared/routesApi';
+import {userInfoSocket} from 'src/shared/typesGame';
+import {Param, UseGuards, ValidationPipe} from '@nestjs/common';
 import {UserEntity, UserStatus} from '../entities/user.entity';
 import {CurrentUser} from '../module.auth/indentify.user';
 import {WSAuthGuard, getToken} from "../module.auth/auth.guard";
 import {accessToken} from '../dto/payload';
 import {JwtService} from '@nestjs/jwt';
-import {UsersService} from 'src/module.users/users.service';
-import {CreateChallengeDTOPPipe} from 'src/dto.pipe/channel.dto';
-import {DefaultEventsMap} from 'socket.io/dist/typed-events';
-import {channelsDTO} from 'shared/DTO/InterfaceDTO';
-import {ChatGateway} from "../module.channels/chat.ws";
+import { UsersService } from 'src/module.users/users.service';
+import { CreateChallengeDTOPPipe } from 'src/dto.pipe/channel.dto';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import { channelsDTO } from 'src/shared/DTO/InterfaceDTO';
 
 
 export interface SocketUserList {
