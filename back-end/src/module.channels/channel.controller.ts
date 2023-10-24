@@ -135,7 +135,7 @@ export class ChannelController {
 	) {
 		checkLimitID(channelID);
 		checkLimitID(targetID);
-		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
+		let channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
@@ -145,7 +145,9 @@ export class ChannelController {
 				'This user have already administrator power',
 			);
 		}
-		return this.channelService.addAdmin(target, channel);
+		channel = await this.channelService.addAdmin(target, channel);
+		await this.chatGateway.EventNotif(target, 'info', 'You have been promoted to an Administrator', channel.name)
+		return channel;
 	}
 
 	@Put('admin/remove/:channelID/:targetID')
@@ -157,7 +159,7 @@ export class ChannelController {
 	) {
 		checkLimitID(channelID);
 		checkLimitID(targetID);
-		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
+		let channel = await this.channelService.findOne(channelID, ['adminList', 'userList']);
 		if (!(this.channelService.userIsAdmin(user, channel))) {
 			throw new BadRequestException("You aren't administrator on this channel");
 		}
@@ -169,7 +171,9 @@ export class ChannelController {
 		}
 		if (target.UserID == channel.owner.UserID)
 			throw new BadRequestException('The target is the ChannelOwner and cannot lost his Administrator Power');
-		return this.channelService.removeAdmin(target, channel);
+		channel = await this.channelService.removeAdmin(target, channel);
+		await this.chatGateway.EventNotif(target, 'warning', 'You have been demoted from the Administrators', channel.name)
+		return channel
 	}
 
 
