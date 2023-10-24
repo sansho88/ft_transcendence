@@ -21,7 +21,7 @@ export class InviteEntity extends BaseEntity {
 	@JoinColumn()
 	channel: ChannelEntity;
 
-	@ManyToOne(() => UserEntity)
+	@ManyToOne(() => UserEntity, {eager: true})
 	@JoinColumn()
 	sender: UserEntity;
 }
