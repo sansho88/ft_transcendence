@@ -253,18 +253,25 @@ export namespace strRoutes {
 		return `${serverApi}/${routeMatchmaking}/`
 	};
 
+
+
 // +---------------------------------------------------------------------+
 // |                             CHANNELS                                |
 // +---------------------------------------------------------------------+
 
 export namespace channel {
-	// export const postCreateChannel = () 																								=> {return `${serverApi}/${routeChannels}/create`} use WS event
-	export const getAll = () 																														=> {return `${serverApi}/${routeChannels}/get`};
-	export const getUsersChannel = (channelID: number)																	=> {return `${serverApi}/${routeChannels}/get/list/${channelID}`};
-	// export const getMsgsChannel = (channelID: number, timestamp: number)								=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
-	export const getChannelJoined = ()																									=> {return `${serverApi}/${routeChannels}/channelJoined`};
-	export const getAllMessagesChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/msg/${channelID}`};
-	export const putModifChannel = (channelID: number)																	=> {return `${serverApi}/${routeChannels}/modif/${channelID}`};
+	// export const postCreateChannel = () 																					=> {return `${serverApi}/${routeChannels}/create`} use WS event
+	export const getAll = () 																											=> {return `${serverApi}/${routeChannels}/get`};
+	export const getUsersChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/get/list/${channelID}`};
+	// export const getMsgsChannel = (channelID: number, timestamp: number)					=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
+	export const getChannelJoined = ()																						=> {return `${serverApi}/${routeChannels}/channelJoined`};
+	export const getAllMessagesChannel = (channelID: number)											=> {return `${serverApi}/${routeChannels}/msg/${channelID}`};
+	export const putModifChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/modif/${channelID}`};
+	
+	export const getMyInvite = ()																									=> {return `/channel/myinvite`};
+	export const getInviteChannel = (channelID: number )													=> {return `/channel/invite/${channelID}`};
+	export const putInviteChannelRemove = (inviteID: number )										=> {return `/channel/invite/remove/${inviteID}`};
+	export const putAddInvite = (channelID: number, userID: number)								=> {return `/channel/invite/add/${channelID}/${userID}`};
 
 	export const putMuteUser = (channelID: number, userID: number, duration: number)		=> {return `${serverApi}/${routeChannels}/mute/${channelID}/${userID}/${duration}`};
 	export const putUnmuteUser = (muteID: number)																				=> {return `${serverApi}/${routeChannels}/unmute/${muteID}`};

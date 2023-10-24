@@ -3,12 +3,10 @@
 import React, { useContext, useEffect, useState, useRef, createContext } from 'react'
 import { LoggedContext, SocketContextChat, SocketContextGame, UserContext } from '@/context/globalContext'
 import { IChannel } from '@/shared/typesChannel'
-import { Channel } from './class/Channel'
 import ChatInput from './subComponents/ChatInput'
 import ChatChannelList from './subComponents/ChatChannelList'
 import ChatMessagesList from './subComponents/ChatMessagesList'
 import { Socket } from 'socket.io-client'
-import { ChannelsServerManager } from './class/ChannelsServerManager'
 import { IUser } from '@/shared/types'
 import { wsChatEvents, wsChatListen } from '../api/WsReq'
 import { IChannelEntity } from '@/shared/entities/IChannel.entity'
@@ -19,7 +17,6 @@ import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelP
 import { IMessageEntity } from '@/shared/entities/IMessage.entity'
 import { messageDTO } from '@/shared/DTO/InterfaceDTO'
 import { wsChatRoutesBack } from '@/shared/routesApi'
-import RightClik from './subComponents/RightClik'
 
 
 export default function ChatMaster({className, token, userID}: {className: string, token: string, userID: number}) {
