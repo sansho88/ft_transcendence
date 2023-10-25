@@ -203,6 +203,10 @@ export class WebsocketGatewayGame
 		if (this.isInGame(user))
 			return client.emit('info', 'You are already in game'); //TODO: NOTIF GENERAL
 		const P1: userInfoSocket = {socket: client, user: user};
+		if (this.serverGame.userInMatchmakingGhost(P1))
+			this.serverGame.removePlayerToMatchmakingGhost(P1);
+		if (this.serverGame.userInMatchmaking(P1))
+			this.serverGame.removePlayerToMatchmaking(P1);
 		const sockersChallenged: RemoteSocket<DefaultEventsMap, any>[] = await this.getSocket(data.targetID);
 		const P2: UserEntity = await this.usersService.findOne(data.targetID)
 		sockersChallenged.forEach((socketLst) => {

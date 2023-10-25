@@ -157,4 +157,10 @@ export class ServerGame {
 	}
 
 
+	userInMatchmakingGhost(player: userInfoSocket) {
+		return this.matchmakingGhost.containsUser(player)
+	}
+	userInMatchmaking(player: userInfoSocket) {
+		return this.matchmaking.containsUser(player);
+	}
 }

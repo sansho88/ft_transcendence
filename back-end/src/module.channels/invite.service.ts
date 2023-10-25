@@ -45,13 +45,12 @@ export class InviteService {
 	}
 
 	findAll() {
-		return this.inviteRepository.find({relations: ['channel', 'user', 'sender']});
+		return this.inviteRepository.find();
 	}
 
 	findOne(inviteID: number) {
 		return this.inviteRepository.findOne({
 			where: {inviteID},
-			relations: ['user', 'channel', 'sender'],
 		});
 	}
 

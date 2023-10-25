@@ -15,9 +15,10 @@ interface ProfileProps{
     avatarSize: string | undefined;
     showStats?: boolean;
     isMainProfile?: boolean;
+    isOwner?: boolean;
 }
 
-const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize, isEditable, showStats, isMainProfile})=>{
+const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize, isEditable, showStats, isMainProfile, isOwner})=>{
 
     const [modifiedNick, setNickText] = useState<string>(user.nickname ? user.nickname : user.login);
     const [editMode, setEditMode] = useState(false);
@@ -31,6 +32,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
 
     useEffect(() => {
         setStatusColor(getEnumNameByIndex(Colors, user.status));
+        return;
     }, [user.login]);
 
     socketChatRef.current?.on("userUpdate", (data: IUser) => {
@@ -40,6 +42,8 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
             setStatusColor(getEnumNameByIndex(Colors, data.status));
         }
     });
+
+    socketChatRef.current?.off("userUpdate", () => {});
 
     useEffect(() => {
         if (isNicknameUsed && modifiedNick !== user.nickname) {
@@ -164,7 +168,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
                     top: "15px",
                 }
             }>
-                    <h2 id={"login"} style={{ color: "darkgrey", marginTop: "0", textShadow: "1px 1px 5px darkgrey"}}>{user.login}</h2>
+                    <h2 id={"login"} style={{ color: "darkgrey", marginTop: "0", textShadow: "1px 1px 5px darkgrey"}}>{user.login}{isOwner ? " 👑":""}</h2>
                     {editedNick()}
 
                     <p id={"status"} style={{

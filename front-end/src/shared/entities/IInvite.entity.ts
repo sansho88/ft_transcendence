@@ -1,9 +1,11 @@
 import {IUserEntity} from './IUser.entity';
 import {IChannelEntity} from './IChannel.entity';
+import { IUser } from '../types';
+import { IChannel } from '../typesChannel';
 
 export interface IInviteEntity {
 	inviteID: number;
-	user: IUserEntity;
-	channel: IChannelEntity;
-	sender: IUserEntity;
+	user: IUser;
+	channel: IChannel;
+	sender: IUser;
 }

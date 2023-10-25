@@ -1,4 +1,4 @@
-import {IsNotEmpty, IsNumber, IsString, Max, Min} from 'class-validator';
+import {IsNotEmpty, IsNumber, IsString, Length, Max, Min} from 'class-validator';
 
 export class SendMessageDTOPipe {
 	@IsNumber()
@@ -9,5 +9,6 @@ export class SendMessageDTOPipe {
 
 	@IsString()
 	@IsNotEmpty()
+	@Length(0, 140)
 	content: string;
 }
