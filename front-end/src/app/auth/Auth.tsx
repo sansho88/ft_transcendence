@@ -176,7 +176,7 @@ export default function Auth({className}: { className?: string }) {
         return (
             <div className='flex flex-col justify-center items-center text-white my-8'>
                 <input type={"text"} name={"username"} style={{display: "none"}} autoComplete={"username"} />
-                <input className='inputLogin' type="password" value={passwordInput} autoComplete={"current-password"} name={"password"}
+                <input className='inputLogin' type="password" value={passwordInput} autoComplete={"current-password"} name={"password"} minLength={1} maxLength={20}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     setPasswordInput(e.target.value);
                                 }}

@@ -122,7 +122,7 @@ export class ChannelController {
 		@CurrentUser() user: UserEntity,
 		@Param('channelID', ParseIntPipe) channelID: number,
 	) {
-		return this.channelService.findOne(channelID, ['adminList']).then(channel => channel.adminList);
+		return this.channelService.findOne(channelID, ['adminList'], true).then(channel => channel.adminList);
 	}
 
 

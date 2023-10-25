@@ -52,7 +52,7 @@ export interface IGameSessionInfo {
   launchTime        : Date;
   startInitElement  : ISizeGameElements;
   ballIsHidden      : boolean;
-  // spectators: Partial<IUser>[];
+  gameMod           : EGameMod;
 }
 
 

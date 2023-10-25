@@ -133,12 +133,6 @@ export class GameSession {
 
 		this.table.maxPosP1 = this.table.tableSize.y - this.table.sizeP1.y;
 		this.table.maxPosP2 = this.table.tableSize.y - this.table.sizeP2.y;
-		//////////SET GAME OBJ FOR DATABASE //////////////
-		// this.historyGame.start_date = startDate;
-		//TODO update GAME TYPE / creer dans la db et recuperer id de session
-		//TODO this.historyGame.Id_GAME = requetes API axios ? websocket ?
-		////////////////////////////////////////////////////
-
 		/*************************************************************************/
 		/////////////////////SETUP TRAINNING GAME ////////////////////////////////
 		/*************************************************************************/
@@ -182,6 +176,7 @@ export class GameSession {
 			launchTime: startDate,
 			startInitElement: this.initElements,
 			ballIsHidden: false,
+			gameMod: this.gameMod
 		}
 
 
@@ -194,7 +189,6 @@ export class GameSession {
 			P1.socket.on(`${this.gameRoomEvent}ready`, () => {
 				this.isP1Ready = true;
 				this.startCountdownIfPlayersReady();
-				//console.log(`${this.gameRoomEvent}: player 1 READY`);
 			})
 		}
 
@@ -208,7 +202,6 @@ export class GameSession {
 		P2.socket.on(`${this.gameRoomEvent}ready`, () => {
 			this.isP2Ready = true;
 			this.startCountdownIfPlayersReady();
-			//console.log(`${this.gameRoomEvent}: player 2 READY`);
 		})
 
 		if (this.gameMod !== PODGAME.EGameMod.trainning) {
@@ -248,25 +241,19 @@ export class GameSession {
 		//DEV EVENT cheat goal system
 		P1.socket.on(`${this.gameRoomEvent}GOAL`, () => {
 			this.addGoalToPlayer(P1);
-			//console.log(`P1 GOALLLL`);
-			//console.log(`SCORE: ${this.table.scoreP1} | ${this.table.scoreP2}`);
 		});
 		P2.socket.on(`${this.gameRoomEvent}GOAL`, () => {
 			this.addGoalToPlayer(P2);
-			//console.log(`P2 GOALLLL`);
-			//console.log(`SCORE: ${this.table.scoreP1} | ${this.table.scoreP2}`);
 		});
 
 
 		P1.socket.on(`${this.gameRoomEvent}STOP`, () => {
-			//console.log(`Player 1 has given up`);
 			if (this.table.scoreP1 < this.scoreLimit && this.table.scoreP2 < this.scoreLimit) {
 				this.table.scoreP2 = this.scoreLimit;
 				this.isEndGameCheckScoring();//faire gagner le joueur adverse
 			}
 		});
 		P2.socket.on(`${this.gameRoomEvent}STOP`, () => {
-			//console.log(`Player 2 has given up`);
 			if (this.table.scoreP1 < this.scoreLimit && this.table.scoreP2 < this.scoreLimit) {
 				this.table.scoreP1 = this.scoreLimit;
 				this.isEndGameCheckScoring();//faire gagner le joueur adverse
@@ -295,7 +282,6 @@ export class GameSession {
 				'infoGameSession',
 				this.infoGameSession
 			);
-		//console.log(`INFO GAME SESSION START INIT : ${JSON.stringify(this.infoGameSession.startInitElement)}`)
 		this.sendUpdateTable(); //lancer setInterval table
 	}
 
@@ -310,7 +296,6 @@ export class GameSession {
 		else
 			this.table.ballIsHidden = false;
 		if (this.hitCounter % this.ballNumberHitBtwGhostZoneUp) {
-			//console.log(`La ghost zone s'agrandie : ${this.ghostZoneSize}`)
 			if (this.ghostZoneSize < this.ghostZoneSizeMax)
 				this.ghostZoneSize *= this.ghostZoneSizeCoef;
 			else
@@ -380,14 +365,10 @@ export class GameSession {
 		if (this.hitCounter % this.ballNumberHitBtwAcceleration === 0 && this.ballSpeed <= this.ballSpeedMax) {
 			this.ballSpeed *= this.ballAccelerationFactor;
 			this.speedPaddle *= this.paddleAccelerationFactor;
-			//console.log(`${this.gameRoomEvent}: la balle accelere ! (ballSpeed:${this.ballSpeed})`)
 		}
 	}
 
 	private handleBallCollisions() {
-
-		//re declaration local pour y voir plus claire dans les if
-		//plutot qu'une foret de "this.table.xxx.xx" ^^
 		const ballPos = this.table.positionBall;
 		const ballSize = this.table.sizeBall;
 		const P1pos = this.table.positionP1v;
@@ -475,7 +456,6 @@ export class GameSession {
 	private ballEngagement() {
 		const angleRandom: number = (Math.random() * 2 - 1);
 		let dx: number;
-		// //console.log(`Random direction for ball engagement = ${angleRandom}`);
 
 		if (this.lastPlayerScore === this.player1)
 			dx = 1;
@@ -512,7 +492,6 @@ export class GameSession {
 			setTimeout(() => {
 				this.ballEngagement();
 			}, 2000)
-			//TODO STOP AND RELAUNCH BALL
 		}
 
 	}
@@ -550,7 +529,7 @@ export class GameSession {
 	//message de fin de game et reset de la game
 	private messageEndGameAndReset() {
 		this.cleanup()
-		if (this.gameMod !== PODGAME.EGameMod.classic) {
+		if (this.gameMod !== PODGAME.EGameMod.classic && this.gameMod !== PODGAME.EGameMod.ghost) {
 			this.table.sizeP1 = this.classicPaddleSize;
 			this.table.sizeP2 = this.classicPaddleSize;
 			this.serverSocket.to(this.gameRoomEvent).emit('updateTable', this.table);
@@ -574,15 +553,13 @@ export class GameSession {
 			else
 				return `${this.winner.user.nickname} won this game\n${this.table.scoreP1} - ${this.table.scoreP2}`
 		}
-		// console.error(`endMessage`)
 		this.serverSocket.to(this.gameRoomEvent).emit('endgame', endMessage());
 		setTimeout(() => {
 				this.serverSocket.to(this.gameRoomEvent).emit('reset');
-				//console.log('reset');
 				this.player1.socket.leave(this.gameRoomEvent);
 				this.player2.socket.leave(this.gameRoomEvent);
 			}
-			, 4000);
+			, 2000);
 	}
 
 	//Enclenche la fin du jeu
@@ -594,14 +571,12 @@ export class GameSession {
 			this.serverSocket
 				.to(this.gameRoomEvent)
 				.emit('info', `${this.player1.user.nickname} won this game`);
-			//console.log(`${this.player1.user.nickname} won this game`);
 		} else {
 			this.winner = this.player2;
 			this.looser = this.player1;
 			this.serverSocket
 				.to(this.gameRoomEvent)
 				.emit('info', `${this.player2.user.nickname} won this game`);
-			//console.log(`${this.player2.user.nickname} won this game`);
 		}
 		if (this.gameMod != EGameMod.trainning) {
 			this.gameService.create(this.player1.user.UserID, this.player2.user.UserID, this.table.scoreP1, this.table.scoreP2, this.startDate);
@@ -634,7 +609,6 @@ export class GameSession {
 	}
 
 	private startGame() {
-		//console.log(`${this.gameRoomEvent}: le jeu commence`);
 		this.ballEngagement();
 		this.isGameRunning = true;
 		this.positionManagement();
@@ -655,11 +629,6 @@ export class GameSession {
 		}
 	}
 
-	//coder la logique de coup d'envoi pour le start et
-	// private restartAfterGoal(goaler: PODGAME.userInfoSocket) {
-
-	// }
-
 	///////// ACCESSORS ////////////
 	public getGameId(): number {
 		return this.game_id;
@@ -679,7 +648,7 @@ export class GameSession {
 
 	public setSocketPlayer1(newSocket: Socket) {
 		this.player1.socket = newSocket;
-	} //pour gerer une deco/reconnection avec son new socket?
+	} 
 
 	public setSocketPlayer2(newSocket: Socket) {
 		this.player2.socket = newSocket;
