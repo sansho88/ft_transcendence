@@ -6,14 +6,13 @@ import * as apiReq from "@/components/api/ApiReq";
 import DraggableComponent from "@/components/draggableComponent";
 import QRCode from 'qrcode.react';
 import {UserContext} from "@/context/globalContext";
-import { Router } from "next/router";
 import { getUserMe } from "@/app/auth/Auth";
 
 
 interface userData2Fa {
     hasActive2FA: boolean
 }
-const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) => {
+const Button2FA: React.FC<userData2Fa> = ({children, hasActive2FA}) => {
 
 	const [qrCodeData, setQrCodeData] = useState("");
   	const [qrCodeGenerated, setQrCodeGenerated] = useState(false);
@@ -69,7 +68,7 @@ const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) =
                 NotificationManager.error("Wrong 2FA code");
                 setIsChecked(false);
             }
-        }).catch((err) => {
+        }).catch(() => {
             NotificationManager.error("Wrong 2FA code");
             setIsChecked(false);
         });
@@ -84,7 +83,7 @@ const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) =
                     if (res) {
                         res.has_2fa = false;
                         setUserContext(res);
-                        NotificationManager.success(`2FA activated on ${res.login}`);
+                        NotificationManager.success(`2FA turned off on ${res.login}`);
                     }
                 });
                 setQrCodeGenerated(false);
@@ -95,7 +94,7 @@ const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) =
             else {
                 NotificationManager.error(`Wrong Deactivation 2FA code.`);
             }
-		}).catch((err) => {
+		}).catch(() => {
 			NotificationManager.error(`Wrong Deactivation 2FA code.`);
 		});
 	}
@@ -151,7 +150,7 @@ const Button2FA: React.FC<userData2Fa> = ({className, children, hasActive2FA}) =
 
     }
 
-    const handleCheckboxChange = (event) => {
+    const handleCheckboxChange = () => {
     };
 
     return (

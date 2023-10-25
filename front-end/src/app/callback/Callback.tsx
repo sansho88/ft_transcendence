@@ -1,11 +1,8 @@
 'use client'
-import React, { useEffect,useContext, useState } from 'react'
+import React, { useEffect} from 'react'
 
 import * as apiReq from '@/components/api/ApiReq'
-import * as POD from "@/shared/types";
-import {LoggedContext, SocketContextChat, SocketContextGame, UserContext} from '@/context/globalContext';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
-import { getUserMe } from '../auth/Auth';
 import * as ClipLoader from 'react-spinners'
 import { useRouter } from 'next/navigation';
 
@@ -13,16 +10,7 @@ import { useRouter } from 'next/navigation';
 
 
 export default function Callback() {
-
-	const {userContext, setUserContext} = useContext(UserContext);
-	const {setLogged} = useContext(LoggedContext);
-	// const [isLogged, setIsLogged] = useState<boolean | null>(null);
-	const socketChat = useContext(SocketContextChat);
-	const socketGame = useContext(SocketContextGame);
-	const [isSignInMode, setIsSignInMode] = useState(false);
-
 	const router = useRouter();
-
 
 	enum authErrorState{
 		emptyLogin,
@@ -69,9 +57,10 @@ export default function Callback() {
 					router.push('/home');
 		}
 	})
-	.catch((e) => {
+	.catch(() => {
 			// LoggedFailed(e.response.status); // pas adapter car dit mdp incoorect si echoue
 			router.push('/auth');
+			alert("Failed to connect to 42 API or wrong 2FA code");
 			return;
 		})
 	return;

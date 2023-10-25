@@ -125,22 +125,26 @@ body {
 }
 
 .welcome .welcome-msg{
-
+    position: relative;
+    top: -10vh;
     height: auto;
     background: none;
     font-size: 5vh;
     font-family: MeromSans-Regular, sans-serif;
     word-wrap: break-word;
+    margin-bottom: 1vh;
     /*box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;*/
 }
 
 .welcome .welcome-title{
-
+    position: relative;
+    top: -50px;
     height: auto;
     width: 100%;
     font-size: 10vh;
     font-family: MeromSans-Regular, sans-serif;
     word-wrap: break-word;
+    margin-bottom: 1vh;
 }
 
 .welcome-title .button-login{
