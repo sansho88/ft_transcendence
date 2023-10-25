@@ -14,7 +14,7 @@ dev: build
 	$(COMPOSE) up
 
 build:
-	cp -r front-end/src/shared back-end/src/shared 
+	cp -r front-end/src/shared back-end/src
 	$(COMPOSE) build --parallel
 
 start:

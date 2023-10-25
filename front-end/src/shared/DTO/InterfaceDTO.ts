@@ -1,8 +1,7 @@
-import { EGameMod, userInfoSocket } from "../typesGame";
+import { EGameMod } from "../typesGame";
 import { IUser } from "../types";
-import { IUserEntity } from "shared/entities/IUser.entity";
-import { IChannelEntity } from "shared/entities/IChannel.entity";
-import { UserEntity } from "src/entities/user.entity";
+import { IUserEntity } from "../entities/IUser.entity";
+import { IChannelEntity } from "../entities/IChannel.entity";
 import { IChannel } from "../typesChannel";
 
 export namespace messageDTO {
