@@ -1,4 +1,4 @@
-import {Injectable} from '@nestjs/common';
+import {forwardRef, Inject, Injectable} from '@nestjs/common';
 import {Matchmaking} from './Matchmaking';
 import {GameSession} from './GameSession';
 import {RemoteSocket, Server, Socket} from 'socket.io';
@@ -16,6 +16,7 @@ import {UserStatus} from "../../entities/user.entity";
 @Injectable()
 export class ServerGame {
 	constructor(
+		@Inject(forwardRef(() => GameService))
 		private gameService: GameService,
 		private usersService: UsersService,
 	) {
@@ -137,7 +138,7 @@ export class ServerGame {
 		}
 
 	}
-	
+
 	public declineChallenge(userP2: UserEntity, event: string){
 		const index = this.challengeList.findIndex((challenge) => challenge.getEventChallenge() === event)
 		if (index >= 0){
@@ -152,5 +153,14 @@ export class ServerGame {
 	}
 	userInMatchmaking(player: userInfoSocket) {
 		return this.matchmaking.containsUser(player);
+	}
+
+	userInGame(userID: number){
+		return !!this.gameSession
+			.filter(game=> game.getIsGameRunning() == true)
+			.find(game => game.getPlayer1().user.UserID === userID || game.getPlayer2().user.UserID == userID)
+			|| !!this.trainningSession
+			.filter(game=> game.getIsGameRunning() == true)
+			.find(game => game.getPlayer1().user.UserID === userID)
 	}
 }

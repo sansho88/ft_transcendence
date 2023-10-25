@@ -92,17 +92,18 @@ export class ChatGateway
 			.catch(() => null);
 		if (user == null) return client.disconnect();
 
-		if (typeof user.channelJoined === 'undefined') return;
-		client.join(
-			user.channelJoined.map((chan) => {
-				return `${chan.channelID}`;
-			}),
-		);
-		client.join(
-			user.subscribed.map(follow => `user.${follow.UserID}`)
-		)
-		this.server.to(`user.${user.UserID}`).emit('notifyEvent', `User ${user.login} is online`)
-		await this.usersService.userStatus(user, UserStatus.ONLINE);
+		if (typeof user.channelJoined !== 'undefined')
+			client.join(
+				user.channelJoined.map((chan) => {
+					return `${chan.channelID}`;
+				}),
+			);
+		if (typeof user.subscribed !== 'undefined')
+			client.join(
+				user.subscribed.map(follow => `user.${follow.UserID}`)
+			)
+		if (user.status === UserStatus.OFFLINE)
+			await this.usersService.userStatus(user, UserStatus.ONLINE);
 		this.socketUserList.push({
 			socketID: client.id,
 			userID: userID,
@@ -451,6 +452,6 @@ export class ChatGateway
 
 	async updateUserStatusEmit(user: UserEntity) {
 		console.log('TEST  THERE ');
-		return this.server.emit('userUpdate', user)
+		return this.server.emit('userUpdate', <any>user)
 	}
 }
