@@ -112,8 +112,6 @@ export class ServerGame {
 	}
 
 	public createChallenge(server: Server, challenger: userInfoSocket, challenged: IUser, gameMod: EGameMod, sockersChallenged: RemoteSocket<DefaultEventsMap, any>[]) {
-		// //console.log('debug challengerID = ' +  JSON.stringify(challenger.user))
-	
 		this.cleanChallenge();
 		// //console.log('debug challenge list length: ' , this.challengeList.length)
 		if (!this.alreadyInChallenge(challenger.user.UserID))
