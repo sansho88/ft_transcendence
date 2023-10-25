@@ -34,11 +34,14 @@ const PutDuration: React.FC<PutDurationProps> = ({ user, channelID, handleType, 
 	}
 
 	function handleDuration() {
-		if (!duration || duration <= 0 || !channelID) return;
+		if (duration < 0 || !channelID) return;
 		if (handleType === DurationType.Ban) {
 			apiReq.putApi.putBanUser(channelID, user.UserID, duration * 60)
 				.then(() => {
-					NotificationManager.success(`You banned ${user.nickname} (${user.login}) for ${duration} minutes.`);
+					if (!duration)
+						NotificationManager.success(`You banned ${user.nickname} (${user.login}) for infinite.`);
+					else
+						NotificationManager.success(`You banned ${user.nickname} (${user.login}) for ${duration} minute${duration > 1 ? 's' : ''}.`);
 					setRefresh(true);
 				})
 				.catch(() => {
@@ -48,7 +51,10 @@ const PutDuration: React.FC<PutDurationProps> = ({ user, channelID, handleType, 
 			else if (handleType === DurationType.Mute) {
 				apiReq.putApi.putMuteUser(channelID, user.UserID, duration* 60)
 				.then(() => {
-					NotificationManager.success(`You muted ${user.nickname} (${user.login}) for ${duration} minutes.`);
+					if (!duration)
+						NotificationManager.success(`You muted ${user.nickname} (${user.login}) for infinite.`);
+					else
+						NotificationManager.success(`You muted ${user.nickname} (${user.login}) for ${duration} minute${duration > 1 ? 's' : ''}.`);
 					setRefresh(true);
 				})
 				.catch(() => {
@@ -71,6 +77,11 @@ const PutDuration: React.FC<PutDurationProps> = ({ user, channelID, handleType, 
 						placeholder="duration in minutes"
 						value={duration}
 						onChange={(e) => changeDuration(e)}
+						onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+							if (e.key === "Enter") {
+								handleDuration();
+							}
+						}}
 					/>
 					{isVisible && (<button onClick={handleDuration} style={{ verticalAlign: "-webkit-baseline-middle" }}>
 						<Image
