@@ -16,6 +16,7 @@ import MatchHistory from "@/components/MatchHistoryComponent";
 import Leaderboard from "@/components/LeaderboardComponent";
 import '@/components/chat/chat.css';
 import {INotif} from "@/shared/types";
+import { Socket } from "socket.io";
 
 
 const HomePage = () => {
@@ -29,6 +30,42 @@ const HomePage = () => {
     const socketGame = useContext(SocketContextGame);
 
 
+    function handleNotif(data: INotif) {
+        switch (data.type) { // Fixme: Happened twice despite sending it only once
+            case "success":
+                NotificationManager.success(data.message, data.title, data.time);
+                break;
+            case "error":
+                NotificationManager.error(data.message, data.title, data.time);
+                break;
+            case "warning":
+                NotificationManager.warning(data.message, data.title, data.time);
+                break;
+            case "info":
+                NotificationManager.info(data.message, data.title, data.time);
+                break;
+            default:
+                console.error("Unknown notif type received: " + JSON.stringify(data));
+        }
+    }
+
+    function handleListenNotifON() {
+        socketChat?.on("notif", (data: INotif) => {
+            handleNotif(data);
+        })
+        socketGame?.on("notif", (data: INotif) => {
+            handleNotif(data);
+        })
+    }
+    function handleListenNotifOFF() {
+        socketChat?.off("notif", (data: INotif) => {
+            handleNotif(data);
+        })
+        socketGame?.off("notif", (data: INotif) => {
+            handleNotif(data);
+        })
+    }
+    
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token)
@@ -47,48 +84,15 @@ const HomePage = () => {
         }
         localStorage.setItem('userContext', JSON.stringify(userContext));
 
+        handleListenNotifON();
         return(() => {
             window.location.reload();
+            handleListenNotifOFF();
+            
         })
     }, []);
 
-    socketChat?.on("notif", (data: INotif) => {
-        switch (data.type) { // Fixme: Happened twice despite sending it only once
-            case "success":
-                NotificationManager.success(data.message, data.title, data.time);
-                break;
-            case "error":
-                NotificationManager.error(data.message, data.title, data.time);
-                break;
-            case "warning":
-                NotificationManager.warning(data.message, data.title, data.time);
-                break;
-            case "info":
-                NotificationManager.info(data.message, data.title, data.time);
-                break;
-            default:
-                console.error("Unknown notif type received: " + JSON.stringify(data));
-        }
-    });
-
-    socketGame?.on("notif", (data: INotif) => {
-        switch (data.type) {
-            case "success":
-                NotificationManager.success(data.message, data.title, data.time);
-                break;
-            case "error":
-                NotificationManager.error(data.message, data.title, data.time);
-                break;
-            case "warning":
-                NotificationManager.warning(data.message, data.title, data.time);
-                break;
-            case "info":
-                NotificationManager.info(data.message, data.title, data.time);
-                break;
-            default:
-                console.error("Unknown notif type received: " + JSON.stringify(data));
-        }
-    });
+    
 
 
     return (
