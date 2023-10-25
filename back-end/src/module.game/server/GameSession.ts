@@ -182,6 +182,7 @@ export class GameSession {
 			launchTime: startDate,
 			startInitElement: this.initElements,
 			ballIsHidden: false,
+			gameMod: this.gameMod
 		}
 
 
@@ -550,7 +551,7 @@ export class GameSession {
 	//message de fin de game et reset de la game
 	private messageEndGameAndReset() {
 		this.cleanup()
-		if (this.gameMod !== PODGAME.EGameMod.classic) {
+		if (this.gameMod !== PODGAME.EGameMod.classic && this.gameMod !== PODGAME.EGameMod.ghost) {
 			this.table.sizeP1 = this.classicPaddleSize;
 			this.table.sizeP2 = this.classicPaddleSize;
 			this.serverSocket.to(this.gameRoomEvent).emit('updateTable', this.table);
@@ -582,7 +583,7 @@ export class GameSession {
 				this.player1.socket.leave(this.gameRoomEvent);
 				this.player2.socket.leave(this.gameRoomEvent);
 			}
-			, 4000);
+			, 2000);
 	}
 
 	//Enclenche la fin du jeu

@@ -142,13 +142,13 @@ export default function Game({className, token}: {className: string, token: stri
           console.log(`WS info recu: ${JSON.stringify(data)}`);
         })
 
-        // socketRef.current?.on('challenge', (data: string) => {
+// socketRef.current?.on('challenge', (data: string) => {
         //   console.log(`WS challenge recu: ${JSON.stringify(data)}`);
         //   setChallengeEvent(data);
         // })
     
         socketRef.current?.on('infoGameSession', (data: PODGAME.IGameSessionInfo) => {
-          // tableServerCoef.current = {x: data.startInitElement.tableServerSize.x / window. //taille en x de la div parent au component}
+// tableServerCoef.current = {x: data.startInitElement.tableServerSize.x / window. //taille en x de la div parent au component}
           setNameGameSession(data.gameName);
           setUserP1(data.player1);
           setUserP2(data.player2);
@@ -156,12 +156,13 @@ export default function Game({className, token}: {className: string, token: stri
           setP1Position({x: data.startInitElement.paddleP1Pos.x, y: data.startInitElement.paddleP1Pos.y})
           setP2Position({x: data.startInitElement.paddleP2Pos.x, y: data.startInitElement.paddleP2Pos.y})
           setBallIsHidden(data.ballIsHidden)
+          gameMod.current = data.gameMod;
           console.log(`WS name session recu: ${JSON.stringify(data)}`);
         })
     
         //client 
         socketRef.current?.on('gameFind', (data) => {
-          if (stepCurrentSession === EStatusFrontGame.matchmakingRequest) {
+          if (stepCurrentSession === EStatusFrontGame.matchmakingRequest || stepCurrentSession === EStatusFrontGame.challengeRequest) {
             setStepCurrentSession(EStatusFrontGame.gameSessionFind)
           }
           setRemoteEvent(data.remoteEvent)
@@ -208,7 +209,7 @@ export default function Game({className, token}: {className: string, token: stri
               y: (offsetHeight / 2)
             }));;
           }
-          setInfoMessage(data);
+                    setInfoMessage(data);
           console.log(`WS endgame: ${JSON.stringify(data)}`);
             NotificationManager.success(JSON.stringify(data), "GAME OVER");
         })
@@ -375,7 +376,7 @@ export default function Game({className, token}: {className: string, token: stri
         // transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
         borderRadius: '1%',
     }} >
-      {/* <div className=' bg-red-500' style={{
+{/* <div className=' bg-red-500' style={{
         position: 'absolute',
         width: `800px`,
         height: `1px`,
@@ -398,7 +399,7 @@ export default function Game({className, token}: {className: string, token: stri
 	const Player = ({className, position, refDiv}: 
 	  {className?: string, position: 'left' | 'right', refDiv: React.RefObject<HTMLDivElement>}) 
 	    :React.JSX.Element => {
-        const textP1: string = gameMod.current === PODGAME.EGameMod.trainning ? `your record` : `${userP1.nickname}`;
+                const textP1: string = gameMod.current === PODGAME.EGameMod.trainning ? `your record` : `${userP1.nickname}`;
     return (
       <>
         {position === 'left' ? 
