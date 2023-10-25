@@ -456,4 +456,13 @@ export class ChatGateway
 		console.log('TEST  THERE ');
 		return this.server.emit('userUpdate', user)
 	}
+
+	async unblock(user: UserEntity, target: UserEntity) {
+		const socketList = await this.getSocket(user.UserID);
+		this.emitSocketLst(socketList, 'block', target)
+	}
+	async block(user: UserEntity, target: UserEntity) {
+		const socketList = await this.getSocket(user.UserID);
+		this.emitSocketLst(socketList, 'unblock', target)
+	}
 }
