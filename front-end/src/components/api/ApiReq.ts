@@ -122,6 +122,12 @@ export namespace getApi {
 		});
 	}
 
+	export const getAllAdminFromChannel = (channelID: number): Promise<{data: channelsDTO.IAdminEntity[]}> => {
+		return axiosInstance.get(`${strRoutes.channel.getAllAdminFromChannel(channelID)}`, {
+			headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
+		});
+	}
+
 	export const getAllMyFollowers = (): Promise<{data:IUser[]}> => {
 
 		return axiosInstance.get(`${strRoutes.relationships.getAllMyFollowers()}`, updateAxiosInstance());
@@ -231,6 +237,8 @@ export namespace putApi {
 	export const putBanUser = (channelID: number, userID: number, duration: number) => {return axiosInstance.put(`${strRoutes.channel.putBanUser(channelID, userID, duration)}`, {}, updateAxiosInstance())}
 	export const putUnbanUser = (banID: number) => {return axiosInstance.put(`${strRoutes.channel.putUnbanUser(banID)}`, {}, updateAxiosInstance())}
 
+	export const putGrantAdmin = (channelID: number, userID: number) => {return axiosInstance.put(`${strRoutes.channel.putGrantAdmin(channelID, userID)}`, {}, updateAxiosInstance())}
+	export const putRevokeAdmin = (channelID: number, userID: number) => {return axiosInstance.put(`${strRoutes.channel.putRevokeAdmin(channelID, userID)}`, {}, updateAxiosInstance())}
 }
 
 export namespace deleteApi {

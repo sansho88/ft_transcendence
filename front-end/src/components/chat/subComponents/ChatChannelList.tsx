@@ -1,5 +1,6 @@
 'use client'
 
+
 import React, {useState, useLayoutEffect, useEffect} from 'react'
 import ChatChannelListElement from './elements/ChatChannelListElement'
 import Image from "next/image";
@@ -31,21 +32,23 @@ export default function ChatChannelList({className, socket, channels, setCurrent
   const [isPopupChannelsVisible, setPopupChannelVisible] = useState(false);
   const [isPopupSettingsVisible, setPopupSettingsVisible] = useState(false);
   const [isPopupUsersVisible, setPopupUsersVisible] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const actualChannel = channels.find(channel => channel.channelID === currentChannel);
 
+useEffect(() => {
+  if (actualChannel === undefined) return;
+  apiReq.getApi.getAllAdminFromChannel(currentChannel).then((res) => {
+    const adminList: channelsDTO.IAdminEntity[] = res.data;
+    if (adminList && adminList.find(admin => admin.UserID === userID) !== undefined)
+      setIsAdmin(true);
+    else
+      setIsAdmin(false);
+  })
+  .catch(() => {
+    setIsAdmin(false);
+  })
+}, [actualChannel])
 
-function isOwner(): boolean {
-
-    if (channels &&  channels.length > 0)
-        {
-          const tchan = channels.findIndex((channel) => channel.channelID === currentChannel)
-          if (channels[tchan].type !== EChannelType.DIRECT)
-            return channels[tchan].owner.UserID === userID
-          else
-            return false
-        }
-    return false
-}
   const addChannel = () => {
     return (
       <>
@@ -53,6 +56,8 @@ function isOwner(): boolean {
         <button onClick={() => {setPopupChannelVisible(!isPopupChannelsVisible)
             if(isPopupSettingsVisible)
                 setPopupSettingsVisible(false)
+            if (isPopupUsersVisible)
+                setPopupUsersVisible(false)
         }}>
 
           <Image
@@ -83,6 +88,8 @@ function isOwner(): boolean {
                   setPopupSettingsVisible(!isPopupSettingsVisible);
                   if(isPopupChannelsVisible)
                       setPopupChannelVisible(false)
+                  if (isPopupUsersVisible)
+                      setPopupUsersVisible(false)
                       }}>
                   <Image
                       src="/settings.svg"
@@ -115,8 +122,9 @@ function isOwner(): boolean {
                                               avatarSize={"medium"}
                                               usersList={`users_from_channel_${currentChannel}`}
                                               showUserProps={true}
-                                              adminMode={isOwner()}
                                               channelID={currentChannel}
+                                              userID={userID}
+                                              buttonVisibility={{setPopupChannelVisible, setPopupSettingsVisible, setPopupUsersVisible, isPopupChannelsVisible, isPopupSettingsVisible, isPopupUsersVisible}}
                 /> }
 
             </>
@@ -230,8 +238,8 @@ function isOwner(): boolean {
 			</div>
 			{!isServerList &&
           <div className='chat_channel_buttons'>
-              <span>{addChannel()}</span> <span
-              style={{marginLeft: "10%"}}>{actualChannel?.type !== EChannelType.DIRECT && actualChannel?.owner.UserID == userID && paramChannel()}</span>
+              <span>{addChannel()}</span> <span>
+                {actualChannel?.type !== EChannelType.DIRECT && actualChannel?.owner.UserID == userID && paramChannel()}</span>
               <span>{showUsersInChannel()}</span>
           </div>}
 		</div>
