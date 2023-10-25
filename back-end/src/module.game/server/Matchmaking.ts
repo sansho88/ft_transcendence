@@ -22,7 +22,7 @@ export class Matchmaking {
 	}
 
 	//for check double addition protection in addUser
-	private containsUser(user: userInfoSocket): boolean {
+	public containsUser(user: userInfoSocket): boolean {
 		return this.userTab.some(element => element.user.UserID === user.user.UserID);
 	}
 

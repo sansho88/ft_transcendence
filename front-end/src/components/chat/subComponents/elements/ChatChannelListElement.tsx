@@ -12,10 +12,12 @@ import ChatMaster from '../../ChatMaster';
 import { Socket } from 'socket.io-client';
 import { IUser } from '@/shared/types';
 import * as apiReq from '@/components/api/ApiReq'
+import AddUserPrivateChannel from './AddUserPrivateChannel';
+import { Fascinate } from 'next/font/google';
 
 
 
-export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected, isServList, isOwner}: {
+export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected, isServList, isOwner, isPending, inviteID}: {
     socket: Socket,
     channelID: number,
     channelName: string,
@@ -26,8 +28,10 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     isProtected: boolean,
     isServList: boolean,
     isOwner: boolean,
+    isPending: boolean,
+    inviteID: number
 }) {
-    const [isPending, setIsPending] = useState(isInvite);
+    // const [isPending, setIsPending] = useState(false); //TODO: check si cest une invit ?
 
     const [channelPassword, setChannelPassword] = useState("");
     const [channelType, setChannelType] = useState("");
@@ -38,6 +42,7 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     const [actualUserID, setActualUserID] = useState<number>(-1)
     const [channelMpName, setChannelMpName] = useState<string | null>(null)
     const [usersList, setUsersList] = useState<IUser[]>([]);
+    // const [inviteID, setInviteID] = useState<number>(0);
 
 
     async function getUserId(){
@@ -54,9 +59,13 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
             })
     }
 
+
     useEffect(() => {
         if (isMp)
             getUserId();
+        
+        console.log('invite ChannelID IN ELEMENT = ', inviteID)
+
     }, [])
 
 
@@ -81,13 +90,20 @@ useEffect(() => {
 }, [channelName, channelType, channelPassword]);
 
     function handleAcceptInvite() {
-        console.log(`Invite to ${channelName} accepted`);
-        setIsPending(false);
+        // console.log(`Invite to ${channelName} accepted`);
+        // setIsPending(false);
+        onClickSwitcher();
     }
 
+    const [visible, setVisible] = useState<boolean>(true);
     function handleDeclineInvite() {
-        console.log(`Invite to ${channelName} declined`);
-        setIsPending(false);
+        // console.log(`Invite to ${channelName} declined`);
+        setVisible(false);
+        apiReq.putApi.inviteIdRemove(inviteID)
+        .then((res) => {
+            if(res.status === 200)
+                return;
+        }) 
     }
 
 
@@ -192,18 +208,22 @@ useEffect(() => {
         };
 
     return (
+        <>
+        {visible && 
         <div    onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 className={currentChannel === channelID ? `channel channel_selected ` : `channel `}>
             <div key={`button_channel_${uuidv4()}`}
                  className={`${defineClassName.current} justify-between ${channelName.length <= 10 ? 'flex' : 'flex-col'}`} onClick={() => onClickSwitcher()}>
                     <div className={`flex truncate ${channelName.length <= 10 ? '' : ' text-xs'}`} >{channelMpName === null ? channelName : channelMpName}</div>
+                    {isInvite && isHovered && <AddUserPrivateChannel className='' currentChannel={currentChannel} channelID={channelID}/>}
                     {!isServList && !isMp && isHovered && <LeaveChannelCross className={`flex-shrink-0 text-red-800 z-0`} onClickFunction={() => leaveChan(socket, channelID)} />}
+
+            {isPending && 
+                <div id={"invite_options"} className='flex space-x-2 mr-1'>
+                        <LeaveChannelCross className='flex z-50' onClickFunction={handleDeclineInvite}/>
+                </div>}
             </div>
-            {isPending && (<div id={"invite_options"}>
-                <span onClick={ handleAcceptInvite }>✅</span>
-                <span onClick={ handleDeclineInvite }>❌</span>
-            </div>)}
             {isProtected && 
                 <div>
                           <li><label>
@@ -233,6 +253,9 @@ useEffect(() => {
                 </div>
             }
         </div>
+        }
+        </>
+
     )
 }
 
