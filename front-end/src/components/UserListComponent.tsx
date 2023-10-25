@@ -130,7 +130,6 @@ const UserList : React.FC<UserListProps> = ({
                         banID={banID}
                         muteID={muteList.find(muteUser => muteUser.user.UserID === user.UserID)?.muteID ?? undefined}
                         adminID={userAdmin?.UserID ?? undefined}
-                        isOwner={isOwner}
                     />}
                 </Profile>
             </li>
