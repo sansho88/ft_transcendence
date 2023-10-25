@@ -1,5 +1,8 @@
 import { EGameMod, userInfoSocket } from "shared/typesGame";
 import { IUser } from "../types";
+import { IUserEntity } from "shared/entities/IUser.entity";
+import { IChannelEntity } from "shared/entities/IChannel.entity";
+import { UserEntity } from "src/entities/user.entity";
 import { IChannel } from "../typesChannel";
 
 export namespace messageDTO {
@@ -60,7 +63,13 @@ export namespace channelsDTO {
 		event: string;
 	}
 
-	export interface IBanEntity {
+	export interface IInviteEntity {
+		inviteID: number;
+		user: IUserEntity;
+		channel: IChannelEntity;
+		sender: IUserEntity;
+	}
+		export interface IBanEntity {
 		bannedID: number;
 		endTime: Date | null;
 		channel: IChannel;
@@ -72,5 +81,8 @@ export namespace channelsDTO {
 		endTime: Date | null;
 		channel: IChannel;
 		user: IUser;
+	}
+
+	export interface IAdminEntity extends Partial<IUser> {
 	}
 }

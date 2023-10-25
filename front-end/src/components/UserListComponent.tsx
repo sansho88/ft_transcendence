@@ -9,33 +9,49 @@ import getAllUsersFromChannel = getApi.getAllUsersFromChannel;
 import { channelsDTO } from "@/shared/DTO/InterfaceDTO";
 import { IUser } from "@/shared/types";
 
-interface UserListProps{
+interface UserListProps {
     avatarSize?: string | undefined;
     usersList?: string | undefined;
-    adminMode?: boolean
-    channelID?: number;
     showUserProps?: boolean;
+    channelID?: number;
+    userID?: number;
 }
-const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, avatarSize, showUserProps, usersList, adminMode, channelID}) => {
+const UserList : React.FC<UserListProps> = ({
+    className,
+    id,
+    userListIdProperty,
+    avatarSize,
+    showUserProps,
+    usersList,
+    channelID,
+    userID,
+}) => {
 
     const [userElements, setUserElements] = useState<React.JSX.Element[]>([]);
     const [isHidden, setIsHidden] = useState(userElements.length == 0);
     const [isPopupUsersVisible, setPopupUsersVisible] = useState(false);
     const [refresh, setRefresh] = useState(false);
-    const [isunBanned, setIsBanned] = useState(false);
-    const [iskicked, setIsMuted] = useState(false);
 
     useEffect(() => {
         if (refresh) {
             setRefresh(false);
+            setPopupUsersVisible(true);
+            let adminList: channelsDTO.IAdminEntity[] = [];
             let bannedList: channelsDTO.IBanEntity[] = [];
             let muteList: channelsDTO.IMuteEntity[] = [];
-            setPopupUsersVisible(true);
             let allDiv : React.JSX.Element[] = [];
             getMyRelationships().then(async (res) => {
-                if (adminMode) {
-                    bannedList = await getApi.getAllBanFromChannel(channelID ? channelID : -1).then((res) => {return res.data;});
-                    muteList = await getApi.getAllMuteFromChannel(channelID ? channelID : -1).then((res) => {return res.data;});
+                let isAdmin = false;
+                if (channelID !== undefined && channelID !== -1) {
+                    adminList = await getApi.getAllAdminFromChannel(channelID ? channelID : -1)
+                    .then((res) => { return res.data; });
+                    const isAdmin = adminList.find(admin => admin.UserID === userID) !== undefined;
+                    if (isAdmin) {
+                        bannedList = await getApi.getAllBanFromChannel(channelID ? channelID : -1)
+                        .then((res) => { return res.data; });
+                        muteList = await getApi.getAllMuteFromChannel(channelID ? channelID : -1)
+                        .then((res) => { return res.data; });
+                    }
                 }
                 const me = res.data;
                 let subs = me.subscribed; //users suivis par l'actuel user
@@ -44,10 +60,10 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                 {
                     if (subs.length > 0) {
                         for (const user of subs) {
-                            allDiv = allDivPush(allDiv, user, muteList, subs, blocked, undefined, true);
+                            allDiv = allDivPush(allDiv, user, muteList, subs, blocked, adminList, (adminList[0]?.UserID ?? -1) === user.UserID, isAdmin, undefined);
                         }
                         for (const user of bannedList) {
-                            allDiv = allDivPush(allDiv, user.user, muteList, subs, blocked, user.bannedID);
+                            allDiv = allDivPush(allDiv, user.user, muteList, subs, blocked, adminList, false, isAdmin, user.bannedID);
                         }
                     }
                     else {
@@ -58,18 +74,27 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                         setUserElements(allDiv);
                     }
                     else {
-                        getAllUsersFromChannel(channelID ? channelID : 0, new Date).then(async (res) => {
-                            if (adminMode) {
-                                bannedList = await getApi.getAllBanFromChannel(channelID ? channelID : -1).then((res) => {return res.data;});
-                                muteList = await getApi.getAllMuteFromChannel(channelID ? channelID : -1).then((res) => {return res.data;});
+                        getAllUsersFromChannel(channelID ? channelID : 0, new Date)
+                        .then(async (res) => {
+                            let isAdmin = false;
+                            if (channelID !== undefined && channelID !== -1) {
+                                adminList = await getApi.getAllAdminFromChannel(channelID ? channelID : -1)
+                                .then((res) => {return res.data;});
+                                isAdmin = adminList.find(admin => admin.UserID === userID) !== undefined;
+                                if (isAdmin) {
+                                    bannedList = await getApi.getAllBanFromChannel(channelID ? channelID : -1)
+                                    .then((res) => {return res.data;});
+                                    muteList = await getApi.getAllMuteFromChannel(channelID ? channelID : -1)
+                                    .then((res) => {return res.data;});
+                                }
                             }
                             for (const user of res.data) {
                                 if (user.UserID > 1) {
-                                    allDiv = allDivPush(allDiv, user, muteList, subs, blocked, undefined);
+                                    allDiv = allDivPush(allDiv, user, muteList, subs, blocked, adminList, (adminList[0]?.UserID ?? -1) === user.UserID, isAdmin, undefined);
                                 }
                             }
                             for (const user of bannedList) {
-                                allDiv = allDivPush(allDiv, user.user, muteList, subs, blocked, user.bannedID);
+                                allDiv = allDivPush(allDiv, user.user, muteList, subs, blocked, adminList, false, isAdmin, user.bannedID);
                             }
                             setUserElements(allDiv);
                         })
@@ -84,33 +109,43 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
     const allDivPush = (
         allDiv: React.JSX.Element[],
         user: IUser,
-        muteList: channelsDTO.IMuteEntity[],
-        follow: IUser[],
-        blocked: IUser[],
-        banID?: number,
-        showStats?: boolean) => {
+        muteList: channelsDTO.IMuteEntity[], 
+        follow: IUser[], 
+        blocked: IUser[], 
+        adminList: channelsDTO.IAdminEntity[],
+        isOwner: boolean,
+        isAdmin: boolean,
+        banID?: number
+    ) => {
+        const userAdmin = adminList.find(adminUser => adminUser.UserID === user.UserID);
         allDiv.push(
             <li key={user.login + "List" + uuidv4()}>
-                <Profile user={user} avatarSize={avatarSize} showStats={showStats}>
+                <Profile user={user} avatarSize={avatarSize} isOwner={isOwner}>
                     {showUserProps == true && <UserOptions
-                    user={user}
-                    relationships={{followed: follow, blocked:blocked}}
-                    channelID={channelID}
-                    showAdminOptions={adminMode}
-                    setRefresh={setRefresh}
-                    banID={banID}
-                    muteID={muteList.find(muteUser => muteUser.user.UserID === user.UserID)?.muteID ?? undefined}/>}
+                        user={user}
+                        relationships={{ followed: follow, blocked: blocked }}
+                        channelID={channelID}
+                        showAdminOptions={isAdmin}
+                        setRefresh={setRefresh}
+                        banID={banID}
+                        muteID={muteList.find(muteUser => muteUser.user.UserID === user.UserID)?.muteID ?? undefined}
+                        adminID={userAdmin?.UserID ?? undefined}
+                        isOwner={isOwner}
+                    />}
                 </Profile>
             </li>
         )
         return allDiv;
     }
 
-    function handleClickUserList(){
+    function handleClickUserList() {
         if (isHidden || refresh)
             setRefresh(true);
-        else
+        else {
+            setPopupUsersVisible(false)
+            setIsHidden(true);
             setUserElements([]);
+        }
         setIsHidden(userElements.length > 0);
     }
     return (
@@ -120,15 +155,14 @@ const UserList : React.FC<UserListProps> = ({className, id, userListIdProperty, 
                 setIsHidden(true);
                 setUserElements([]);
             }}></div>}
-            <Button className={className} id={id} image={"friends.svg"} onClick={handleClickUserList} alt={"Online Users button"}/>
+            <Button className={className} id={id} image={"friends.svg"} onClick={handleClickUserList} alt={"Online Users button"} style={{ width: "80%", height: "auto", maxWidth: "4vw", maxHeight: "4vh" }} />
             {isPopupUsersVisible && !isHidden && <div id={"make_popup_disappear"} onClick={() => setIsHidden(true)}></div> &&
                 <div className={"userList"} id={userListIdProperty} >
                     <ul>
-                    {userElements}
+                        {userElements}
                     </ul>
                 </div>
             }
-
         </>
     )
 }

@@ -116,7 +116,7 @@ export class ChannelController {
 	/**
 	 * */
 
-	@Get('admin/:channelID')
+	@Get('get/admin/:channelID')
 	@UseGuards(AuthGuard)
 	async getAdmin(
 		@CurrentUser() user: UserEntity,
@@ -126,7 +126,7 @@ export class ChannelController {
 	}
 
 
-	@Put('admin/add/:channelID/:targetID')
+	@Put('grant/admin/:channelID/:targetID')
 	@UseGuards(AuthGuard)
 	async addAdmin(
 		@CurrentUser() user: UserEntity,
@@ -150,7 +150,7 @@ export class ChannelController {
 		return channel;
 	}
 
-	@Put('admin/remove/:channelID/:targetID')
+	@Put('revoke/admin/:channelID/:targetID')
 	@UseGuards(AuthGuard)
 	async removeAdmin(
 		@CurrentUser() user: UserEntity,
@@ -290,7 +290,6 @@ export class ChannelController {
 		@Param('channelID', ParseIntPipe) channelID: number,
 		@Param('userID', ParseIntPipe) targetID: number,
 	) {
-		console.log('kick : chan' + channelID + ' / target : ' + targetID);
 		checkLimitID(channelID);
 		checkLimitID(targetID);
 		const channel = await this.channelService.findOne(channelID, ['adminList', 'userList'])
@@ -408,9 +407,9 @@ export class ChannelController {
 		checkLimitID(inviteID);
 		const invite = await this.inviteService.findOne(inviteID);
 		if (invite == null)
-			throw new BadRequestException('This invite is not created or already accepted');
-		if (invite.sender.UserID != user.UserID)
-			throw new BadRequestException('This invite is not created by you');
+			throw new BadRequestException('This invite is not created or already accepted/refused');
+		if (invite.sender.UserID != user.UserID && invite.user.UserID != user.UserID)
+			throw new BadRequestException('You are not the sender nor the receiver of this invite');
 		await this.chatGateway.EventNotif(invite.user, 'info', 'You invitation has been canceled', invite.channel.name);
 		await this.inviteService.remove(invite);
 	}
