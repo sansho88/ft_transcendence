@@ -110,7 +110,6 @@ export default function Auth({className}: { className?: string }) {
     const [password, setPassword] = useState<string>('');
     
     const [code2FAInput, setcode2FAInput] = useState<string>('');
-    const [code2FA, setcode2FA] = useState<string>('');
 
 
     // Créer une instance Axios avec des en-têtes d'authentification par défaut
@@ -259,7 +258,7 @@ export default function Auth({className}: { className?: string }) {
     const welcomeTitle = () => {
         return (
             <>
-                <div className="welcome space-y-10 my-12">
+                <div className="welcome">
                     <div className="welcome-msg">WELCOME TO</div>
                     {/*<div className="width: 788px; height: 130px; left: 0px; top: 24px; position: absolute; justify-content: center; align-items: center; display: inline-flex">*/}
                     <div className="welcome-title ">PONG POD!</div>
@@ -501,7 +500,7 @@ export default function Auth({className}: { className?: string }) {
             <NotificationContainer/>
             {welcomeTitle()}
             {currentStepLogin === EStepLogin.start &&
-                <button onClick={() => goto42auth()} className='button-login h-14'>LOGIN 42</button>}
+                <button onClick={() => goto42auth()} className='button-login'><span>LOGIN 42</span></button>}
             {currentStepLogin === EStepLogin.start && enterCode2FA()}
             {currentStepLogin < EStepLogin.tryLoginAsInvite &&
                 <button onClick={() => nextStepCheck()} className='button-login'><span>{inviteButtonText}</span>
