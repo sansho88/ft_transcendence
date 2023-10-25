@@ -32,9 +32,8 @@ export class ServerGame {
 
 	public async addPlayerToMatchmaking(player: userInfoSocket, server: Server) {
 		if (!player)
-			return //console.log('addPlayerToMatchmaking: Error player')
+			return;
 		this.matchmaking.addUser(player);
-		//console.log(`${player.user.login}: add in matchmaking list`);
 		if (this.matchmaking.getUsersNumber() >= 2) {
 			this.gameSession.push(await this.matchmaking.createGame(server, this.gameSession.length, EGameMod.classic));
 		}
@@ -43,9 +42,8 @@ export class ServerGame {
 
 	public async addPlayerToMatchmakingGhost(player: userInfoSocket, server: Server) {
 		if (!player)
-			return //console.log('addPlayerToMatchmakingGhost: Error player')
+			return ;
 		this.matchmakingGhost.addUser(player);
-		//console.log(`${player.user.login}: add in matchmakingGhost list`);
 		if (this.matchmakingGhost.getUsersNumber() >= 2) {
 			this.gameSession.push(await this.matchmakingGhost.createGame(server, this.gameSession.length, EGameMod.ghost));
 		}
@@ -53,21 +51,19 @@ export class ServerGame {
 
 	public removePlayerToMatchmaking(player: userInfoSocket) {
 		if (!player)
-			return //console.log('removePlayerToMatchmaking: Error player')
+			return;
 		this.matchmaking.removeUser(player);
-		//console.log(`${player.user.login}: remove in matchmaking list`);
 	}
 
 	public removePlayerToMatchmakingGhost(player: userInfoSocket) {
 		if (!player)
-			return //console.log('removePlayerToMatchmakingGhost: Error player')
+			return ;
 		this.matchmakingGhost.removeUser(player);
-		//console.log(`${player.user.login}: remove in matchmaking list`);
 	}
 
 	public async addPlayerInTrainningSession(player: userInfoSocket, server: Server) {
 		if (!player)
-			return //console.log('addPlayerToMatchmaking: Error player');
+			return ;
 		this.trainningSession.push(await this.createTrainningSessionGame(server, 0, player));
 	}
 
@@ -84,7 +80,6 @@ export class ServerGame {
 
 		const startDate: Date = new Date();
 		const generateSessionName: string = uuidv4();
-		//console.log(`NEW TRAINING SESSION: ${generateSessionName} | ${player.user.nickname})`);
 		const usr = await this.usersService.findOne(player.user.UserID);
 		this.usersService.userStatus(usr, UserStatus.INGAME);
 		return new GameSession(server, player, player, startDate, game_id, EGameMod.trainning, generateSessionName, this.gameService);
@@ -103,7 +98,6 @@ export class ServerGame {
 	public createGame(server: Server, p1: userInfoSocket, p2: userInfoSocket, gameMod: EGameMod) {
 		const startDate: Date = new Date();
 		const generateSessionName: string = uuidv4();
-		//console.log(`NEW CHALLENGE GAME: ${generateSessionName}  ${p2.user.nickname} vs ${p1.user.nickname})`);
 		return new GameSession(server, p1, p2, startDate, this.gameSession.length, gameMod, generateSessionName, this.gameService);
 	}
 
@@ -112,10 +106,7 @@ export class ServerGame {
 	}
 
 	public createChallenge(server: Server, challenger: userInfoSocket, challenged: IUser, gameMod: EGameMod, sockersChallenged: RemoteSocket<DefaultEventsMap, any>[]) {
-		// //console.log('debug challengerID = ' +  JSON.stringify(challenger.user))
-	
 		this.cleanChallenge();
-		// //console.log('debug challenge list length: ' , this.challengeList.length)
 		if (!this.alreadyInChallenge(challenger.user.UserID))
 			this.challengeList.push(new ChallengeManager(server, challenger, challenged, sockersChallenged, this.createGame, gameMod))
 		else
