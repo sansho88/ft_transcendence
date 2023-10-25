@@ -60,7 +60,7 @@ const UserList : React.FC<UserListProps> = ({
                 {
                     if (subs.length > 0) {
                         for (const user of subs) {
-                            allDiv = allDivPush(allDiv, user, muteList, subs, blocked, adminList, (adminList[0]?.UserID ?? -1) === user.UserID, isAdmin, undefined);
+                            allDiv = allDivPush(allDiv, user, muteList, subs, blocked, adminList, (adminList[0]?.UserID ?? -1) === user.UserID, isAdmin, undefined, true);
                         }
                         for (const user of bannedList) {
                             allDiv = allDivPush(allDiv, user.user, muteList, subs, blocked, adminList, false, isAdmin, user.bannedID);
@@ -115,12 +115,13 @@ const UserList : React.FC<UserListProps> = ({
         adminList: channelsDTO.IAdminEntity[],
         isOwner: boolean,
         isAdmin: boolean,
-        banID?: number
+        banID?: number,
+        showStats?: boolean
     ) => {
         const userAdmin = adminList.find(adminUser => adminUser.UserID === user.UserID);
         allDiv.push(
             <li key={user.login + "List" + uuidv4()}>
-                <Profile user={user} avatarSize={avatarSize} isOwner={isOwner}>
+                <Profile user={user} avatarSize={avatarSize} isOwner={isOwner} showStats={showStats}>
                     {showUserProps == true && <UserOptions
                         user={user}
                         relationships={{ followed: follow, blocked: blocked }}
