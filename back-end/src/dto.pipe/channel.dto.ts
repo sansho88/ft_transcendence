@@ -22,6 +22,7 @@ export class CreateChannelDTOPipe {
 
 	@IsString()
 	@IsOptional()
+	@Length(0,20)
 	password?: string;
 }
 
@@ -34,6 +35,7 @@ export class JoinChannelDTOPipe {
 
 	@IsString()
 	@IsOptional()
+	@Length(0,20)
 	password?: string;
 }
 

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {IsNotEmpty, IsOptional, IsString, Length} from 'class-validator';
 
 export class LogVisitDTOPipe {
 	@IsString()
@@ -7,6 +7,7 @@ export class LogVisitDTOPipe {
 
 	@IsString()
 	@IsNotEmpty()
+	@Length(0,20)
 	password: string;
 
 	@IsString()
@@ -17,5 +18,6 @@ export class LogVisitDTOPipe {
 export class SignVisitDTOPipe {
 	@IsString()
 	@IsNotEmpty()
+	@Length(0,20)
 	password: string;
 }
