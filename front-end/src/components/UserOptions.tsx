@@ -18,17 +18,17 @@ export interface userOptionsProps {
    banID?: number;
    muteID?: number;
    adminID?: number;
-   isOwner?: boolean;
    setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, showAdminOptions, relationships, channelID, setRefresh, banID, muteID, adminID, isOwner}) => {
+const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, showAdminOptions, relationships, channelID, setRefresh, banID, muteID, adminID}) => {
     const {userContext} = useContext(UserContext);
     const [isFollowed, setIsFollowed] = useState(relationships.followed && !!relationships.followed.find(tmpUser => user.UserID === tmpUser.UserID));
     const [isBlocked, setIsBlocked] = useState(relationships.blocked && !!relationships.blocked.find(tmpUser => user.UserID == tmpUser.UserID));
     const [isWaitingChallenge, setIsWaitingChallenge] = useState<boolean>(false);
     const [isDurationVisible, setIsDurationVisible] = useState<boolean>(false);
     const [durType, setDurationType] = useState<typeof DurationType[keyof typeof DurationType]>(DurationType.Ban);
+    const [showPopupAdmin, setShowPopupAdmin] = useState<boolean>(false);
 
     const socketRef = useContext(SocketContextChat)
     const socketRefGame = useContext(SocketContextGame)
@@ -97,19 +97,19 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
     }
 
     function handleKick() {
-        if (!showAdminOptions || channelID === undefined) return console.log('NO RIGHTS TO DO THIS ACTION');
+        if (!showAdminOptions || channelID === undefined) return NotificationManager.error(`You can\'t kick ${user.nickname} (${user.login})`);
         apiReq.putApi.putKickUser(channelID, user.UserID)
             .then(() => {
-                console.log('KICK SUCCESS')
+                NotificationManager.success(`You kicked ${user.nickname} (${user.login})`);
                 setRefresh(true);
             })
             .catch(() => {
-                console.log('KICK FAILED')
+                NotificationManager.error(`You can\'t kick ${user.nickname} (${user.login})`);
             })
     }
 
     function handleBan() {
-        if (!showAdminOptions || channelID === undefined) return console.log('NO RIGHTS TO DO THIS ACTION');
+        if (!showAdminOptions || channelID === undefined) return NotificationManager.error(`You can\'t ban ${user.nickname} (${user.login})`);
         if (banID === undefined) {
             setDurationType(DurationType.Ban);
             setIsDurationVisible(!isDurationVisible);
@@ -117,17 +117,17 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
         else {
             apiReq.putApi.putUnbanUser(banID)
                 .then(() => {
-                    console.log('UNBAN SUCCESS')
+                    NotificationManager.success(`You unbanned ${user.nickname} (${user.login})`);
                     setRefresh(true);
                 })
                 .catch(() => {
-                    console.log('UNBAN FAILED')
+                    NotificationManager.error(`You can\'t unban ${user.nickname} (${user.login})`);
                 })
         }
     }
 
     function handleMute() {
-        if (!showAdminOptions || channelID === undefined) return console.log('NO RIGHTS TO DO THIS ACTION');
+        if (!showAdminOptions || channelID === undefined) return NotificationManager.error(`You can\'t mute ${user.nickname} (${user.login})`);
         if (muteID === undefined) {
             setDurationType(DurationType.Mute);
             setIsDurationVisible(!isDurationVisible);
@@ -135,35 +135,45 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
         else {
             apiReq.putApi.putUnmuteUser(muteID ? muteID : -1)
                 .then(() => {
-                    console.log('UNMUTE SUCCESS')
+                    NotificationManager.success(`You unmuted ${user.nickname} (${user.login})`);
                     setRefresh(true);
                 })
                 .catch(() => {
-                    console.log('UNMUTE FAILED')
+                   NotificationManager.error(`You can\'t unmute ${user.nickname} (${user.login})`);
                 })
         }
     }
 
+    const adminOptionsSettings = () => {
+        return (
+            <div  id={"adminOptionsSettings"} style={{marginTop:"10px"}}>
+                <Button image={`/block-message-${muteID === undefined ? "red" : "green"}.svg`} onClick={() => {handleMute()}} alt={"Mute"} margin={"0 5px 0 0"} title={`${muteID != undefined && "Un" || ""}Mute`}/>
+                <Button image={"/door-red.svg"} onClick={() => {handleKick()}} alt={"Kick"} margin={"0 5px 0 0"} title={"Kick"}/>
+                <Button image={`/hammer-${banID === undefined ? "red" : "green"}.svg`} onClick={() => {handleBan()}}  alt={"Ban"} title={`${banID !== undefined && "Un" || ""}Ban`}/>
+                <Button image={`/${adminID === undefined ? "pro" : "de"}mote.svg`} onClick={() => {handleGrant()}} alt={"Grant"} title={`${adminID === undefined ? "Pro" : "De"}mote`}/>
+            </div>
+        )
+    }
     function handleGrant() {
-        if (!showAdminOptions || channelID === undefined) return console.log('NO RIGHTS TO DO THIS ACTION');
+        if (!showAdminOptions || channelID === undefined) return NotificationManager.error(`You can\'t grant ${user.nickname} (${user.login})`);
         if (adminID === undefined) {
             apiReq.putApi.putGrantAdmin(channelID, user.UserID)
                 .then(() => {
-                    console.log('GRANT SUCCESS')
+                    NotificationManager.success(`You granted ${user.nickname} (${user.login})`);
                     setRefresh(true);
                 })
                 .catch(() => {
-                    console.log('GRANT FAILED')
+                    NotificationManager.error(`You can\'t grant ${user.nickname} (${user.login})`);
                 })
         }
         else {
             apiReq.putApi.putRevokeAdmin(channelID, user.UserID) //adminID === user.UserID
                 .then(() => {
-                    console.log('REVOKE SUCCESS')
+                    NotificationManager.success(`You revoked ${user.nickname} (${user.login})`);
                     setRefresh(true);
                 })
                 .catch(() => {
-                    console.log('REVOKE FAILED')
+                    NotificationManager.error(`You can\'t revoke ${user.nickname} (${user.login})`);
                 })
         }
     }
@@ -191,26 +201,25 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
                         : <Button image={"/accept.svg"} onClick={handleBlock} alt={"Block"} margin={"0 5px 0 0"} title={"Unblock"}/>}
 
                         <Button image={"/send-message.svg"} onClick={handleMp} alt={"Send MP"} title={"MP"}/>
+
                         { !isWaitingChallenge && user.status != EStatus.Offline &&
                             <>
                                 <Button image={"/sword.svg"} onClick={() => handleChallenge(EGameMod.classic)} alt={"Challenge"} title={"Classic Challenge"}/>
                                 <Button image={"/swordGhost.svg"} onClick={() => handleChallenge(EGameMod.ghost)} alt={"Challenge"} title={"Ghost Challenge"}/>
                             </>
                         }
-                        {showAdminOptions && !isOwner &&
-                            <span style={{display:"inline-flex"}}>
-                                <Button image={`/block-message-${muteID === undefined ? "red" : "green"}.svg`} onClick={() => {handleMute()}} alt={"Mute"} margin={"0 5px 0 0"} title={`${muteID != undefined && "Un" || ""}Mute`}/>
-                                <Button image={"/door-red.svg"} onClick={() => {handleKick()}} alt={"Kick"} margin={"0 5px 0 0"} title={"Kick"}/>
-                                <Button image={`/hammer-${banID === undefined ? "red" : "green"}.svg`} onClick={() => {handleBan()}}  alt={"Ban"} title={`${banID !== undefined && "Un" || ""}Ban`}/>
-                                <Button image={`/${adminID === undefined ? "pro" : "de"}mote.svg`} onClick={() => {handleGrant()}} alt={"Grant"} title={`${adminID === undefined ? "Pro" : "De"}mote`}/>
-                            </span>
-                        }
+
+                        {showAdminOptions && <Button image={"/slavery-whip.svg"} onClick={() => setShowPopupAdmin(!showPopupAdmin)} alt={"Admin window"} title={"Admin window"}/>}
+
+                        {showAdminOptions && showPopupAdmin && adminOptionsSettings()}
+
+
                     </span>
                     {isDurationVisible && <PutDuration 
                     user={user} 
                     channelID={channelID} 
                     handleType={durType} 
-                    isVisible={isDurationVisible}
+                    isVisible={isDurationVisible && showPopupAdmin}
                     setDurationType={setDurationType}
                     setIsDurationVisible={setIsDurationVisible}
                     setRefresh={setRefresh}

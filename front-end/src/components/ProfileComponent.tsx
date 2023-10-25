@@ -32,6 +32,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
 
     useEffect(() => {
         setStatusColor(getEnumNameByIndex(Colors, user.status));
+        return;
     }, [user.login]);
 
     socketChatRef.current?.on("userUpdate", (data: IUser) => {
@@ -41,6 +42,8 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
             setStatusColor(getEnumNameByIndex(Colors, data.status));
         }
     });
+
+    socketChatRef.current?.off("userUpdate", () => {});
 
     useEffect(() => {
         if (isNicknameUsed && modifiedNick !== user.nickname) {

@@ -18,6 +18,7 @@ export default function ShowHomePage() {
 			router.push("/auth");
 		else
 			setIsTokenExists(true);
+		return;
 	});
 	return (
 		isTokenExists ?

@@ -1,5 +1,4 @@
 import { Providers } from "@/context/providers";
-import { NavBar } from '@/components/(ben_proto)/DevTools/NavBarDev'
 import './globals.css'
 import { Inter } from 'next/font/google'
 

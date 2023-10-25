@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import Profile from "@/components/ProfileComponent";
 import Button from "@/components/CustomButtonComponent";
 import {v4 as uuidv4} from "uuid";
@@ -17,14 +17,14 @@ interface UserListProps {
     userID?: number;
 }
 const UserList : React.FC<UserListProps> = ({
-    className, 
-    id, 
-    userListIdProperty, 
-    avatarSize, 
-    showUserProps, 
+    className,
+    id,
+    userListIdProperty,
+    avatarSize,
+    showUserProps,
     usersList,
-    channelID, 
-    userID, 
+    channelID,
+    userID,
 }) => {
 
     const [userElements, setUserElements] = useState<React.JSX.Element[]>([]);
@@ -103,10 +103,11 @@ const UserList : React.FC<UserListProps> = ({
                 })
                 .catch((error) => console.error("[UserList] Impossible to get relationships of actual user: " + error));
         }
+        return;
     }, [refresh]);
 
     const allDivPush = (
-        allDiv: React.JSX.Element[], 
+        allDiv: React.JSX.Element[],
         user: IUser,
         muteList: channelsDTO.IMuteEntity[], 
         follow: IUser[], 
@@ -129,7 +130,6 @@ const UserList : React.FC<UserListProps> = ({
                         banID={banID}
                         muteID={muteList.find(muteUser => muteUser.user.UserID === user.UserID)?.muteID ?? undefined}
                         adminID={userAdmin?.UserID ?? undefined}
-                        isOwner={isOwner}
                     />}
                 </Profile>
             </li>

@@ -54,6 +54,7 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus, isMai
 
 	useEffect(() => {
 		setStatusColor(getEnumNameByIndex(Colors, playerStatus));
+        return;
 	}, [playerStatus]);
 
 	path = !path ? "/tests/avatar.jpg" : path;

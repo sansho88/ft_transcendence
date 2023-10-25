@@ -2,8 +2,9 @@ import { IUser } from "@/shared/types";
 import Image from "next/image";
 import * as apiReq from '@/components/api/ApiReq'
 import React, { useState } from "react";
-import { text } from "stream/consumers";
 import { inherits } from "util";
+import {NotificationManager} from 'react-notifications';
+
 
 export const DurationType = {
 	none: 0,
@@ -37,21 +38,21 @@ const PutDuration: React.FC<PutDurationProps> = ({ user, channelID, handleType, 
 		if (handleType === DurationType.Ban) {
 			apiReq.putApi.putBanUser(channelID, user.UserID, duration * 60)
 				.then(() => {
-					console.log('BAN SUCCESS')
+					NotificationManager.success(`You banned ${user.nickname} (${user.login}) for ${duration} minutes.`);
 					setRefresh(true);
 				})
 				.catch(() => {
-					console.log('BAN FAILED')
+					NotificationManager.error(`You can\'t ban ${user.nickname} (${user.login})`);
 				})
 			}
 			else if (handleType === DurationType.Mute) {
 				apiReq.putApi.putMuteUser(channelID, user.UserID, duration* 60)
 				.then(() => {
-					console.log('MUTE SUCCESS')
+					NotificationManager.success(`You muted ${user.nickname} (${user.login}) for ${duration} minutes.`);
 					setRefresh(true);
 				})
 				.catch(() => {
-					console.log('MUTE FAILED')
+					NotificationManager.error(`You can\'t mute ${user.nickname} (${user.login})`);
 				})
 		}
 		setDurationType(DurationType.none);
@@ -59,17 +60,16 @@ const PutDuration: React.FC<PutDurationProps> = ({ user, channelID, handleType, 
 	}
 
 	return (
-		<div>
+		<>
 			{isVisible && (
-				<div className="flex flex-col justify-center items-center text-white" style={{minWidth:"fit-content"}}>
-					<label htmlFor="duration">Duration (in minutes)<h6>0 for infinit</h6></label>
+				<div id="muteDuration" style={{minWidth:"fit-content"}}>
+					<label htmlFor="duration">Duration (in minutes)<h6>0 for infinite</h6></label>
 					<input
 						type="number"
 						name="duration"
 						id="duration"
 						placeholder="duration in minutes"
 						value={duration}
-						style={{backgroundColor: "#2d3748", padding: "0.5rem", borderRadius: "0.5rem", color: "#f56565", height: "1rem", textAlign: "center", outline:"inset", width:"100%"}}
 						onChange={(e) => changeDuration(e)}
 					/>
 					{isVisible && (<button onClick={handleDuration} style={{ verticalAlign: "-webkit-baseline-middle" }}>
@@ -83,7 +83,7 @@ const PutDuration: React.FC<PutDurationProps> = ({ user, channelID, handleType, 
 					</button>)}
 				</div>
 			)}
-		</div>
+		</>
 	);
 }
 
