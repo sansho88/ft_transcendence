@@ -26,27 +26,28 @@ const MatchHistory : React.FC = () => {
                 .then((res) => {
                     setSelectedUserRelationships({followed:res.data.followed, blocked:res.data?.blocked});
                 });
-            const timer = setInterval(() => {
+            /*const timer = setInterval(() => {
                 getApi.getMatchHistoryFromUserId(selectedUserContext.UserID)
                     .then((res) => {
                         setMatchesList(res.data);
                     })
             }, 10000);
-
+*/
             return () => {
-                clearInterval(timer);
+                //clearInterval(timer);
             };
         }
     }, [selectedUserContext])
 
     socketChatRef.current?.on("userUpdate", (data: IUser) => {
         if (selectedUserContext && data.UserID == selectedUserContext.UserID && selectedUserContext.status == EStatus.Online)
-        {
             setSelectedUserContext(data);
-        }
     });
 
-    socketChatRef.current?.off("userUpdate", () => {});
+    socketChatRef.current?.off("userUpdate", (data: IUser) => {
+        if (selectedUserContext && data.UserID == selectedUserContext.UserID && selectedUserContext.status == EStatus.Online)
+            setSelectedUserContext(data);
+    });
 
 
     if (matchesList.length > 0 && matchesList.at(0).ID >= 0){

@@ -429,6 +429,21 @@ body {
     padding-left: 0.4vw;
 }
 
+#adminOptionsSettings{
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0.5em;
+    padding: 0.5em;
+    border-radius: 0.5em;
+    background: rgba(0, 0, 0, 0.27);
+    border: 2px rgba(0, 0, 0, 0.11);
+    border-style: inherit ;
+    box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
+    border-radius: 8px;
+    z-index: 1;
+}
+
 .game{
     display: inline;
     margin-inline: auto;

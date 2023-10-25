@@ -27,6 +27,7 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
     const [isWaitingChallenge, setIsWaitingChallenge] = useState<boolean>(false);
     const [isDurationVisible, setIsDurationVisible] = useState<boolean>(false);
     const [durType, setDurationType] = useState<typeof DurationType[keyof typeof DurationType]>(DurationType.Ban);
+    const [showPopupAdmin, setShowPopupAdmin] = useState<boolean>(false);
 
     const socketRef = useContext(SocketContextChat)
     const socketRefGame = useContext(SocketContextGame)
@@ -142,6 +143,16 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
         }
     }
 
+    const adminOptionsSettings = () => {
+
+        return (
+            <div  id={"adminOptionsSettings"} style={{marginTop:"10px"}}>
+                <Button image={`/block-message-${muteID === undefined ? "red" : "green"}.svg`} onClick={() => {handleMute()}} alt={"Mute"} margin={"0 5px 0 0"} title={`${muteID != undefined && "Un" || ""}Mute`}/>
+                <Button image={"/door-red.svg"} onClick={() => {handleKick()}} alt={"Kick"} margin={"0 5px 0 0"} title={"Kick"}/>
+                <Button image={`/hammer-${banID === undefined ? "red" : "green"}.svg`} onClick={() => {handleBan()}}  alt={"Ban"} title={`${banID !== undefined && "Un" || ""}Ban`}/>
+            </div>
+        )
+    }
 
     useEffect(() => {
         if (socketRefGame){
@@ -166,19 +177,22 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
 
                         <Button image={"/send-message.svg"} onClick={handleMp} alt={"Send MP"} title={"MP"}/>
 
-                        {showAdminOptions &&
-                            <span style={{float:"right"}}>
-                                <Button image={`/block-message-${muteID === undefined ? "red" : "green"}.svg`} onClick={() => {handleMute()}} alt={"Mute"} margin={"0 5px 0 0"} title={`${muteID != undefined && "Un" || ""}Mute`}/>
-                                <Button image={"/door-red.svg"} onClick={() => {handleKick()}} alt={"Kick"} margin={"0 5px 0 0"} title={"Kick"}/>
-                                <Button image={`/hammer-${banID === undefined ? "red" : "green"}.svg`} onClick={() => {handleBan()}}  alt={"Ban"} title={`${banID !== undefined && "Un" || ""}Ban`}/>
-                            </span>
-                        }
                         { !isWaitingChallenge && user.status != EStatus.Offline &&
                             <>
                                 <Button image={"/sword.svg"} onClick={() => handleChallenge(EGameMod.classic)} alt={"Challenge"} title={"Classic Challenge"}/>
                                 <Button image={"/swordGhost.svg"} onClick={() => handleChallenge(EGameMod.ghost)} alt={"Challenge"} title={"Ghost Challenge"}/>
                             </>
                         }
+
+                        <Button image={"/joystick.svg"} onClick={() => setShowPopupAdmin(!showPopupAdmin)} alt={"Admin window"} title={"Admin window"}/>
+
+                        {showAdminOptions && showPopupAdmin && adminOptionsSettings()}
+                            {/*<span style={{float:"right"}}>
+                                <Button image={`/block-message-${muteID === undefined ? "red" : "green"}.svg`} onClick={() => {handleMute()}} alt={"Mute"} margin={"0 5px 0 0"} title={`${muteID != undefined && "Un" || ""}Mute`}/>
+                                <Button image={"/door-red.svg"} onClick={() => {handleKick()}} alt={"Kick"} margin={"0 5px 0 0"} title={"Kick"}/>
+                                <Button image={`/hammer-${banID === undefined ? "red" : "green"}.svg`} onClick={() => {handleBan()}}  alt={"Ban"} title={`${banID !== undefined && "Un" || ""}Ban`}/>
+                            </span>*/}
+
                     </span>
                     {isDurationVisible && <PutDuration 
                     user={user} 
