@@ -29,15 +29,12 @@ import {
 	LeaveChannelDTOPipe,
 } from '../dto.pipe/channel.dto';
 import {SendMessageDTOPipe,} from '../dto.pipe/message.dto';
-import {
-	JoinEventDTO,
-	ReceivedMessageEventDTO,
-} from '../dto/event.dto'
+import {JoinEventDTO, ReceivedMessageEventDTO} from '../dto/event.dto'
 import {InviteService} from "./invite.service";
 import {InviteEntity} from "../entities/invite.entity";
-import {wsChatRoutesClient, wsChatRoutesBack} from 'shared/routesApi';
+import {wsChatRoutesBack, wsChatRoutesClient} from '../shared/routesApi';
 import {DefaultEventsMap} from "socket.io/dist/typed-events";
-import {channelsDTO} from 'shared/DTO/InterfaceDTO';
+import {channelsDTO} from '../shared/DTO/InterfaceDTO';
 
 
 class SocketUserList {

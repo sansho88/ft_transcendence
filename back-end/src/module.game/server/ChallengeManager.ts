@@ -1,12 +1,11 @@
-import { wsChatRoutesBack, wsChatRoutesClient } from "shared/routesApi";
+import { wsChatRoutesClient } from "../../shared/routesApi";
 import { RemoteSocket, Server, Socket } from "socket.io";
 import {v4 as uuidv4} from "uuid";
-import {userInfoSocket, EGameMod, IChallengeManager, IChallengeStepDTO} from 'shared/typesGame';
+import {userInfoSocket, EGameMod, IChallengeStepDTO} from '../../shared/typesGame';
 import { GameSession } from "./GameSession";
-import { channelsDTO } from "shared/DTO/InterfaceDTO";
+import { channelsDTO } from "../../shared/DTO/InterfaceDTO";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
-import { IUser } from "shared/types";
-import { SocketUserList } from "../game.ws";
+import { IUser } from "../../shared/types";
 
 interface IChallenge {
 	P1: number;
