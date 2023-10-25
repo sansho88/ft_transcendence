@@ -398,7 +398,7 @@
 }
 
 #button_select_channel_mode{
-  width: -webkit-fill-available;
+  width: 90%;
   padding: 0.32rem 0.59rem;
   margin: 0.3rem;
 
@@ -426,4 +426,5 @@
   overflow-y: auto;
   padding-inline: 2vh;
   text-align: left;
+  max-width: 20%;
 }

@@ -115,7 +115,7 @@ const HomePage = () => {
                 {showMatchHistory && <MatchHistory/>}
                 {showLeaderboard &&  <Leaderboard/>}
 
-                <UserList className={"friends"} userListIdProperty={"friends_user_list"} avatarSize={"medium"} showUserProps={true}/>
+                <UserList className={"friends"} userListIdProperty={"friends_user_list"} avatarSize={"medium"} showUserProps={true} userID={userContext.UserID}/>
                 <Button className={"logout"} image={"/logout.svg"} onClick={() => {
                     localStorage.clear();
                     router.push("/auth");

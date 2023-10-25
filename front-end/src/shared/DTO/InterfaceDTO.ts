@@ -73,4 +73,7 @@ export namespace channelsDTO {
 		channel: IChannel;
 		user: IUser;
 	}
+
+	export interface IAdminEntity extends Partial<IUser> {
+	}
 }

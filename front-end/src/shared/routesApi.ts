@@ -276,6 +276,10 @@ export namespace channel {
 	export const getAllBanFromChannel = (channelID: number)															=> {return `${serverApi}/${routeChannels}/get/ban/${channelID}`};
 	export const putBanUser = (channelID: number, userID: number, duration: number)			=> {return `${serverApi}/${routeChannels}/ban/${channelID}/${userID}/${duration}`};
 	export const putUnbanUser = (banID: number)																					=> {return `${serverApi}/${routeChannels}/pardon/${banID}`};
+
+	export const getAllAdminFromChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/get/admin/${channelID}`};
+	export const putGrantAdmin = (channelID: number, userID: number)										=> {return `${serverApi}/${routeChannels}/grant/admin/${channelID}/${userID}`};
+	export const putRevokeAdmin = (channelID: number, userID: number)										=> {return `${serverApi}/${routeChannels}/revoke/admin/${channelID}/${userID}`};
 }
 
 
