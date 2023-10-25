@@ -459,10 +459,10 @@ export class ChatGateway
 
 	async unblock(user: UserEntity, target: UserEntity) {
 		const socketList = await this.getSocket(user.UserID);
-		this.emitSocketLst(socketList, 'block', target)
+		this.emitSocketLst(socketList, 'updateBlocked', target)
 	}
 	async block(user: UserEntity, target: UserEntity) {
 		const socketList = await this.getSocket(user.UserID);
-		this.emitSocketLst(socketList, 'unblock', target)
+		this.emitSocketLst(socketList, 'updateBlocked', target)
 	}
 }

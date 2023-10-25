@@ -169,5 +169,13 @@ export namespace wsChatListen {
   }
 
 
+  //envoi un ping pour update la liste des user bloked
+  export function toggleBlockedUserList(
+    socket: Socket, updateBlockedList: Function) {
+    socket.on(wsChatRoutesClient.updateBlockedList(), (res) => {
+      updateBlockedList();
+    
+    })
+  }
 
 }

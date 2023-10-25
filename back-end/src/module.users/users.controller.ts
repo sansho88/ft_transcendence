@@ -215,6 +215,6 @@ export class UsersController {
 	async blockedUser(
 		@CurrentUser() user: UserEntity,
 	) {
-		return this.usersService.findOne(user.UserID, ['banned']).then(user => user.banned);
+		return this.usersService.findOne(user.UserID, ['blocked']).then(user => user.blocked);
 	}
 }

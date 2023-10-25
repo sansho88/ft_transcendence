@@ -9,6 +9,7 @@ import axios from "axios";
 import {IChannelEntity} from "@/shared/entities/IChannel.entity";
 import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
 import { IInviteEntity } from "@/shared/entities/IInvite.entity";
+import { IUserEntity } from "@/shared/entities/IUser.entity";
 
 
 const AuthManager = require('./AuthManager');
@@ -103,13 +104,19 @@ export namespace getApi {
 			return user.channelJoined;
 		}
 	}
-
-	export const getAllMessagesChannel = (channelID: number): Promise<{ data: IMessageEntity[] }> => {
-		return axiosInstance.get(`${strRoutes.channel.getAllMessagesChannel(channelID)}`, {
-			headers: {'Authorization': `Bearer ${authManager.getToken()}`}
-		});
-	}
-
+	
+		export const getAllMessagesChannel = (channelID: number): Promise<{ data: IMessageEntity[] }> => {
+			return axiosInstance.get(`${strRoutes.channel.getAllMessagesChannel(channelID)}`, {
+				headers: {'Authorization': `Bearer ${authManager.getToken()}`}
+			});
+		}
+	
+		export const getBlockedList = (): Promise<{ data: IUserEntity[] }> => {
+			return axiosInstance.get(`${strRoutes.relationships.getBlockedList()}`, {
+				headers: {'Authorization': `Bearer ${authManager.getToken()}`}
+			});
+		}
+	
 	export const getAllBanFromChannel = (channelID: number): Promise<{data: channelsDTO.IBanEntity[]}> => {
 		return axiosInstance.get(`${strRoutes.channel.getAllBanFromChannel(channelID)}`, {
 			headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
