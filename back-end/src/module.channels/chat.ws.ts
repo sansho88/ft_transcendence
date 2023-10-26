@@ -36,6 +36,7 @@ import {InviteEntity} from "../entities/invite.entity";
 import {wsChatRoutesClient, wsChatRoutesBack} from 'src/shared/routesApi';
 import {DefaultEventsMap} from "socket.io/dist/typed-events";
 import {channelsDTO} from 'src/shared/DTO/InterfaceDTO';
+import { MutedService } from './muted.service';
 
 
 class SocketUserList {
