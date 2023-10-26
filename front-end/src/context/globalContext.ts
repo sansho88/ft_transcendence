@@ -32,9 +32,6 @@ export type TokenContextType = {
 	setToken: (value: string) => void;
 };
 
-
-// export const SocketContextChat = createContext<Socket>(io(`http://${originDefault.domain}:${originDefault.apiPort}`, { autoConnect: false })); //WIP
-// export const SocketContextGame = createContext<Socket>(io(`http://${originDefault.domain}:${originDefault.apiPort}`, { autoConnect: false })); //WIP
 export const SocketContextChat = createContext<Socket | null>(null);
 export const SocketContextGame = createContext<Socket | null>(null);
 export const ThemeContext = createContext<string>("light");

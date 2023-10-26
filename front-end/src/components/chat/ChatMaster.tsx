@@ -27,7 +27,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
   const [channelsServer, setChannelsServer] = useState<IChannel[]>([]) //recuperer tous les channels server
   const [channels, setChannels] = useState<IChannel[]>([]) //list des channels JOINED
-  const [messagesChannel, setMessagesChannel] = useState<messageDTO.IReceivedMessageEventDTO[]>([]) //les messages actuellement load du channel //TODO: faire route ws avec ping et update
+  const [messagesChannel, setMessagesChannel] = useState<messageDTO.IReceivedMessageEventDTO[]>([]) //les messages actuellement load du channel
   const [currentChannel, setCurrentChannel] = useState<number>(-1); // definir le channel en cours by ID
   const [blockList, setBlockList] = useState<IUserEntity[]>([]); // definir le channel en cours by ID
   
@@ -65,7 +65,6 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
 
   async function updateMessages(channelID: number) {
-        //get la liste des userBlocked
         await apiReq.getApi.getAllMessagesChannel(channelID)
         .then(async (messages) => {
           await apiReq.getApi.getBlockedList()
@@ -134,7 +133,6 @@ export default function ChatMaster({className, token, userID}: {className: strin
   useEffect(() => {
 
       if (socketChat){
-        wsChatListen.infoRoom(socketChat); //DBG
         wsChatListen.createRoomListen(socketChat, setChannels);
         wsChatListen.updateChannelsJoined(socketChat, setChannels);
         wsChatEvents.pingUpdateChannelsJoined(socketChat);
@@ -162,7 +160,6 @@ export default function ChatMaster({className, token, userID}: {className: strin
         wsChatListen.channelHasChangedOFF(socketChat, channels, setChannels)
         wsChatListen.leaveRoomListenOFF(socketChat, setChannels, setCurrentChannel, channels)
     }
-    // if(channels.length === 0)
       setMessagesChannel([])
     })
   }, [channels])
@@ -180,7 +177,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
                           isServerList={false} /> : <></> }
       
       <div className='chat_block_main'>
-        <ChatMessagesList className='chat_message_list' messages={messagesChannel} currentChannel={currentChannel} userCurrentID={userID}/> {/* TODO: charger ref liste message channel en cours*/}
+        <ChatMessagesList className='chat_message_list' messages={messagesChannel} currentChannel={currentChannel} userCurrentID={userID}/>
         {socketChat?.active ? 
         <ChatInput className={'chat_block_messages_input'} socket={socketChat} channelID={currentChannel} /> : <></>}
       </div>

@@ -40,7 +40,6 @@ const Leaderboard : React.FC = () => {
         if (data.UserID == userContext.UserID && data.status == EStatus.Online)
         {
             refreshLeaderboard = true;
-            console.log("refresh leaderboard");
         }
     });
 

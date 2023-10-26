@@ -18,7 +18,7 @@ export default function AddUserPrivateChannel({ className, channelID}:
   const [popupIsVisible, setPopupIsVisible] = useState<boolean>(false);
 
 
-	const elementClickable = (user: IUser) => { //FIXME: check is good
+	const elementClickable = (user: IUser) => {
 		function queryInvite(userID: number){
 			apiReq.putApi.inviteUserInChannel(userID, channelID)
 			.then(() => {})
@@ -49,18 +49,18 @@ export default function AddUserPrivateChannel({ className, channelID}:
 				const lst = res.data
 				setUserListChan(lst)
 			})
-				.catch((reason) => {console.log(reason)});
+				.catch((reason) => {});
 			apiReq.getApi.getAllMyFollowers()
 			.then((res) => {
 				const tmpLst: IUser[] = res.data.filter((user) => !userList.includes(user))
 				setUserListFollo(tmpLst);
 			})
-				.catch((reason) => {console.log(reason)});
+				.catch((reason) => {});
 			apiReq.getApi.getInviteChannelID(channelID)
 			.then((res) => {
 					setInviteListChannel(res.data);
 			})
-				.catch((reason) => {console.log(reason)});
+				.catch((reason) => {});
 		}
 	
 	}, [popupIsVisible])

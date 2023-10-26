@@ -68,7 +68,6 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
         event.preventDefault();
         if (areSettingsValids)
         {
-            // console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
             setIsChannelCreated(true);
             
             const newChannel: channelsDTO.ICreateChannelDTOPipe = {
@@ -89,7 +88,6 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
         setPasswordVisible(showPassword == "text" ? "password" : "text");
     }
 
-//todo: afficher uniquement en cas de clique sur le bouton d ajout + deplacer les boutons de settings vers le haut
     return (
         <>
             {!isChannelCreated && <div className={className}>

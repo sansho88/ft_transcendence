@@ -31,7 +31,6 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     isPending: boolean,
     inviteID: number
 }) {
-    // const [isPending, setIsPending] = useState(false); //TODO: check si cest une invit ?
 
     const [channelPassword, setChannelPassword] = useState("");
     const [channelType, setChannelType] = useState("");
@@ -42,7 +41,6 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     const [actualUserID, setActualUserID] = useState<number>(-1)
     const [channelMpName, setChannelMpName] = useState<string | null>(null)
     const [usersList, setUsersList] = useState<IUser[]>([]);
-    // const [inviteID, setInviteID] = useState<number>(0);
 
 
     async function getUserId(){
@@ -63,9 +61,6 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
     useEffect(() => {
         if (isMp)
             getUserId();
-        
-        console.log('invite ChannelID IN ELEMENT = ', inviteID)
-
     }, [])
 
 
@@ -90,14 +85,11 @@ useEffect(() => {
 }, [channelName, channelType, channelPassword]);
 
     function handleAcceptInvite() {
-        // console.log(`Invite to ${channelName} accepted`);
-        // setIsPending(false);
         onClickSwitcher();
     }
 
     const [visible, setVisible] = useState<boolean>(true);
     function handleDeclineInvite() {
-        // console.log(`Invite to ${channelName} declined`);
         setVisible(false);
         apiReq.putApi.inviteIdRemove(inviteID)
         .then((res) => {
@@ -130,14 +122,6 @@ useEffect(() => {
         event.preventDefault();
         if (areSettingsValids)
         {
-            // console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
-            // setIsChannelCreated(true);
-            
-            // const newChannel: channelsDTO.IJoinChannelDTOPipe = {
-            //     channelID: channelID,
-            //     password: channelType === "Protected" ? channelPassword : undefined
-            //   }
-            
             onClickFunction(channelPassword);
           }
         
@@ -190,21 +174,16 @@ useEffect(() => {
         
         function leaveChan(socket: Socket, channelLeaveID: number) {
             const leavedChannel: channelsDTO.ILeaveChannelDTOPipe = {channelID: channelLeaveID}
-            console.log('leave action')
             wsChatEvents.leaveRoom(socket, leavedChannel)
         }
     
         const timerRef = useRef(null);
         const handleMouseEnter = () => {
-        //   clearTimeout(timerRef.current); // Annule tout timer existant
           setIsHovered(true);
         };
       
         const handleMouseLeave = () => {
-          // Défini un timer pour retarder le changement d'état
-        //   timerRef.current = setTimeout(() => {
             setIsHovered(false);
-        //   }, 300); // 100 ms de délai
         };
 
     return (

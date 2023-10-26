@@ -73,22 +73,15 @@ const SettingsChannel = ({className, socket, channelToEdit}: {className: string,
         event.preventDefault();
         if (areSettingsValids)
         {
-            // console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
             setIsChannelEdited(true);
 
-            // const newEditedChannel : IChannel = {
             const newEditedChannel : channelsDTO.IChangeChannelDTOPipe = {
                 channelID: channelToEdit.channelID,
                 name: channelName,
                 privacy: channelType == "Private",
                 password: channelPassword ? channelPassword : null
             }
-            // apiReq.putApi.putModifChannel(channelToEdit.channelID, newEditedChannel)//FIXME:
-            // .then(() => {
-            //     console.log('tous va bien dans le meilleur des mondes')
-            // })
-            // .catch((e) => {
-            // console.error(e)})
+           
             wsChatEvents.updateChannel(socket, newEditedChannel); // utilisation ws pour update tous les clients ensuite
         }
 

@@ -22,8 +22,6 @@ class AuthManager {
     getBaseURL(){
         return this.baseURL;
     }
-
-    // Vous pouvez également ajouter d'autres méthodes, comme la vérification d'expiration du token, la déconnexion, etc.
 }
 
 module.exports = AuthManager;

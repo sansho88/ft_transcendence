@@ -62,7 +62,6 @@ useEffect(() => {
               alt="ADD CHANNEL BUTTON"
               width={22}
               height={22}
-              //        style={{width: "80%", height:"auto", maxWidth:"4vw", maxHeight:"4vh"}}
               />
         </button>
     { isPopupChannelsVisible && <ChatNewChannelPopup
@@ -109,11 +108,6 @@ useEffect(() => {
             <>
                 {isPopupUsersVisible && 
                 <div id={"make_popup_disappear"} onClick={() => setPopupUsersVisible(false)}></div>}
-                {/* <button className='testBUTTON' onClick={() => {
-                    setPopupUsersVisible(!isPopupUsersVisible);
-                }}>
-
-                </button> */}
                 { actualChannel  && <UserList id={"chat_users_button"}
                                               userListIdProperty={"chat_users_list"}
                                               avatarSize={"medium"}
@@ -123,7 +117,6 @@ useEffect(() => {
                                               userID={userID}
                                               buttonVisibility={{setPopupChannelVisible, setPopupSettingsVisible, setPopupUsersVisible, isPopupChannelsVisible, isPopupSettingsVisible, isPopupUsersVisible}}
                 /> }
-
             </>
         )
     }
@@ -168,8 +161,8 @@ useEffect(() => {
               channelID={channel.channelID}
               inviteID={-1}
               channelName={channel.name}
-              isInvite={channel.type === EChannelType.PRIVATE} //TODO:
-              isMp={channel.type === EChannelType.DIRECT} //TODO:
+              isInvite={channel.type === EChannelType.PRIVATE}
+              isMp={channel.type === EChannelType.DIRECT}
               socket={socket}
               isServList={false}
               isOwner={channel.owner ? channel.owner.UserID === userID : false }
@@ -183,7 +176,7 @@ useEffect(() => {
           ))
         }
         {channelsServer && isServerList &&
-          channelsServer.filter(channel => channel.type <= EChannelType.PROTECTED || (channel.type === EChannelType.PRIVATE && isInvitable(channel.channelID) === true) ) //FIXME:FIXME:
+          channelsServer.filter(channel => channel.type <= EChannelType.PROTECTED || (channel.type === EChannelType.PRIVATE && isInvitable(channel.channelID) === true) )
           .filter(channel => channels && !channels.some(existingChannel => existingChannel.channelID === channel.channelID)) 
           .map((channel) => (
             <ChatChannelListElement
@@ -191,8 +184,8 @@ useEffect(() => {
               channelID={channel.channelID}
               inviteID={defineInviteID(channel.channelID)}
               channelName={channel.name}
-              isInvite={false} //TODO:
-              isMp={false} //TODO:
+              isInvite={false}
+              isMp={false}
               socket={socket}
               isServList={true}
               isOwner={false}

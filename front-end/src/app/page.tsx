@@ -23,7 +23,6 @@ export default function Home() {
         authManager.setToken(tmpToken);
         if (!logged && !tmpToken)
         {
-            console.log("Redirect to auth page");
             router.push('/auth');
         }
         else
@@ -34,21 +33,16 @@ export default function Home() {
                    .then((testUser) => {
                         if (testUser && testUser.UserID >= 0)
                         {
-                            console.log("Redirect to Home page");
                             router.push('/home');
                         }
                         else
                         {
-                            if ("UserID" in testUser) {
-                                console.log("testUser id= " + testUser.UserID);
-                            }
                             alert("An invalid token was saved in the browser." +
                                 "\nPlease, log in again or create a new account.");
                         }
                     })
                     .catch((error) => {
                         console.error("[redirect useEffect error]" + error);
-                        console.log("authManager baseURL: " + authManager.getBaseURL());
                     });
 
             }

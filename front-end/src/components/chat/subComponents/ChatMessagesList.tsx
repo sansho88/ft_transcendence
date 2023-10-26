@@ -26,9 +26,7 @@ export default function ChatMessagesList({className, messages, currentChannel, u
     setTimeout(() => {
       goToEndMessage('auto');
     }, setTimeoutGoToEndMesage)
-    
-    
-  }, []) //TODO: dependence new message... OU PAS ?
+  }, [])
 
   useEffect(() => {
 
@@ -46,7 +44,6 @@ export default function ChatMessagesList({className, messages, currentChannel, u
       if (refDivParent && scrollPosition)
       {
         const maxHeight = refDivParent.current?.scrollHeight - refDivParent.current?.clientHeight;
-        // console.log(`scollPos=${scrollPosition} || maxHeigh=${maxHeight - 50}`)
         if (scrollPosition > (maxHeight - 400))
         {
           setTimeout(() => {
@@ -62,7 +59,6 @@ export default function ChatMessagesList({className, messages, currentChannel, u
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = refDivParent.current?.scrollTop;
-      // console.log("Position actuelle du scroll :", scrollPosition);
       if (refDivParent && scrollPosition)
       {
         const maxHeight = refDivParent.current?.scrollHeight - refDivParent.current?.clientHeight;
@@ -85,7 +81,6 @@ export default function ChatMessagesList({className, messages, currentChannel, u
     if (refDivParent.current !== null)
     {  
       const maxHeight = refDivParent.current?.scrollHeight - refDivParent.current?.clientHeight;
-      // console.log("Position maximale du scroll :", maxHeight);
     }
   }, [refDivParent.current]);
   
@@ -134,7 +129,3 @@ export default function ChatMessagesList({className, messages, currentChannel, u
     </div>
   )
 }
-
-    // <div>
-    //   <ChatMessage className={' h-20 items-end justify-center'}/>
-    // </div>

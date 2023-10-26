@@ -14,7 +14,6 @@ export default function Game({className, token}: {className: string, token: stri
   const socket      = useContext(SocketContextGame);
   const socketRef   = useRef(socket);
   
-  // const {logged}    = useContext(LoggedContext);
   const userLogged  = useContext(UserContext);
   const {logged, setLogged} = useContext(LoggedContext);
 
@@ -54,16 +53,6 @@ export default function Game({className, token}: {className: string, token: stri
   const coefTableServer                 = useRef<PODGAME.IVector2D>({x: 1, y: 1});
 
   const gameMod                         = useRef<PODGAME.EGameMod>(PODGAME.EGameMod.classic);
-
-
-//   function changeTheme(themeName) {
-//     setCurrentGameTheme(themeName);
-// }
-
-  // useEffect(() => {
-  //   localStorage.setItem('theme', currentGameTheme);
-  // }, [currentGameTheme])
-
 
   useEffect(( ) => {
     if (logged === true) {
@@ -301,7 +290,7 @@ export default function Game({className, token}: {className: string, token: stri
 	interface TableProps {
 	  className?: string;
 	  tableRef: React.RefObject<HTMLDivElement>;
-	  children?: React.ReactNode; // add this line
+	  children?: React.ReactNode;
 	}
 	
 	const Table: React.FC<TableProps> = ({className, tableRef, children}) => {
@@ -508,8 +497,6 @@ export default function Game({className, token}: {className: string, token: stri
     <div className={`${className} ${currentGameTheme} rounded-xl`}> 
       <Table tableRef={tableRef} className='table w-full h-full relative font-vt323'> 
         {stepCurrentSession === EStatusFrontGame.idle && challengeList()}
-        {/* <Scoreboard/> // bugger*/} 
-        {/* <CenterDBG/> */}
         <Player className='paddle absolute ' position='left' refDiv={pad1Ref} /> 
         {(stepCurrentSession === EStatusFrontGame.matchmakingRequest || stepCurrentSession === EStatusFrontGame.modChoice) &&
             <div className='flex space-x-5 items-center justify-end pr-10 pl-10 pt-20'>
