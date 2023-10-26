@@ -103,6 +103,9 @@ export namespace wsChatRoutesClient {
 	export const proposeChallenge = () => {
 		return `proposeChallenge`
 	}
+	export const updateBlockedList = () => {
+		return `updateBlocked`
+	}
 
 
 }
@@ -183,6 +186,8 @@ export namespace strRoutes {
 	export const deleteUserById = () => {
 		return `${serverApi}/${routeUsers}/`
 	}
+
+
 
 // +---------------------------------------------------------------------+
 // |                              GAME                                   |
@@ -322,6 +327,8 @@ export namespace channel {
 		export const unblockUser = (userID: number) => {
 			return `${serverApi}/${routeUsers}/unblock/${userID}`
 		};
+		export const getBlockedList = ()=> {
+			return `${serverApi}/${routeUsers}/block/`};
 	}
 
 }

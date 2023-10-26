@@ -58,7 +58,6 @@ export class UsersController {
 	@Get('/get/nicknameUsed/:nick')
 	@UseGuards(AuthGuard)
 	nickNameUsed(@Param('nick') nick: string) {
-		console.log('nick?: ' + nick)
 		return this.usersService.nicknameUsed(nick);
 	}
 
@@ -189,6 +188,7 @@ export class UsersController {
 			throw new BadRequestException('You already have blocked this user');
 		if (!!user.subscribed.find(targ => targ.UserID == target.UserID))
 			user.subscribed = user.subscribed.filter(targ => targ.UserID !== target.UserID);
+		await this.chatWsService.block(user, target);
 		return this.usersService.blockUser(user, target);
 	}
 
@@ -205,6 +205,7 @@ export class UsersController {
 		user = await this.usersService.findOne(user.UserID, ['blocked']);
 		if (!user.blocked.find(block => block.UserID == target.UserID))
 			throw new BadRequestException('You haven\'t block this user yet');
+		await this.chatWsService.unblock(user, target);
 		return this.usersService.unBlockUser(user, target);
 	}
 
@@ -213,6 +214,6 @@ export class UsersController {
 	async blockedUser(
 		@CurrentUser() user: UserEntity,
 	) {
-		return this.usersService.findOne(user.UserID, ['banned']).then(user => user.banned);
+		return this.usersService.findOne(user.UserID, ['blocked']).then(user => user.blocked);
 	}
 }
