@@ -598,8 +598,8 @@ export class GameSession {
 
 	//clean les intervals pour eviter les fuites memoires
 	private cleanup() {
-		clearInterval(<number>this.intervalId);
-		clearInterval(<number>this.intervalIdEmit);
+		clearInterval(this.intervalId);
+		clearInterval(this.intervalIdEmit);
 	}
 
 	///////// METHODS ////////////

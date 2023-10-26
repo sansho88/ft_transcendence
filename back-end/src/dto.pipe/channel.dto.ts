@@ -56,6 +56,12 @@ export class CreateMpDTOPPipe {
 }
 
 export class ChangeChannelDTOPipe {
+	@IsNotEmpty()
+	@Max(2147483647)
+	@Min(0)
+	@IsNumber()
+	channelID
+
 	@IsOptional()
 	@IsString()
 	name: string;

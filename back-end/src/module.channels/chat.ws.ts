@@ -23,6 +23,7 @@ import {accessToken} from '../dto/payload';
 import * as process from 'process';
 import {JwtService} from '@nestjs/jwt';
 import {
+	ChangeChannelDTOPipe,
 	CreateChannelDTOPipe,
 	CreateMpDTOPPipe,
 	JoinChannelDTOPipe,
@@ -34,7 +35,6 @@ import {InviteService} from "./invite.service";
 import {InviteEntity} from "../entities/invite.entity";
 import {wsChatRoutesBack, wsChatRoutesClient} from '../shared/routesApi';
 import {DefaultEventsMap} from "socket.io/dist/typed-events";
-import {channelsDTO} from '../shared/DTO/InterfaceDTO';
 import {MutedService} from "./muted.service";
 
 
@@ -388,6 +388,8 @@ export class ChatGateway
 		@ConnectedSocket() client: Socket,
 		@MessageBody(new ValidationPipe()) data: { nickname: string },
 	) {
+		if(!data.nickname)
+			return;
 		const res = await this.usersService.nicknameUsed(data.nickname);
 		client.emit('NicknameUsed', res);
 	}
@@ -408,7 +410,6 @@ export class ChatGateway
 
 		return socketLst.filter(socket => {
 			for (const Id of socketIDLst) {
-				//console.log('id = ', Id.socketID);
 				if (Id.socketID == socket.id)
 					return true;
 			}
@@ -438,12 +439,10 @@ export class ChatGateway
 	@UseGuards(WSAuthGuard)
 	async handleUpdateRoom(
 		@CurrentUser() user: UserEntity,
-		@MessageBody(new ValidationPipe()) data: channelsDTO.IChangeChannelDTOPipe) {
-		//console.log(' update ', data);
+		@MessageBody(new ValidationPipe()) data: ChangeChannelDTOPipe) {
 		const channel = await this.channelService.findOne(data.channelID).catch(() => null);
 		if (channel === null)
 			return;
-		//console.log(channel);
 		if (channel.owner.UserID !== user.UserID)
 			return;
 		const credential = await this.channelCredentialService.create(data.password);

@@ -98,7 +98,9 @@ export class ServerGame {
 	public createGame(server: Server, p1: userInfoSocket, p2: userInfoSocket, gameMod: EGameMod) {
 		const startDate: Date = new Date();
 		const generateSessionName: string = uuidv4();
-		return new GameSession(server, p1, p2, startDate, this.gameSession.length, gameMod, generateSessionName, this.gameService);
+		const newGame = new GameSession(server, p1, p2, startDate, this.gameSession.length, gameMod, generateSessionName, this.gameService)
+		this.gameSession.push (newGame);
+		return newGame;
 	}
 
 	private async cleanChallenge() {
