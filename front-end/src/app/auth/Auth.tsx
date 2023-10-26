@@ -254,7 +254,6 @@ export default function Auth({className}: { className?: string }) {
             <>
                 <div className="welcome">
                     <div className="welcome-msg">WELCOME TO</div>
-                    {/*<div className="width: 788px; height: 130px; left: 0px; top: 24px; position: absolute; justify-content: center; align-items: center; display: inline-flex">*/}
                     <div className="welcome-title ">PONG POD!</div>
                 </div>
             </>
@@ -275,10 +274,6 @@ export default function Auth({className}: { className?: string }) {
     }, [currentStepLogin, router]);
 
     const LoggedSuccess = () => {
-        /*
-            socketChat?.connect();
-            socketGame?.connect();
-            */
         return (
             <div className="flex flex-col items-center text-center">
                 {showMessage && <LoadingComponent/>}
