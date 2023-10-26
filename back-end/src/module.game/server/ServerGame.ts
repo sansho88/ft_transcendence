@@ -1,22 +1,22 @@
-import {Injectable} from '@nestjs/common';
+import {forwardRef, Inject, Injectable} from '@nestjs/common';
 import {Matchmaking} from './Matchmaking';
 import {GameSession} from './GameSession';
 import {RemoteSocket, Server, Socket} from 'socket.io';
-import {userInfoSocket, EGameMod} from 'shared/typesGame';
+import {userInfoSocket, EGameMod} from '../../shared/typesGame';
 import {v4 as uuidv4} from "uuid";
 import {GameService} from '../game.service';
-import { IUser } from 'shared/types';
+import { IUser } from '../../shared/types';
 import { ChallengeManager } from './ChallengeManager'
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { channelsDTO } from 'shared/DTO/InterfaceDTO';
+import { channelsDTO } from '../../shared/DTO/InterfaceDTO';
 import { UserEntity } from 'src/entities/user.entity';
 import {UsersService} from "../../module.users/users.service";
 import {UserStatus} from "../../entities/user.entity";
 
 @Injectable()
 export class ServerGame {
-	// gameService: GameService;
 	constructor(
+		@Inject(forwardRef(() => GameService))
 		private gameService: GameService,
 		private usersService: UsersService,
 	) {
@@ -98,7 +98,9 @@ export class ServerGame {
 	public createGame(server: Server, p1: userInfoSocket, p2: userInfoSocket, gameMod: EGameMod) {
 		const startDate: Date = new Date();
 		const generateSessionName: string = uuidv4();
-		return new GameSession(server, p1, p2, startDate, this.gameSession.length, gameMod, generateSessionName, this.gameService);
+		const newGame = new GameSession(server, p1, p2, startDate, this.gameSession.length, gameMod, generateSessionName, this.gameService)
+		this.gameSession.push (newGame);
+		return newGame;
 	}
 
 	private async cleanChallenge() {
@@ -138,7 +140,7 @@ export class ServerGame {
 		}
 
 	}
-	
+
 	public declineChallenge(userP2: UserEntity, event: string){
 		const index = this.challengeList.findIndex((challenge) => challenge.getEventChallenge() === event)
 		if (index >= 0){
@@ -153,5 +155,14 @@ export class ServerGame {
 	}
 	userInMatchmaking(player: userInfoSocket) {
 		return this.matchmaking.containsUser(player);
+	}
+
+	userInGame(userID: number){
+		return !!this.gameSession
+			.filter(game=> game.getIsGameRunning() == true)
+			.find(game => game.getPlayer1().user.UserID === userID || game.getPlayer2().user.UserID == userID)
+			|| !!this.trainningSession
+			.filter(game=> game.getIsGameRunning() == true)
+			.find(game => game.getPlayer1().user.UserID === userID)
 	}
 }

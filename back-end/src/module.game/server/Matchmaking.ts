@@ -1,4 +1,4 @@
-import {EGameMod, userInfoSocket} from 'shared/typesGame';
+import {EGameMod, userInfoSocket} from '../../shared/typesGame';
 import {Server, Socket} from 'socket.io';
 import {GameSession} from './GameSession';
 import {v4 as uuidv4} from "uuid";
