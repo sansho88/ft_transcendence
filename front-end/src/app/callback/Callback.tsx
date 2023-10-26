@@ -55,9 +55,6 @@ export default function Callback() {
 					apiReq.authManager.setToken(userToken);
 					router.push('/home');
 		}
-		else {
-			console.log("2fa");
-		}
 	})
 	.catch((error) => {
 		  
