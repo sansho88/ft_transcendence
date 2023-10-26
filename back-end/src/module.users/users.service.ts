@@ -94,7 +94,7 @@ export class UsersService {
 
 	async uploadAvatar(user: UserEntity, file, request) {
 		try {
-			if (file.buffer.length > 20000000) throw new BadRequestException('Le fichier est trop volumineux (20Mo max)');
+			if (file.buffer.length > 5000000) throw new BadRequestException('Le fichier est trop volumineux (5Mo max)');
 			const internalPath = request.protocol + '://' + request.hostname + ':' + process.env.PORT_SERVER;
 			const buffer = file.buffer;
 			const img = await Jimp.read(buffer)
