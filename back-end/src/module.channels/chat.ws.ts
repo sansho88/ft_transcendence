@@ -35,6 +35,7 @@ import {InviteEntity} from "../entities/invite.entity";
 import {wsChatRoutesBack, wsChatRoutesClient} from '../shared/routesApi';
 import {DefaultEventsMap} from "socket.io/dist/typed-events";
 import {channelsDTO} from '../shared/DTO/InterfaceDTO';
+import {MutedService} from "./muted.service";
 
 
 class SocketUserList {
@@ -57,6 +58,7 @@ export class ChatGateway
 		@Inject(forwardRef(() => UsersService))
 		private usersService: UsersService,
 		private bannedService: BannedService,
+		private muteService: MutedService,
 		private channelCredentialService: ChannelCredentialService,
 		private jwtService: JwtService,
 		private inviteService: InviteService,
@@ -249,6 +251,7 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
+		this.muteService.update();
 		//console.log('sendMESSAGES ======= ');
 		const channel = await this.channelService
 			.findOne(data.channelID, ['userList', 'muteList'], true)
@@ -343,8 +346,6 @@ export class ChatGateway
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity,
 	) {
-		user = await this.usersService.findOne(user.UserID, ['channelJoined']);
-		//console.log(user);
 	}
 
 
