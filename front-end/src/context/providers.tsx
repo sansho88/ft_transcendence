@@ -14,7 +14,6 @@ import {
 } from "@/context/globalContext";
 import { IOriginNetwork } from "../shared/types";
 import { io, Socket } from "socket.io-client";
-// import websocketConnect from "@/websocket/websocket";
 
 const IP_HOST = () => {
   if (typeof window !== 'undefined') 
@@ -37,9 +36,6 @@ const originDefaultFull = (origin: IOriginNetwork): IOriginNetwork => {
 			appDOM: `http://${origin.domain}:${origin.appPort}`,
 	}
 }
-
-// export const SocketContextChat = createContext<Socket | null>(null);
-// export const SocketContextGame = createContext<Socket | null>(null);
 
 export function SocketProvider({ children }) {
   const [socketChat, setSocketChat] = useState<Socket | null>(null);

@@ -2,12 +2,6 @@
 import React, { useEffect, useState } from 'react'
 import { GameTheme } from "@/shared/typesGame";
 
-
-// export function swicthTheme(newTheme: GameTheme){
-
-
-// }
-
 export default function SwitcherTheme({className, setThemeFunction}) {
 
   const [isOverlap, setIseOverlap] = useState<boolean>(false);

@@ -31,7 +31,7 @@ const HomePage = () => {
 
 
     function handleNotif(data: INotif) {
-        switch (data.type) { // Fixme: Happened twice despite sending it only once
+        switch (data.type) {
             case "success":
                 NotificationManager.success(data.message, data.title, data.time);
                 break;

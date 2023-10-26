@@ -77,7 +77,6 @@ export default function Callback() {
 		{ 
 			fetchData(code);
 		}
-		//si success routrer vers home
 	}, [])
 	return (
 			<LoadingComponent/>

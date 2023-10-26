@@ -7,7 +7,7 @@ import * as apiReq from '@/components/api/ApiReq'
 import { EGameMod, EStatusFrontGame } from '@/shared/typesGame'
 import {v4 as uuidv4} from "uuid";
 
-export default function ChallengeList({currentStepGameFront}: {currentStepGameFront: EStatusFrontGame}) { //FIXME: props useless ?
+export default function ChallengeList({currentStepGameFront}: {currentStepGameFront: EStatusFrontGame}) {
   const socket      												= useContext(SocketContextGame);
   const [challengeList, setChallengeList] 	= useState<channelsDTO.IChallengeProposeDTO[]>([]);
   const {setSelectedUserContext} = useContext(SelectedUserContext);
@@ -17,10 +17,10 @@ export default function ChallengeList({currentStepGameFront}: {currentStepGameFr
 			if (socket?.disconnected)
 				socket.connect();
 
-			socket?.on(wsChatRoutesClient.proposeChallenge(), (/*data: channelsDTO.IChallengeProposeDTO*/) => {
+			socket?.on(wsChatRoutesClient.proposeChallenge(), () => {
 				challengeElement();
 			})
-		}, 200) // petit timeout pour laisser les autres componenets / socket se monter avant
+		}, 200)
 		challengeElement();
 	}, [])
 	

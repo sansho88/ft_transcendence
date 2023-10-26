@@ -5,13 +5,6 @@ import { Socket } from 'socket.io-client';
 
  export default function LeaveChannelCross({onClickFunction, className}:{onClickFunction: Function, className: string}) {
 
-
-	// function leaveChan(channelLeaveID: number) {
-	// 	const leavedChannel: channelsDTO.ILeaveChannelDTOPipe = {channelID: channelLeaveID}
-	// 	wsChatEvents.leaveRoom(socket, leavedChannel)
-	// }
-
-
 	return (
 		<div className={className}
 					onClick={(event) => {
