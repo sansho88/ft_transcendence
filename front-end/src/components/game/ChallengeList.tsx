@@ -48,6 +48,8 @@ export default function ChallengeList({currentStepGameFront}: {currentStepGameFr
 
 		return (
 			<div className='flex  max-w-max p-1 mt-1 rounded-md space-x-1' key={uuidv4()}>
+				<button onClick={() => acceptChallenge(challenge)} title='Accept'>✅</button>
+				<button onClick={()=> declineChallenge(challenge)} title='Decline'>❌</button>
 				<div className='mr-2'
 					 style={{cursor: 'pointer'}}
 					 onClick={() => setSelectedUserContext(challenge.challenger)}
@@ -55,8 +57,6 @@ export default function ChallengeList({currentStepGameFront}: {currentStepGameFr
 					{`${challenge.challenger.nickname}(${challenge.challenger.login}) |`}
 					{challenge.gameMod === EGameMod.classic ? ' classic ' : ' ghost '} 
 				</div>
-				<button onClick={() => acceptChallenge(challenge)} title='Accept'>✅</button>
-				<button onClick={()=> declineChallenge(challenge)} title='Decline'>❌</button>
 			</div>
 			)
 		}
