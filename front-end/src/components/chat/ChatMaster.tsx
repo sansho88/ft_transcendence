@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useContext, useEffect, useState, useRef, createContext } from 'react'
+import React, { useContext, useEffect, useState, useRef, createContext, useLayoutEffect } from 'react'
 import { LoggedContext, SocketContextChat, SocketContextGame, UserContext } from '@/context/globalContext'
 import { IChannel } from '@/shared/typesChannel'
 import ChatInput from './subComponents/ChatInput'
@@ -15,23 +15,25 @@ import * as apiReq from '../api/ApiReq'
 
 import ChatNewChannelPopup from "@/components/chat/subComponents/ChatNewChannelPopup";
 import { IMessageEntity } from '@/shared/entities/IMessage.entity'
-import { messageDTO } from '@/shared/DTO/InterfaceDTO'
+import { channelsDTO, messageDTO } from '@/shared/DTO/InterfaceDTO'
 import { wsChatRoutesBack } from '@/shared/routesApi'
+import { IUserEntity } from '@/shared/entities/IUser.entity'
 
 
 export default function ChatMaster({className, token, userID}: {className: string, token: string, userID: number}) {
   const timeoutRefreshMessage: number = 150; //ajoute un timeout pour laisser le temps au message de se charger
- 
+  const timeoutRefreshChannel: number = 250; //ajoute un timeout pour laisser le temps au message de se recharger apres un blocked
+  
 
   const [channelsServer, setChannelsServer] = useState<IChannel[]>([]) //recuperer tous les channels server
   const [channels, setChannels] = useState<IChannel[]>([]) //list des channels JOINED
   const [messagesChannel, setMessagesChannel] = useState<messageDTO.IReceivedMessageEventDTO[]>([]) //les messages actuellement load du channel //TODO: faire route ws avec ping et update
   const [currentChannel, setCurrentChannel] = useState<number>(-1); // definir le channel en cours by ID
+  const [blockList, setBlockList] = useState<IUserEntity[]>([]); // definir le channel en cours by ID
   
+  const chanRef = useRef<number>(-1); 
   
   const socketChat = useContext(SocketContextChat);
-  const socketGame = useContext(SocketContextGame);
-  const {logged, setLogged} = useContext(LoggedContext);
 
   const setterCurrentChannel = (newIdChannel: number) => {
     setCurrentChannel(newIdChannel);
@@ -39,7 +41,6 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
   if(socketChat?.disconnected) 
   { 
-    // console.log(`Chat WS is connected in ChatMaster`);
     if (!token){
       const tokentmp = localStorage.getItem('token');
       if (tokentmp)
@@ -49,32 +50,59 @@ export default function ChatMaster({className, token, userID}: {className: strin
     socketChat.connect();
   }
 
-  async function updateMessages(channelID: number) {
-        // console.log('***********try update messages?************')
-        await apiReq.getApi.getAllMessagesChannel(channelID)
-        .then((messages) => {
-          setMessagesChannel(messages.data)
-        })
-        .catch(() => {})
-
-
+  function checkMessageBlockedList(message: messageDTO.IReceivedMessageEventDTO):boolean {
+    return !blockList.some((user) => user.UserID === message.author.UserID);
   }
 
-  const newMessageHandler = (socket: Socket,
+  async function updateBlockList() {
+    
+    await apiReq.getApi.getBlockedList()
+    .then((res: {data: IUserEntity[]}) => {
+      setBlockList(res.data)
+    })
+    .catch(() => {})
+  }
+
+
+  async function updateMessages(channelID: number) {
+        //get la liste des userBlocked
+        await apiReq.getApi.getAllMessagesChannel(channelID)
+        .then(async (messages) => {
+          await apiReq.getApi.getBlockedList()
+          .then((res: {data: IUserEntity[]}) => {
+            setBlockList(res.data)
+          })
+          .catch(() => {})
+          const tmpMessages = messages.data.filter((message) => checkMessageBlockedList(message))
+          setMessagesChannel(tmpMessages)
+        })
+        .catch(() => {})
+  }
+
+  const newMessageHandler = async (socket: Socket,
     setMessages: React.Dispatch<React.SetStateAction<messageDTO.IReceivedMessageEventDTO[]>>,
     currentChannel: number,
     message: messageDTO.IReceivedMessageEventDTO) => {
-    if (message.channelID === currentChannel)
-      setMessages(prevMessages => [...prevMessages, message]);
+      await apiReq.getApi.getBlockedList()
+      .then((res: {data: IUserEntity[]}) => {
+        setBlockList(res.data)
+        if (checkMessageBlockedList(message) && message.channelID === currentChannel)
+          setMessages(prevMessages => [...prevMessages, message]);
+      })
+      .catch(() => {})
+   
   }
 
 
-  useEffect(() => {
 
-    setTimeout(() => 
-    {
+  useLayoutEffect(() => {
+    if(currentChannel !=  -1)
+      chanRef.current = currentChannel;
+
+    setTimeout(() => {
       updateMessages(currentChannel);
     }, timeoutRefreshMessage)
+    
     
     const messageHandler = (message: messageDTO.IReceivedMessageEventDTO) => {
       if (socketChat?.connected)
@@ -84,7 +112,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
     if (socketChat) {
       socketChat.on(wsChatRoutesBack.sendMsg(), messageHandler);
     }
-    
+
     return () => {
       if (socketChat) {
         socketChat.off(wsChatRoutesBack.sendMsg(), messageHandler);
@@ -93,6 +121,15 @@ export default function ChatMaster({className, token, userID}: {className: strin
   }, [currentChannel]);
 
 
+  function refreshChannel() {
+      setCurrentChannel(-1);
+      setMessagesChannel([]);
+
+      setTimeout(() => {
+        setCurrentChannel(chanRef.current);
+      },timeoutRefreshChannel)
+  
+  }
 
   useEffect(() => {
 
@@ -100,8 +137,8 @@ export default function ChatMaster({className, token, userID}: {className: strin
         wsChatListen.infoRoom(socketChat); //DBG
         wsChatListen.createRoomListen(socketChat, setChannels);
         wsChatListen.updateChannelsJoined(socketChat, setChannels);
-        //TODO: update channelsServer
         wsChatEvents.pingUpdateChannelsJoined(socketChat);
+        wsChatListen.toggleBlockedUserList(socketChat, refreshChannel)
       }
       else {
 
@@ -115,7 +152,6 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
 
   useEffect(() => {
-    // console.log(`CHANNELS UPDATED =  ${JSON.stringify(channels)}`);
     if (socketChat){
       wsChatListen.channelHasChanged(socketChat, channels, setChannels);
       wsChatListen.leaveRoomListen(socketChat, setChannels, setCurrentChannel, channels)
@@ -126,6 +162,8 @@ export default function ChatMaster({className, token, userID}: {className: strin
         wsChatListen.channelHasChangedOFF(socketChat, channels, setChannels)
         wsChatListen.leaveRoomListenOFF(socketChat, setChannels, setCurrentChannel, channels)
     }
+    // if(channels.length === 0)
+      setMessagesChannel([])
     })
   }, [channels])
   

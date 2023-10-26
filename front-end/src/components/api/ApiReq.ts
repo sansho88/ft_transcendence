@@ -9,6 +9,7 @@ import axios from "axios";
 import {IChannelEntity} from "@/shared/entities/IChannel.entity";
 import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
 import { IInviteEntity } from "@/shared/entities/IInvite.entity";
+import { IUserEntity } from "@/shared/entities/IUser.entity";
 
 
 const AuthManager = require('./AuthManager');
@@ -103,13 +104,19 @@ export namespace getApi {
 			return user.channelJoined;
 		}
 	}
-
-	export const getAllMessagesChannel = (channelID: number): Promise<{ data: IMessageEntity[] }> => {
-		return axiosInstance.get(`${strRoutes.channel.getAllMessagesChannel(channelID)}`, {
-			headers: {'Authorization': `Bearer ${authManager.getToken()}`}
-		});
-	}
-
+	
+		export const getAllMessagesChannel = (channelID: number): Promise<{ data: IMessageEntity[] }> => {
+			return axiosInstance.get(`${strRoutes.channel.getAllMessagesChannel(channelID)}`, {
+				headers: {'Authorization': `Bearer ${authManager.getToken()}`}
+			});
+		}
+	
+		export const getBlockedList = (): Promise<{ data: IUserEntity[] }> => {
+			return axiosInstance.get(`${strRoutes.relationships.getBlockedList()}`, {
+				headers: {'Authorization': `Bearer ${authManager.getToken()}`}
+			});
+		}
+	
 	export const getAllBanFromChannel = (channelID: number): Promise<{data: channelsDTO.IBanEntity[]}> => {
 		return axiosInstance.get(`${strRoutes.channel.getAllBanFromChannel(channelID)}`, {
 			headers: { 'Authorization': `Bearer ${authManager.getToken()}` }
@@ -268,10 +275,8 @@ export namespace utilsCheck {
 
 	export async function isLoginAlreadyTaken(login: string): Promise<boolean> {
 		if (!login) {
-			console.log('Call isLoginAlreadyTaken: login is empty !')
 			return false;
 		}
-		console.log('Call isLoginAlreadyTaken: login = ||' + login + '||')
 		try {
 			await getApi.getUserByLoginPromise(login);
 			return true;
@@ -282,7 +287,6 @@ export namespace utilsCheck {
 	}
 
 	export async function isPasswordMatch(login: string, password: string, code2FAInput?: string) {
-		console.log('\n\ncall isPasswordMatch: login: ||' + login + '||\npassword: ||' + password + '||\n\n');
 		try {
 			const res = await postApi.postTryLogin({login, password, token_2fa: code2FAInput});
 			return res.status === 201;

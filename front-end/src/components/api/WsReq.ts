@@ -20,7 +20,6 @@ export namespace wsChatEvents {
 
   export function leaveRoom(socket: Socket, leaveChannel: channelsDTO.ILeaveChannelDTOPipe) {
     socket.emit(wsChatRoutesBack.leaveRoom(), leaveChannel);
-    console.log('leaveRoomWS ' + JSON.stringify(leaveChannel));
   }
 
   export function sendMsg(socket: Socket, newMessage: messageDTO.ISendMessageDTOPipe) {
@@ -48,7 +47,7 @@ export namespace wsChatListen {
 
   export function infoRoom(socket: Socket) {
     socket.on(wsChatRoutesBack.infoRoom(), (data: {message: string}) => {
-        console.log(`INFO ROOM: ${data.message}`) }) }
+        /*console.log(`INFO ROOM: ${data.message}`)*/ }) }
 
   export function createRoomListen(socket: Socket, setter: Function) {
     socket.on(wsChatRoutesBack.createRoom(), (data: {channel: IChannelEntity}) => {
@@ -62,7 +61,6 @@ export namespace wsChatListen {
                             channels: IChannel[], 
                             data: {channel: IChannelEntity}) 
   {
-    console.log('channels.length=', channels.length)
     if(data.channel && channels.length > 0)
       setter(prevChannels => prevChannels.filter((channel) => channel.channelID != data.channel.channelID))
     setCurrentChannel(-1);
@@ -84,7 +82,6 @@ export namespace wsChatListen {
   // function handleChallenge(socket: Socket, )
   export function newChallengeListen(socket: Socket, listChallenge: IChallenge[]) {
     socket.on(wsChatRoutesBack.createChallenge(), (res) => {
-      console.log(res);//TODO: reception des donner pour accepter le challenge (login, nickname, et event de reponse)
     })
   }
 
@@ -169,5 +166,13 @@ export namespace wsChatListen {
   }
 
 
+  //envoi un ping pour update la liste des user bloked
+  export function toggleBlockedUserList(
+    socket: Socket, updateBlockedList: Function) {
+    socket.on(wsChatRoutesClient.updateBlockedList(), (res) => {
+      updateBlockedList();
+    
+    })
+  }
 
 }
