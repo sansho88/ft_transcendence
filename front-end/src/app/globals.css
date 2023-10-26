@@ -274,6 +274,7 @@ body {
     border-radius: 8px;
     scroll-behavior: smooth;
     overflow-x: hidden;
+    z-index: 1;
 }
 
 .matchHistory h1{
@@ -349,7 +350,8 @@ body {
     scroll-behavior: smooth;
     overflow-x: hidden;
 
-    overflow-y: auto; /* Cache la barre de défilement verticale */
+    overflow-y: auto;
+    z-index: 1;
 }
 
 .leaderboard h1{
@@ -538,10 +540,11 @@ body {
   color: var(--game-text-color);
   background-color: var(--game-primary-color);
   padding: 1rem;
+    z-index: 0;
 }
 
 .game-theme-neon {
-  --game-primary-color: #01FDFF;
+  --game-primary-color: #07C3FF;
   --game-secondary-color: #000000;
   --game-text-color: rgba(63, 105, 190, 0.268);
   --game-line-color: var(--game-text-color);
@@ -571,3 +574,27 @@ body {
   transition: background-color 500ms, color 500ms;
 }
 
+.challenge-list{
+    margin-left: 2vw;
+    margin-top: 2vh;
+    padding: 2vw;
+    width: fit-content;
+
+    background: rgba(91, 91, 90, 0.62);
+    border: 2px rgba(0, 0, 0, 0.11);
+    border-style: inherit ;
+    box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.27);
+    border-radius: 8px;
+    z-index: 10000;
+}
+
+.challenge-list h1{
+    left: 0;
+    color: silver;
+    font-size: 2.2ch;
+    text-align: left;
+    padding: 0 0 0 1ch;
+    text-shadow: 1px 2px 6px #606060;
+    font-weight: bold;
+    z-index: 100;
+}

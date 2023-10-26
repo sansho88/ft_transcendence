@@ -24,7 +24,7 @@ const Stats: React.FC<StatsProps> = ({className, user})=>{
     })
 
     socketChatRef.current?.on("userUpdate", (data: IUser) => {
-        if (data.UserID == user.UserID && data.status != user.status)
+        if (data.UserID == user.UserID)
         {
             getUserStatsById(user.UserID).then((result) => {
                 setStats(result.data);

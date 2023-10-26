@@ -5,7 +5,7 @@ import Profile from '@/components/ProfileComponent';
 import {v4 as uuidv4} from "uuid";
 import { IInviteEntity } from '@/shared/entities/IInvite.entity';
 
-export default function AddUserPrivateChannel({ className, currentChannel, channelID}: 
+export default function AddUserPrivateChannel({ className, channelID}:
 	{ 
 		className: string,
 		currentChannel: number,
@@ -22,7 +22,7 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
 		function queryInvite(userID: number){
 			apiReq.putApi.inviteUserInChannel(userID, channelID)
 			.then(() => {})
-			.catch((e) => {})
+			.catch(() => {})
 		} 
 
 		return (
@@ -37,6 +37,7 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
 		.then((res) => {
 			setUserList(res.data)
 		})
+			.catch(() => {});
 	
 	}, [])
 
@@ -48,15 +49,18 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
 				const lst = res.data
 				setUserListChan(lst)
 			})
+				.catch((reason) => {console.log(reason)});
 			apiReq.getApi.getAllMyFollowers()
 			.then((res) => {
 				const tmpLst: IUser[] = res.data.filter((user) => !userList.includes(user))
 				setUserListFollo(tmpLst);
 			})
+				.catch((reason) => {console.log(reason)});
 			apiReq.getApi.getInviteChannelID(channelID)
 			.then((res) => {
 					setInviteListChannel(res.data);
 			})
+				.catch((reason) => {console.log(reason)});
 		}
 	
 	}, [popupIsVisible])
@@ -65,7 +69,7 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
 
   function handleAddUser() {
     return (
-			<div className="h-52 user_private_list">
+			<div className="user_private_list">
 				{userListFollo
 					.filter((user) => {
 						return !userListChan.some((chan) => user.UserID === chan.UserID);
@@ -76,14 +80,20 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
 					.map((user) => {
 						return elementClickable(user);
 					})}
+				{userListFollo.filter((user) => {
+					return !userListChan.some((chan) => user.UserID === chan.UserID);
+				})
+					.filter((user) =>  {
+						return !inviteListChannel.some((chan) => user.UserID === chan.user.UserID);
+					})
+					.length === 0 && <div className="text-center">No user to invite</div>}
 			</div>
 		);
-		// return <UserList adminMode={false} channelID={currentChannel} />;
   }
 
   return (
     <>
-      <div
+      <span
         className={className}
         onClick={(event) => {
           event.stopPropagation();
@@ -94,11 +104,11 @@ export default function AddUserPrivateChannel({ className, currentChannel, chann
         }}
       >
         ➕
-      </div>
+      </span>
       {popupIsVisible && (
-        <div className='  chat_new_channel_popup_inviteChan translate-y-[-40px] '>
+        <span className='  chat_new_channel_popup_inviteChan translate-y-[-40px] '>
           {handleAddUser()}
-        </div>
+        </span>
       )}
     </>
   );
