@@ -85,44 +85,6 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
                           channelsServer={channelServer3.data}
                           isServerList={true} 
                           />
-                {/* <ChatChannelList  */}
-                {/* <form>
-                    <label>
-                        <input id={"channelNameInput"}
-                               type={"text"}
-                               autoFocus={true}
-                               inputMode={"text"}
-                               minLength={3}
-                               maxLength={12}
-                               placeholder={" Name"}
-                               value={channelName}
-                               onChange={handleOnNameChange}/>
-                    </label>
-                    <label id={"visibility_block"}>Password required ?
-                        <label>
-                                    <input id={"channelPasswordInput"}
-                                           type={showPassword}
-                                           inputMode={"text"}
-                                           minLength={3}
-                                           maxLength={12}
-                                           value={channelPassword}
-                                           placeholder={" Password"}
-                                           autoFocus={true}
-                                           onChange={handleOnPasswordChange}/>
-                                    <Button id={"button_showPassword"} image={showPassword == "password" ? "/eye-off.svg" : "/eye-show.svg"}
-                                            onClick={handleShowPassword}
-                                            alt={"Show password button"}/>
-                        </label>
-                    </label>
-                    <button onClick={handleSubmit} disabled={!areSettingsValids}>
-                        {areSettingsValids && <Image
-                            src="/confirm.svg"
-                            alt="add new channel button"
-                            width={32}
-                            height={32}
-                        />}
-                    </button>
-                </form> */}
             </div>}
         </>
     )

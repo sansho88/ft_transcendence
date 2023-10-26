@@ -29,9 +29,6 @@ export default function ChatInput({className, socket, channelID}: {className: st
       wsChatEvents.sendMsg(socket, messObj);
 			setMessage("");
 		}
-    else {
-      console.error("Tried to send a message before socket is connected");
-		}
 	};
 
   return (<>{ channelID != -1 ?
