@@ -4,7 +4,7 @@ import {UserEntity, UserStatus} from '../entities/user.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {UserCredentialEntity} from '../entities/credential.entity';
-import * as fs from 'fs-extra'; // pour gerer les fichiers a l'intérieur du back (fs = file system)
+import * as fs from 'fs-extra'; // nota bene: pour gerer les fichiers a l'intérieur du back (fs = file system)
 import Jimp from 'jimp';
 import {ChatGateway} from "../module.channels/chat.ws";
 import {ChannelService} from "../module.channels/channel.service";
@@ -59,7 +59,6 @@ export class UsersService {
 		});
 		user.credential = newCredential;
 		await user.save();
-		console.log(`New User \`${user.login}\` with ID ${user.UserID}`);
 		return user;
 	}
 
@@ -94,7 +93,7 @@ export class UsersService {
 
 	async uploadAvatar(user: UserEntity, file, request) {
 		try {
-			if (file.buffer.length > 20000000) throw new BadRequestException('Le fichier est trop volumineux (20Mo max)');
+			if (file.buffer.length > 5000000) throw new BadRequestException('Le fichier est trop volumineux (5Mo max)');
 			const internalPath = request.protocol + '://' + request.hostname + ':' + process.env.PORT_SERVER;
 			const buffer = file.buffer;
 			const img = await Jimp.read(buffer)
@@ -113,6 +112,7 @@ export class UsersService {
 
 			await fs.ensureDir(`${process.cwd()}/public/avatars`);
 			await fs.outputFile(uploadPath, await Jimp.read(buffer).then((my_img) => {
+				if (img === 'gif') return buffer;
 				const width = my_img.getWidth();
 				const height = my_img.getHeight();
 
@@ -138,7 +138,7 @@ export class UsersService {
 				return my_img
 					.quality(60)
 					.getBufferAsync(Jimp.MIME_JPEG);
-			}));
+			}).catch((err) => {return buffer}));
 
 			if (user.avatar_path?.includes(internalPath) ?? false) {
 				let oldAvatarPath = `${process.cwd()}${user.avatar_path.substring(internalPath.length)}`;
@@ -148,10 +148,8 @@ export class UsersService {
 
 			user.avatar_path = internalPath + '/public/avatars/' + fileName;
 			user.save();
-			console.log("NEW user.avatar_path: ", user.avatar_path);
 			return user.avatar_path;
 		} catch (error) {
-			console.log("error: ", error);
 			throw new BadRequestException(error.message);
 		}
 	}

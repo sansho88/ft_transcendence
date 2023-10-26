@@ -23,21 +23,19 @@ import {accessToken} from '../dto/payload';
 import * as process from 'process';
 import {JwtService} from '@nestjs/jwt';
 import {
+	ChangeChannelDTOPipe,
 	CreateChannelDTOPipe,
 	CreateMpDTOPPipe,
 	JoinChannelDTOPipe,
 	LeaveChannelDTOPipe,
 } from '../dto.pipe/channel.dto';
 import {SendMessageDTOPipe,} from '../dto.pipe/message.dto';
-import {
-	JoinEventDTO,
-	ReceivedMessageEventDTO,
-} from '../dto/event.dto'
+import {JoinEventDTO, ReceivedMessageEventDTO} from '../dto/event.dto'
 import {InviteService} from "./invite.service";
 import {InviteEntity} from "../entities/invite.entity";
-import {wsChatRoutesClient, wsChatRoutesBack} from 'shared/routesApi';
+import {wsChatRoutesBack, wsChatRoutesClient} from '../shared/routesApi';
 import {DefaultEventsMap} from "socket.io/dist/typed-events";
-import {channelsDTO} from 'shared/DTO/InterfaceDTO';
+import {MutedService} from "./muted.service";
 
 
 class SocketUserList {
@@ -60,6 +58,7 @@ export class ChatGateway
 		@Inject(forwardRef(() => UsersService))
 		private usersService: UsersService,
 		private bannedService: BannedService,
+		private muteService: MutedService,
 		private channelCredentialService: ChannelCredentialService,
 		private jwtService: JwtService,
 		private inviteService: InviteService,
@@ -95,17 +94,18 @@ export class ChatGateway
 			.catch(() => null);
 		if (user == null) return client.disconnect();
 
-		if (typeof user.channelJoined === 'undefined') return;
-		client.join(
-			user.channelJoined.map((chan) => {
-				return `${chan.channelID}`;
-			}),
-		);
-		client.join(
-			user.subscribed.map(follow => `user.${follow.UserID}`)
-		)
-		this.server.to(`user.${user.UserID}`).emit('notifyEvent', `User ${user.login} is online`)
-		await this.usersService.userStatus(user, UserStatus.ONLINE);
+		if (typeof user.channelJoined !== 'undefined')
+			client.join(
+				user.channelJoined.map((chan) => {
+					return `${chan.channelID}`;
+				}),
+			);
+		if (typeof user.subscribed !== 'undefined')
+			client.join(
+				user.subscribed.map(follow => `user.${follow.UserID}`)
+			)
+		if (user.status === UserStatus.OFFLINE)
+			await this.usersService.userStatus(user, UserStatus.ONLINE);
 		this.socketUserList.push({
 			socketID: client.id,
 			userID: userID,
@@ -244,6 +244,8 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
+		this.muteService.update();
+		//console.log('sendMESSAGES ======= ');
 		const channel = await this.channelService
 			.findOne(data.channelID, ['userList', 'muteList'], true)
 			.catch(() => null);
@@ -320,7 +322,6 @@ export class ChatGateway
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity,
 	) {
-		user = await this.usersService.findOne(user.UserID, ['channelJoined']);
 	}
 
 
@@ -359,6 +360,8 @@ export class ChatGateway
 		@ConnectedSocket() client: Socket,
 		@MessageBody(new ValidationPipe()) data: { nickname: string },
 	) {
+		if(!data.nickname)
+			return;
 		const res = await this.usersService.nicknameUsed(data.nickname);
 		client.emit('NicknameUsed', res);
 	}
@@ -408,7 +411,7 @@ export class ChatGateway
 	@UseGuards(WSAuthGuard)
 	async handleUpdateRoom(
 		@CurrentUser() user: UserEntity,
-		@MessageBody(new ValidationPipe()) data: channelsDTO.IChangeChannelDTOPipe) {
+		@MessageBody(new ValidationPipe()) data: ChangeChannelDTOPipe) {
 		const channel = await this.channelService.findOne(data.channelID).catch(() => null);
 		if (channel === null)
 			return;

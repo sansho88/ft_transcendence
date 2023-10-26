@@ -35,10 +35,8 @@ const Button2FA: React.FC<userData2Fa> = ({children, hasActive2FA}) => {
 		  await apiReq.postApi.postGen2FA().then((res) => {
 		    setQrCodeData(res.data.img);
 		    setQrCodeGenerated(true);
-            console.log(res.data.img);
           });
 		} catch (err) {
-		  console.log(err);
 		}
 	};
 
@@ -76,7 +74,6 @@ const Button2FA: React.FC<userData2Fa> = ({children, hasActive2FA}) => {
 	const handleSubmitDeactivationCode = async (event) => {
 		event.preventDefault();
 
-        console.log(turnOffCode2FA);
 		await apiReq.postApi.postDisable2FA(turnOffCode2FA).then((res) => {
             if (res.data === true) {
                 getUserMe(undefined).then((res) => {

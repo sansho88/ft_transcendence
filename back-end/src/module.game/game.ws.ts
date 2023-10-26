@@ -10,8 +10,8 @@ import {
 
 import {RemoteSocket, Server, Socket} from 'socket.io';
 import {ServerGame} from 'src/module.game/server/ServerGame';
-import {wsChatRoutesBack, wsGameRoutes} from 'shared/routesApi';
-import {userInfoSocket} from 'shared/typesGame';
+import {wsChatRoutesBack, wsGameRoutes} from '../shared/routesApi';
+import {userInfoSocket} from '../shared/typesGame';
 import {UseGuards} from '@nestjs/common';
 import {UserEntity, UserStatus} from '../entities/user.entity';
 import {CurrentUser} from '../module.auth/indentify.user';
@@ -21,8 +21,7 @@ import {JwtService} from '@nestjs/jwt';
 import {UsersService} from 'src/module.users/users.service';
 import {CreateChallengeDTOPPipe} from 'src/dto.pipe/channel.dto';
 import {DefaultEventsMap} from 'socket.io/dist/typed-events';
-import {channelsDTO} from 'shared/DTO/InterfaceDTO';
-import {ChatGateway} from "../module.channels/chat.ws";
+import {channelsDTO} from '../shared/DTO/InterfaceDTO';
 
 
 export interface SocketUserList {

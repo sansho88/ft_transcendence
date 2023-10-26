@@ -1,10 +1,11 @@
-import {Injectable} from '@nestjs/common';
+import {forwardRef, Inject, Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {GameEntity} from 'src/entities/game.entity';
 import {UsersService} from 'src/module.users/users.service';
 import {Repository} from 'typeorm';
 import {UserEntity, UserStatus} from "../entities/user.entity";
 import {GameStats} from "../dto/gameStats";
+import {ServerGame} from "./server/ServerGame";
 
 interface levelList {
 	userID: number;
@@ -22,6 +23,8 @@ export class GameService {
 		@InjectRepository(GameEntity)
 		private gameRepository: Repository<GameEntity>,
 		private usersService: UsersService,
+		@Inject(forwardRef(() => ServerGame))
+		private serverGame: ServerGame,
 	) {
 	}
 
@@ -134,8 +137,8 @@ export class GameService {
 		return stats;
 	}
 
-	async endGameStatus(UserID, UserID2?) {
-		if (UserID2)
+	async endGameStatus(UserID: number, UserID2?: number) {
+		if (UserID2 && !this.serverGame.userInGame(UserID2))
 			setTimeout(async () => {
 				const user1 = await this.usersService.findOne(UserID);
 				if (user1.status != UserStatus.OFFLINE)
@@ -144,7 +147,7 @@ export class GameService {
 				if (user2.status != UserStatus.OFFLINE)
 					await this.usersService.userStatus(user2, UserStatus.ONLINE)
 			}, 2000);
-		else
+		else if (!this.serverGame.userInGame(UserID))
 			setTimeout(async () => {
 				const user1 = await this.usersService.findOne(UserID);
 				if (user1.status != UserStatus.OFFLINE)
