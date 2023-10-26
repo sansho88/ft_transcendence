@@ -1,6 +1,3 @@
-
-
- 
 export default function NotFound() {
     const errorImgs = [
         "/images/404a.jpg",

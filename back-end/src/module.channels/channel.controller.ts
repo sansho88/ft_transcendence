@@ -391,7 +391,7 @@ export class ChannelController {
 			throw new BadRequestException('This user is already on that channel');
 		if (await this.channelService.userIsBan(channel, target))
 			throw new BadRequestException('This user is Banned for this channel');
-		if (await this.inviteService.userIsInvite(channel, target))
+		if ((await this.inviteService.userIsInvite(channel, target)).length)
 			throw new BadRequestException('This user has already an invite to this channel');
 		const invite = await this.inviteService.create(target, channel, user);
 		await this.chatGateway.receivedInvite(invite);

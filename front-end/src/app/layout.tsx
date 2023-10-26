@@ -19,8 +19,6 @@ export default function RootLayout({
 		<html lang="en">
 			<body className={inter.className}>
 				<div className='main-background'>
-				{/* <div className='bg-gray-950'> */}
-				{/* <div className='main-background'> */}
 					<Providers>
 						{children}
 					</Providers>

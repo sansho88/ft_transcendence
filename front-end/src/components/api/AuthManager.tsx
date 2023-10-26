@@ -6,7 +6,6 @@ class AuthManager {
         this.token = "";
     }
 
-
     setToken(token) {
         this.token = token;
     }

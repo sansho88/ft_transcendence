@@ -4,7 +4,6 @@ import Callback from './Callback'
 
 export default function PageCallback() {
 
-
 	return (
 		<div>
 			<Callback/>
