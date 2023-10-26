@@ -53,7 +53,6 @@ export class UserEntity extends BaseEntity {
 	})
 	has_2fa: boolean;
 
-	// Todo: comeback later to proper storage
 	@Column({
 		type: 'varchar',
 		length: 256,

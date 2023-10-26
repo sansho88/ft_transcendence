@@ -5,6 +5,7 @@ import * as apiReq from '@/components/api/ApiReq'
 import LoadingComponent from "@/components/waiting/LoadingComponent";
 import * as ClipLoader from 'react-spinners'
 import { useRouter } from 'next/navigation';
+import { NotificationManager } from 'react-notifications';
 
 
 
@@ -55,10 +56,12 @@ export default function Callback() {
 					router.push('/home');
 		}
 	})
-	.catch(() => {
-			// LoggedFailed(e.response.status); // pas adapter car dit mdp incoorect si echoue
+	.catch((error) => {
+		  
+			if (localStorage.getItem('token') !== null) return router.push('/home');
+			alert("2FA is required for this account");
+			localStorage.removeItem('token');
 			router.push('/auth');
-			alert("Failed to connect to 42 API or wrong 2FA code");
 			return;
 		})
 	return;
@@ -70,12 +73,10 @@ export default function Callback() {
 		const code = recupURL.get('code');
 
 		if (!code) router.push('/auth');
-		//FAIRE LA REQUETE API pour obtenir le token
 		if (code !== null)
 		{ 
 			fetchData(code);
 		}
-		//si success routrer vers home
 	}, [])
 	return (
 			<LoadingComponent/>

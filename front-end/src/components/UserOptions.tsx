@@ -92,7 +92,7 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
         if (socketRefGame){
             setIsWaitingChallenge(true);
             const tmp: channelsDTO.ICreateChallengeDTO = {targetID: user.UserID, gameMod: gameMod}
-            wsGameEvents.createChallenge(socketRefGame, tmp) //TODO: pouvoir choisir le gameMod
+            wsGameEvents.createChallenge(socketRefGame, tmp)
         }
     }
 
@@ -167,7 +167,7 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
                 })
         }
         else {
-            apiReq.putApi.putRevokeAdmin(channelID, user.UserID) //adminID === user.UserID
+            apiReq.putApi.putRevokeAdmin(channelID, user.UserID)
                 .then(() => {
                     NotificationManager.success(`You revoked ${user.nickname} (${user.login})`);
                     setRefresh(true);

@@ -10,7 +10,7 @@ import * as ClipLoader from 'react-spinners'
 import {useRouter} from 'next/navigation';
 import {LoggedContext, UserContext} from '@/context/globalContext';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
-import {NotificationContainer} from 'react-notifications';
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 
 enum EStepLogin {
     init,
@@ -88,7 +88,7 @@ export default function Auth({className}: { className?: string }) {
         const tmpToken = localStorage.getItem('token');
         if (tmpToken)
         {
-            console.log("Logged. Redirect to home.");
+            console.log("Logged.");
             authManager.setToken(tmpToken);
             router.push("/home");
         }
@@ -110,9 +110,6 @@ export default function Auth({className}: { className?: string }) {
     
     const [code2FAInput, setcode2FAInput] = useState<string>('');
 
-
-    // Créer une instance Axios avec des en-têtes d'authentification par défaut
-
     ////////////////////////////////////////////////////////
     //////////////// INPUT SWITCH DISPLAY //////////////////
     ////////////////////////////////////////////////////////
@@ -121,7 +118,6 @@ export default function Auth({className}: { className?: string }) {
         setLogged(true);
         setCurrentStepLogin(EStepLogin.successLogin);
         localStorage.setItem('userContext', JSON.stringify(userContext));
-        //window.location.reload(); //refresh for remove "preload fonts" warning
     }
 
     const askForLogOrSignIn = () => {
@@ -219,7 +215,6 @@ export default function Auth({className}: { className?: string }) {
                        }}
                        onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                            if (e.key === "Enter") {
-                               console.log("ENTER key pressed ?");
                                setCurrentStepLogin(currentStepLogin);
                            }
                        }}
@@ -343,13 +338,12 @@ export default function Auth({className}: { className?: string }) {
 
                 case EStepLogin.enterPassword:
                     if (loginInput.trim().length === 0) {
-                        console.log('Login is empty');
                         return;
                     }
                     const loginTrimmed = loginInput.trim().toString();
                     setLogin(loginTrimmed);
                     if (passwordInput === '') {
-                        console.log('No pass, return');
+                        
                         return;
                     }
                     setPassword(passwordInput);
@@ -413,7 +407,6 @@ export default function Auth({className}: { className?: string }) {
                             }
                         })
                         .catch((e) => {
-                            console.log("[TRY LOGIN ERROR]" + e);
                             LoggedFailed(e.response.status);
                             return;
                         })
@@ -432,7 +425,6 @@ export default function Auth({className}: { className?: string }) {
             case EStepLogin.enterLogin:
 
                 if (loginInput.trim().length === 0) {
-                    console.log('Login is empty');
                     return;
                 } else {
                     setCurrentStepLogin(EStepLogin.enterPassword)
@@ -440,7 +432,6 @@ export default function Auth({className}: { className?: string }) {
                 break;
             case EStepLogin.enterPassword:
                 if (passwordInput.length === 0) {
-                    console.log('PassWord is empty');
                     return;
                 } else {
                     setPassword(passwordInput);
@@ -473,7 +464,6 @@ export default function Auth({className}: { className?: string }) {
 							const req = await apiReq.postApi.postTryGetIntraURL();
 							return req.data;
             };
-            console.log(await generateOAuthURI()); // Affiche l'URI générée
             router.push(await generateOAuthURI())
         }
 
@@ -486,6 +476,15 @@ export default function Auth({className}: { className?: string }) {
                 {currentStepLogin === EStepLogin.start &&
                     <button onClick={() => goto42auth()} className='button-login'><span>LOGIN 42</span></button>}
                 {currentStepLogin === EStepLogin.start && enterCode2FA()}
+                {currentStepLogin === EStepLogin.start && <div className='2fa text' style={{
+                    borderRadius:"8px", 
+                    backgroundColor:"#000000", 
+                    width:"110%",
+                    padding:"2px",
+                    marginBottom:"1vh",
+                    marginTop:"1vh",
+                    marginLeft:"-5%",
+                    }}></div>}
                 {currentStepLogin < EStepLogin.tryLoginAsInvite &&
                     <button onClick={() => nextStepCheck()} className='button-login'><span>{inviteButtonText}</span>
                     </button>}

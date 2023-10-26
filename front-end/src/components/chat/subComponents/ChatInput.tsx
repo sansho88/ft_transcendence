@@ -8,9 +8,6 @@ import { messageDTO } from '@/shared/DTO/InterfaceDTO';
 import { wsChatEvents } from '@/components/api/WsReq';
 const max_msg_lenght: number = 140;
 
-
-//TODO: recup userContext pour envoi message + props channel ID 
-
 export default function ChatInput({className, socket, channelID}: {className: string, socket: Socket, channelID: number})
 {
 	const [message, setMessage] = useState<string>("");
@@ -37,7 +34,6 @@ export default function ChatInput({className, socket, channelID}: {className: st
 		}
 	};
 
-  // let message: string = '';
   return (<>{ channelID != -1 ?
     
     <div className={`${className}`}>

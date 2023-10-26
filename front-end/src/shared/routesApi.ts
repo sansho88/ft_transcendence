@@ -1,7 +1,5 @@
 'use client'
-//mis en commun back-front des ref routesApi, pour facilite' la maintenance/evoluabilite' des routes
 
-//NOTA BENE: jai prevu toutes routes mais surments des changements a prevoir et des routes inutiles
 const IP_HOST = () => {
 	if (typeof window !== `undefined`) {
 		return window.location.hostname;
@@ -9,7 +7,7 @@ const IP_HOST = () => {
 		return `localhost`
 }
 
-const serverApi = `http://${IP_HOST()}:8000/api` //TODO utiliser le context OriginNetwork
+const serverApi = `http://${IP_HOST()}:8000/api`
 
 // definition des routes root 🫠
 const routeUsers = 'users'
@@ -61,9 +59,6 @@ export namespace wsGameRoutes {
 // |                       		EVENTS CHAT WS              	             |
 // +---------------------------------------------------------------------+
 export namespace wsChatRoutesBack {
-	export const infoRoom = () => {
-		return `infoRoom`
-	} //retour message concernant les channel
 	export const createRoom = () => {
 		return `createRoom`
 	}
@@ -265,10 +260,8 @@ export namespace strRoutes {
 // +---------------------------------------------------------------------+
 
 export namespace channel {
-	// export const postCreateChannel = () 																					=> {return `${serverApi}/${routeChannels}/create`} use WS event
 	export const getAll = () 																											=> {return `${serverApi}/${routeChannels}/get`};
 	export const getUsersChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/get/list/${channelID}`};
-	// export const getMsgsChannel = (channelID: number, timestamp: number)					=> {return `${serverApi}/${routeChannels}/get/${channelID}`};
 	export const getChannelJoined = ()																						=> {return `${serverApi}/${routeChannels}/channelJoined`};
 	export const getAllMessagesChannel = (channelID: number)											=> {return `${serverApi}/${routeChannels}/msg/${channelID}`};
 	export const putModifChannel = (channelID: number)														=> {return `${serverApi}/${routeChannels}/modif/${channelID}`};
@@ -299,13 +292,13 @@ export namespace channel {
 // |                             MESSAGES                                |
 // +---------------------------------------------------------------------+
 
-	export const getMessagesByChannelId = ()	=> {return `${serverApi}/${routeChannels}/`}; 	//all messages in channel_id
+	export const getMessagesByChannelId = ()	=> {return `${serverApi}/${routeChannels}/`};
 
 	export const postMessage = () 						=> {return `${serverApi}/${routeMessages}`};
 
-	export const putMessageById = () 					=> {return `${serverApi}/${routeMessages}/`}; 			//feature ? 	params: message_id
+	export const putMessageById = () 					=> {return `${serverApi}/${routeMessages}/`}; 
 
-	export const deleteMessageById = () 			=> {return `${serverApi}/${routeMessages}/`};		// feature ?	params: message_id
+	export const deleteMessageById = () 			=> {return `${serverApi}/${routeMessages}/`};		
 
 
 // +---------------------------------------------------------------------+

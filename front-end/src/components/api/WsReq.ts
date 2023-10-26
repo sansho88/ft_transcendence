@@ -45,9 +45,7 @@ export namespace wsGameListen {
 export namespace wsChatListen {
 
 
-  export function infoRoom(socket: Socket) {
-    socket.on(wsChatRoutesBack.infoRoom(), (data: {message: string}) => {
-        /*console.log(`INFO ROOM: ${data.message}`)*/ }) }
+
 
   export function createRoomListen(socket: Socket, setter: Function) {
     socket.on(wsChatRoutesBack.createRoom(), (data: {channel: IChannelEntity}) => {
@@ -79,7 +77,6 @@ export namespace wsChatListen {
 
 
 
-  // function handleChallenge(socket: Socket, )
   export function newChallengeListen(socket: Socket, listChallenge: IChallenge[]) {
     socket.on(wsChatRoutesBack.createChallenge(), (res) => {
     })
@@ -90,14 +87,14 @@ export namespace wsChatListen {
 
   export function updateChannelsJoined(socket: Socket, setChannelsJoined: Function) {
     
-    socket.on(wsChatRoutesClient.updateChannelsJoined(), (data: IChannelEntity[]) => { //TODO:
+    socket.on(wsChatRoutesClient.updateChannelsJoined(), (data: IChannelEntity[]) => {
       setChannelsJoined(prevChannels => [...prevChannels, ...data]);
     })
   }
 
   export function channelHasChanged(socket: Socket, channels: IChannel[], setChannelsJoined: Function) {
     
-    socket.on(wsChatRoutesClient.nameChannelsHasChanged(), (data: IChannelEntity) => { //TODO:
+    socket.on(wsChatRoutesClient.nameChannelsHasChanged(), (data: IChannelEntity) => {
       const newChannels: IChannel[] = [];
       channels.forEach(channel => {
         if(channel.channelID == data.channelID)
@@ -116,7 +113,7 @@ export namespace wsChatListen {
 
   export function channelHasChangedOFF(socket: Socket, channels: IChannel[], setChannelsJoined: Function) {
     
-    socket.on(wsChatRoutesClient.nameChannelsHasChanged(), (data: IChannelEntity) => { //TODO:
+    socket.on(wsChatRoutesClient.nameChannelsHasChanged(), (data: IChannelEntity) => {
       const newChannels: IChannel[] = [];
       channels.forEach(channel => {
         if(channel.channelID == data.channelID)

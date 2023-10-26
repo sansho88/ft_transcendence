@@ -19,19 +19,4 @@ export interface IUserEntity {
 	has_2fa: boolean;
 	avatar_path: string;
 	status: UserStatus;
-	// credential: IUserCredentialEntity;
-	// message: IMessageEntity[];
-	// followers: IUserEntity[];
-	// subscribed: IUserEntity[];
-	// invite: IInviteEntity[];
-	// mute: IMuteEntity[];
-	// banned: IBannedEntity[];
-	// channelJoined: IChannelEntity[];
-	// channelAdmin: IChannelEntity[];
-	// channelOwned: IChannelEntity[];
-
-	// @Column()
-	// @ManyToMany(() => UserEntity)
-	// @JoinTable()
-	// friend_list: UserEntity[];
 }

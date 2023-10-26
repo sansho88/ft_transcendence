@@ -411,7 +411,7 @@ export class ChannelController {
 		if (invite.sender.UserID != user.UserID && invite.user.UserID != user.UserID)
 			throw new BadRequestException('You are not the sender nor the receiver of this invite');
 		await this.chatGateway.EventNotif(invite.user, 'info', 'You invitation has been canceled', invite.channel.name);
-		await this.inviteService.remove(invite);
+		await this.inviteService.remove([invite]);
 	}
 
 	@Put('modif/:channelID')

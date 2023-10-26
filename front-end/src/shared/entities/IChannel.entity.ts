@@ -17,12 +17,4 @@ export interface IChannelEntity {
 	owner: IUserEntity;
 	name: string;
 	type: ChannelType;
-	// credential: IChannelCredentialEntity;
-	// adminList: IUserEntity[];
-	// userList: IUserEntity[];
-	// messages: IMessageEntity[];
-	// inviteList: IInviteEntity[];
-	// muteList: IMuteEntity[];
-	// bannedList: IBannedEntity[];
-
 }

@@ -89,8 +89,6 @@ export interface IPodTable {
   ballIsHidden      : boolean;
   }
 
-
-//vecteur unitaire pour direction de la balle
 export interface IDirectionVec2D {
     dx                 : number;
     dy                 : number;

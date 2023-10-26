@@ -26,16 +26,7 @@ const MatchHistory : React.FC = () => {
                 .then((res) => {
                     setSelectedUserRelationships({followed:res.data.followed, blocked:res.data?.blocked});
                 });
-            /*const timer = setInterval(() => {
-                getApi.getMatchHistoryFromUserId(selectedUserContext.UserID)
-                    .then((res) => {
-                        setMatchesList(res.data);
-                    })
-            }, 10000);
-*/
-            return () => {
-                //clearInterval(timer);
-            };
+            return () => {};
         }
     }, [selectedUserContext])
 

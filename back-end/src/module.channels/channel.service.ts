@@ -82,7 +82,6 @@ export class ChannelService {
 	}
 
 	async leaveChannel(channel: ChannelEntity, user: UserEntity) {
-		console.log('LeaveChannel ===')
 		channel.userList = channel.userList.filter(usr => usr.UserID != user.UserID)
 		return await channel.save();
 	}
@@ -127,9 +126,9 @@ export class ChannelService {
 			case ChannelType.PROTECTED:
 				return this.channelCredentialService.compare(data.password, credential);
 			case ChannelType.PRIVATE:
-				return false; // todo: redo with invite !
+				return false;
 			case ChannelType.DIRECT:
-				return false; // todo: WIP
+				return false;
 		}
 	}
 
