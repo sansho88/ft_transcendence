@@ -4,4 +4,12 @@
   border-radius: .5rem; 
   height: 2rem;
   padding: 1rem;
+  max-width: min-content;
+
+}
+
+.textAuth {
+  color: rgba(0, 0, 0, 0.8);  /* text-black text-opacity-80 */
+  text-align: center;          /* text-center */
+  font-weight: 600;            /* font-semibold */
 }

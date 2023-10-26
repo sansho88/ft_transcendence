@@ -145,7 +145,7 @@ export default function Auth({className}: { className?: string }) {
             <form className='flex flex-col justify-center items-center text-white my-2'>
                 {  currentStepLogin === EStepLogin.logIn ?
                     <div>
-                            <div className=' font-thin'>LOGIN</div>
+                            <div className=' textAuth'>LOGIN</div>
                             <input className='inputLogin' type="text" value={loginInput} autoComplete={"username"} name={"username"} autoFocus={true}
                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                        setLoginInput(e.target.value);
@@ -160,7 +160,7 @@ export default function Auth({className}: { className?: string }) {
                         {enterCode2FA()}
                     </div>
                     :
-                    <div className={"text-center"}>
+                    <div className={" textAuth"}>
                         Keep in minds your future generated login.<br/>
                         You'll need it for log in.
                     </div>
@@ -174,8 +174,8 @@ export default function Auth({className}: { className?: string }) {
 
         return (
             <div className='flex flex-col justify-center items-center text-white my-8'>
-                <input type={"text"} name={"username"} style={{display: "none"}} autoComplete={"username"} />
-                <input className='inputLogin' type="password" value={passwordInput} autoComplete={"current-password"} name={"password"} minLength={1} maxLength={20}
+                <input type={"text"} name={"username"} style={{display: "none"}} autoComplete={"username"} className='w-[8vw]' />
+                <input className='inputLogin w-[8vw]' type="password" value={passwordInput} autoComplete={"current-password"} name={"password"} minLength={1} maxLength={20}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     setPasswordInput(e.target.value);
                                 }}
@@ -189,8 +189,8 @@ export default function Auth({className}: { className?: string }) {
 
                 />
                 {currentStepLogin === EStepLogin.logIn ?
-                    <div className=' font-thin'>Enter your password</div> :
-                    <div className=' font-thin'>Create password</div>
+                    <div className=' textAuth'>Enter your password</div> :
+                    <div className=' textAuth'>Create password</div>
                 }
                 <button type="button" className={"button-login my-12 "} onClick={() => {
                     setCurrentStepLogin(currentStepLogin === EStepLogin.logIn ?
@@ -213,7 +213,7 @@ export default function Auth({className}: { className?: string }) {
 
         return (
             <div className='flex flex-col justify-center items-center text-white my-8'>
-                <input className='inputLogin' type="text" value={code2FAInput} autoComplete={"one-time-code"} name={"code2FA"}
+                <input className='inputLogin w-[8vw]' type="text" value={code2FAInput} autoComplete={"one-time-code"} name={"code2FA"}
                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                            setcode2FAInput(e.target.value)
                            sessionStorage.setItem('code2FA', e.target.value);
@@ -227,7 +227,7 @@ export default function Auth({className}: { className?: string }) {
 
                 />
                 {
-                    <div className=' font-thin'>Enter your 2FA Code [if enabled]</div>
+                    <div className='  textAuth font-mono text-lg '>Enter your 2FA Code<br/>[if enabled]</div>
                 }
             </div>
         )
@@ -496,21 +496,24 @@ export default function Auth({className}: { className?: string }) {
         }
 
     return (
-        <div className={defaultClassName}>
+        <div className={`${defaultClassName} w-screen bg-center bg-no-repeat bg-cover h-screen`} style={{ backgroundImage: `url('images/background/bg_pongPod1.png')` }}  >
             <NotificationContainer/>
-            {welcomeTitle()}
-            {currentStepLogin === EStepLogin.start &&
-                <button onClick={() => goto42auth()} className='button-login'><span>LOGIN 42</span></button>}
-            {currentStepLogin === EStepLogin.start && enterCode2FA()}
-            {currentStepLogin < EStepLogin.tryLoginAsInvite &&
-                <button onClick={() => nextStepCheck()} className='button-login'><span>{inviteButtonText}</span>
-                </button>}
-            {currentStepLogin === EStepLogin.signOrLogIn && askForLogOrSignIn()}
-            {currentStepLogin === EStepLogin.enterLogin && enterLogin()}
-            {(currentStepLogin === EStepLogin.signIn || currentStepLogin === EStepLogin.logIn) && enterLogin()}
-            {currentStepLogin === EStepLogin.check2FA && enterCode2FA()}
-            {currentStepLogin === EStepLogin.successLogin && LoggedSuccess()}
-            {currentStepLogin === EStepLogin.failLogin && LoggedFailed(42)}
+            <div className='  bg-slate-50 p-6 bg-opacity-40 rounded-3xl flex-col justify-center items-center absolute right-1/4  top-1/4  max-w-min'>
+
+                {/* {welcomeTitle()} */}
+                {currentStepLogin === EStepLogin.start &&
+                    <button onClick={() => goto42auth()} className='button-login'><span>LOGIN 42</span></button>}
+                {currentStepLogin === EStepLogin.start && enterCode2FA()}
+                {currentStepLogin < EStepLogin.tryLoginAsInvite &&
+                    <button onClick={() => nextStepCheck()} className='button-login'><span>{inviteButtonText}</span>
+                    </button>}
+                {currentStepLogin === EStepLogin.signOrLogIn && askForLogOrSignIn()}
+                {currentStepLogin === EStepLogin.enterLogin && enterLogin()}
+                {(currentStepLogin === EStepLogin.signIn || currentStepLogin === EStepLogin.logIn) && enterLogin()}
+                {currentStepLogin === EStepLogin.check2FA && enterCode2FA()}
+                {currentStepLogin === EStepLogin.successLogin && LoggedSuccess()}
+                {currentStepLogin === EStepLogin.failLogin && LoggedFailed(42)}
+                    </div>
 
         </div>
 

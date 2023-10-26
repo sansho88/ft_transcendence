@@ -496,7 +496,7 @@ export default function Game({className, token}: {className: string, token: stri
   const challengeList = () => {
   
     return (
-        <div>
+        <div style={{ zIndex: '1000 !important' }}>
           <ChallengeList currentStepGameFront={stepCurrentSession}/>
         </div>
       
@@ -508,7 +508,7 @@ export default function Game({className, token}: {className: string, token: stri
     <div className={`${className} ${currentGameTheme} rounded-xl`}> 
       <Table tableRef={tableRef} className='table w-full h-full relative font-vt323'> 
         {stepCurrentSession === EStatusFrontGame.idle && challengeList()}
-        {/* <Scoreboard/> // bugger*/}
+        {/* <Scoreboard/> // bugger*/} 
         {/* <CenterDBG/> */}
         <Player className='paddle absolute ' position='left' refDiv={pad1Ref} /> 
         {(stepCurrentSession === EStatusFrontGame.matchmakingRequest || stepCurrentSession === EStatusFrontGame.modChoice) &&
@@ -520,7 +520,7 @@ export default function Game({className, token}: {className: string, token: stri
         {stepCurrentSession === EStatusFrontGame.idle &&
           <>
             <SwitcherTheme className=' absolute right-1 top-1' setThemeFunction={setCurrentGameTheme} ></SwitcherTheme>
-            <div className='absolute -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2 game-info-message  xs:text-xs md:text-5xl xl:text-7xl'>{infoMessage}</div> 
+            <div className='absolute  -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2 game-info-message z-0  xs:text-xs md:text-5xl xl:text-7xl'>{infoMessage}</div> 
           </>}
         {stepCurrentSession === EStatusFrontGame.countdown &&
           <div className='absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 game-info-message text-9xl'>{infoMessage}</div>  }
