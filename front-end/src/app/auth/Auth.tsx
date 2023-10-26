@@ -12,7 +12,6 @@ import {LoggedContext, UserContext} from '@/context/globalContext';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
 import {NotificationContainer} from 'react-notifications';
 
-// import { Button } from '@/components/CustomButtonComponent'
 enum EStepLogin {
     init,
     start,
@@ -122,7 +121,7 @@ export default function Auth({className}: { className?: string }) {
         setLogged(true);
         setCurrentStepLogin(EStepLogin.successLogin);
         localStorage.setItem('userContext', JSON.stringify(userContext));
-        window.location.reload(); //refresh for remove "preload fonts" warning
+        //window.location.reload(); //refresh for remove "preload fonts" warning
     }
 
     const askForLogOrSignIn = () => {
@@ -309,7 +308,6 @@ export default function Auth({className}: { className?: string }) {
     }
     const LoggedFailed = (errorCode) => {
         let errMsg: string;
-        console.log("error code: " + errorCode);
 
         switch (errorCode) {
             case authErrorState.emptyLogin: errMsg = "The login is empty"; break;
@@ -331,20 +329,6 @@ export default function Auth({className}: { className?: string }) {
             </>
         );
     }
-
-/*
-    useEffect(() => {
-        if (login.length > 0) {
-            console.log(`login = ${login}`);
-        }
-        if (password.length > 0) {
-            let nb: number = password.length
-            let ret: string = '';
-            for (let i = 0; i < nb; i++)
-                ret += '❓️';
-            console.log(`password = ${ret}`);
-        }
-    }, [password, login]);*/
 
     const textInviteModeButton: string = 'INVITE MODE'
     const [inviteButtonText] = useState<string>(textInviteModeButton);
@@ -382,8 +366,6 @@ export default function Auth({className}: { className?: string }) {
                                 authManager.setToken(userToken);
                                 localStorage.setItem("login", login);
                                 setUserContext(await getUserMe(user).then(() => {
-                                        /*setLogged(true);
-                                        setCurrentStepLogin(EStepLogin.successLogin);*/
                                         connectUser();
                                     }
                                 ));
