@@ -110,7 +110,7 @@ export class ChatGateway
 			socketID: client.id,
 			userID: userID,
 		});
-		console.log('NEW CONNEXION WS CLIENT CHAT, id = ' + client.id + ` | userID: ${userID}`);
+		console.log('NEW CONNEXION WS CLIENT CHAT - , id = ' + client.id + ` | userID: ${userID}`);
 	}
 
 	async handleDisconnect(client: Socket) {
@@ -137,6 +137,7 @@ export class ChatGateway
 			this.server.to(`user.${user.UserID}`).emit('notifyEvent', `User ${user.login} is offline`)
 			await this.usersService.userStatus(user, UserStatus.OFFLINE);
 		}
+		console.log(`CLIENT ${client.id} left CHAT WS`);
 		return client.disconnect();
 	}
 
@@ -245,7 +246,6 @@ export class ChatGateway
 		@ConnectedSocket() client: Socket,
 	) {
 		this.muteService.update();
-		//console.log('sendMESSAGES ======= ');
 		const channel = await this.channelService
 			.findOne(data.channelID, ['userList', 'muteList'], true)
 			.catch(() => null);
@@ -260,7 +260,7 @@ export class ChatGateway
 			return await this.SendMessage(channel, user, data.content);
 		}
 		return client.emit('sendMsg', {
-			error: 'You are not part of this channel', //TODO: il faudra changer pour emit sur invent Info notif, (a definir)
+			error: 'You are not part of this channel',
 		});
 
 	}
@@ -271,7 +271,6 @@ export class ChatGateway
 	/********************************/
 
 	//  todo: Cannot create mp with Blocked User
-	//	todo: Cannot send messages if User get block
 
 	@SubscribeMessage('createMP')
 	@UseGuards(WSAuthGuard)
@@ -280,7 +279,6 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
-		//console.log('ENTER createMp WS =' + JSON.stringify(data))
 		const user2: UserEntity = await this.usersService.findOne(data.targetID);
 		if (!user2) return client.emit('createMP', {messages: 'This user doesn\'t exist'});
 		if (user2.UserID == user.UserID) return client.emit('createMP', {messages: 'You cannot create a mp with yourself, Find a friend :D'});

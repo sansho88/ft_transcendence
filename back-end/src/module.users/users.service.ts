@@ -4,7 +4,7 @@ import {UserEntity, UserStatus} from '../entities/user.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {UserCredentialEntity} from '../entities/credential.entity';
-import * as fs from 'fs-extra'; // nota bene: pour gerer les fichiers a l'intérieur du back (fs = file system)
+import * as fs from 'fs-extra';
 import Jimp from 'jimp';
 import {ChatGateway} from "../module.channels/chat.ws";
 import {ChannelService} from "../module.channels/channel.service";
@@ -30,9 +30,6 @@ export class UsersService {
 	) {
 	}
 
-	/**
-	 * Todo: update with new thing in table
-	 */
 	/**
 	 * Create and save the new user
 	 * @param newLogin login of the user
