@@ -15,7 +15,7 @@ export default function Game({className, token}: {className: string, token: stri
   const socketRef   = useRef(socket);
   
   const userLogged  = useContext(UserContext);
-  const {logged, setLogged} = useContext(LoggedContext);
+  const {logged} = useContext(LoggedContext);
 
 
   const tableRef    = useRef<HTMLDivElement>(null);
@@ -124,6 +124,10 @@ export default function Game({className, token}: {className: string, token: stri
           setP2Position({x: data.startInitElement.paddleP2Pos.x, y: data.startInitElement.paddleP2Pos.y})
           setBallIsHidden(data.ballIsHidden)
           gameMod.current = data.gameMod;
+          if (data.gameMod === PODGAME.EGameMod.trainning)
+              NotificationManager.info(`You\'ll play against yourself.\n Do your best! `, "SOLO TRAINING");
+          else
+              NotificationManager.info(`${data.player1.nickname} VS ${data.player2.nickname}`, "MATCH FOUND");
         })
     
         //client 
@@ -131,13 +135,7 @@ export default function Game({className, token}: {className: string, token: stri
           if (stepCurrentSession === EStatusFrontGame.matchmakingRequest || stepCurrentSession === EStatusFrontGame.challengeRequest) {
             setStepCurrentSession(EStatusFrontGame.gameSessionFind)
           }
-          setRemoteEvent(data.remoteEvent)
-            let player2;
-            if (!data.player2 || data.player1 == data.player2)
-                player2 = "yourself";
-            else
-                player2 = data.player2.nickname;
-            NotificationManager.info(`You'll play against ${player2}`, "GAME FOUND");
+          setRemoteEvent(data.remoteEvent);
         })
   
   
@@ -171,9 +169,10 @@ export default function Game({className, token}: {className: string, token: stri
             setP2Position(prevState => ({
               x: prevState.x,
               y: (offsetHeight / 2)
-            }));;
+            }));
           }
             setInfoMessage(data);
+          NotificationManager.info(data, "END OF GAME");
         })
         
         socketRef.current?.on('reset', () => {
