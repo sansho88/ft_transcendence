@@ -43,7 +43,13 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
         }
     });
 
-    socketChatRef.current?.off("userUpdate", () => {});
+    socketChatRef.current?.off("userUpdate", (data: IUser) => {
+        if (data.UserID == user.UserID)
+        {
+            setUserStatus(data.status);
+            setStatusColor(getEnumNameByIndex(Colors, data.status));
+        }
+    });
 
     useEffect(() => {
         if (isNicknameUsed && modifiedNick !== user.nickname) {
@@ -63,7 +69,6 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
             setNickErrMsg("Alphanumerics only");
         }
         else {
-            console.log(`value= ${value}, nickname=${user.nickname} `)
             if (value != user.nickname)
                 await apiReq.getApi.getIsNicknameUsed(value).then((res) => {
                     const ret: boolean = res.data;
