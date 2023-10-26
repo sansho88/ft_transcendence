@@ -186,7 +186,7 @@ export class ChatGateway
 				message: `You cannot Join that channel`,
 			});
 		const invite = await this.inviteService.userIsInvite(channel, user);
-		if (!(await this.channelService.checkCredential(data)) && !invite)
+		if (!(await this.channelService.checkCredential(data)) && !invite.length)
 			return client.emit(`joinRoom`, {
 				message: `You cannot Join that channel`,
 			});
