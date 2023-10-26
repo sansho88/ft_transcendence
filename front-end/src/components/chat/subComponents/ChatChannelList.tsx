@@ -13,9 +13,6 @@ import UserList from "@/components/UserListComponent";
 import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
 import * as apiReq from '@/components/api/ApiReq'
 import { IInviteEntity } from '@/shared/entities/IInvite.entity';
-import { IChannelCredentialEntity } from '@/shared/entities/ICredential.entity';
-import { IChannelInvite } from '@/shared/types';
-import { IChannelEntity } from '@/shared/entities/IChannel.entity';
 
 
 export default function ChatChannelList({className, socket, channels, setCurrentChannel, currentChannel, isServerList, channelsServer, userID}
@@ -65,7 +62,7 @@ useEffect(() => {
               alt="ADD CHANNEL BUTTON"
               width={22}
               height={22}
-              style={{width: "80%", height:"auto", maxWidth:"4vw", maxHeight:"4vh"}}
+              //        style={{width: "80%", height:"auto", maxWidth:"4vw", maxHeight:"4vh"}}
               />
         </button>
     { isPopupChannelsVisible && <ChatNewChannelPopup
@@ -137,32 +134,22 @@ useEffect(() => {
       getChannelInvite();
     }, [])
 
-
-    useEffect(() => {
-      console.log('DBG invite lst ', JSON.stringify(myInviteLst)) // LE LOOOG
-    }, [myInviteLst])
-    
-    
     function getChannelInvite(){
       apiReq.getApi.getMyInvite().then((res) => {
         setMyInviteLst(res.data)
       })
-  
-
     }
 
     function isInvitable(channelID: number):boolean {
       if (myInviteLst.length > 0)
         return myInviteLst.some((channel) => channel.channel.channelID === channelID)
       return false
-
     }
 
     function defineInviteID(channelID: number):number {
       if (myInviteLst.length > 0)
       {
         const index: number = myInviteLst.findIndex((channel) => channel.channel.channelID === channelID)
-        console.log('HEY INDEX ==== ' , index, ' ', isInvitable(channelID))
         if (index >= 0)
           return myInviteLst[index].inviteID
       }
