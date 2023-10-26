@@ -472,7 +472,6 @@ export default function Auth({className}: { className?: string }) {
 							const req = await apiReq.postApi.postTryGetIntraURL();
 							return req.data;
             };
-            console.log(await generateOAuthURI()); // Affiche l'URI générée
             router.push(await generateOAuthURI())
         }
 
