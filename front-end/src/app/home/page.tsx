@@ -21,7 +21,7 @@ export default function ShowHomePage() {
 		return;
 	});
 	return (
-		isTokenExists ?
-			<HomePage className={""}/> : <LoadingComponent/>
+			isTokenExists ?
+				<HomePage className={""}/> : <LoadingComponent/>
 	)
 }
