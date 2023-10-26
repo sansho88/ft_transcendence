@@ -54,12 +54,12 @@ export class InviteService {
 		});
 	}
 
-	async remove(invite: InviteEntity) {
-		await invite.remove();
+	async remove(invites: InviteEntity[]) {
+		await invites.forEach(invite => invite.remove());
 	}
 
 	async userIsInvite(channel: ChannelEntity, user: UserEntity) {
 		const lst = await this.findAllChannel(channel);
-		return (lst.find(invite => invite.user.UserID == user.UserID));
+		return (lst.filter(invite => invite.user.UserID == user.UserID));
 	}
 }
