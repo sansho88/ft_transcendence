@@ -220,7 +220,6 @@ export default function Auth({className}: { className?: string }) {
                        }}
                        onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                            if (e.key === "Enter") {
-                               console.log("ENTER key pressed ?");
                                setCurrentStepLogin(currentStepLogin);
                            }
                        }}
@@ -504,6 +503,15 @@ export default function Auth({className}: { className?: string }) {
                 {currentStepLogin === EStepLogin.start &&
                     <button onClick={() => goto42auth()} className='button-login'><span>LOGIN 42</span></button>}
                 {currentStepLogin === EStepLogin.start && enterCode2FA()}
+                {currentStepLogin === EStepLogin.start && <div className='2fa text' style={{
+                    borderRadius:"8px", 
+                    backgroundColor:"#000000", 
+                    width:"110%",
+                    padding:"2px",
+                    marginBottom:"1vh",
+                    marginTop:"1vh",
+                    marginLeft:"-5%",
+                    }}></div>}
                 {currentStepLogin < EStepLogin.tryLoginAsInvite &&
                     <button onClick={() => nextStepCheck()} className='button-login'><span>{inviteButtonText}</span>
                     </button>}
