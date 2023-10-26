@@ -41,7 +41,6 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
   if(socketChat?.disconnected) 
   { 
-    // console.log(`Chat WS is connected in ChatMaster`);
     if (!token){
       const tokentmp = localStorage.getItem('token');
       if (tokentmp)
@@ -60,8 +59,6 @@ export default function ChatMaster({className, token, userID}: {className: strin
     await apiReq.getApi.getBlockedList()
     .then((res: {data: IUserEntity[]}) => {
       setBlockList(res.data)
-      console.log('res = ', JSON.stringify(res.data))
-      console.log('update block list= ', JSON.stringify(blockList))
     })
     .catch(() => {})
   }
@@ -69,14 +66,11 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
   async function updateMessages(channelID: number) {
         //get la liste des userBlocked
-        console.log('update Des Messages')
         await apiReq.getApi.getAllMessagesChannel(channelID)
         .then(async (messages) => {
           await apiReq.getApi.getBlockedList()
           .then((res: {data: IUserEntity[]}) => {
             setBlockList(res.data)
-          console.log('update block list= ', JSON.stringify(blockList))
-
           })
           .catch(() => {})
           const tmpMessages = messages.data.filter((message) => checkMessageBlockedList(message))
@@ -92,9 +86,8 @@ export default function ChatMaster({className, token, userID}: {className: strin
       await apiReq.getApi.getBlockedList()
       .then((res: {data: IUserEntity[]}) => {
         setBlockList(res.data)
-        console.log('*********res data = ', JSON.stringify(res.data));
         if (checkMessageBlockedList(message) && message.channelID === currentChannel)
-        setMessages(prevMessages => [...prevMessages, message]);
+          setMessages(prevMessages => [...prevMessages, message]);
       })
       .catch(() => {})
    
@@ -103,7 +96,6 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
 
   useLayoutEffect(() => {
-    console.log('current channel ', currentChannel)
     if(currentChannel !=  -1)
       chanRef.current = currentChannel;
 
@@ -160,7 +152,6 @@ export default function ChatMaster({className, token, userID}: {className: strin
 
 
   useEffect(() => {
-    // console.log(`CHANNELS UPDATED =  ${JSON.stringify(channels)}`);
     if (socketChat){
       wsChatListen.channelHasChanged(socketChat, channels, setChannels);
       wsChatListen.leaveRoomListen(socketChat, setChannels, setCurrentChannel, channels)

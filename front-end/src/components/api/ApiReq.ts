@@ -275,10 +275,8 @@ export namespace utilsCheck {
 
 	export async function isLoginAlreadyTaken(login: string): Promise<boolean> {
 		if (!login) {
-			console.log('Call isLoginAlreadyTaken: login is empty !')
 			return false;
 		}
-		console.log('Call isLoginAlreadyTaken: login = ||' + login + '||')
 		try {
 			await getApi.getUserByLoginPromise(login);
 			return true;
@@ -289,7 +287,6 @@ export namespace utilsCheck {
 	}
 
 	export async function isPasswordMatch(login: string, password: string, code2FAInput?: string) {
-		console.log('\n\ncall isPasswordMatch: login: ||' + login + '||\npassword: ||' + password + '||\n\n');
 		try {
 			const res = await postApi.postTryLogin({login, password, token_2fa: code2FAInput});
 			return res.status === 201;
