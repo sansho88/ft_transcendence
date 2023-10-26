@@ -3,6 +3,7 @@ import {UserContext} from '@/context/globalContext';
 import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
 import { postApi } from "./api/ApiReq";
+import {NotificationManager} from "react-notifications";
 
 export interface avatarProps {
 	path?:string;
@@ -46,8 +47,8 @@ const Avatar: React.FC<avatarProps> = ({path, width, height, playerStatus, isMai
           setIsUploading(false);
         })
         .catch(error => {
-          console.error('Erreur lors de l\'upload de l\'image', error);
           setIsUploading(false);
+          NotificationManager.error(error.response.data.message, 'Erreur');
         });
     }
   };

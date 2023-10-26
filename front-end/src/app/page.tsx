@@ -61,12 +61,8 @@ export default function Home() {
     }, [logged]);
 
         return (
-            <>
-                <div className="welcome space-y-10 my-12">
-                    <div className="welcome-msg">WELCOME TO</div>
-                    <div className="welcome-title ">PONG POD!</div>
-                </div>
+                <div className="welcome  w-screen bg-center bg-no-repeat bg-cover h-screen" style={{ backgroundImage: `url('images/background/bg_pongPod1.png')` }}>
                 <LoadingComponent/>
-            </>
+                </div>
         )
 }

@@ -501,7 +501,7 @@ export class GameSession {
 		if ((this.isP1Ready && this.isP2Ready) || this.gameMod === PODGAME.EGameMod.trainning) {
 			this.isGameReady = true;
 			let countdown: number = 3;
-			let intervalStart: NodeJS.Timeout = setInterval(() => {
+			let intervalStart = setInterval(() => {
 				if (countdown > 0)
 					this.serverSocket.to(this.gameRoomEvent).emit('countdown', countdown.toString());
 				else if (countdown === 0)
@@ -578,6 +578,7 @@ export class GameSession {
 				.to(this.gameRoomEvent)
 				.emit('info', `${this.player2.user.nickname} won this game`);
 		}
+		this.isGameRunning = false;
 		if (this.gameMod != EGameMod.trainning) {
 			this.gameService.create(this.player1.user.UserID, this.player2.user.UserID, this.table.scoreP1, this.table.scoreP2, this.startDate);
 			this.gameService.endGameStatus(this.player1.user.UserID, this.player2.user.UserID);

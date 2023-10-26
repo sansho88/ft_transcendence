@@ -22,7 +22,6 @@ export default function Callback() {
 
 	const LoggedFailed = (errorCode) => {
 		let errMsg: string;
-		console.log("error code: " + errorCode);
 
 		switch (errorCode) {
 				case authErrorState.emptyLogin: errMsg = "The login is empty"; break;
@@ -48,7 +47,6 @@ export default function Callback() {
 	if (code2FA) sessionStorage.removeItem('code2FA');
 	await apiReq.postApi.postTryLogin42(code, code2FA)
 	.then(async (res) => {
-		console.log(`ret tryLogin42: ${JSON.stringify(res)}`)
 			if (res.status === 200) {
 					const userToken = res.data;
 					localStorage.removeItem('token');
@@ -71,17 +69,12 @@ export default function Callback() {
 		const recupURL = new URLSearchParams(window.location.search);
 		const code = recupURL.get('code');
 
-		console.log('code = <' + code + '>');
 		if (!code) router.push('/auth');
 		//FAIRE LA REQUETE API pour obtenir le token
 		if (code !== null)
 		{ 
 			fetchData(code);
 		}
-
-		
-		
-		
 		//si success routrer vers home
 	}, [])
 	return (

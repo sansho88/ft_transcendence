@@ -7,7 +7,6 @@ re: fclean all
 redev: fclean dev
 
 up: build
-	touch ./docker/.env/.env_42
 	$(COMPOSE) up -d
 
 dev: build

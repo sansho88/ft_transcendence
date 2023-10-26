@@ -26,19 +26,16 @@ export class AuthService {
 	/** * * * * * * * * * * * * * * **/
 
 	async logInVisit(login: string, rawPassword: string, token_2fa?: string) {
-		console.log(`NEW CONNECTION ===== \nlogin: ${login}\npass: ${rawPassword} \n2fa: ${token_2fa}`);
 		if (login === undefined || rawPassword === undefined)
 			throw new UnauthorizedException('Login or Password are empty');
 		const user = await this.usersService
 			.findAll()
 			.then((users) => users[users.findIndex((usr) => usr.login == login)]);
 		if (!user) {
-			console.log(`Login failed :\`${login}' is not used`);
 			throw new UnauthorizedException();
 		}
 		const credential = await this.usersService.getCredential(user.UserID);
 		if (!(await this.credentialsService.compare(rawPassword, credential))) {
-			console.log(`Login failed :Wrong password`);
 			throw new UnauthorizedException();
 		}
 
@@ -52,7 +49,6 @@ export class AuthService {
 			})) throw new HttpException("2FA Invalid.", HttpStatus.BAD_REQUEST);
 		}
 
-		console.log('Login success');
 		const payloadToken: accessToken = {id: user.UserID};
 		return await this.jwtService.signAsync(payloadToken);
 	}
@@ -123,7 +119,6 @@ export class AuthService {
 		// else log in
 		const credential = await this.usersService.getCredential(user.UserID);
 		if (!(await this.credentialsService.compare("", credential))) {
-			console.log('failed');
 			throw new UnauthorizedException();
 		}
 		const speakeasy = require('speakeasy');
@@ -135,7 +130,6 @@ export class AuthService {
 				token: token_2fa
 			})) throw new HttpException("2FA Invalid.", HttpStatus.BAD_REQUEST);
 		}
-		console.log('success');
 		const payloadToken: accessToken = {id: user.UserID};
 		return await this.jwtService.signAsync(payloadToken);
 	}
@@ -196,7 +190,6 @@ export class AuthService {
 		if (!cred.token_2fa) throw new HttpException("No 2fa Generated.", HttpStatus.BAD_REQUEST)
 
 		token = token.substring(0, 6);
-		console.log(token);
 		const speakeasy = require('speakeasy');
 
 		if (!speakeasy.totp.verify({
@@ -204,7 +197,6 @@ export class AuthService {
 			encoding: 'base32',
 			token
 		})) return false;
-		console.log("2fa disabled");
 
 		cred.token_2fa = null;
 		cred.save();
