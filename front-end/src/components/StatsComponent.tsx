@@ -32,7 +32,15 @@ const Stats: React.FC<StatsProps> = ({className, user})=>{
                 .catch((error) => console.error("Request for STATS failed: " + error));
         }
     });
-    socketChatRef.current?.off("userUpdate", () => {});
+    socketChatRef.current?.off("userUpdate", (data: IUser) => {
+        if (data.UserID == user.UserID)
+        {
+            getUserStatsById(user.UserID).then((result) => {
+                setStats(result.data);
+            })
+                .catch((error) => console.error("Request for STATS failed: " + error));
+        }
+    });
 
 
     return (
