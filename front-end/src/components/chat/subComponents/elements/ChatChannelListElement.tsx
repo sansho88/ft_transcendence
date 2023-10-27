@@ -7,15 +7,10 @@ import Image from "next/image";
 import { channelsDTO } from '@/shared/DTO/InterfaceDTO';
 import { wsChatEvents } from '@/components/api/WsReq';
 import LeaveChannelCross from './LeaveChannelCross';
-
-import ChatMaster from '../../ChatMaster';
 import { Socket } from 'socket.io-client';
 import { IUser } from '@/shared/types';
 import * as apiReq from '@/components/api/ApiReq'
 import AddUserPrivateChannel from './AddUserPrivateChannel';
-import { Fascinate } from 'next/font/google';
-
-
 
 export default function ChatChannelListElement({socket, channelID, channelName, onClickFunction, isInvite, currentChannel, isMp, isProtected, isServList, isOwner, isPending, inviteID}: {
     socket: Socket,
@@ -33,7 +28,7 @@ export default function ChatChannelListElement({socket, channelID, channelName, 
 }) {
 
     const [channelPassword, setChannelPassword] = useState("");
-    const [channelType, setChannelType] = useState("");
+    const [channelType] = useState("");
     const [areSettingsValids, setSettingsValid] = useState(false);
     const [showPassword, setPasswordVisible] = useState("password");
     const [passwordErrorMsg, setPasswordErrMsg] = useState("");
@@ -129,8 +124,7 @@ useEffect(() => {
 
 
     function onClickSwitcher() {
-
-        if(isProtected === true) {
+        if(isProtected) {
             if(areSettingsValids)
                 onClickFunction(channelPassword);
         }
@@ -176,8 +170,7 @@ useEffect(() => {
             const leavedChannel: channelsDTO.ILeaveChannelDTOPipe = {channelID: channelLeaveID}
             wsChatEvents.leaveRoom(socket, leavedChannel)
         }
-    
-        const timerRef = useRef(null);
+
         const handleMouseEnter = () => {
           setIsHovered(true);
         };
@@ -204,9 +197,11 @@ useEffect(() => {
                 </div>}
             </div>
             {isProtected && 
-                <div>
+                <form>
                           <li><label>
-                                    <input id={"channelPasswordInput"}
+                              <input type={"text"} name={"username"} hidden={true} autoComplete={"username"}/>
+                                    <input className={`channelPasswordInput`}
+                                           id={`channelPasswordInput${uuidv4()}`}
                                            type={showPassword}
                                            inputMode={"text"}
                                            minLength={3}
@@ -214,8 +209,10 @@ useEffect(() => {
                                            value={channelPassword}
                                            placeholder={" Password"}
                                            autoFocus={true}
-                                           onChange={handleOnPasswordChange}/>
-                                    <Button id={"button_showPassword"} image={showPassword == "password" ? "/eye-off.svg" : "/eye-show.svg"}
+                                           onChange={handleOnPasswordChange}
+                                           autoComplete={"current-password"}
+                                    />
+                                    <Button className={`button_showPassword`} id={`button_showPassword${uuidv4()}`}  image={showPassword == "password" ? "/eye-off.svg" : "/eye-show.svg"}
                                             onClick={handleShowPassword}
                                             alt={"Show password button"}/>
                                     <p style={{fontSize: "12px", color: "red"}}>{passwordErrorMsg}</p>
@@ -229,7 +226,7 @@ useEffect(() => {
                                     disabled={channelType.length == 0}
                                 />}
                             </button>
-                </div>
+                </form>
             }
         </div>
         }
