@@ -21,8 +21,8 @@ import { IUserEntity } from '@/shared/entities/IUser.entity'
 
 
 export default function ChatMaster({className, token, userID}: {className: string, token: string, userID: number}) {
-  const timeoutRefreshMessage: number = 150; //ajoute un timeout pour laisser le temps au message de se charger
-  const timeoutRefreshChannel: number = 250; //ajoute un timeout pour laisser le temps au message de se recharger apres un blocked
+  const timeoutRefreshMessage: number = 50; //ajoute un timeout pour laisser le temps au message de se charger
+  const timeoutRefreshChannel: number = 50; //ajoute un timeout pour laisser le temps au message de se recharger apres un blocked
   
 
   const [channelsServer, setChannelsServer] = useState<IChannel[]>([]) //recuperer tous les channels server
@@ -30,6 +30,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
   const [messagesChannel, setMessagesChannel] = useState<messageDTO.IReceivedMessageEventDTO[]>([]) //les messages actuellement load du channel
   const [currentChannel, setCurrentChannel] = useState<number>(-1); // definir le channel en cours by ID
   const [blockList, setBlockList] = useState<IUserEntity[]>([]); // definir le channel en cours by ID
+  const [inputIsVisible, setInputIsVisible] = useState<boolean>(true);
   const newChanIsMp = useRef<boolean>(false); // fix refresh des message si mp
   const lastChanPing = useRef<number>(-1)
   
@@ -99,11 +100,19 @@ export default function ChatMaster({className, token, userID}: {className: strin
   }
 
   useLayoutEffect(() => {
-    if(currentChannel !=  -1)
+    if(currentChannel !==  -1)
+    {
       chanRef.current = currentChannel;
+      setInputIsVisible(true);
+    }
+    else
+    {
+      setMessagesChannel([]);  
+      setInputIsVisible(false);
+    }
 
     setTimeout(() => {
-      if (channelIdIsInListChannels(currentChannel) === true)
+      // if (channelIdIsInListChannels(currentChannel) === true)
         updateMessages(currentChannel);
     }, timeoutRefreshMessage)
     
@@ -130,12 +139,8 @@ export default function ChatMaster({className, token, userID}: {className: strin
       setMessagesChannel([]);
 
       setTimeout(() => {
-        if(channelIdIsInListChannels(chanRef.current) === true)
+        if(chanRef.current !== -1)
           setCurrentChannel(chanRef.current);
-        else
-        {
-          setCurrentChannel(-1);
-        }
       },timeoutRefreshChannel)
   
   }
@@ -159,6 +164,8 @@ export default function ChatMaster({className, token, userID}: {className: strin
   }, [])
 
 
+
+
   useEffect(() => {
     if (socketChat){
       wsChatListen.channelHasChanged(socketChat, channels, setChannels);
@@ -170,7 +177,10 @@ export default function ChatMaster({className, token, userID}: {className: strin
         wsChatListen.channelHasChangedOFF(socketChat, channels, setChannels)
         wsChatListen.leaveRoomListenOFF(socketChat, setChannels, setCurrentChannel, channels)
     }
-      refreshChannel();
+    setTimeout(() => {
+      if (chanRef.current === -1)
+        setMessagesChannel([]);
+    }, 75)
     })
   }, [channels])
   
@@ -188,7 +198,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
       
       <div className='chat_block_main'>
         <ChatMessagesList className='chat_message_list' messages={messagesChannel} currentChannel={currentChannel} userCurrentID={userID}/>
-        {socketChat?.active ? 
+        {socketChat?.active && inputIsVisible ? 
         <ChatInput className={'chat_block_messages_input'} socket={socketChat} channelID={currentChannel} /> : <></>}
       </div>
     </div>

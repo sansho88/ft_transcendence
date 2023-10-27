@@ -31,7 +31,7 @@ export default function ChatInput({className, socket, channelID}: {className: st
 		}
 	};
 
-  return (<>{ channelID != -1 ?
+   return (
     
     <div className={`${className}`}>
     
@@ -54,8 +54,8 @@ export default function ChatInput({className, socket, channelID}: {className: st
             height={32}
             />
             </button>
-            </div>: <></>
-            }
-            </>
+            </div>
+            
+           
     )
 }
