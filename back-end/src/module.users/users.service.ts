@@ -1,5 +1,5 @@
 import {BadRequestException, forwardRef, Inject, Injectable} from '@nestjs/common';
-import {UpdateUserDto} from '../dto/user/update-user.dto';
+import {UpdateUserDto} from '../dto.pipe/update-user.dto';
 import {UserEntity, UserStatus} from '../entities/user.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';

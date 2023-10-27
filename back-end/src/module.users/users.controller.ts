@@ -12,10 +12,11 @@ import {
 	HttpStatus,
 	HttpCode,
 	Post,
-	Request
+	Request,
+	ValidationPipe,
 } from '@nestjs/common';
 import {UsersService} from './users.service';
-import {UpdateUserDto} from '../dto/user/update-user.dto';
+import {UpdateUserDto} from '../dto.pipe/update-user.dto';
 import {AuthGuard} from '../module.auth/auth.guard';
 import {UserEntity} from "../entities/user.entity";
 import {CurrentUser} from '../module.auth/indentify.user';
@@ -99,7 +100,7 @@ export class UsersController {
 	@UseGuards(AuthGuard)
 	updateNickname(
 		@CurrentUser() user: UserEntity,
-		@Body() update: UpdateUserDto,
+		@Body(new ValidationPipe()) update: UpdateUserDto,
 	) {
 		return this.usersService.update(user, update);
 	}
