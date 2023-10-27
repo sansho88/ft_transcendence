@@ -199,7 +199,6 @@ useEffect(() => {
                       password: password
                     }
                     wsChatEvents.joinRoom(socket, joinChan)
-                    setCurrentChannel(channel.channelID);
                     setPopupChannelVisible(false);
                   }
                 }
