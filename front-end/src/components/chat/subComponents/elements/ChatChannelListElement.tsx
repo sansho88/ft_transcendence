@@ -79,10 +79,6 @@ useEffect(() => {
 
 }, [channelName, channelType, channelPassword]);
 
-    function handleAcceptInvite() {
-        onClickSwitcher();
-    }
-
     const [visible, setVisible] = useState<boolean>(true);
     function handleDeclineInvite() {
         setVisible(false);
@@ -113,17 +109,8 @@ useEffect(() => {
         setPasswordVisible(showPassword == "text" ? "password" : "text");
     }
 
-    function handleSubmit(event) {
+    function onClickSwitcher(event) {
         event.preventDefault();
-        if (areSettingsValids)
-        {
-            onClickFunction(channelPassword);
-          }
-        
-    }
-
-
-    function onClickSwitcher() {
         if(isProtected) {
             if(areSettingsValids)
                 onClickFunction(channelPassword);
@@ -186,7 +173,7 @@ useEffect(() => {
                 onMouseLeave={handleMouseLeave}
                 className={currentChannel === channelID ? `channel channel_selected ` : `channel `}>
             <div key={`button_channel_${uuidv4()}`}
-                 className={`${defineClassName.current} justify-between ${channelName.length <= 10 ? 'flex' : 'flex-col'}`} onClick={() => onClickSwitcher()}>
+                 className={`${defineClassName.current} justify-between ${channelName.length <= 10 ? 'flex' : 'flex-col'}`} onClick={onClickSwitcher}>
                     <div className={`flex truncate ${channelName.length <= 10 ? '' : ' text-xs'}`} >{channelMpName === null ? channelName : channelMpName}</div>
                     {isInvite && isHovered && <AddUserPrivateChannel className='' currentChannel={currentChannel} channelID={channelID}/>}
                     {!isServList && !isMp && isHovered && <LeaveChannelCross className={`flex-shrink-0 text-red-800 z-0`} onClickFunction={() => leaveChan(socket, channelID)} />}
