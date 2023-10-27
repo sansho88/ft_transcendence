@@ -13,8 +13,7 @@ dev: build
 	$(COMPOSE) up
 
 build:
-	cp -r ./front-end/src/shared ./back-end/src
-	touch ./docker/.env/.env_42
+	cp -r front-end/src/shared back-end/src
 	$(COMPOSE) build --parallel
 
 start:

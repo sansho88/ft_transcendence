@@ -34,9 +34,10 @@ import {SendMessageDTOPipe,} from '../dto.pipe/message.dto';
 import {JoinEventDTO, ReceivedMessageEventDTO} from '../dto/event.dto'
 import {InviteService} from "./invite.service";
 import {InviteEntity} from "../entities/invite.entity";
-import {wsChatRoutesBack, wsChatRoutesClient} from '../shared/routesApi';
+import {wsChatRoutesClient, wsChatRoutesBack} from 'src/shared/routesApi';
 import {DefaultEventsMap} from "socket.io/dist/typed-events";
-import {MutedService} from "./muted.service";
+import {channelsDTO} from 'src/shared/DTO/InterfaceDTO';
+import { MutedService } from './muted.service';
 
 
 class SocketUserList {

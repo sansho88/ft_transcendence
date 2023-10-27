@@ -343,7 +343,7 @@ export default function Auth({className}: { className?: string }) {
                                 setUserContext(await getUserMe(user).then(() => {
                                         connectUser();
                                     }
-                                ));
+                                ) as Partial<IUser>);
                             }
                         })
                         .catch((e) => {
@@ -384,7 +384,7 @@ export default function Auth({className}: { className?: string }) {
                                     else
                                         connectUser();
 
-                                }));
+                                })as Partial<IUser>);
                             }
                         })
                         .catch((e) => {

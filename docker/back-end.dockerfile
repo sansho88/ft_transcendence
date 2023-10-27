@@ -2,10 +2,17 @@ FROM node:20
 
 WORKDIR /usr/src/app
 
-COPY --chown=node:node ./back-end/*.json 							./
-COPY --chown=node:node ./back-end/*.js 								./
-COPY --chown=node:node ./back-end/.prettierrc 				./
+COPY ./back-end/package.json ./
+COPY ./back-end/package-lock.json ./
 
 RUN npm install
 
-CMD [ "npm", "run", "start:dev" ]
+COPY ./back-end/tsconfig.json ./
+COPY ./back-end/tsconfig.build.json ./
+COPY ./back-end/src ./src
+COPY --chown=node:node ./front-end/src/shared 				./back-end/src/
+
+RUN npm run build
+
+CMD [ "npm", "run", "start:prod" ]
+

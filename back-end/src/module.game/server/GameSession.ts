@@ -1,7 +1,8 @@
-import * as PODGAME from '../../shared/typesGame';
-import {EGameMod} from '../../shared/typesGame';
-import * as POD from '../../shared/types';
+import * as PODGAME from 'src/shared/typesGame';
+import {EGameMod} from 'src/shared/typesGame';
+import * as POD from 'src/shared/types';
 import {Server, Socket} from 'socket.io';
+import {wsGameRoutes} from 'src/shared/routesApi';
 import {GameService} from '../game.service';
 
 

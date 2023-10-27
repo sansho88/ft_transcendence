@@ -36,7 +36,7 @@ export namespace channelsDTO {
 	}
 
 	export interface IChangeChannelDTOPipe {
-		channelID: number;
+		channelID: number; //for wsRoute
 		name: string;
 		password: string | null;
 		privacy: boolean;
