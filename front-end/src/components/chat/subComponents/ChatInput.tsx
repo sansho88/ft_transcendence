@@ -37,6 +37,7 @@ export default function ChatInput({className, socket, channelID}: {className: st
     
     <input
     type="text"
+      autoFocus={true}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => {
