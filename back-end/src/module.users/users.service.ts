@@ -80,12 +80,12 @@ export class UsersService {
 	}
 
 	async update(user: UserEntity, updateUser: UpdateUserDto) {
-		if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
 		await user.save();
-		if (updateUser.status !== user.status)
+		if (updateUser.status !== user.status || user.nickname !== updateUser.nickname) {
+			if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
 			await this.chatGateway.updateUserStatusEmit(user);
-		return user;
+		}	return user;
 	}
 
 	async uploadAvatar(user: UserEntity, file, request) {
@@ -145,6 +145,7 @@ export class UsersService {
 
 			user.avatar_path = internalPath + '/public/avatars/' + fileName;
 			user.save();
+			this.chatGateway.updateUserStatusEmit(user);
 			return user.avatar_path;
 		} catch (error) {
 			throw new BadRequestException(error.message);
