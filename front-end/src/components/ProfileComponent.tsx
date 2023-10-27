@@ -29,6 +29,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
     const socketChat      = useContext(SocketContextChat);
     const socketChatRef   = useRef(socketChat);
     const [isNicknameUsed, setIsNicknameUsed] = useState(false);
+    const [avatarPath, setAvatarPath] = useState(user.avatar_path)
 
     useEffect(() => {
         setStatusColor(getEnumNameByIndex(Colors, user.status));
@@ -39,6 +40,8 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
         if (data.UserID == user.UserID)
         {
             setUserStatus(data.status);
+            setAvatarPath(data.avatar_path);
+            setNickText(data?.nickname ?? modifiedNick);
             setStatusColor(getEnumNameByIndex(Colors, data.status));
         }
     });
@@ -47,6 +50,8 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
         if (data.UserID == user.UserID)
         {
             setUserStatus(data.status);
+            setAvatarPath(data.avatar_path);
+            setNickText(data?.nickname ?? modifiedNick);
             setStatusColor(getEnumNameByIndex(Colors, data.status));
         }
     });
@@ -161,7 +166,7 @@ const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize,
     return (
         <>
             <div className={className} onClick={() => setSelectedUserContext(user)}>
-                <Avatar path={user.avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus} isMainProfile={isMainProfile}/>
+                <Avatar path={avatarPath} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus} isMainProfile={isMainProfile}/>
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
                     color: "#07C3FF",
