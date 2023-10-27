@@ -81,17 +81,18 @@ export class UsersService {
 
 	async update(user: UserEntity, updateUser: UpdateUserDto) {
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
-		await user.save();
 		if (updateUser.status !== user.status || user.nickname !== updateUser.nickname) {
 			if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
 			await this.chatGateway.updateUserStatusEmit(user);
-		}	return user;
+		}
+		await user.save();
+		return user;
 	}
 
 	async uploadAvatar(user: UserEntity, file, request) {
 		try {
 			if (file.buffer.length > 5000000) throw new BadRequestException('Le fichier est trop volumineux (5Mo max)');
-			const internalPath = request.protocol + '://' + request.hostname + ':' + process.env.PORT_SERVER;
+			const internalPath = request.protocol + '://' + process.env.IP_SERVER + ':' + process.env.PORT_SERVER;
 			const buffer = file.buffer;
 			const img = await Jimp.read(buffer)
 				.then((my_img) => {

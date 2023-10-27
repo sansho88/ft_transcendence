@@ -246,7 +246,7 @@ export class ChatGateway
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
-		this.muteService.update();
+		await this.muteService.update();
 		const channel = await this.channelService
 			.findOne(data.channelID, ['userList', 'muteList'], true)
 			.catch(() => null);

@@ -10,7 +10,7 @@ import * as ClipLoader from 'react-spinners'
 import {useRouter} from 'next/navigation';
 import {LoggedContext, UserContext} from '@/context/globalContext';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
-import {NotificationContainer, NotificationManager} from 'react-notifications';
+import {NotificationContainer} from 'react-notifications';
 
 enum EStepLogin {
     init,
@@ -88,7 +88,6 @@ export default function Auth({className}: { className?: string }) {
         const tmpToken = localStorage.getItem('token');
         if (tmpToken)
         {
-            console.log("Logged.");
             authManager.setToken(tmpToken);
             router.push("/home");
         }
@@ -141,7 +140,7 @@ export default function Auth({className}: { className?: string }) {
                 {  currentStepLogin === EStepLogin.logIn ?
                     <div>
                             <div className=' textAuth'>LOGIN</div>
-                            <input className='inputLogin' type="text" value={loginInput} autoComplete={"username"} name={"username"} autoFocus={true}
+                            <input className='inputLogin' type="text" value={loginInput} autoComplete={"username email"} name={"username"} autoFocus={true}
                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                        setLoginInput(e.target.value);
                                    }}
@@ -169,7 +168,7 @@ export default function Auth({className}: { className?: string }) {
 
         return (
             <div className='flex flex-col justify-center items-center text-white my-8'>
-                <input type={"text"} name={"username"} style={{display: "none"}} autoComplete={"username"} className='w-[8vw]' />
+                <input type={"text"} name={"username email"} style={{display: "none"}} autoComplete={"username email"} className='w-[8vw]' />
                 <input className='inputLogin w-[8vw]' type="password" value={passwordInput} autoComplete={"current-password"} name={"password"} minLength={1} maxLength={20}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     setPasswordInput(e.target.value);
@@ -249,21 +248,8 @@ export default function Auth({className}: { className?: string }) {
         setPassword(passwordInput);
     }
 
-    const welcomeTitle = () => {
-        return (
-            <>
-                <div className="welcome">
-                    <div className="welcome-msg">WELCOME TO</div>
-                    <div className="welcome-title ">PONG POD!</div>
-                </div>
-            </>
-        )
-    }
-
-
     const [showMessage, setShowMessage] = useState(true);
     const [showMessageFail] = useState(true);
-
 
     useEffect(() => {
         if (currentStepLogin !== EStepLogin.successLogin) {

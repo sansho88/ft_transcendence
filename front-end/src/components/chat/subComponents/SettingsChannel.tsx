@@ -1,14 +1,12 @@
-import {input} from "zod";
 import React, {useContext, useEffect, useState} from "react";
 import Image from "next/image";
 import Button from "@/components/CustomButtonComponent";
 import {channelsDTO} from "@/shared/DTO/InterfaceDTO";
 import { wsChatEvents } from "@/components/api/WsReq";
 import { Socket } from "socket.io-client";
-import {CurrentChannelContext, SocketContextChat} from "@/context/globalContext";
+import {CurrentChannelContext} from "@/context/globalContext";
 import {IChannel} from "@/shared/typesChannel";
-import * as apiReq from "@/components/api/ApiReq"
-import { channel } from "diagnostics_channel";
+import {v4 as uuidv4} from "uuid";
 
 const SettingsChannel = ({className, socket, channelToEdit}: {className: string, socket: Socket, channelToEdit: IChannel}) => {
     const [channelName, setChannelName] = useState(channelToEdit.name);
@@ -19,7 +17,6 @@ const SettingsChannel = ({className, socket, channelToEdit}: {className: string,
     const [nameErrorMsg, setNameErrMsg] = useState("");
     const [passwordErrorMsg, setPasswordErrMsg] = useState("");
     const [isChannelEdited, setIsChannelEdited] = useState(false);
-    const {selectedChannel, editSelectChannel} = useContext(CurrentChannelContext);
 
     useEffect(() => {
         if (channelName.length < 3)
@@ -122,7 +119,9 @@ const SettingsChannel = ({className, socket, channelToEdit}: {className: string,
                                                onChange={handleOnChange} checked={channelType == "Protected"}/> Protected</label></li>
                             {channelType == "Protected" &&
                                 <li><label>
-                                    <input id={"channelPasswordInput"}
+                                    <input type={"text"} name={"username"} hidden={true} autoComplete={"username"}/>
+                                    <input className={`channelPasswordInput`}
+                                           id={`channelPasswordInput${uuidv4()}`}
                                            type={showPassword}
                                            inputMode={"text"}
                                            minLength={3}
@@ -130,8 +129,10 @@ const SettingsChannel = ({className, socket, channelToEdit}: {className: string,
                                            value={channelPassword}
                                            placeholder={" Password"}
                                            autoFocus={true}
-                                           onChange={handleOnPasswordChange}/>
-                                    <Button id={"button_showPassword"} image={showPassword == "password" ? "/eye-off.svg" : "/eye-show.svg"}
+                                           onChange={handleOnPasswordChange}
+                                           autoComplete={"current-password"}
+                                    />
+                                    <Button className={`button_showPassword`} id={`button_showPassword${uuidv4()}`} image={showPassword == "password" ? "/eye-off.svg" : "/eye-show.svg"}
                                             onClick={handleShowPassword}
                                             alt={"Show password button"}/>
                                     <p style={{fontSize: "12px", color: "red"}}>{passwordErrorMsg}</p>

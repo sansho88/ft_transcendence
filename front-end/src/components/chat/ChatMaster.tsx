@@ -30,6 +30,8 @@ export default function ChatMaster({className, token, userID}: {className: strin
   const [messagesChannel, setMessagesChannel] = useState<messageDTO.IReceivedMessageEventDTO[]>([]) //les messages actuellement load du channel
   const [currentChannel, setCurrentChannel] = useState<number>(-1); // definir le channel en cours by ID
   const [blockList, setBlockList] = useState<IUserEntity[]>([]); // definir le channel en cours by ID
+  const newChanIsMp = useRef<boolean>(false); // fix refresh des message si mp
+  const lastChanPing = useRef<number>(-1)
   
   const chanRef = useRef<number>(-1); 
   
@@ -92,14 +94,17 @@ export default function ChatMaster({className, token, userID}: {className: strin
    
   }
 
-
+  function channelIdIsInListChannels(targetChanID: number): boolean {
+    return channels.some((channel) => channel.channelID === targetChanID)
+  }
 
   useLayoutEffect(() => {
     if(currentChannel !=  -1)
       chanRef.current = currentChannel;
 
     setTimeout(() => {
-      updateMessages(currentChannel);
+      if (channelIdIsInListChannels(currentChannel) === true)
+        updateMessages(currentChannel);
     }, timeoutRefreshMessage)
     
     
@@ -125,7 +130,12 @@ export default function ChatMaster({className, token, userID}: {className: strin
       setMessagesChannel([]);
 
       setTimeout(() => {
-        setCurrentChannel(chanRef.current);
+        if(channelIdIsInListChannels(chanRef.current) === true)
+          setCurrentChannel(chanRef.current);
+        else
+        {
+          setCurrentChannel(-1);
+        }
       },timeoutRefreshChannel)
   
   }
@@ -133,7 +143,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
   useEffect(() => {
 
       if (socketChat){
-        wsChatListen.createRoomListen(socketChat, setChannels);
+        wsChatListen.createRoomListen(socketChat, setChannels, newChanIsMp);
         wsChatListen.updateChannelsJoined(socketChat, setChannels);
         wsChatEvents.pingUpdateChannelsJoined(socketChat);
         wsChatListen.toggleBlockedUserList(socketChat, refreshChannel)
@@ -160,7 +170,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
         wsChatListen.channelHasChangedOFF(socketChat, channels, setChannels)
         wsChatListen.leaveRoomListenOFF(socketChat, setChannels, setCurrentChannel, channels)
     }
-      setMessagesChannel([])
+      refreshChannel();
     })
   }, [channels])
   

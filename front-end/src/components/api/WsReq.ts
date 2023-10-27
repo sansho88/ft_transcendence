@@ -1,11 +1,12 @@
 import { Socket } from "socket.io-client";
 import { wsChatRoutesBack, wsChatRoutesClient } from "@/shared/routesApi";
-import { IChannel, IChannelMessage } from "@/shared/typesChannel";
+import { EChannelType, IChannel, IChannelMessage } from "@/shared/typesChannel";
 import { channelsDTO, messageDTO} from "@/shared/DTO/InterfaceDTO"
 import { IChannelEntity } from "@/shared/entities/IChannel.entity";
 import { channel } from "diagnostics_channel";
 import { IMessageEntity } from "@/shared/entities/IMessage.entity";
 import { IChallenge } from "@/shared/types";
+import { ChannelType } from "@/shared/entities/IChannel.entity";
 
 export namespace wsChatEvents { 
 
@@ -47,9 +48,13 @@ export namespace wsChatListen {
 
 
 
-  export function createRoomListen(socket: Socket, setter: Function) {
+  export function createRoomListen(socket: Socket, setter: Function, setterIsMp: React.RefObject<boolean>) {
     socket.on(wsChatRoutesBack.createRoom(), (data: {channel: IChannelEntity}) => {
-      setter(prevChannels => [...prevChannels, data.channel]);
+      if(data.channel.type === ChannelType.DIRECT)
+        setterIsMp.current = true;
+      else
+        setterIsMp.current = false;
+    setter(prevChannels => [...prevChannels, data.channel]);
     })
   }
 
