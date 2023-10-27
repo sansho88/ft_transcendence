@@ -94,14 +94,17 @@ export default function ChatMaster({className, token, userID}: {className: strin
    
   }
 
-
+  function channelIdIsInListChannels(targetChanID: number): boolean {
+    return channels.some((channel) => channel.channelID === targetChanID)
+  }
 
   useLayoutEffect(() => {
     if(currentChannel !=  -1)
       chanRef.current = currentChannel;
 
     setTimeout(() => {
-      updateMessages(currentChannel);
+      if (channelIdIsInListChannels(currentChannel) === true)
+        updateMessages(currentChannel);
     }, timeoutRefreshMessage)
     
     
@@ -127,7 +130,12 @@ export default function ChatMaster({className, token, userID}: {className: strin
       setMessagesChannel([]);
 
       setTimeout(() => {
-        setCurrentChannel(chanRef.current);
+        if(channelIdIsInListChannels(chanRef.current) === true)
+          setCurrentChannel(chanRef.current);
+        else
+        {
+          setCurrentChannel(-1);
+        }
       },timeoutRefreshChannel)
   
   }
