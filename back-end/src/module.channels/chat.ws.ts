@@ -6,12 +6,13 @@ import {
 	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer,
+	WsException,
 } from '@nestjs/websockets';
 import {IoAdapter} from '@nestjs/platform-socket.io';
 import {RemoteSocket, Server, Socket} from 'socket.io';
 import {MessageService} from './message.service';
 import {getToken, WSAuthGuard} from '../module.auth/auth.guard';
-import {forwardRef, Inject, UseGuards, ValidationPipe} from '@nestjs/common';
+import {forwardRef, Inject, UseGuards, ValidationPipe, ValidationPipeOptions} from '@nestjs/common';
 import {CurrentUser} from '../module.auth/indentify.user';
 import {ChannelService} from './channel.service';
 import {BannedService} from "./banned.service";
@@ -42,6 +43,17 @@ import { MutedService } from './muted.service';
 class SocketUserList {
 	userID: number;
 	socketID: string;
+}
+
+export const WsParsePipe: ValidationPipeOptions = {
+	exceptionFactory(validationErrors = []) {
+		if (this.isDetailedOutputDisabled) {
+			return new WsException('Bad request');
+		}
+		const errors = this.flattenValidationErrors(validationErrors);
+
+		return new WsException(errors);
+	}
 }
 
 @WebSocketGateway({namespace: 'chat', cors: true})
@@ -145,7 +157,7 @@ export class ChatGateway
 	@SubscribeMessage('createRoom')
 	@UseGuards(WSAuthGuard)
 	async handelCreateRoom(
-		@MessageBody(new ValidationPipe()) data: CreateChannelDTOPipe,
+		@MessageBody(new ValidationPipe(WsParsePipe)) data: CreateChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 	) {
 		const credential = await this.channelCredentialService.create(
@@ -168,7 +180,7 @@ export class ChatGateway
 	@SubscribeMessage('joinRoom')
 	@UseGuards(WSAuthGuard)
 	async handelJoinRoom(
-		@MessageBody(new ValidationPipe()) data: JoinChannelDTOPipe,
+		@MessageBody(new ValidationPipe(WsParsePipe)) data: JoinChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
@@ -205,7 +217,7 @@ export class ChatGateway
 	@SubscribeMessage('leaveRoom')
 	@UseGuards(WSAuthGuard)
 	async handelLeaveRoom(
-		@MessageBody(new ValidationPipe()) data: LeaveChannelDTOPipe,
+		@MessageBody(new ValidationPipe(WsParsePipe)) data: LeaveChannelDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,) {
 		let channel: ChannelEntity = await this.channelService
@@ -242,7 +254,7 @@ export class ChatGateway
 	@SubscribeMessage('sendMsg')
 	@UseGuards(WSAuthGuard)
 	async handelMessages(
-		@MessageBody(new ValidationPipe()) data: SendMessageDTOPipe,
+		@MessageBody(new ValidationPipe(WsParsePipe)) data: SendMessageDTOPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
@@ -276,7 +288,7 @@ export class ChatGateway
 	@SubscribeMessage('createMP')
 	@UseGuards(WSAuthGuard)
 	async handelCreateMP(
-		@MessageBody(new ValidationPipe()) data: CreateMpDTOPPipe,
+		@MessageBody(new ValidationPipe(WsParsePipe)) data: CreateMpDTOPPipe,
 		@CurrentUser() user: UserEntity,
 		@ConnectedSocket() client: Socket,
 	) {
@@ -357,9 +369,9 @@ export class ChatGateway
 	@UseGuards(WSAuthGuard)
 	async handleUpdateNickname(
 		@ConnectedSocket() client: Socket,
-		@MessageBody(new ValidationPipe()) data: { nickname: string },
+		@MessageBody(new ValidationPipe(WsParsePipe)) data: { nickname: string },
 	) {
-		if(!data.nickname)
+		if (!data.nickname)
 			return;
 		const res = await this.usersService.nicknameUsed(data.nickname);
 		client.emit('NicknameUsed', res);
@@ -410,7 +422,7 @@ export class ChatGateway
 	@UseGuards(WSAuthGuard)
 	async handleUpdateRoom(
 		@CurrentUser() user: UserEntity,
-		@MessageBody(new ValidationPipe()) data: ChangeChannelDTOPipe) {
+		@MessageBody(new ValidationPipe(WsParsePipe)) data: ChangeChannelDTOPipe) {
 		const channel = await this.channelService.findOne(data.channelID).catch(() => null);
 		if (channel === null)
 			return;
@@ -429,6 +441,7 @@ export class ChatGateway
 		const socketList = await this.getSocket(user.UserID);
 		this.emitSocketLst(socketList, 'updateBlocked', target)
 	}
+
 	async block(user: UserEntity, target: UserEntity) {
 		const socketList = await this.getSocket(user.UserID);
 		this.emitSocketLst(socketList, 'updateBlocked', target)
