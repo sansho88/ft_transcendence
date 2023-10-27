@@ -52,7 +52,7 @@ export default function ChatMaster({className, token, userID}: {className: strin
     socketChat.connect();
   }
 
-  function checkMessageBlockedList(message: messageDTO.IReceivedMessageEventDTO):boolean {
+  function checkMessageBlockedList(message: any, blockList):boolean {
     return !blockList.some((user) => user.UserID === message.author.UserID);
   }
 
@@ -69,12 +69,13 @@ export default function ChatMaster({className, token, userID}: {className: strin
   async function updateMessages(channelID: number) {
         await apiReq.getApi.getAllMessagesChannel(channelID)
         .then(async (messages) => {
-          await apiReq.getApi.getBlockedList()
+          const lst = await apiReq.getApi.getBlockedList()
           .then((res: {data: IUserEntity[]}) => {
             setBlockList(res.data)
+            return res.data
           })
           .catch(() => {})
-          const tmpMessages = messages.data.filter((message) => checkMessageBlockedList(message))
+          const tmpMessages = messages.data.filter((message) => checkMessageBlockedList(message, lst))
           setMessagesChannel(tmpMessages)
         })
         .catch(() => {})
@@ -87,11 +88,10 @@ export default function ChatMaster({className, token, userID}: {className: strin
       await apiReq.getApi.getBlockedList()
       .then((res: {data: IUserEntity[]}) => {
         setBlockList(res.data)
-        if (checkMessageBlockedList(message) && message.channelID === currentChannel)
+        if (checkMessageBlockedList(message, res.data) && message.channelID === currentChannel)
           setMessages(prevMessages => [...prevMessages, message]);
       })
       .catch(() => {})
-   
   }
 
   function channelIdIsInListChannels(targetChanID: number): boolean {
