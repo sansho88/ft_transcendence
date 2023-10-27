@@ -81,11 +81,12 @@ export class UsersService {
 
 	async update(user: UserEntity, updateUser: UpdateUserDto) {
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
-		await user.save();
 		if (updateUser.status !== user.status || user.nickname !== updateUser.nickname) {
 			if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
 			await this.chatGateway.updateUserStatusEmit(user);
-		}	return user;
+		}
+		await user.save();
+		return user;
 	}
 
 	async uploadAvatar(user: UserEntity, file, request) {
