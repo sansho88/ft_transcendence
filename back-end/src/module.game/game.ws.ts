@@ -12,16 +12,16 @@ import {RemoteSocket, Server, Socket} from 'socket.io';
 import {ServerGame} from 'src/module.game/server/ServerGame';
 import {wsChatRoutesBack, wsGameRoutes} from '../shared/routesApi';
 import {userInfoSocket} from '../shared/typesGame';
-import {UseGuards} from '@nestjs/common';
+import {UseGuards, ValidationPipe} from '@nestjs/common';
 import {UserEntity, UserStatus} from '../entities/user.entity';
 import {CurrentUser} from '../module.auth/indentify.user';
 import {WSAuthGuard, getToken} from "../module.auth/auth.guard";
 import {accessToken} from '../dto/payload';
 import {JwtService} from '@nestjs/jwt';
 import {UsersService} from 'src/module.users/users.service';
-import {CreateChallengeDTOPPipe} from 'src/dto.pipe/channel.dto';
 import {DefaultEventsMap} from 'socket.io/dist/typed-events';
-import {channelsDTO} from '../shared/DTO/InterfaceDTO';
+import {WsParsePipe} from "../module.channels/chat.ws";
+import {ChallengeAcceptedDTO, CreateChallengeDTOPPipe} from "../dto.pipe/game.dto";
 
 
 export interface SocketUserList {
@@ -179,7 +179,7 @@ export class WebsocketGatewayGame
 	@SubscribeMessage(wsChatRoutesBack.createChallenge())
 	@UseGuards(WSAuthGuard)
 	async createChallengeGame(
-		@MessageBody() data: CreateChallengeDTOPPipe,
+		@MessageBody(new ValidationPipe(WsParsePipe)) data: CreateChallengeDTOPPipe,
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity,
 	) {
@@ -201,7 +201,7 @@ export class WebsocketGatewayGame
 	@SubscribeMessage(wsChatRoutesBack.responseChallenge())
 	@UseGuards(WSAuthGuard)
 	async acceptChallengeGame(
-		@MessageBody() data: channelsDTO.IChallengeAcceptedDTO,
+		@MessageBody(new ValidationPipe(WsParsePipe)) data: ChallengeAcceptedDTO,
 		@ConnectedSocket() client: Socket,
 		@CurrentUser() user: UserEntity,
 	) {
