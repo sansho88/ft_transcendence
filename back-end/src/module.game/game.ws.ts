@@ -78,7 +78,6 @@ export class WebsocketGatewayGame
 			socketID: client.id,
 			userID: userID
 		});
-		console.log('NEW CONNEXION WS CLIENT THEGAME, id = ' + client.id);
 	}
 
 	async handleDisconnect(client: Socket) {
@@ -104,7 +103,6 @@ export class WebsocketGatewayGame
 		if (!user)
 			return client.disconnect();
 		this.socketUserList = this.socketUserList.filter(value => value.socketID != client.id);
-		console.log(`CLIENT ${client.id} left GAME WS`);
 		return client.disconnect();
 	}
 

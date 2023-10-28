@@ -204,6 +204,16 @@ export class GameSession {
 			this.startCountdownIfPlayersReady();
 		})
 
+		setTimeout(() => {
+			if (this.isGameReady === false) {
+				if (!this.isP1Ready)
+					this.isP1Ready = true;
+				if (!this.isP2Ready)
+					this.isP2Ready = true;
+				this.startCountdownIfPlayersReady();
+			}
+		}, 10000);
+
 		if (this.gameMod !== PODGAME.EGameMod.trainning) {
 			//j'ecoute leur propre event pour faire bouger leur paddle respectif
 			P1.socket.on(`${this.gameRoomEvent}PLAYER1`, (data) => {

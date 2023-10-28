@@ -123,7 +123,7 @@ export class ChatGateway
 			socketID: client.id,
 			userID: userID,
 		});
-		console.log('NEW CONNEXION WS CLIENT CHAT - , id = ' + client.id + ` | userID: ${userID}`);
+		console.log('New connexion ws - (' + client.id + `) | userID: ${userID}`);
 	}
 
 	async handleDisconnect(client: Socket) {
@@ -150,7 +150,7 @@ export class ChatGateway
 			this.server.to(`user.${user.UserID}`).emit('notifyEvent', `User ${user.login} is offline`)
 			await this.usersService.userStatus(user, UserStatus.OFFLINE);
 		}
-		console.log(`CLIENT ${client.id} left CHAT WS`);
+		console.log(`CLIENT ${client.id} left ws`);
 		return client.disconnect();
 	}
 
