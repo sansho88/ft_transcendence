@@ -22,13 +22,13 @@ const MatchHistory : React.FC = () => {
                     .then((res) => {
                         setMatchesList(res.data);
                     });
-            getApi.getOtherRelationships(selectedUserContext.UserID)
+            getApi.getMyRelationships()
                 .then((res) => {
-                    setSelectedUserRelationships({followed:res.data.followed, blocked:res.data?.blocked});
+                    setSelectedUserRelationships({followed:res.data.subscribed, blocked:res.data?.blocked});
                 });
             return () => {};
         }
-    }, [selectedUserContext])
+    }, [selectedUserContext, refresh])
 
     socketChatRef.current?.on("userUpdate", (data: IUser) => {
         if (selectedUserContext && data.UserID == selectedUserContext.UserID && selectedUserContext.status == EStatus.Online)

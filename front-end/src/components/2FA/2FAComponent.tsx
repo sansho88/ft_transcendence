@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useLayoutEffect, useState} from "react";
 
 import "./2FAstyleSheet.css"
 import {NotificationManager} from 'react-notifications';
@@ -10,9 +10,11 @@ import { getUserMe } from "@/app/auth/Auth";
 
 
 interface userData2Fa {
-    hasActive2FA: boolean
+    hasActive2FA: boolean,
+    setterVisibilty: React.Dispatch<React.SetStateAction<boolean>>,
+    visibility: boolean
 }
-const Button2FA: React.FC<userData2Fa> = ({children, hasActive2FA}) => {
+const Button2FA: React.FC<userData2Fa> = ({children, hasActive2FA, setterVisibilty, visibility}) => {
 
 	const [qrCodeData, setQrCodeData] = useState("");
   	const [qrCodeGenerated, setQrCodeGenerated] = useState(false);
@@ -95,6 +97,15 @@ const Button2FA: React.FC<userData2Fa> = ({children, hasActive2FA}) => {
 			NotificationManager.error(`Wrong Deactivation 2FA code.`);
 		});
 	}
+
+    useLayoutEffect(() => {
+        setterVisibilty(onProcess)
+    }, [onProcess])
+
+    useLayoutEffect(() => {
+        if (!visibility)
+            setOnProcess(false);
+    }, [visibility])
 
     const handleInput2FAChange = (e) => {
         inputCode = e.target.value;
