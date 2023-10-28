@@ -227,6 +227,8 @@ export class ChatGateway
 			return client.emit('leaveRoom', {error: 'There is no such Channel'});
 		if (!await this.channelService.isUserOnChan(channel, user))
 			return client.emit('leaveRoom', {error: 'You are not part of this channel'});
+		if (channel.channelID === 1)
+			return client.emit('leaveRoom', {error: 'You cannot leave generale'});
 		if (channel.owner.UserID === user.UserID) {
 			channel.userList.map(async user => await this.leaveChat(channel, user))
 			return channel = await this.channelService.remove(channel);
