@@ -21,8 +21,8 @@ import { IUserEntity } from '@/shared/entities/IUser.entity'
 
 
 export default function ChatMaster({className, token, userID}: {className: string, token: string, userID: number}) {
-  const timeoutRefreshMessage: number = 50; //ajoute un timeout pour laisser le temps au message de se charger
-  const timeoutRefreshChannel: number = 50; //ajoute un timeout pour laisser le temps au message de se recharger apres un blocked
+  const timeoutRefreshMessage: number = 75; //ajoute un timeout pour laisser le temps au message de se charger
+  const timeoutRefreshChannel: number = 75; //ajoute un timeout pour laisser le temps au message de se recharger apres un blocked
   
 
   const [channelsServer, setChannelsServer] = useState<IChannel[]>([]) //recuperer tous les channels server
