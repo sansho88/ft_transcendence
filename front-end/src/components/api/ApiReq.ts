@@ -78,7 +78,7 @@ export namespace getApi {
 		return axiosInstance.get(strRoutes.getMyRelationships(), updateAxiosInstance());
 	}
 
-	export const getOtherRelationships = (targetID: number): any => {
+	export const getOtherRelationships = (targetID: number): Promise<{ data }>  => {
 		return axiosInstance.get(strRoutes.getOtherRelationships(targetID), updateAxiosInstance());
 	}
 
