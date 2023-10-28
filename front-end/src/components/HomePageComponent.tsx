@@ -29,6 +29,8 @@ const HomePage = () => {
     const socketChat = useContext(SocketContextChat);
     const socketGame = useContext(SocketContextGame);
 
+    const [is2faVisible, setIs2faVisible] = useState<boolean>(false)
+
 
     function handleNotif(data: INotif) {
         switch (data.type) {
@@ -93,7 +95,14 @@ const HomePage = () => {
     }, []);
 
     
-
+    useEffect(() => {
+        if (is2faVisible)
+        {
+            setMatchHistoryVisible(false)
+            setLeaderboardVisible(false);
+        }
+    
+    },[is2faVisible])
 
     return (
         <>
@@ -107,13 +116,15 @@ const HomePage = () => {
                         <Button image={"/history-list.svg"} onClick={() => {
                             setMatchHistoryVisible(!showMatchHistory);
                             setLeaderboardVisible(false);
+                            setIs2faVisible(false);
                         }} alt={"Match History button"} title={"Match History"}/>
                         <Button image={"/podium.svg"} onClick={() => {
                             setLeaderboardVisible(!showLeaderboard);
+                            setIs2faVisible(false);
                             setMatchHistoryVisible(false);
                         }} alt={"Leaderboard button"} title={"Leaderboard"} margin={"0 0 0 2ch"}/>
               
-                        <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
+                        <Button2FA hasActive2FA={userContext.has_2fa} setterVisibilty={setIs2faVisible} visibility={is2faVisible}>2FA</Button2FA>
                     </Profile>
 
                 {showMatchHistory && <MatchHistory/>}
