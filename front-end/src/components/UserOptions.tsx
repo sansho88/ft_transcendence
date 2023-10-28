@@ -33,6 +33,10 @@ const UserOptions: React.FC<userOptionsProps> = ({classname, idProperty, user, s
     const socketRef = useContext(SocketContextChat)
     const socketRefGame = useContext(SocketContextGame)
 
+    useEffect(() => {
+        setIsFollowed(!!relationships.followed.find(tmpUser => user.UserID === tmpUser.UserID));
+        setIsBlocked(relationships.blocked && !!relationships.blocked?.find(tmpUser => user.UserID === tmpUser.UserID));
+    }, [relationships]);
     function handleFollow(){
         if (!isFollowed)
         {
