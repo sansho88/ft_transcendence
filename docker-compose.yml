@@ -2,6 +2,43 @@ version : "3.8"
 
 services:
 
+  db:
+    container_name: database
+    build:
+      context: ./docker
+      dockerfile: ./database.dockerfile
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - database
+    env_file:
+      - ./docker/.env/.env_db
+    ports:
+      - "5432:5432"
+
+  back-end:
+    depends_on:
+      - db
+    container_name: api
+    build:
+      context: ./
+      dockerfile: ./docker/back-end.dockerfile
+    volumes:
+      - ./back-end/src:/usr/src/app/src
+      # - ./front-end/src/shared/:/usr/src/app/src/shared
+    ports:
+      - "8000:8000"
+    networks:
+      - webapp
+      - database
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - ./docker/.env/.env_db
+      - ./docker/.env/.env_42
+      - ./docker/.env/.env_nest
+      
   front-end:
     depends_on:
       - back-end
@@ -17,44 +54,9 @@ services:
     networks:
       - webapp
     environment:
-      - NODE_ENV=development
+      # - NODE_ENV=development
+      - NEXT_SKIP_TYPE_CHECK=true
 
-  back-end:
-    depends_on:
-      - db
-    container_name: api
-    build:
-      context: ./
-      dockerfile: ./docker/back-end.dockerfile
-    volumes:
-      - ./back-end/src:/usr/src/app/src
-      - ./front-end/src/shared/:/usr/src/app/shared
-    ports:
-      - "8000:8000"
-    networks:
-      - webapp
-      - database
-    environment:
-      - NODE_ENV=development
-    env_file:
-      - ./docker/.env/.env_db
-      - ./docker/.env/.env_42
-      - ./docker/.env/.env_nest
-
-  db:
-    container_name: database
-    build:
-      context: ./docker
-      dockerfile: ./database.dockerfile
-    restart: always
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    networks:
-      - database
-    env_file:
-      - ./docker/.env/.env_db
-    ports:
-      - "5432:5432"
 
   adminer:
     container_name: adminer

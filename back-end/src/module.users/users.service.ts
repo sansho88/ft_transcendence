@@ -1,21 +1,35 @@
-import {BadRequestException, Injectable} from '@nestjs/common';
-import {UpdateUserDto} from '../dto/user/update-user.dto';
+import {BadRequestException, forwardRef, Inject, Injectable} from '@nestjs/common';
+import {UpdateUserDto} from '../dto.pipe/update-user.dto';
 import {UserEntity, UserStatus} from '../entities/user.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {UserCredentialEntity} from '../entities/credential.entity';
+import * as fs from 'fs-extra';
+import Jimp from 'jimp';
+import {ChatGateway} from "../module.channels/chat.ws";
+import {ChannelService} from "../module.channels/channel.service";
+
+const acceptedImageTypes = [
+	'jpeg',
+	'png',
+	'gif',
+	'bmp',
+	'tiff',
+	'gif'
+];
 
 @Injectable()
 export class UsersService {
 	constructor(
 		@InjectRepository(UserEntity)
 		private usersRepository: Repository<UserEntity>,
+		@Inject(forwardRef(() => ChatGateway))
+		private chatGateway: ChatGateway,
+		@Inject(forwardRef(() => ChannelService))
+		private channelService: ChannelService
 	) {
 	}
 
-	/**
-	 * Todo: update with new thing in table
-	 */
 	/**
 	 * Create and save the new user
 	 * @param newLogin login of the user
@@ -33,14 +47,15 @@ export class UsersService {
 			nickname = this.generateNickname();
 		while (await this.nicknameUsed(nickname))
 			nickname = this.generateNickname();
+		const globalChannel = await this.channelService.getGlobalChannel();
 		const user = this.usersRepository.create({
 			login: newLogin,
 			nickname: nickname,
 			visit: newInvite,
+			channelJoined: [globalChannel],
 		});
 		user.credential = newCredential;
 		await user.save();
-		console.log(`New User \`${user.login}\` with ID ${user.UserID}`);
 		return user;
 	}
 
@@ -52,7 +67,7 @@ export class UsersService {
 	 * @return UserEntity Or Undefined if user not in db
 	 */
 	async findOne(userID: number, relations?: string[]) {
-		let user;
+		let user: UserEntity;
 		if (!relations)
 			user = await this.usersRepository.findOneBy({UserID: userID});
 		else
@@ -65,14 +80,79 @@ export class UsersService {
 	}
 
 	async update(user: UserEntity, updateUser: UpdateUserDto) {
-		if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
-		if (updateUser.avatar !== undefined) user.avatar_path = updateUser.avatar;
 		if (updateUser.has_2fa !== undefined) user.has_2fa = updateUser.has_2fa;
-		if (updateUser.status !== undefined) user.status = updateUser.status;
+		if (updateUser.status !== user.status || user.nickname !== updateUser.nickname) {
+			if (!await this.nicknameUsed(updateUser.nickname)) user.nickname = updateUser.nickname
+			await this.chatGateway.updateUserStatusEmit(user);
+		}
 		await user.save();
-		console.log(user);
 		return user;
 	}
+
+	async uploadAvatar(user: UserEntity, file, request) {
+		try {
+			if (file.buffer.length > 5000000) throw new BadRequestException('Le fichier est trop volumineux (5Mo max)');
+			const internalPath = request.protocol + '://' + process.env.IP_SERVER + ':' + process.env.PORT_SERVER;
+			const buffer = file.buffer;
+			const img = await Jimp.read(buffer)
+				.then((my_img) => {
+					return my_img.getExtension();
+				})
+				.catch((err) => {
+					console.error(err);
+				});
+
+			if (!img || !acceptedImageTypes.includes(`${img}`)) {
+				throw new BadRequestException('Le fichier doit avoir une extension .png, .jpg, .jpeg ou .gif');
+			}
+			const fileName = `${Date.now()}.${crypto.randomUUID()}.${img}`;
+			const uploadPath = `${process.cwd()}/public/avatars/${fileName}`;
+
+			await fs.ensureDir(`${process.cwd()}/public/avatars`);
+			await fs.outputFile(uploadPath, await Jimp.read(buffer).then((my_img) => {
+				if (img === 'gif') return buffer;
+				const width = my_img.getWidth();
+				const height = my_img.getHeight();
+
+				const squareSize = 1000;
+
+				if (width < squareSize || height < squareSize) {
+					my_img.resize(squareSize, squareSize, Jimp.RESIZE_NEAREST_NEIGHBOR);
+					return my_img
+						.quality(60)
+						.getBufferAsync(Jimp.MIME_JPEG);
+				}
+
+				let cropped: any
+				const minSize = Math.min(width, height)
+				const maxSize = Math.max(width, height)
+				const diff = maxSize - minSize
+
+				if (width > height) {
+					cropped = my_img.crop(diff / 4, 0, minSize, minSize).resize(squareSize, squareSize, Jimp.RESIZE_BILINEAR)
+				} else {
+					cropped = my_img.crop(0, diff / 4, minSize, minSize).resize(squareSize, squareSize, Jimp.RESIZE_BILINEAR)
+				}
+				return my_img
+					.quality(60)
+					.getBufferAsync(Jimp.MIME_JPEG);
+			}).catch((err) => {return buffer}));
+
+			if (user.avatar_path?.includes(internalPath) ?? false) {
+				let oldAvatarPath = `${process.cwd()}${user.avatar_path.substring(internalPath.length)}`;
+				oldAvatarPath = oldAvatarPath.trim();
+				await fs.remove(oldAvatarPath);
+			}
+
+			user.avatar_path = internalPath + '/public/avatars/' + fileName;
+			user.save();
+			this.chatGateway.updateUserStatusEmit(user);
+			return user.avatar_path;
+		} catch (error) {
+			throw new BadRequestException(error.message);
+		}
+	}
+
 
 	async getCredential(userID: number) {
 		const target = await this.usersRepository.findOne({
@@ -82,9 +162,14 @@ export class UsersService {
 		return target.credential;
 	}
 
+	/**
+	 * Need to call a emit to notify other User (Followers) that they change status on 'user.${user.userID}`
+	 */
 	async userStatus(user: UserEntity, newStatus: UserStatus) {
+		if (user.status === newStatus) return;
 		user.status = newStatus;
 		await user.save();
+		await this.chatGateway.updateUserStatusEmit(user);
 	}
 
 	private generateNickname() {
@@ -103,8 +188,22 @@ export class UsersService {
 	 * return false if nickname is not used
 	 */
 	async nicknameUsed(nickname: string) {
-		const test = !!await this.usersRepository.findOneBy({nickname: nickname});
-		// console.log('checkNick', test);
-		return test;
+		return !!await this.usersRepository.findOneBy({nickname: nickname});
+	}
+
+	blockUser(user: UserEntity, target: UserEntity) {
+		user.blocked.push(target);
+		return user.save();
+	}
+
+	unBlockUser(user: UserEntity, target: UserEntity) {
+		user.blocked = user.blocked.filter(block => block.UserID != target.UserID);
+		return user.save();
+	}
+
+	async getAdminUser() {
+		return this.usersRepository.findOneBy({
+			login: 'PongGod'
+		});
 	}
 }

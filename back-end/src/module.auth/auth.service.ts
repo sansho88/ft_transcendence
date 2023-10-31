@@ -1,6 +1,7 @@
 import {
+	forwardRef,
 	HttpException,
-	HttpStatus,
+	HttpStatus, Inject,
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
@@ -10,10 +11,12 @@ import {JwtService} from '@nestjs/jwt';
 import {accessToken} from '../dto/payload';
 import {UserCredentialService} from './credential.service';
 import * as process from "process";
+import {UserEntity} from 'src/entities/user.entity';
 
 @Injectable()
 export class AuthService {
 	constructor(
+		@Inject(forwardRef(() => UsersService))
 		private readonly usersService: UsersService,
 		private jwtService: JwtService,
 		private credentialsService: UserCredentialService,
@@ -22,23 +25,30 @@ export class AuthService {
 
 	/** * * * * * * * * * * * * * * **/
 
-	async logInVisit(login: string, rawPassword: string) {
-		console.log(`NEW CONNECTION ===== \nlogin: ${login}\npass: ${rawPassword}`);
+	async logInVisit(login: string, rawPassword: string, token_2fa?: string) {
 		if (login === undefined || rawPassword === undefined)
 			throw new UnauthorizedException('Login or Password are empty');
 		const user = await this.usersService
 			.findAll()
 			.then((users) => users[users.findIndex((usr) => usr.login == login)]);
 		if (!user) {
-			console.log(`Login failed :\`${login}' is not used`);
 			throw new UnauthorizedException();
 		}
 		const credential = await this.usersService.getCredential(user.UserID);
 		if (!(await this.credentialsService.compare(rawPassword, credential))) {
-			console.log(`Login failed :Wrong password`);
 			throw new UnauthorizedException();
 		}
-		console.log('Login success');
+
+		const speakeasy = require('speakeasy');
+		if (user.has_2fa) {
+			if (!token_2fa) throw new HttpException("2FA Token is missing.", HttpStatus.BAD_REQUEST);
+			if (!speakeasy.totp.verify({
+				secret: credential.token_2fa,
+				encoding: 'base32',
+				token: token_2fa
+			})) throw new HttpException("2FA Invalid.", HttpStatus.BAD_REQUEST);
+		}
+
 		const payloadToken: accessToken = {id: user.UserID};
 		return await this.jwtService.signAsync(payloadToken);
 	}
@@ -67,7 +77,7 @@ export class AuthService {
 		return `https://api.intra.42.fr/oauth/authorize?client_id=${params.client_id}&redirect_uri=${params.redirect_uri}&response_type=${params.response_type}`;
 	}
 
-	async connect42(token: string, req: Request) {
+	async connect42(token: string, req: Request, token_2fa: string) {
 		const axios = require('axios');
 
 		const tokenRequestData = {
@@ -109,11 +119,90 @@ export class AuthService {
 		// else log in
 		const credential = await this.usersService.getCredential(user.UserID);
 		if (!(await this.credentialsService.compare("", credential))) {
-			console.log('failed');
 			throw new UnauthorizedException();
 		}
-		console.log('success');
+		const speakeasy = require('speakeasy');
+		if (user.has_2fa) {
+			if (!token_2fa) throw new HttpException("2FA Token is missing.", HttpStatus.BAD_REQUEST);
+			if (!speakeasy.totp.verify({
+				secret: credential.token_2fa,
+				encoding: 'base32',
+				token: token_2fa
+			})) throw new HttpException("2FA Invalid.", HttpStatus.BAD_REQUEST);
+		}
 		const payloadToken: accessToken = {id: user.UserID};
 		return await this.jwtService.signAsync(payloadToken);
+	}
+
+	/** * * * * * * * * * * * * * * **/
+
+	/**
+	 * generate a secret key for 2FA and return the secret and the img
+	 * @param user the user to update
+	 * @returns {img: string}
+	 */
+	async generate2FA(user: UserEntity) {
+		if (user.has_2fa) throw new HttpException("2fa already enabled.", HttpStatus.BAD_REQUEST)
+
+		const cred = await this.usersService.getCredential(user.UserID);
+		const speakeasy = require('speakeasy');
+		const secret = speakeasy.generateSecret({length: 20, name: "Pong Pod " + user.UserID});
+
+		cred.token_2fa = secret.base32;
+		cred.save();
+
+		return {img: secret.otpauth_url};
+	}
+
+	/**
+	 * check if the token is valid
+	 * @param token the token to check
+	 * @param user the user to update if the 2fa is valid
+	 * @returns {boolean}
+	 */
+	async check2FA(token: string, user: UserEntity) {
+		const cred = await this.usersService.getCredential(user.UserID);
+		if (cred.token_2fa === null) throw new HttpException("No 2fa Generated.", HttpStatus.BAD_REQUEST)
+
+		token = token.substring(0, 6);
+
+		const speakeasy = require('speakeasy');
+		if (!speakeasy.totp.verify({
+			secret: cred.token_2fa,
+			encoding: 'base32',
+			token
+		})) return false;
+
+		user.has_2fa = true;
+		user.save();
+		return true;
+	}
+
+	/**
+	 * disable the 2fa
+	 * @param user the user to update
+	 * @returns {boolean}
+	 */
+	async disable2FA(token: string, user: UserEntity) {
+		const cred = await this.usersService.getCredential(user.UserID);
+
+		if (!user.has_2fa) throw new HttpException("2fa already disabled.", HttpStatus.BAD_REQUEST)
+		if (!cred.token_2fa) throw new HttpException("No 2fa Generated.", HttpStatus.BAD_REQUEST)
+
+		token = token.substring(0, 6);
+		const speakeasy = require('speakeasy');
+
+		if (!speakeasy.totp.verify({
+			secret: cred.token_2fa,
+			encoding: 'base32',
+			token
+		})) return false;
+
+		cred.token_2fa = null;
+		cred.save();
+		user.has_2fa = false;
+		user.save();
+
+		return true;
 	}
 }

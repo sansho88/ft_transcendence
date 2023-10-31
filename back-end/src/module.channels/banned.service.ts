@@ -14,7 +14,7 @@ export class BannedService {
 	}
 
 	async create(user: UserEntity, channel: ChannelEntity, duration: number) {
-		let endTime = null;
+		let endTime: null | Date = null;
 		if (duration) {
 			endTime = new Date();
 			endTime.setUTCHours(endTime.getHours() + 2);
@@ -33,12 +33,12 @@ export class BannedService {
 		let lst = await this.bannedRepository.find();
 		if (!channel)
 			return lst;
-		return lst.filter(ban => ban.channel.channelID == channel.channelID)
+		return lst.filter(ban => ban.channel.channelID === channel.channelID)
 	}
 
 	async findOne(banID: number) {
 		const ban = await this.bannedRepository.findOneBy({bannedID: banID});
-		if (ban == null)
+		if (ban === null)
 			throw new BadRequestException('This Ban ID is not in use (possibly already pardon or not banned yet)');
 		return ban;
 	}
@@ -47,7 +47,7 @@ export class BannedService {
 		const bans = await this.findAll();
 		const now = new Date();
 		now.setHours(now.getHours() + 2);
-		const pardons = bans.filter(ban => ban.endTime < now && ban.endTime != null)
+		const pardons = bans.filter(ban => ban.endTime < now && ban.endTime !== null)
 		pardons.map(pardon => {
 			pardon.remove();
 		})

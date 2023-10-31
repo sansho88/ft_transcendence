@@ -1,6 +1,8 @@
+@import "../../app/globals.css";
 
 /*main parent component*/
 .chat_master {
+  inline-size: fit-content;
   background: rgba(0, 0, 0, 0.27);
   border: 0.2rem rgba(0, 0, 0, 0.15);
   border-style: inherit ;
@@ -9,11 +11,13 @@
   display: flex;
   position: absolute;
   width: 21%;
+  min-width: 21vw;
   height: 42vh;
   align-items: flex-end;
   bottom: 2rem;
   right: 0.25rem;
   margin-right: 0.5vw;
+  z-index: 0;
 
 }
 
@@ -63,22 +67,38 @@
 
 /*main parent channel component*/
 .chat_channel_buttons {
-  text-align: center;
-  align-items: flex-end;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: absolute;
   height: 10%;
   width: 30%;
-  padding-top: 0.4rem;
-
+  padding: 0.4rem 0 0 0.4rem;
   top: 0;
-
   font-weight: bold;
   font-size: 0.85rem;
   background: rgba(0, 0, 0, 0.27);
-  border-radius: 8px 0 0 0;
+  border-radius: 13px 0 0 0;
   border-bottom: rgba(0, 0, 0, 0.27) solid 2px;
+  z-index: 1;
+}
 
+.chat_channel_buttons button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+}
 
+.chat_channel_buttons img {
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.chat_channel_buttons button:last-child img {
+  align-self: flex-end;
 }
 
 .channel{
@@ -111,6 +131,10 @@
 .chat_channel_list_element_mp {
   color: #00ffff;
   font-style: italic;
+}
+
+.chat_channel_list_element_owner {
+  color: #ffc2a8;
 }
 
 #invite_options{
@@ -172,9 +196,36 @@
 
 
 
+.user_private_list {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  width: auto;
+  height: auto;
+}
+/* Pour Chrome, Safari et Opera */
+.user_private_list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pour Firefox */
+.user_private_list {
+  scrollbar-width: none;
+}
+
+/* Pour IE et Edge */
+.user_private_list {
+  -ms-overflow-style: none;
+}
+
+
+
+
 
 /* pour le chat message list component= contient la liste des message (list de chat_message_list_block)*/
 .chat_message_list {
+  word-wrap: break-word;
   display: flex;
   flex-direction: column;
   height: 95%; /* BURK , not responsive*/
@@ -308,6 +359,31 @@
   100% { opacity: 1; }
 }
 
+.chat_new_channel_popup_inviteChan{
+  color: darkgrey;
+  background: rgba(0, 0, 0, 0.85);
+  border: 0.2rem rgba(0, 0, 0, 0.15);
+  border-style: inherit ;
+  box-shadow: 3px 4px 10px  rgba(0, 0, 0, 0.5);
+  border-radius: 1rem;
+  display: inline-block;
+  position: absolute; 
+  width: auto;
+  min-width: 12ch;
+  height: auto;
+  /* bottom: 5vh; */
+  left: 0;
+
+
+  margin-right: 0.5vw;
+  text-align: left;
+  padding: 0.5em 1em;
+
+  animation: fadeIn 500ms;
+  z-index: 10;
+}
+
+
 .chat_new_channel_popup{
   color: darkgrey;
   background: rgba(0, 0, 0, 0.52);
@@ -330,6 +406,7 @@
   padding-left: 1em;
 
   animation: fadeIn 500ms;
+  z-index: 1;
 }
 
 #channelNameInput{
@@ -342,7 +419,7 @@
   padding-left: 1ch;
 }
 
-#channelPasswordInput{
+.channelPasswordInput{
   display: inline-block;
   color:darkgrey;
   width: 80%;
@@ -363,7 +440,7 @@
   color:#07C3FF ;
 }
 
-#button_showPassword{
+.button_showPassword{
   display: inline-block;
   margin: 0.2rem;
   padding-left: 0.2rem;
@@ -372,10 +449,33 @@
 }
 
 #button_select_channel_mode{
+  width: 90%;
   padding: 0.32rem 0.59rem;
   margin: 0.3rem;
 
   background-color: rgba(66, 66, 66, 0.36);
   border: 1px solid black;
   border-radius: 4px;
+}
+
+#make_popup_disappear{
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+}
+
+#chat_users_list {
+  position: fixed;
+  bottom: 45vh;
+  right: 2vh;
+  max-height: 21vh;
+  overflow-y: auto;
+  padding-inline: 2vh;
+  text-align: left;
+  max-width: 20%;
 }

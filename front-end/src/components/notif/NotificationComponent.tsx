@@ -21,46 +21,6 @@ const Notif : React.FC = () => {
     const [notified, setNotified] = useState(false);
     const {userContext, setUserContext} = useContext(UserContext);
 
-
-
-   /* socketRef.current?.on('gameFind', (data: PODGAME.IGameSessionInfo) => {
-        let player2;
-        if (!data.player2)
-            player2 = "yourself";
-        else
-            player2 = data.player2.nickname;
-        NotificationManager.info(`You'll play against ${player2}`, "GAME FOUND");
-    }
-    );
-
-    socketRef.current?.on("endgame", (data) => {
-        NotificationManager.success(JSON.stringify(data), "GAME OVER");
-
-    })*/
-/*
-    useEffect(() => {
-        let tmpUser = userContext;
-       /!* if (!notified)
-        {
-            socketRef.current?.on('gameFind', (data: PODGAME.IGameSessionInfo) => {
-                let player2;
-                if (!data.player2)
-                    player2 = "yourself";
-                else
-                    player2 = data.player2.nickname;
-                NotificationManager.info(`You'll play against ${player2}`, "GAME FOUND");
-
-            })
-            setNotified(true);
-        }
-*!/
-
-        socketRef.current?.on("endgame", (data) => {
-            NotificationManager.success(JSON.stringify(data), "GAME OVER");
-
-        })
-    })*/
-
         return (
             <div>
                 <NotificationContainer enterTimeout={800} leaveTimeout={500}/>

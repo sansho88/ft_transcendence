@@ -26,7 +26,6 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const channelsServer2 = async () => {
-    
         return apiReq.getApi.getChannels();
     }
 
@@ -38,14 +37,9 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
             setIsLoading(true)
         }
         channelsServer2()
-        console.log('channel serv 2= ' + JSON.stringify(channelServer3.data));
-        console.log('channels ******= ' + JSON.stringify(channels));
     }, [])
 
 
-        useEffect(() => {
-            console.log('channelServer3 a changé : ', JSON.stringify(channelServer3.data));
-        }, [channelServer3]);
 
     useEffect(() => {
         if (channelName.length < 3)
@@ -81,7 +75,7 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
     return (
         <>
             {!isChannelJoined && isLoading && 
-            <div className={className}>
+            <div className={`${className} max-h-72 overflow-y-auto  chat_message_list_sub`}>
                 <h1 id={"popup_title"}>JOIN A CHANNEL</h1>
                 <ChatChannelList  className={'chat_channel_block'}
                           socket={socketChat}
@@ -91,44 +85,6 @@ const JoinChannelSettings = ({className, channels, channelsServer, socketChat, s
                           channelsServer={channelServer3.data}
                           isServerList={true} 
                           />
-                {/* <ChatChannelList  */}
-                {/* <form>
-                    <label>
-                        <input id={"channelNameInput"}
-                               type={"text"}
-                               autoFocus={true}
-                               inputMode={"text"}
-                               minLength={3}
-                               maxLength={12}
-                               placeholder={" Name"}
-                               value={channelName}
-                               onChange={handleOnNameChange}/>
-                    </label>
-                    <label id={"visibility_block"}>Password required ?
-                        <label>
-                                    <input id={"channelPasswordInput"}
-                                           type={showPassword}
-                                           inputMode={"text"}
-                                           minLength={3}
-                                           maxLength={12}
-                                           value={channelPassword}
-                                           placeholder={" Password"}
-                                           autoFocus={true}
-                                           onChange={handleOnPasswordChange}/>
-                                    <Button id={"button_showPassword"} image={showPassword == "password" ? "/eye-off.svg" : "/eye-show.svg"}
-                                            onClick={handleShowPassword}
-                                            alt={"Show password button"}/>
-                        </label>
-                    </label>
-                    <button onClick={handleSubmit} disabled={!areSettingsValids}>
-                        {areSettingsValids && <Image
-                            src="/confirm.svg"
-                            alt="add new channel button"
-                            width={32}
-                            height={32}
-                        />}
-                    </button>
-                </form> */}
             </div>}
         </>
     )

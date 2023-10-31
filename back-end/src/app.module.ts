@@ -1,26 +1,25 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import {Module, OnApplicationBootstrap} from '@nestjs/common';
+import {ConfigModule} from '@nestjs/config';
+import {AppController} from './app.controller';
+import {AppService} from './app.service';
 import * as process from 'process';
-import { UsersModule } from './module.users/users.module';
-import { AuthModule } from './module.auth/auth.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from './entities/user.entity';
-import { ChannelEntity } from './entities/channel.entity';
-import { MessageEntity } from './entities/message.entity';
+import {UsersModule} from './module.users/users.module';
+import {AuthModule} from './module.auth/auth.module';
+import {TypeOrmModule} from '@nestjs/typeorm';
+import {UserEntity} from './entities/user.entity';
+import {ChannelEntity} from './entities/channel.entity';
+import {MessageEntity} from './entities/message.entity';
 import {
 	ChannelCredentialEntity,
 	UserCredentialEntity,
 } from './entities/credential.entity';
-import { GameEntity } from './entities/game.entity';
-import { ChannelModule } from './module.channels/channel.module';
-import { InviteEntity } from './entities/invite.entity';
-import { MuteEntity } from './entities/mute.entity';
-import { BannedEntity } from './entities/banned.entity';
-import { WebsocketGatewayGlobal } from './websocket/websocket.gateway';
-import { GameController } from './module.game/game.controller';
-import { GameModule } from './module.game/game.module';
+import {GameEntity} from './entities/game.entity';
+import {ChannelModule} from './module.channels/channel.module';
+import {InviteEntity} from './entities/invite.entity';
+import {MuteEntity} from './entities/mute.entity';
+import {BannedEntity} from './entities/banned.entity';
+import {WebsocketGatewayGlobal} from './websocket/websocket.gateway';
+import {GameModule} from './module.game/game.module';
 
 @Module({
 	imports: [
@@ -46,14 +45,25 @@ import { GameModule } from './module.game/game.module';
 				ChannelCredentialEntity,
 				GameEntity,
 			],
-			synchronize: true, // true -> will create the Table on db if class not there
+			// synchronize: true, // true -> will create the Table on db if class not there
+			synchronize: false,
 		}),
 		UsersModule,
 		AuthModule,
 		ChannelModule,
 		GameModule,
 	],
-	controllers: [AppController, GameController],
+	controllers: [AppController],
 	providers: [AppService, WebsocketGatewayGlobal],
 })
-export class AppModule {}
+export class AppModule implements OnApplicationBootstrap {
+	constructor(
+		private readonly appService: AppService,
+	) {
+	}
+
+	async onApplicationBootstrap() {
+		const admin = await this.appService.createAdmin();
+		this.appService.createGlobalChannel(admin);
+	}
+}

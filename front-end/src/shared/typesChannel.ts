@@ -12,25 +12,12 @@ export enum EChannelType {
 	DIRECT,
 }
 
-// export interface IChannel {
-//   channelID: number;
-//   name: string;
-//   type: number;
-//   ownerUserID: number;
-//   ownerLogin?: string;
-// }
-
 export interface IChannel {
   channelID: number;
   owner: IUser;
   name: string;
   type: EChannelType;
-  // adminList: User[];
-  // userList: User[];
-  // messages: Message[];
-  // inviteList: Invite[];
-  // muteList: Mute[];
-  // bannedList: Banned[];
+  password?: string;
 }
 
 export interface IChannelMessage {
@@ -41,11 +28,4 @@ export interface IChannelMessage {
 	content: string;
 }
 
-// //DTO recup
-
-// export interface ICreateChannelDTOPipe {
-// 	name: string;
-// 	privacy: boolean;
-// 	password?: string;
-// }
 

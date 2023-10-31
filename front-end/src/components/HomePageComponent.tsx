@@ -1,37 +1,74 @@
 import Profile from "@/components/ProfileComponent";
-import Stats from "@/components/StatsComponent";
 import Button from "@/components/CustomButtonComponent";
 import UserList from "@/components/UserListComponent";
 import Game from "@/components/game/Game";
-import React, {useContext, useEffect, useRef} from "react";
-import {LoggedContext, SocketContextGame, UserContext} from "@/context/globalContext";
-import {EStatus} from "@/shared/types";
-import * as apiReq from "@/components/api/ApiReq";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import {LoggedContext, SocketContextChat, SocketContextGame, UserContext} from "@/context/globalContext";
+import {authManager} from "@/components/api/ApiReq";
 import {useRouter} from "next/navigation";
 import {getUserMe} from "@/app/auth/Auth";
-import {authManager} from "@/components/api/ApiReq";
+import {NotificationManager} from 'react-notifications';
 import NotifComponent from "@/components/notif/NotificationComponent";
 import Button2FA from "@/components/2FA/2FAComponent";
-import '@/components/chat/chat.css'
 import ChatMaster from "./chat/ChatMaster";
-import {wsGameRoutes} from "@/shared/routesApi";
 import LoadingComponent from "@/components/waiting/LoadingComponent";
+import MatchHistory from "@/components/MatchHistoryComponent";
+import Leaderboard from "@/components/LeaderboardComponent";
+import '@/components/chat/chat.css';
+import {INotif} from "@/shared/types";
+import { Socket } from "socket.io";
 
-interface HomePageProps {
-    className: unknown
-}
 
-const HomePage = ({className}: HomePageProps) => {
+const HomePage = () => {
     const {userContext, setUserContext} = useContext(UserContext);
     const {setLogged} = useContext(LoggedContext);
     const router = useRouter();
     const tokenRef = useRef<string>('');
-    const socket      = useContext(SocketContextGame);
-    const socketRef   = useRef(socket);
+    const [showMatchHistory, setMatchHistoryVisible] = useState(false);
+    const [showLeaderboard, setLeaderboardVisible] = useState(false);
+    const socketChat = useContext(SocketContextChat);
+    const socketGame = useContext(SocketContextGame);
+
+    const [is2faVisible, setIs2faVisible] = useState<boolean>(false)
 
 
+    function handleNotif(data: INotif) {
+        switch (data.type) {
+            case "success":
+                NotificationManager.success(data.message, data.title, data.time);
+                break;
+            case "error":
+                NotificationManager.error(data.message, data.title, data.time);
+                break;
+            case "warning":
+                NotificationManager.warning(data.message, data.title, data.time);
+                break;
+            case "info":
+                NotificationManager.info(data.message, data.title, data.time);
+                break;
+            default:
+                console.error("Unknown notif type received: " + JSON.stringify(data));
+        }
+    }
+
+    function handleListenNotifON() {
+        socketChat?.on("notif", (data: INotif) => {
+            handleNotif(data);
+        })
+        socketGame?.on("notif", (data: INotif) => {
+            handleNotif(data);
+        })
+    }
+    function handleListenNotifOFF() {
+        socketChat?.off("notif", (data: INotif) => {
+            handleNotif(data);
+        })
+        socketGame?.off("notif", (data: INotif) => {
+            handleNotif(data);
+        })
+    }
+    
     useEffect(() => {
-        //authManager.setBaseURL('http://' + window.location.href.split(':')[1].substring(2) + ':8000/api/');
         const token = localStorage.getItem("token");
         if (!token)
             router.push("/auth");
@@ -49,28 +86,23 @@ const HomePage = ({className}: HomePageProps) => {
         }
         localStorage.setItem('userContext', JSON.stringify(userContext));
 
-    })
+        handleListenNotifON();
+        return(() => {
+            window.location.reload();
+            handleListenNotifOFF();
+            
+        })
+    }, []);
 
-
-    socketRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
-        let updateUser = userContext;
-        if (updateUser && (newStatus != updateUser.status))
+    
+    useEffect(() => {
+        if (is2faVisible)
         {
-            updateUser.status = newStatus;
-            apiReq.putApi.putUser(updateUser)
-                .catch((e) => {
-
-                     console.error(e)
-                })
-            setUserContext(updateUser);
+            setMatchHistoryVisible(false)
+            setLeaderboardVisible(false);
         }
-    });
-    /*
-    socketRef.current?.on("connect", () =>{
-        let updateUser = userContext;
-        updateUser.status = EStatus.Online;
-
-    })*/
+    
+    },[is2faVisible])
 
     return (
         <>
@@ -78,18 +110,27 @@ const HomePage = ({className}: HomePageProps) => {
             <main className="main-background">
 
                     <Profile className={"main-user-profile"}
-                             nickname={userContext.nickname}
-                             login={userContext.login} status={userContext.status }
-                             avatar_path={userContext.avatar_path}
-                             UserID={userContext.UserID }
-                             isEditable={true} has_2fa={false}>
+                             user={userContext}
 
-                        <Stats level={42} victories={112} defeats={24} rank={1}></Stats>
-                        <Button image={"/history-list.svg"} onClick={() => console.log("history list button")} alt={"Match History button"}/>
-                        <Button2FA hasActive2FA={userContext.has_2fa}>2FA</Button2FA>
+                             isEditable={true} avatarSize={"big"} showStats={true} isMainProfile={true} >
+                        <Button image={"/history-list.svg"} onClick={() => {
+                            setMatchHistoryVisible(!showMatchHistory);
+                            setLeaderboardVisible(false);
+                            setIs2faVisible(false);
+                        }} alt={"Match History button"} title={"Match History"}/>
+                        <Button image={"/podium.svg"} onClick={() => {
+                            setLeaderboardVisible(!showLeaderboard);
+                            setIs2faVisible(false);
+                            setMatchHistoryVisible(false);
+                        }} alt={"Leaderboard button"} title={"Leaderboard"} margin={"0 0 0 2ch"}/>
+              
+                        <Button2FA hasActive2FA={userContext.has_2fa} setterVisibilty={setIs2faVisible} visibility={is2faVisible}>2FA</Button2FA>
                     </Profile>
 
-                <UserList className={"friends"}/>
+                {showMatchHistory && <MatchHistory/>}
+                {showLeaderboard &&  <Leaderboard/>}
+
+                <UserList className={"friends"} userListIdProperty={"friends_user_list"} avatarSize={"medium"} showUserProps={true} userID={userContext.UserID}/>
                 <Button className={"logout"} image={"/logout.svg"} onClick={() => {
                     localStorage.clear();
                     router.push("/auth");
@@ -98,7 +139,7 @@ const HomePage = ({className}: HomePageProps) => {
                 } alt={"Logout button"}/>
 
                 <div className={"game"}>
-                    <Game className={"game"}/>
+                    <Game className={"game"} token={tokenRef.current}/>
                 </div>
                <ChatMaster className={'chat_master'} token={tokenRef.current} userID={userContext.UserID}/>
                 <div className={"absolute bottom-0 left-0"}><NotifComponent /></div>

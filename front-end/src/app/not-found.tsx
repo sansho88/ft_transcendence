@@ -1,11 +1,16 @@
-import Link from 'next/link'
- 
 export default function NotFound() {
+    const errorImgs = [
+        "/images/404a.jpg",
+        "/images/404b.jpg",
+        "/images/404c.jpg"
+    ]
+
+    const randomImg = errorImgs[Math.floor(Math.random() * errorImgs.length)];
   return (
-    <div className='justify-center items-center font-light flex h-screen text-orange-700'>
-			<div className='absolute top-[40%] left-[37%] font-extrabold text-5xl text-cyan-500'>PODPONG</div>
-      <h1>404</h1>
-      <h2>: Not Found</h2>
+    <div className={"welcome"}>
+      <div className={"welcome-title"}>404</div>
+      <div className={"welcome-msg"}>Not Found</div>
+        <img src={randomImg} alt="404" className={"welcome-img"} width={"60%"} height={"60%"} style={{marginInline:"auto"}}/>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import {BadRequestException, Injectable} from '@nestjs/common';
+import {BadRequestException, forwardRef, Inject, Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {ChannelEntity, ChannelType} from '../entities/channel.entity';
@@ -9,13 +9,17 @@ import {ChannelCredentialService} from './credential.service';
 import {ChangeChannelDTOPipe, JoinChannelDTOPipe} from '../dto.pipe/channel.dto';
 import {BannedService} from "./banned.service";
 import {MutedService} from "./muted.service";
+import {ChatGateway} from "./chat.ws";
 
 @Injectable()
 export class ChannelService {
 	constructor(
 		@InjectRepository(ChannelEntity)
 		private channelRepository: Repository<ChannelEntity>,
+		@Inject(forwardRef(() => UsersService))
 		private userService: UsersService,
+		@Inject(forwardRef(() => ChatGateway))
+		private chatGateway: ChatGateway,
 		private channelCredentialService: ChannelCredentialService,
 		private bannedService: BannedService,
 		private mutedService: MutedService,
@@ -51,19 +55,19 @@ export class ChannelService {
 	}
 
 	async findAll(relations?: string[]) {
-		return this.channelRepository.find({relations});
+		return this.channelRepository.find({relations, where: {archive: false}});
 	}
 
 	async findOne(id: number, relations?: string[], canBeMP?: boolean) {
-		let channel;
+		let channel: ChannelEntity;
 		if (canBeMP != true)
 			channel = await this.channelRepository.findOne({
-				where: {channelID: id, mp: false},
+				where: {channelID: id, mp: false, archive: false},
 				relations,
 			});
 		else
 			channel = await this.channelRepository.findOne({
-				where: {channelID: id},
+				where: {channelID: id, archive: false},
 				relations,
 			});
 		if (channel == null)
@@ -72,49 +76,31 @@ export class ChannelService {
 	}
 
 	async joinChannel(user: UserEntity, channel: ChannelEntity) {
-		this.getList(channel).then(async (lst) => {
-			channel.userList = lst;
-			channel.userList.push(user);
-			await channel.save();
-			return channel;
-		});
+		channel.userList.push(user);
+		await channel.save();
+		return channel;
 	}
 
 	async leaveChannel(channel: ChannelEntity, user: UserEntity) {
-		const lst = await this.getList(channel)
-		channel.userList = lst.filter(usr => usr.UserID != user.UserID)
+		channel.userList = channel.userList.filter(usr => usr.UserID != user.UserID)
 		return await channel.save();
 	}
 
 	/**
 	 * return true if User in channel
-	 * @param user
-	 * @param chan
 	 */
-	async userInChannel(user: UserEntity, chan: ChannelEntity) {
-		return this.getList(chan).then((userList) => {
-			return userList.find((usr) => usr.UserID == user.UserID);
-		});
-	}
-
-	async getList(target: ChannelEntity) {
-		return this.channelRepository
-			.findOne({
-				where: {channelID: target.channelID},
-				relations: {userList: true},
-			})
-			.then((chan) => chan.userList);
+	async userInChannel(user: UserEntity, channel: ChannelEntity) {
+		return channel.userList.find(usr => usr.UserID == user.UserID);
 	}
 
 	async isUserOnChan(channel: ChannelEntity, user: UserEntity) {
-		const list = await this.getList(channel);
-		return !!list.find((value) => value.UserID == user.UserID);
+		return !!channel.userList.find((value) => value.UserID == user.UserID);
 	}
 
 	async getMessages(target: ChannelEntity) {
 		return this.channelRepository
 			.findOne({
-				where: {channelID: target.channelID},
+				where: {channelID: target.channelID, archive: false},
 				relations: ['messages', 'messages.author'],
 			}).then((chan) => chan.messages);
 	}
@@ -122,7 +108,7 @@ export class ChannelService {
 	async getAllMessages(target: ChannelEntity) {
 		return await this.channelRepository
 			.findOne({
-				where: {channelID: target.channelID},
+				where: {channelID: target.channelID, archive: false},
 				relations: ['messages', 'messages.author'],
 			})
 			.then((chan) => chan.messages);
@@ -130,7 +116,7 @@ export class ChannelService {
 
 	async checkCredential(data: JoinChannelDTOPipe) {
 		const channel = await this.channelRepository.findOne({
-			where: {channelID: data.channelID, mp: false},
+			where: {channelID: data.channelID, mp: false, archive: false},
 			relations: ['credential'],
 		});
 		const credential = channel.credential;
@@ -140,9 +126,9 @@ export class ChannelService {
 			case ChannelType.PROTECTED:
 				return this.channelCredentialService.compare(data.password, credential);
 			case ChannelType.PRIVATE:
-				return false; // todo: redo with invite !
+				return false;
 			case ChannelType.DIRECT:
-				return false; // todo: WIP
+				return false;
 		}
 	}
 
@@ -155,7 +141,7 @@ export class ChannelService {
 		if (!(await this.userInChannel(target, channel)))
 			throw new BadRequestException('The target isn\'t part of this Channel');
 		channel = await this.channelRepository.findOne({
-			where: {channelID: channel.channelID, mp: false},
+			where: {channelID: channel.channelID, mp: false, archive: false},
 			relations: ['adminList'],
 		});
 		channel.adminList.push(target);
@@ -166,8 +152,8 @@ export class ChannelService {
 	async removeAdmin(target: UserEntity, channel: ChannelEntity) {
 		if (!(await this.userInChannel(target, channel)))
 			throw new BadRequestException('The target isn\'t part of this Channel');
-		if (target.UserID == channel.owner.UserID)
-			throw new BadRequestException('The target is the ChannelOwner and cannot lost his Administrator Power');
+		// if (target.UserID == channel.owner.UserID)
+		// 	throw new BadRequestException('The target is the ChannelOwner and cannot lost his Administrator Power');
 		channel.adminList.findIndex(
 			(usr) => usr.UserID == target.UserID,
 		);
@@ -197,7 +183,7 @@ export class ChannelService {
 			throw new BadRequestException('The target is the ChannelOwner and cannot be mute');
 		if (await this.userIsMute(channel, target))
 			throw new BadRequestException('The target is already mutes and cannot be mute again');
-		await this.mutedService.create(target, channel, duration);
+		return await this.mutedService.create(target, channel, duration);
 	}
 
 	async userIsMute(channel: ChannelEntity, usr: UserEntity) {
@@ -211,7 +197,7 @@ export class ChannelService {
 		const id1: number = Math.min(user1.UserID, user2.UserID);
 		const id2: number = Math.max(user1.UserID, user2.UserID);
 		const mp = this.channelRepository.create({
-			name: `.mp${id1}.${id2}`,
+			name: `mp.${id1}.${id2}`,
 			userList: [user1, user2],
 			type: ChannelType.DIRECT,
 			mp: true,
@@ -221,11 +207,10 @@ export class ChannelService {
 	}
 
 	async getmp(user1: UserEntity, user2: UserEntity) {
-		// const chanlst = await this.findAll([]
 		const id1: number = Math.min(user1.UserID, user2.UserID);
 		const id2: number = Math.max(user1.UserID, user2.UserID);
 		const channel = await this.channelRepository.findOne({
-			where: {mp: true, name: `mp.${id1}.${id2}`},
+			where: {mp: true, name: `mp.${id1}.${id2}`, archive: false},
 			relations: ['userList'],
 		});
 		if (!channel)
@@ -248,8 +233,28 @@ export class ChannelService {
 		return channel.save();
 	}
 
-	async getJoinedChannelList(user: UserEntity): Promise<ChannelEntity[]> {
-		const ret: UserEntity =  await this.userService.findOne(user.UserID, ['channelJoined']);
-			return ret.channelJoined;
+	async getJoinedChannelList(user: UserEntity) {
+		const ret = await this.userService.findOne(user.UserID, ['channelJoined']);
+		return ret.channelJoined;
+	}
+
+	async remove(channel: ChannelEntity) {
+		channel.archive = true;
+		await channel.save();
+		return channel;
+	}
+
+	async checkBlock(user: UserEntity, channel: ChannelEntity) {
+		if (!channel.mp)
+			return false;
+		const targetID = channel.userList.find(usr => usr.UserID != user.UserID).UserID;
+		const target = await this.userService.findOne(targetID, ['blocked']);
+		return !!target.blocked.find(usr => usr.UserID == user.UserID)
+	}
+
+	async getGlobalChannel() {
+		const admin = await this.userService.getAdminUser();
+		const channelLst = await this.findAll();
+		return channelLst.find(channel => !channel.mp && channel.owner.UserID == admin.UserID);
 	}
 }

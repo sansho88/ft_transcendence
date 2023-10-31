@@ -24,6 +24,17 @@ export enum EInfoType {
   gameFind,
 }
 
+export enum EStatusFrontGame {
+  idle,
+  modChoice,
+  matchmakingRequest,
+  gameSessionFind,
+  waiting,
+  countdown,
+  gameInProgress,
+  endOfGame,
+  challengeRequest
+}
 export interface ISizeGameElements {
   tableServerSize   : IVector2D; //sert a calculer le coef d'agrandissement ou reduction cote front par rapport a la taille d'affichage
   ballSize          : IVector2D;
@@ -41,7 +52,17 @@ export interface IGameSessionInfo {
   launchTime        : Date;
   startInitElement  : ISizeGameElements;
   ballIsHidden      : boolean;
-  // spectators: Partial<IUser>[];
+  gameMod           : EGameMod;
+}
+
+
+export interface IChallengeManager{
+  
+}
+
+export interface IChallengeStepDTO {
+  challengerequested: boolean;
+  
 }
 
 export enum EKeyEvent {
@@ -68,8 +89,6 @@ export interface IPodTable {
   ballIsHidden      : boolean;
   }
 
-
-//vecteur unitaire pour direction de la balle
 export interface IDirectionVec2D {
     dx                 : number;
     dy                 : number;
@@ -102,16 +121,4 @@ export interface IGamePlayerMove {
 export interface userInfoSocket {
 	user              : Partial<IUser>;
 	socket            : Socket;
-}
-
-export class Stack<T> {
-	private elements: T[] = [];
-
-	push(element: T): void {    this.elements.push(element);	}
-	pop(): T | undefined {	    return this.elements.pop();	}
-	peek(): T | undefined {	    return this.elements[this.elements.length - 1];	}
-	isEmpty(): boolean {	      return this.elements.length === 0;}
-	size(): number {            return this.elements.length;}
-  toArray(): T[] {            return [...this.elements];
-  }
 }

@@ -1,34 +1,21 @@
 'use client'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { UserContext, SocketContextGame, LoggedContext} from '@/context/globalContext'
-import { useRouter } from 'next/navigation'
 import { IUser } from '@/shared/types'
 import * as PODGAME from '@/shared/typesGame'
+import { EStatusFrontGame, IChallengeStepDTO }from '@/shared/typesGame'
 import * as apiRoutes from '@/shared/routesApi'
 import * as ClipLoader from 'react-spinners'
 import SwitcherTheme from '@/components/game/SwitcherTheme'
-import {NotificationContainer, NotificationManager} from 'react-notifications';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
+import ChallengeList from './ChallengeList'
 
-enum EStatusFrontGame {
-  idle,
-  modChoice,
-  matchmakingRequest,
-  gameSessionFind,
-  waiting,
-  countdown,
-  gameInProgress,
-  endOfGame
-}
-
-export default function Game({className}: {className: string}) {
+export default function Game({className, token}: {className: string, token: string}) {
   const socket      = useContext(SocketContextGame);
   const socketRef   = useRef(socket);
   
-  // const {logged}    = useContext(LoggedContext);
   const userLogged  = useContext(UserContext);
-  const {logged, setLogged} = useContext(LoggedContext);
-
-  // const router      = useRouter();
+  const {logged} = useContext(LoggedContext);
 
 
   const tableRef    = useRef<HTMLDivElement>(null);
@@ -36,13 +23,14 @@ export default function Game({className}: {className: string}) {
   const pad2Ref     = useRef<HTMLDivElement>(null);
   const ballRef     = useRef<HTMLDivElement>(null);
 
-  const [currentGameTheme, setCurrentGameTheme] = useState<string>('')
+  const [currentGameTheme, setCurrentGameTheme] = useState<string | null >(null)
 
 
 
   const [nameGameSession, setNameGameSession] = useState<string>("");
   const [stepCurrentSession, setStepCurrentSession] = useState<EStatusFrontGame>(EStatusFrontGame.idle);
   const [remoteEvent, setRemoteEvent] = useState<string>("");
+
   
   const [p1Size, setP1Size]             = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default avant connection
   const [p2Size, setP2Size]             = useState<PODGAME.IVector2D>({x: 10, y: 60}); //taille par default avant connection
@@ -66,15 +54,19 @@ export default function Game({className}: {className: string}) {
 
   const gameMod                         = useRef<PODGAME.EGameMod>(PODGAME.EGameMod.classic);
 
-
-//   function changeTheme(themeName) {
-//     setCurrentGameTheme(themeName);
-// }
-
-
   useEffect(( ) => {
-    if (logged === true)
-      socketRef.current?.connect();
+    if (logged === true) {
+      if(socketRef.current){
+        if (!token){
+          const tokentmp = localStorage.getItem('token');
+          if (tokentmp)
+            token = tokentmp;
+        }
+        
+        socketRef.current.auth = { type: `Bearer`, token: `${token}` };
+        socketRef.current.connect();
+      }
+    }
     else
       socketRef.current?.disconnect();
   }, [logged])
@@ -83,9 +75,6 @@ export default function Game({className}: {className: string}) {
 	  if (nameGameSession === "") {
 	    return;
 	  }
-	  console.log(
-	    `Vous venez de rejoindre la session de jeu : ${nameGameSession}\nLe match va bientot commencer`
-	  );
     setStepCurrentSession(EStatusFrontGame.gameSessionFind);
 	}, [nameGameSession]);
 	
@@ -102,7 +91,6 @@ export default function Game({className}: {className: string}) {
 
     const reset = () => {
       setStepCurrentSession(EStatusFrontGame.idle);
-      console.log(`WS RESET`);
       resetPositionPaddle();
       setInfoMessage(titleGame);
       setScoreP1(0);
@@ -111,22 +99,23 @@ export default function Game({className}: {className: string}) {
       setUserP2({});
     }
 
+
 	useEffect(() => {
 
 
     if (!socketRef.current?.connected) {
-      console.log('CGame: socket non connecter, se connect');
   
       socketRef.current?.on('connect', () => {
-        console.log('CGame: socket connecté YOUHOUUUUUUUU');
-        // Autres opérations à faire une fois connecté
-        
-        socketRef.current?.on('info', (data) => {
-          console.log(`WS info recu: ${JSON.stringify(data)}`);
+        socketRef.current?.on('challengeStep', (res: IChallengeStepDTO) => {
+          if (res.challengerequested)
+            setStepCurrentSession(EStatusFrontGame.challengeRequest);
+          else{ 
+            setStepCurrentSession(EStatusFrontGame.idle);
+          }
+          
         })
     
         socketRef.current?.on('infoGameSession', (data: PODGAME.IGameSessionInfo) => {
-          // tableServerCoef.current = {x: data.startInitElement.tableServerSize.x / window. //taille en x de la div parent au component}
           setNameGameSession(data.gameName);
           setUserP1(data.player1);
           setUserP2(data.player2);
@@ -134,22 +123,19 @@ export default function Game({className}: {className: string}) {
           setP1Position({x: data.startInitElement.paddleP1Pos.x, y: data.startInitElement.paddleP1Pos.y})
           setP2Position({x: data.startInitElement.paddleP2Pos.x, y: data.startInitElement.paddleP2Pos.y})
           setBallIsHidden(data.ballIsHidden)
-          console.log(`WS name session recu: ${JSON.stringify(data)}`);
+          gameMod.current = data.gameMod;
+          if (data.gameMod === PODGAME.EGameMod.trainning)
+              NotificationManager.info(`You\'ll play against yourself.\n Do your best! `, "SOLO TRAINING");
+          else
+              NotificationManager.info(`${data.player1.nickname} VS ${data.player2.nickname}`, "MATCH FOUND");
         })
     
         //client 
         socketRef.current?.on('gameFind', (data) => {
-          if (stepCurrentSession === EStatusFrontGame.matchmakingRequest) {
+          if (stepCurrentSession === EStatusFrontGame.matchmakingRequest || stepCurrentSession === EStatusFrontGame.challengeRequest) {
             setStepCurrentSession(EStatusFrontGame.gameSessionFind)
           }
-          setRemoteEvent(data.remoteEvent)
-          console.log(`WS gameFind recu: ${JSON.stringify(data)}`);
-            let player2;
-            if (!data.player2 || data.player1 == data.player2)
-                player2 = "yourself";
-            else
-                player2 = data.player2.nickname;
-            NotificationManager.info(`You'll play against ${player2}`, "GAME FOUND");
+          setRemoteEvent(data.remoteEvent);
         })
   
   
@@ -157,7 +143,6 @@ export default function Game({className}: {className: string}) {
           if (stepCurrentSession !== EStatusFrontGame.countdown)
             setStepCurrentSession(EStatusFrontGame.countdown);
           setInfoMessage(data);
-          // console.log(`WS countdown: ${JSON.stringify(data)}`);
         })
     
         socketRef.current?.on('alreadyInMatchmaking', () => {
@@ -184,31 +169,21 @@ export default function Game({className}: {className: string}) {
             setP2Position(prevState => ({
               x: prevState.x,
               y: (offsetHeight / 2)
-            }));;
+            }));
           }
-          setInfoMessage(data);
-          console.log(`WS endgame: ${JSON.stringify(data)}`);
-            NotificationManager.success(JSON.stringify(data), "GAME OVER");
+            setInfoMessage(data);
+          NotificationManager.info(data, "END OF GAME");
         })
         
         socketRef.current?.on('reset', () => {
               reset();
         })
   
-  
-  
-        socketRef.current?.on('setup', (data) => { //TODO: recup via ws le setup de la table
-          console.log(`WS setup recu: ${JSON.stringify(data)}`); //recupere taille des elements paddle et balle
-        })
-    
-  
         /*-----------------------------------------------------------------------------------------------------------*\
         |                                               TABLE UPDATE                                                  |
         /*-----------------------------------------------------------------------------------------------------------*/  
         socketRef.current?.on('updateTable', (data: PODGAME.IPodTable) => {
-          // console.log(JSON.stringify(data))
           if(tableRef.current){
-            // coefTableServer.current = {x:  tableRef.current?.offsetWidth / data.tableSize.x , y: tableRef.current?.offsetHeight / data.tableSize.y}
             calculCoefTableServer(data.tableSize);
             setP1Position({x: data.positionP1v.x * coefTableServer.current.x, y: data.positionP1v.y * coefTableServer.current.y})
             setP2Position({x: data.positionP2v.x * coefTableServer.current.x, y: data.positionP2v.y * coefTableServer.current.y})
@@ -230,8 +205,12 @@ export default function Game({className}: {className: string}) {
           }
         })
       });
-  
-      socketRef.current?.connect();
+      
+      if (socketRef.current)
+      {
+        socketRef.current.auth = { type: `Bearer`, token: `${token}` };
+        socketRef.current?.connect();
+      }
     }
     return () => {
       socketRef.current?.disconnect();
@@ -247,12 +226,10 @@ export default function Game({className}: {className: string}) {
 			const keyDownHandler = (e) => {
 				if (e.key === 'ArrowUp' && !arrowUp.current) {
 					arrowUp.current = true;
-					// console.log(`${remoteEvent.slice(-7)}: UP pressed`);
 					socketRef.current?.emit(remoteEvent, PODGAME.EKeyEvent.arrowUpPressed);
         }
 				if (e.key === 'ArrowDown' && !arrowDown.current) {
 					arrowDown.current = true;
-					// console.log(`${remoteEvent.slice(-7)}: DOWN pressed`);
 					socketRef.current?.emit(
 						remoteEvent,
 						PODGAME.EKeyEvent.arrowDownPressed,
@@ -263,7 +240,6 @@ export default function Game({className}: {className: string}) {
 			const keyUpHandler = (e) => {
 				if (e.key === 'ArrowUp') {
 					arrowUp.current = false;
-					// console.log(`${remoteEvent.slice(-7)}: UP release`);
 					socketRef.current?.emit(
 						remoteEvent,
 						PODGAME.EKeyEvent.arrowUpRelease,
@@ -271,7 +247,6 @@ export default function Game({className}: {className: string}) {
 				}
 				if (e.key === 'ArrowDown') {
 					arrowDown.current = false;
-					// console.log(`${remoteEvent.slice(-7)}: DOWN release`);
 					socketRef.current?.emit(
 						remoteEvent,
 						PODGAME.EKeyEvent.arrowDownRelease,
@@ -279,27 +254,42 @@ export default function Game({className}: {className: string}) {
 				}
 			};
 
+      const handleWindowFocus = () => {
+        //si action specifique a faire a la reprise du focus..
+      };
+      const handleWindowBlur = () => {
+					arrowUp.current = false;
+					socketRef.current?.emit(
+						remoteEvent,
+						PODGAME.EKeyEvent.arrowUpRelease
+            );
+					arrowDown.current = false;
+					socketRef.current?.emit(
+						remoteEvent,
+						PODGAME.EKeyEvent.arrowDownRelease,
+					);
+      };
+
 			window.addEventListener('keydown', keyDownHandler);
 			window.addEventListener('keyup', keyUpHandler);
+
+      window.addEventListener('focus', handleWindowFocus);
+      window.addEventListener('blur', handleWindowBlur);
 
 			return () => {
 				window.removeEventListener('keydown', keyDownHandler);
 				window.removeEventListener('keyup', keyUpHandler);
+      
+        window.removeEventListener('focus', handleWindowFocus);
+        window.removeEventListener('blur', handleWindowBlur);
 			};
 		}
 	}, [remoteEvent]);
 	
-	
-	useEffect(() => {
-	  if (remoteEvent)
-	    console.log(`YOU ARE ${remoteEvent.slice(-7)} , your remoteEvent is ${remoteEvent}`);
-	}, [remoteEvent])
-	
-	
 	interface TableProps {
 	  className?: string;
 	  tableRef: React.RefObject<HTMLDivElement>;
-	  children?: React.ReactNode; // add this line
+	  children?: React.ReactNode;
 	}
 	
 	const Table: React.FC<TableProps> = ({className, tableRef, children}) => {
@@ -308,8 +298,6 @@ export default function Game({className}: {className: string}) {
 	    style={{
         boxShadow: "0 0 150px  40px rgba(170, 170, 255, 0.4)" 
       }}> 
-      {/* <div className="relative pb-[75%]"></div> */}
-      {/* <div className="absolute inset-0 flex items-center justify-center"></div> */}
         <div className='dottedLine absolute  left-1/2 h-full w-1'></div>
 	      {children} 
 	    </div>
@@ -325,24 +313,8 @@ export default function Game({className}: {className: string}) {
         height: `${ballSize.y}px`,
         top: `${ballPosition.y}px`,
         left: `${ballPosition.x}px`,
-        // transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
         borderRadius: '1%',
     }} >
-      {/* <div className=' bg-red-500' style={{
-        position: 'absolute',
-        width: `800px`,
-        height: `1px`,
-        transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
-
-    }}/>
-      <div className=' bg-green-500' style={{
-        position: 'absolute',
-        width: `1px`,
-        height: `200px`,
-        transform: 'translate(-50%, -50%)', // pour cebntrer le point de pivot de la balle par son centre
-
-    }}/> */}
-
     </div>
     </>
     )
@@ -351,7 +323,7 @@ export default function Game({className}: {className: string}) {
 	const Player = ({className, position, refDiv}: 
 	  {className?: string, position: 'left' | 'right', refDiv: React.RefObject<HTMLDivElement>}) 
 	    :React.JSX.Element => {
-        const textP1: string = gameMod.current === PODGAME.EGameMod.trainning ? `your record` : `${userP1.nickname}`;
+                const textP1: string = gameMod.current === PODGAME.EGameMod.trainning ? `your record` : `${userP1.nickname}`;
     return (
       <>
         {position === 'left' ? 
@@ -380,20 +352,22 @@ export default function Game({className}: {className: string}) {
   }
 
   function dbgAddPlayerGoal() {
-    console.log('GOALASOOOOO');
     socketRef.current?.emit(`${nameGameSession}GOAL`);
   }
 
   function stopGameAndLose() {
-    console.log('YOU LOSE');
     socketRef.current?.emit(`${nameGameSession}STOP`);
-    // setStepCurrentSession(EStatusFrontGame.idle);
   }
 
   function cancelMatchmaking() {
-    console.log('CANCEL MATCHMAKING');
-    socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchmaking(), userLogged.userContext);
+    if (gameMod.current === PODGAME.EGameMod.classic)
+      socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchmaking(), userLogged.userContext);
+    else
+      socketRef.current?.emit(apiRoutes.wsGameRoutes.removePlayerToMatchmakingGhost(), userLogged.userContext);
     setStepCurrentSession(EStatusFrontGame.idle);
+  }
+  function cancelChallenge() {
+    socketRef.current?.emit('cancelChallenge');
   }
 
   function handleSearchGame() {
@@ -414,7 +388,6 @@ export default function Game({className}: {className: string}) {
 					},
 				);
 				setStepCurrentSession(EStatusFrontGame.matchmakingRequest);
-				console.log('Cancel matchmaking not implemented for the moment');
 				return;
 			}
       else if (gameMod.current === PODGAME.EGameMod.ghost) {
@@ -427,7 +400,6 @@ export default function Game({className}: {className: string}) {
 					},
 				);
 				setStepCurrentSession(EStatusFrontGame.matchmakingRequest);
-				console.log('Cancel matchmaking not implemented for the moment');
 				return;
 			}
       else if (gameMod.current === PODGAME.EGameMod.trainning) {
@@ -443,19 +415,15 @@ export default function Game({className}: {className: string}) {
 		}
     else if (stepCurrentSession === EStatusFrontGame.matchmakingRequest) {
       setStepCurrentSession(EStatusFrontGame.gameSessionFind);
-			console.log("Match trouvé ! le jeu va bientot commencer, etes vous pret?");
       return;
 		}
     else if (stepCurrentSession === EStatusFrontGame.gameSessionFind) {
-      console.log(`GameSessionName = ${nameGameSession}`)
       socketRef.current?.emit(`${nameGameSession}ready`);
       setStepCurrentSession(EStatusFrontGame.waiting);
-      console.log("le jeu a commencer.. Bonne chance !");
       return;
 		}
     else if (stepCurrentSession === EStatusFrontGame.gameInProgress) {
       setStepCurrentSession(EStatusFrontGame.endOfGame);
-      console.log("le jeu est terminé !"); 
       return;
 		}
   }
@@ -473,13 +441,18 @@ export default function Game({className}: {className: string}) {
   }
 
   useEffect(() => {
+
+    setCurrentGameTheme(localStorage.getItem('theme'));
+
+      if (localStorage.getItem('theme') === null){
+        localStorage.setItem('theme', new PODGAME.GameTheme().neon)
+        setCurrentGameTheme( new PODGAME.GameTheme().neon);
+      }
+
     resetPositionPaddle();
-    setCurrentGameTheme(new PODGAME.GameTheme().neon);
   }, []);
 
   useEffect(() => {
-    console.log(`CurrentStep = ${stepCurrentSession}`);
-    // handleSearchGame();
   }, [stepCurrentSession]);
 
   const [prevDimensions, setPrevDimensions] = useState({ width: 0, height: 0 });
@@ -508,23 +481,32 @@ export default function Game({className}: {className: string}) {
     }
   }, [tableRef.current])
   
+  const challengeList = () => {
+  
+    return (
+        <div style={{ zIndex: '1000 !important' }}>
+          <ChallengeList currentStepGameFront={stepCurrentSession}/>
+        </div>
+      
+      )
+  }
 
 
   return (
     <div className={`${className} ${currentGameTheme} rounded-xl`}> 
-    <>
-      {/* {console.log('DIV GAME MONTER')} */}
-    </>
       <Table tableRef={tableRef} className='table w-full h-full relative font-vt323'> 
-        {/* <Scoreboard/> // bugger*/}
-        {/* <CenterDBG/> */}
+        {stepCurrentSession === EStatusFrontGame.idle && challengeList()}
         <Player className='paddle absolute ' position='left' refDiv={pad1Ref} /> 
+        {(stepCurrentSession === EStatusFrontGame.matchmakingRequest || stepCurrentSession === EStatusFrontGame.modChoice) &&
+            <div className='flex space-x-5 items-center justify-end pr-10 pl-10 pt-20'>
+              keys:<br/>up: up arrow key<br/>down: down arrow key
+            </div> }
         <Player className='paddle absolute'  position='right' refDiv={pad2Ref} />
         {!ballIsHidden && <Ball/>}
         {stepCurrentSession === EStatusFrontGame.idle &&
           <>
             <SwitcherTheme className=' absolute right-1 top-1' setThemeFunction={setCurrentGameTheme} ></SwitcherTheme>
-            <div className='absolute -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2  game-info-message text-7xl'>{infoMessage}</div> 
+            <div className='absolute  -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2 game-info-message z-0  xs:text-xs md:text-5xl xl:text-7xl'>{infoMessage}</div> 
           </>}
         {stepCurrentSession === EStatusFrontGame.countdown &&
           <div className='absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 game-info-message text-9xl'>{infoMessage}</div>  }
@@ -541,9 +523,13 @@ export default function Game({className}: {className: string}) {
               <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.ghost;handleSearchGame()}}>GHOST</button> 
               <button className='text-white' onClick={() => {gameMod.current = PODGAME.EGameMod.trainning;handleSearchGame()}}>SOLO TRAINING</button> 
             </div> }
-          {stepCurrentSession === EStatusFrontGame.matchmakingRequest &&
+          {stepCurrentSession === EStatusFrontGame.matchmakingRequest && 
             <div className='flex space-x-5 items-center'>
               <button className='text-white' onClick={() => cancelMatchmaking()}>CANCEL MATCHMAKING</button><ClipLoader.ClipLoader color="#36d7b7" />
+            </div> }
+          {stepCurrentSession === EStatusFrontGame.challengeRequest && 
+            <div className='flex space-x-5 items-center'>
+              <button className='text-white' onClick={() => cancelChallenge()}>CANCEL CHALLENGE</button><ClipLoader.ClipLoader color="#60d7b7" />
             </div> }
      
           {stepCurrentSession === EStatusFrontGame.waiting &&
@@ -554,19 +540,12 @@ export default function Game({className}: {className: string}) {
           {stepCurrentSession === EStatusFrontGame.gameInProgress &&
           <div className='flex flex-grow relative'>
             <button className='text-white justify-center items-center' onClick={() => stopGameAndLose()}>STOP GAME</button> 
-            {/* {gameMod.current !== PODGAME.EGameMod.trainning &&
-              <button className='text-red-800 absolute top-2 right-12' onClick={() => dbgAddPlayerGoal()}>GOAL +1 </button> 
-            } */}
-
           </div>
           
-        }
-        {stepCurrentSession === EStatusFrontGame.gameSessionFind &&
+          }
+          {stepCurrentSession === EStatusFrontGame.gameSessionFind &&
           <button className='text-white' onClick={() => handleSearchGame()}>ARE YOU READY ?</button> }
-          {/* {stepCurrentSession === EStatusFrontGame.endOfGame &&
-          <button className='text-white' onClick={() => {reset()}}>END OF GAME</button> } */}
-
-            </div>
+      </div>
     </div>
   )
 }

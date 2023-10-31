@@ -23,7 +23,6 @@ export default function Home() {
         authManager.setToken(tmpToken);
         if (!logged && !tmpToken)
         {
-            console.log("Redirect to auth page");
             router.push('/auth');
         }
         else
@@ -34,21 +33,16 @@ export default function Home() {
                    .then((testUser) => {
                         if (testUser && testUser.UserID >= 0)
                         {
-                            console.log("Redirect to Home page");
                             router.push('/home');
                         }
                         else
                         {
-                            if ("UserID" in testUser) {
-                                console.log("testUser id= " + testUser.UserID);
-                            }
                             alert("An invalid token was saved in the browser." +
                                 "\nPlease, log in again or create a new account.");
                         }
                     })
                     .catch((error) => {
                         console.error("[redirect useEffect error]" + error);
-                        console.log("authManager baseURL: " + authManager.getBaseURL());
                     });
 
             }
@@ -61,12 +55,8 @@ export default function Home() {
     }, [logged]);
 
         return (
-            <>
-                <div className="welcome space-y-10 my-12">
-                    <div className="welcome-msg">WELCOME TO</div>
-                    <div className="welcome-title ">PONG POD!</div>
-                </div>
+                <div className="welcome  w-screen bg-center bg-no-repeat bg-cover h-screen" style={{ backgroundImage: `url('images/background/bg_pongPod1.png')` }}>
                 <LoadingComponent/>
-            </>
+                </div>
         )
 }

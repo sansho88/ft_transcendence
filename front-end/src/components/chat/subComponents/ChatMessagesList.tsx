@@ -11,6 +11,7 @@ import { messageDTO } from '@/shared/DTO/InterfaceDTO'
 
 export default function ChatMessagesList({className, messages, currentChannel, userCurrentID}
   : {className: string, messages: messageDTO.IReceivedMessageEventDTO[], currentChannel: number, userCurrentID: number}) {
+  const setTimeoutGoToEndMesage: number = 200;
 
   const refDivEndMessage = useRef<HTMLDivElement>(null);
   const refDivParent = useRef<HTMLDivElement>(null);
@@ -22,16 +23,16 @@ export default function ChatMessagesList({className, messages, currentChannel, u
     refDivEndMessage.current?.scrollIntoView({behavior: typeScroll});
   }
   useEffect(() => {
-    goToEndMessage('auto');
-    
-    
-  }, []) //TODO: dependence new message... OU PAS ?
+    setTimeout(() => {
+      goToEndMessage('auto');
+    }, setTimeoutGoToEndMesage)
+  }, [])
 
   useEffect(() => {
 
     setTimeout(() => {
       goToEndMessage('auto');
-    }, 50)
+    }, setTimeoutGoToEndMesage)
     
   }, [currentChannel])
 
@@ -43,12 +44,11 @@ export default function ChatMessagesList({className, messages, currentChannel, u
       if (refDivParent && scrollPosition)
       {
         const maxHeight = refDivParent.current?.scrollHeight - refDivParent.current?.clientHeight;
-        console.log(`scollPos=${scrollPosition} || maxHeigh=${maxHeight - 50}`)
         if (scrollPosition > (maxHeight - 400))
         {
           setTimeout(() => {
             goToEndMessage('smooth');
-          }, 50)
+          }, setTimeoutGoToEndMesage)
         }
       }
     };
@@ -59,7 +59,6 @@ export default function ChatMessagesList({className, messages, currentChannel, u
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = refDivParent.current?.scrollTop;
-      // console.log("Position actuelle du scroll :", scrollPosition);
       if (refDivParent && scrollPosition)
       {
         const maxHeight = refDivParent.current?.scrollHeight - refDivParent.current?.clientHeight;
@@ -80,8 +79,9 @@ export default function ChatMessagesList({className, messages, currentChannel, u
   
   useEffect(() => {
     if (refDivParent.current !== null)
-    {  const maxHeight = refDivParent.current?.scrollHeight - refDivParent.current?.clientHeight;
-      console.log("Position maximale du scroll :", maxHeight);}
+    {  
+      const maxHeight = refDivParent.current?.scrollHeight - refDivParent.current?.clientHeight;
+    }
   }, [refDivParent.current]);
   
   
@@ -129,7 +129,3 @@ export default function ChatMessagesList({className, messages, currentChannel, u
     </div>
   )
 }
-
-    // <div>
-    //   <ChatMessage className={' h-20 items-end justify-center'}/>
-    // </div>

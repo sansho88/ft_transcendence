@@ -8,9 +8,6 @@ import { messageDTO } from '@/shared/DTO/InterfaceDTO';
 import { wsChatEvents } from '@/components/api/WsReq';
 const max_msg_lenght: number = 140;
 
-
-//TODO: recup userContext pour envoi message + props channel ID 
-
 export default function ChatInput({className, socket, channelID}: {className: string, socket: Socket, channelID: number})
 {
 	const [message, setMessage] = useState<string>("");
@@ -29,37 +26,36 @@ export default function ChatInput({className, socket, channelID}: {className: st
         content: message,
         channelID: channelID
 			};
-			console.log("DBG DEBUUUUUG => " + messObj.content);
       wsChatEvents.sendMsg(socket, messObj);
 			setMessage("");
 		}
-    else {
-      console.error("Tried to send a message before socket is connected");
-		}
 	};
 
-  // let message: string = '';
-  return (
+   return (
+    
     <div className={`${className}`}>
-
-        <input
-          type="text"
+    
+    <input
+    type="text"
+      autoFocus={true}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') 
-              sendMessage(message);
+            sendMessage(message);
           }}
           className="chat_block_messages_input_input"
-        />
+          />
         <button onClick={() => {sendMessage(message)}} className="chat_block_messages_input_button">
           <Image
             src="/chat/send.svg"
             alt="Send button"
             width={32}
             height={32}
-          />
-        </button>
-    </div>
+            />
+            </button>
+            </div>
+            
+           
     )
 }

@@ -23,7 +23,7 @@ export enum UserStatus {
 	OFFLINE = 0,
 }
 
-@Entity('TestUser')
+@Entity('User')
 export class UserEntity extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	UserID: number;
@@ -53,7 +53,6 @@ export class UserEntity extends BaseEntity {
 	})
 	has_2fa: boolean;
 
-	// Todo: comeback later to proper storage
 	@Column({
 		type: 'varchar',
 		length: 256,
@@ -66,7 +65,7 @@ export class UserEntity extends BaseEntity {
 		type: 'enum',
 		enum: UserStatus,
 		enumName: `User Status`,
-		default: UserStatus.ONLINE,
+		default: UserStatus.OFFLINE,
 	})
 	status: UserStatus;
 
@@ -80,12 +79,16 @@ export class UserEntity extends BaseEntity {
 
 	//	Friends
 	@ManyToMany(() => UserEntity, (user) => user.subscribed)
-	@JoinTable()
+		// @JoinTable()
 	followers: UserEntity[];
 
 	@ManyToMany(() => UserEntity, (user) => user.followers)
-	@JoinTable()
+	@JoinTable({name: 'Subscriber'})
 	subscribed: UserEntity[];
+
+	@ManyToMany(() => UserEntity)
+	@JoinTable({name: 'Blocked'})
+	blocked: UserEntity[];
 
 	@OneToMany(() => InviteEntity, (invite) => invite.user)
 	invite: InviteEntity[];

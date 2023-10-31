@@ -2,85 +2,71 @@ import React, {useContext, useEffect, useRef, useState} from "react";
 import Button from "./CustomButtonComponent"
 import Avatar from "@/components/AvatarComponent";
 import * as apiReq from '@/components/api/ApiReq'
-
-
 import "../utils/usefulFuncs"
 import {Colors, getEnumNameByIndex} from "@/utils/usefulFuncs";
 import {EStatus, IUser} from "@/shared/types";
 import {getUserFromId} from "@/app/auth/Auth";
-import {SocketContextChat, SocketContextGame} from "@/context/globalContext";
-import {wsGameRoutes} from "@/shared/routesApi";
-import {IGameSessionInfo} from "@/shared/typesGame";
-import {log} from "util";
+import {SelectedUserContext, SocketContextChat} from "@/context/globalContext";
+import {NotificationManager} from 'react-notifications';
+import Stats from "@/components/StatsComponent";
 
+interface ProfileProps{
+    user: IUser;
+    avatarSize: string | undefined;
+    showStats?: boolean;
+    isMainProfile?: boolean;
+    isOwner?: boolean;
+}
 
-const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, login, status, UserID, isEditable})=>{
+const Profile: React.FC<ProfileProps> = ({children, className ,user, avatarSize, isEditable, showStats, isMainProfile, isOwner})=>{
 
-    const [modifiedNick, setNickText] = useState<string>(nickname ? nickname : login);
+    const [modifiedNick, setNickText] = useState<string>(user.nickname ? user.nickname : user.login);
     const [editMode, setEditMode] = useState(false);
+    const {setSelectedUserContext} = useContext(SelectedUserContext);
     const [nickErrorMsg, setNickErrMsg] = useState("");
     const [statusColor, setStatusColor] = useState("grey");
-    const [userStatus, setUserStatus] = useState(status);
-    const socketGame      = useContext(SocketContextGame);
-    const socketGameRef   = useRef(socketGame);
+    const [userStatus, setUserStatus] = useState(user.status);
     const socketChat      = useContext(SocketContextChat);
     const socketChatRef   = useRef(socketChat);
     const [isNicknameUsed, setIsNicknameUsed] = useState(false);
+    const [avatarPath, setAvatarPath] = useState(user.avatar_path)
 
     useEffect(() => {
-        if (socketChatRef.current?.disconnected)
+        setStatusColor(getEnumNameByIndex(Colors, user.status));
+        return;
+    }, [user.login]);
+
+    socketChatRef.current?.on("userUpdate", (data: IUser) => {
+        if (data.UserID == user.UserID)
         {
-            socketChatRef.current?.connect();
+            setUserStatus(data.status);
+            setAvatarPath(data.avatar_path);
+            setNickText(data?.nickname ?? modifiedNick);
+            setStatusColor(getEnumNameByIndex(Colors, data.status));
         }
-
-        console.log(socketChatRef.current?.disconnected);
-    }, [login]);
-
-
-    useEffect(() => {
-        setStatusColor(getEnumNameByIndex(Colors, userStatus ? userStatus : 0));
-        console.log("[PROFILE] STATUS UPDATED: " + userStatus);
-    }, [userStatus]);
-
-
-    /*socketGameRef.current?.on(wsGameRoutes.statusUpdate(), (newStatus: EStatus) => {
-        console.log('new status = ' + newStatus);
-       setUserStatus(newStatus);
-        setStatusColor(getEnumNameByIndex(Colors, userStatus));
-    });*/
-
-   /* socketGameRef.current?.on("connect", () => {
-        setUserStatus(EStatus.Online);
-    })*/
-
-    socketGameRef.current?.on("infoGameSession", (data: IGameSessionInfo) => {
-        if ((data.player1 && data.player1.login == login) || data.player2.login == login)
-        {
-            setUserStatus(EStatus.InGame);
-            setStatusColor(getEnumNameByIndex(Colors, userStatus));
-
-            socketGameRef.current?.on("endgame", () => {
-                    setUserStatus(EStatus.Online);
-                    setStatusColor(getEnumNameByIndex(Colors, userStatus));
-            });
-        }
-
     });
 
+    socketChatRef.current?.off("userUpdate", (data: IUser) => {
+        if (data.UserID == user.UserID)
+        {
+            setUserStatus(data.status);
+            setAvatarPath(data.avatar_path);
+            setNickText(data?.nickname ?? modifiedNick);
+            setStatusColor(getEnumNameByIndex(Colors, data.status));
+        }
+    });
 
     useEffect(() => {
-        if (isNicknameUsed && modifiedNick !== nickname) {
+        if (isNicknameUsed && modifiedNick !== user.nickname) {
           setNickErrMsg("Unavailable");
-          console.log("Abandon");
         }
-      }, [isNicknameUsed, modifiedNick, nickname]);
+      }, [isNicknameUsed, modifiedNick, user.nickname]);
 
     async function handleTextChange  (event: React.ChangeEvent<HTMLInputElement>)  { //updated for each character
         setIsNicknameUsed(false);
 
         const value = event.target.value;
         setNickText(value);
-        // socketChatRef.current?.emit("NicknameUsed", {nickname:value});
         if (value.length < 2 || value.length > 12) {
             setNickErrMsg("Length: 2 => 12");
         }
@@ -88,14 +74,11 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
             setNickErrMsg("Alphanumerics only");
         }
         else {
-            console.log(`value= ${value}, nickname=${nickname} `)
-            if (value != nickname)
+            if (value != user.nickname)
                 await apiReq.getApi.getIsNicknameUsed(value).then((res) => {
                     const ret: boolean = res.data;
-                    console.log('res = ' + ret);
-                    if (ret == true)
+                    if (ret)
                     {
-                        console.log('coucou ');
                         setIsNicknameUsed(true);
                         setNickErrMsg("Unavailable");
                     }
@@ -105,7 +88,8 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
 
                     }
 
-            });
+            })
+                    .catch(() => console.error("Failed to check if nickname is used or not"));
         }
     }
 
@@ -116,13 +100,20 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
 
         if (!nickErrorMsg.length) {
 
-            await getUserFromId(UserID).then( (userGet) => {
-            console.log("[PROFILE] login to update: " + userGet.login);
+            await getUserFromId(user.UserID).then( (userGet) => {
             userGet.nickname = modifiedNick;
-            apiReq.putApi.putUser(userGet);
-            });
+            apiReq.putApi.putUser(userGet)
+                .then(() => {
+                    setEditMode(false);
+                })
+                .catch((error) => {
+                    NotificationManager.error(error.data, "Edit of nickname failed");
+                })
+            ;
+            })
+                .catch(() => console.error(`Failed to get data from getUserFromId in Profile.`));
 
-            setEditMode(false);
+
 
         }
     }
@@ -137,15 +128,15 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
                     border: "2px ridge darkgrey",
                     borderRadius: "4px",
                     background: "none",
-                    padding: "6px"
+                    padding: "6px",
                 }}/>
-                <span style={{marginLeft: "4px"}}><Button image={"/floppy.svg"} onClick={turnOffEditMode} alt={"Save Button"}/></span>
+                <span style={{marginLeft: "4px", position: "fixed"}}><Button image={"/floppy.svg"} onClick={turnOffEditMode} alt={"Save Button"}/></span>
                 <p style={{fontSize: "12px", color: "red"}}>{nickErrorMsg}</p>
             </div>);
         }
         else
             return (
-                <p id={"nickname"}>{modifiedNick}
+                <p id={"nickname"} style={{textShadow: "1px 3px 8px #0888AFFF"}}>{modifiedNick}
                     {isEditable ?
                         <span id={"editNickNameButton"} style={{marginLeft: "4px"}}>
                             <Button image={"/edit.svg"} onClick={turnOnEditMode} alt={"edit NickName button"}/>
@@ -158,33 +149,52 @@ const Profile: React.FC<IUser> = ({children, className ,nickname, avatar_path, l
     }
 
 
-    const WIDTH= 4, HEIGHT= WIDTH * 2.5
+    let WIDTH= 4;
+
+
+    if (avatarSize){
+        switch (avatarSize) {
+
+            case "small": WIDTH= 1; break;
+            case "medium": WIDTH= 2; break;
+            case "big": WIDTH = 4; break;
+
+        }
+    }
+   let HEIGHT= WIDTH * 2.5
+
     return (
         <>
-            <div className={className}>
-                <Avatar path={avatar_path} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus}/>
+            <div className={className} onClick={() => setSelectedUserContext(user)}>
+                <Avatar path={avatarPath} width={`${WIDTH}vw`} height={`${HEIGHT}vh`} playerStatus={userStatus} isMainProfile={isMainProfile}/>
                 <div className={"infos"} style={{
                     fontFamily: "sans-serif",
                     color: "#07C3FF",
                     lineHeight: "1.5em",
+                    marginLeft: "10px",
                     display: "inline-block",
                     position: "relative",
-                    marginLeft: "10px",
-                    paddingTop: "2%",
-                    top: "2vh"
-
+                    transition:"1000ms",
+                    top: "15px",
                 }
-                }>
-                    <h2 id={"login"} style={{ color: "darkgrey"}}>{login}</h2>
+            }>
+                    <h2 id={"login"} style={{ color: "darkgrey", marginTop: "0", textShadow: "1px 1px 5px darkgrey"}}>{user.login}{isOwner ? " 👑":""}</h2>
                     {editedNick()}
 
                     <p id={"status"} style={{
                         color:statusColor,
-                        transition:"1000ms"}}>
+                        transition:"0ms",
+                        position: "relative", 
+                        top: "0",
+                        textShadow: `2px 2px 6px ${statusColor}`,
+                        }}>
                         {getEnumNameByIndex(EStatus, userStatus)}
                     </p>
                 </div>
-                <div id={"children"} style={{marginLeft: "4px"}}>{children}</div>
+                <div id={"children"} style={{marginLeft: "4px", marginTop: "6px", clear: "both"}}>
+                    {showStats && <Stats user={user}/>}
+                    {children}
+                </div>
             </div>
         </>);
 };

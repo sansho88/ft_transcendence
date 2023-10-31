@@ -10,6 +10,8 @@ interface ButtonProps {
    radius?: string;
    onClick: (event: any | undefined) => void;
    alt: string;
+   title?: string;
+    margin?: string;
 }
 const Button: React.FC<ButtonProps> = ({
     color,
@@ -20,14 +22,17 @@ const Button: React.FC<ButtonProps> = ({
     onClick,
     alt,
     className,
-    id
+    id,
+    margin,
+    title
 }) => {
    return (
-       <button id={id} className={className} onClick={onClick}
+       <button id={id} className={className} onClick={onClick} title={title}
        style={{
           backgroundColor: color,
           height: height,
-          width: width
+          width: width,
+           margin: margin
        }}><img src={image} alt={alt}/>
           {children}
        </button>);

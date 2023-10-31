@@ -1,4 +1,8 @@
+import { EGameMod } from "../typesGame";
 import { IUser } from "../types";
+import { IUserEntity } from "../entities/IUser.entity";
+import { IChannelEntity } from "../entities/IChannel.entity";
+import { IChannel } from "../typesChannel";
 
 export namespace messageDTO {
 	
@@ -21,7 +25,7 @@ export namespace channelsDTO {
 		privacy: boolean;
 		password?: string;
 	}
-
+ 
 	export interface IJoinChannelDTOPipe {
 		channelID: number;
 		password?: string;
@@ -32,8 +36,52 @@ export namespace channelsDTO {
 	}
 
 	export interface IChangeChannelDTOPipe {
+		channelID: number;
 		name: string;
-		password: string;
+		password: string | null;
 		privacy: boolean;
+	}
+
+	export interface ICreateMpDTOPPipe {
+		targetID: number
+	}
+
+	export interface ICreateChallengeDTO {
+		targetID: number;
+		gameMod: EGameMod;
+	}
+
+	export interface IChallengeProposeDTO {
+		challenger: Partial<IUser>;
+		eventChallenge: string;
+		gameMod: EGameMod;
+	}
+	
+	export interface IChallengeAcceptedDTO {
+		response: boolean;
+		event: string;
+	}
+
+	export interface IInviteEntity {
+		inviteID: number;
+		user: IUserEntity;
+		channel: IChannelEntity;
+		sender: IUserEntity;
+	}
+		export interface IBanEntity {
+		bannedID: number;
+		endTime: Date | null;
+		channel: IChannel;
+		user: IUser;
+	}
+
+	export interface IMuteEntity {
+		muteID: number;
+		endTime: Date | null;
+		channel: IChannel;
+		user: IUser;
+	}
+
+	export interface IAdminEntity extends Partial<IUser> {
 	}
 }

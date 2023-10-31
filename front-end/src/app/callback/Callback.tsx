@@ -1,28 +1,17 @@
 'use client'
-import React, { useEffect,useContext, useState } from 'react'
+import React, { useEffect} from 'react'
 
 import * as apiReq from '@/components/api/ApiReq'
-import * as POD from "@/shared/types";
-import {LoggedContext, SocketContextChat, SocketContextGame, UserContext} from '@/context/globalContext';
 import LoadingComponent from "@/components/waiting/LoadingComponent";
-import { getUserMe } from '../auth/Auth';
 import * as ClipLoader from 'react-spinners'
 import { useRouter } from 'next/navigation';
+import { NotificationManager } from 'react-notifications';
 
 
 
 
 export default function Callback() {
-
-	const {userContext, setUserContext} = useContext(UserContext);
-	const {setLogged} = useContext(LoggedContext);
-	// const [isLogged, setIsLogged] = useState<boolean | null>(null);
-	const socketChat = useContext(SocketContextChat);
-	const socketGame = useContext(SocketContextGame);
-	const [isSignInMode, setIsSignInMode] = useState(false);
-
 	const router = useRouter();
-
 
 	enum authErrorState{
 		emptyLogin,
@@ -34,7 +23,6 @@ export default function Callback() {
 
 	const LoggedFailed = (errorCode) => {
 		let errMsg: string;
-		console.log("error code: " + errorCode);
 
 		switch (errorCode) {
 				case authErrorState.emptyLogin: errMsg = "The login is empty"; break;
@@ -55,10 +43,11 @@ export default function Callback() {
 		);
 }
 
- const fetchData = async (code :string) => { 
-	await apiReq.postApi.postTryLogin42(code)
+ const fetchData = async (code :string) => {
+	const code2FA = sessionStorage.getItem('code2FA');
+	if (code2FA) sessionStorage.removeItem('code2FA');
+	await apiReq.postApi.postTryLogin42(code, code2FA)
 	.then(async (res) => {
-		console.log(`ret tryLogin42: ${JSON.stringify(res)}`)
 			if (res.status === 200) {
 					const userToken = res.data;
 					localStorage.removeItem('token');
@@ -67,8 +56,11 @@ export default function Callback() {
 					router.push('/home');
 		}
 	})
-	.catch((e) => {
-			// LoggedFailed(e.response.status); // pas adapter car dit mdp incoorect si echoue
+	.catch((error) => {
+		  
+			if (localStorage.getItem('token') !== null) return router.push('/home');
+			alert("2FA is required for this account");
+			localStorage.removeItem('token');
 			router.push('/auth');
 			return;
 		})
@@ -80,18 +72,11 @@ export default function Callback() {
 		const recupURL = new URLSearchParams(window.location.search);
 		const code = recupURL.get('code');
 
-		console.log('code = <' + code + '>');
 		if (!code) router.push('/auth');
-		//FAIRE LA REQUETE API pour obtenir le token
-		if( code !== null)
+		if (code !== null)
 		{ 
 			fetchData(code);
 		}
-
-		
-		
-		
-		//si success routrer vers home
 	}, [])
 	return (
 			<LoadingComponent/>

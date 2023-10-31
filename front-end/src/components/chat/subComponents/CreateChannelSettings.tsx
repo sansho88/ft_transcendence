@@ -1,10 +1,10 @@
-import {input} from "zod";
 import React, {useEffect, useState} from "react";
 import Image from "next/image";
 import Button from "@/components/CustomButtonComponent";
 import { channelsDTO } from "@/shared/DTO/InterfaceDTO";
 import { wsChatEvents } from "@/components/api/WsReq";
 import { Socket } from "socket.io-client";
+import {v4 as uuidv4} from "uuid";
 
 const CreateChannelSettings = ({className, socket}: {className: string, socket: Socket}) => {
     const [channelName, setChannelName] = useState("");
@@ -68,14 +68,16 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
         event.preventDefault();
         if (areSettingsValids)
         {
-            console.log(`${channelType} channel ${channelName} created ${channelType == "Protected" ? `password: ${channelPassword}` : ""}`);
             setIsChannelCreated(true);
             
             const newChannel: channelsDTO.ICreateChannelDTOPipe = {
                 name: channelName,
-                privacy: false,
+                privacy: channelType === "Private",
                 password: channelType === "Protected" ? channelPassword : undefined
               }
+
+
+
               wsChatEvents.createRoom(socket, newChannel);
           }
         
@@ -86,7 +88,6 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
         setPasswordVisible(showPassword == "text" ? "password" : "text");
     }
 
-//todo: afficher uniquement en cas de clique sur le bouton d ajout + deplacer les boutons de settings vers le haut
     return (
         <>
             {!isChannelCreated && <div className={className}>
@@ -117,7 +118,9 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
                                                onChange={handleOnChange}/> Protected</label></li>
                             {channelType == "Protected" &&
                                 <li><label>
-                                    <input id={"channelPasswordInput"}
+                                    <input type={"text"} name={"username email"} hidden={true} autoComplete={"username"}/>
+                                    <input className={`channelPasswordInput`}
+                                           id={`channelPasswordInput${uuidv4()}`}
                                            type={showPassword}
                                            inputMode={"text"}
                                            minLength={3}
@@ -125,8 +128,10 @@ const CreateChannelSettings = ({className, socket}: {className: string, socket: 
                                            value={channelPassword}
                                            placeholder={" Password"}
                                            autoFocus={true}
-                                           onChange={handleOnPasswordChange}/>
-                                    <Button id={"button_showPassword"} image={showPassword == "password" ? "/eye-off.svg" : "/eye-show.svg"}
+                                           onChange={handleOnPasswordChange}
+                                           autoComplete={"new-password"}
+                                    />
+                                    <Button className={`button_showPassword`} id={`button_showPassword${uuidv4()}`}  image={showPassword == "password" ? "/eye-off.svg" : "/eye-show.svg"}
                                             onClick={handleShowPassword}
                                             alt={"Show password button"}/>
                                     <p style={{fontSize: "12px", color: "red"}}>{passwordErrorMsg}</p>

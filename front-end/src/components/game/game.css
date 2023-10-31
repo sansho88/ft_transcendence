@@ -1,0 +1,10 @@
+.noScrollbar {
+  overflow-y: auto;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+/* Pour Chrome, Safari et Opera */
+.noScrollbar::-webkit-scrollbar {
+  display: none;
+}

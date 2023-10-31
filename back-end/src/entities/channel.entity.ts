@@ -24,7 +24,7 @@ export enum ChannelType {
 	DIRECT,
 }
 
-@Entity('TestChannels')
+@Entity('Channels')
 export class ChannelEntity extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	channelID: number;
@@ -53,20 +53,26 @@ export class ChannelEntity extends BaseEntity {
 	})
 	mp: boolean;
 
+	@Column({
+		type: 'boolean',
+		default: false,
+	})
+	archive: boolean;
+
 	@OneToOne(() => ChannelCredentialEntity, {cascade: true})
-	@JoinColumn({name: 'TestCredential'})
+	@JoinColumn({name: 'Credential'})
 	credential: ChannelCredentialEntity;
 
 	@ManyToMany(() => UserEntity, (UserEntity) => UserEntity.channelAdmin)
-	@JoinTable({name: 'TestAdminList'})
+	@JoinTable({name: 'AdminList'})
 	adminList: UserEntity[];
 
 	@ManyToMany(() => UserEntity, (UserEntity) => UserEntity.channelJoined)
-	@JoinTable({name: 'TestUserList'})
+	@JoinTable({name: 'UserList'})
 	userList: UserEntity[];
 
-	@OneToMany(() => MessageEntity, (MessageEntity) => MessageEntity.channel)
-	@JoinColumn({name: 'TestMessageList'})
+	@OneToMany(() => MessageEntity, (MessageEntity) => MessageEntity.channel, {cascade: ['remove']})
+	@JoinTable({name: 'MessageList'})
 	messages: MessageEntity[];
 
 	@OneToMany(() => InviteEntity, (InviteEntity) => InviteEntity.channel)
