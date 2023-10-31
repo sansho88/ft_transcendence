@@ -2,9 +2,9 @@ name: "Green = GG WP; Red = Tu peux retry!"
 
 on:
   push:
-    branches: [ "main", "beta", "main-dev" ]
+    branches: [ "main", "main-dev" ]
   pull_request:
-    branches: [ "main", "beta", "main-dev" ]
+    branches: [ "main", "main-dev" ]
   workflow_dispatch:
     inputs:
       branch:
@@ -36,9 +36,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Create empty .env_42
-      run: touch ./docker/.env/.env_42
-    
+    - name: Create empty .env*
+      run: touch ./docker/.env/.env_42 ./docker/.env/.env_nestjs ./docker/.env/.env_db
+
     - name: Launch Pong Pod
       run: make
       
