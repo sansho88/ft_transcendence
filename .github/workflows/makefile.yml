@@ -37,7 +37,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Create empty .env*
-      run: touch ./docker/.env/.env_42 ./docker/.env/.env_nestjs ./docker/.env/.env_db
+      run: touch ./docker/.env/.env_42 ./docker/.env/.env_nest ./docker/.env/.env_db
 
     - name: Launch Pong Pod
       run: make
