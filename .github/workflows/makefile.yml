@@ -36,8 +36,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Create empty .env*
-      run: touch ./docker/.env/.env_42 ./docker/.env/.env_nest ./docker/.env/.env_db
+    - name: cp template env 42
+      run: cp ./docker/.env/.env_42.template ./docker/.env/.env_42
+
+    - name: cp template env nest
+      run: cp ./docker/.env/.env_nest.template ./docker/.env/.env_nest
+
+    - name: cp template env db
+      run: cp ./docker/.env/.env_db.template ./docker/.env/.env_db
 
     - name: Launch Pong Pod
       run: make
