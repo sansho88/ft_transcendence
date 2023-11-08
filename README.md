@@ -1,5 +1,10 @@
-# Projet Transcendence (10/23 -- WIP)
-![image](https://github.com/BenJ3D/ft_transcendence/assets/49345674/a9d1f99b-7592-4733-93cc-d65a53631824)
+# Projet Transcendence
+![image](https://github.com/BenJ3D/ft_transcendence/assets/49345674/76945b29-d616-469b-b100-465541ffc134)
+
+## demo en ligne ici => www.pongpod.fr 
+- creer un compte en cliquant sur INVITE MODE puis SIGN IN
+- definir un mot de passe et CONNECT
+- pensz a retenir votre login (user2 3 4..) pour pouvoir vous reconnecter
 
 ## Description
 
@@ -48,3 +53,14 @@ Ouvrez votre navigateur et accédez à `http://localhost:3000`.
 ## Note
 
  - Le login 42 ne fonctionnera que si vous renseignez votre propre clef API 42 dans le fichier docker/.env/.env_42
+
+## Visuels
+![image](https://github.com/BenJ3D/ft_transcendence/assets/49345674/fc3a7bd0-d708-4c1d-96e9-f6bea2165814)
+![image](https://github.com/BenJ3D/ft_transcendence/assets/49345674/71d1a214-87c8-4e2a-9f35-a1b94f4f3dfe)
+![281226559-be96b702-335b-4344-b8ea-81a17e09e4a2](https://github.com/BenJ3D/ft_transcendence/assets/49345674/f7bd2206-90fd-458b-9851-4b34102483fa)
+![image](https://github.com/BenJ3D/ft_transcendence/assets/49345674/d66f512b-3cfb-4612-9113-ab82747a1382)
+![281226704-cd40ac32-d471-4157-9f34-3baa371ff5f6](https://github.com/BenJ3D/ft_transcendence/assets/49345674/7775b147-2e7b-4337-98bc-85f8b88b186d)
+![image](https://github.com/BenJ3D/ft_transcendence/assets/49345674/73d85aac-9660-4a41-8826-d3af4a793c7b)
+
+
+
