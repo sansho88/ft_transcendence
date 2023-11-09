@@ -4,7 +4,7 @@
 ## demo en ligne ici => www.pongpod.fr 
 - creer un compte en cliquant sur INVITE MODE puis SIGN IN
 - definir un mot de passe et CONNECT
-- pensz a retenir votre login (user2 3 4..) pour pouvoir vous reconnecter
+- pensez à mémoriser votre login (userX..) pour pouvoir vous reconnecter plus tard.
 
 ## Description
 
