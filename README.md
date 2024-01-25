@@ -1,7 +1,7 @@
 # Projet Transcendence
 ![image](https://github.com/BenJ3D/ft_transcendence/assets/49345674/76945b29-d616-469b-b100-465541ffc134)
 
-## demo en ligne ici => www.pongpod.fr 
+## demo en ligne ici => www.pongpod.fr (ipv6 requise pour ce lien)
 - creer un compte en cliquant sur INVITE MODE puis SIGN IN
 - definir un mot de passe et CONNECT
 - pensez à mémoriser votre login (userX..) pour pouvoir vous reconnecter plus tard.
